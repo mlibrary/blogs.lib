@@ -829,6 +829,14 @@ class MigrateToolsCommands extends DrushCommands {
       }
     }
 
+    foreach ($matched_migrations as $id => $migration) {
+      if (substr($id, 0, 3) == 'd6_') {
+        $notice = dt('Migration @id skipped.', ['@id' => $id]);
+        $this->logger()->notice($notice);
+        unset($matched_migrations[$id]);
+      }
+    }
+
     // Do not return any migrations which fail to meet requirements.
     /** @var \Drupal\migrate\Plugin\Migration $migration */
     foreach ($matched_migrations as $id => $migration) {

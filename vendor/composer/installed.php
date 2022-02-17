@@ -1,12 +1,12 @@
 <?php return array (
   'root' => 
   array (
-    'pretty_version' => '1.0.0+no-version-set',
-    'version' => '1.0.0.0',
+    'pretty_version' => 'dev-master',
+    'version' => 'dev-master',
     'aliases' => 
     array (
     ),
-    'reference' => NULL,
+    'reference' => 'c188e3536df8ebbcd93cc845756cbd84240cb1d8',
     'name' => 'drupal/recommended-project',
   ),
   'versions' => 
@@ -136,6 +136,15 @@
       array (
       ),
       'reference' => 'ca41dc82b280bccdf1b231d5599c7d506fba5c04',
+    ),
+    'cweagans/composer-patches' => 
+    array (
+      'pretty_version' => '1.x-dev',
+      'version' => '1.9999999.9999999.9999999-dev',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'e9969cfc0796e6dea9b4e52f77f18e1065212871',
     ),
     'dflydev/dot-access-data' => 
     array (
@@ -1113,12 +1122,12 @@
     ),
     'drupal/recommended-project' => 
     array (
-      'pretty_version' => '1.0.0+no-version-set',
-      'version' => '1.0.0.0',
+      'pretty_version' => 'dev-master',
+      'version' => 'dev-master',
       'aliases' => 
       array (
       ),
-      'reference' => NULL,
+      'reference' => 'c188e3536df8ebbcd93cc845756cbd84240cb1d8',
     ),
     'drupal/reroute_email' => 
     array (
