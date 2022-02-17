@@ -1,0 +1,324 @@
+<?php
+
+/**
+ * @file
+ * Provides a caption textarea for image fields.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\image_field_caption\ImageCaptionStorage;
+use Drupal\Component\Utility\NestedArray;
+
+// @todo Support for Views, maybe built in in D8?
+// @todo Support the revision management.
+
+/**
+ * Implements hook_field_info_alter().
+ */
+function image_field_caption_field_info_alter(&$info) {
+  // Set a new class for the image fields.
+  $info['image']['class'] = '\Drupal\image_field_caption\ImageCaptionItem';
+}
+
+/**
+ * Implements hook_field_widget_form_alter().
+ */
+function image_field_caption_field_widget_form_alter(&$element, FormStateInterface $form_state, $context) {
+  /** @var \Drupal\field\Entity\FieldConfig $field */
+  $field = $context['items']->getFieldDefinition();
+  // If the current field is an image field.
+  if ($field->getType() == 'image') {
+    // Get the current field settings.
+    $settings = $field->getSettings();
+    // Check if the current field has the caption.
+    if (!empty($settings['caption_field'])) {
+      $element['#caption_field_required'] = $settings['caption_field_required'];
+      $element['#process'][] = '_image_field_caption_widget_process';
+    }
+  }
+}
+
+/**
+ * Custom callback function for the #process of an image field type.
+ */
+function _image_field_caption_widget_process($element, &$form_state, $form) {
+  // Get the entity.
+  $entity = $form_state->getFormObject()->getEntity();
+  // Get the fields definitions.
+  $field_definitions = $entity->getFieldDefinitions();
+  // Get the current field definition.
+  if (!empty($field_definitions[$element['#field_name']])) {
+    $field_definition = $field_definitions[$element['#field_name']];
+  }
+  elseif (!empty($field_definitions[$element['#field_parents'][0]])) {
+    $field_definition = $field_definitions[$element['#field_parents'][0]];
+  }
+  else {
+    $field_definition = NULL;
+  }
+
+  // Get the current field values (form state).
+  $field_values = $form_state->getValues();
+  // If the field has parents (ex: paragraphs) then get the nested values.
+  if (!empty($element['#field_parents'])) {
+    $field_values = NestedArray::getValue($field_values, $element['#field_parents']);
+  }
+  $field_value = (isset($field_values[$element['#field_name']][$element['#delta']]['image_field_caption'])) ? $field_values[$element['#field_name']][$element['#delta']]['image_field_caption'] : [];
+
+  // Add the additional caption fields.
+  $element['image_field_caption'] = [
+    '#title' => t('Caption'),
+    '#type' => 'text_format',
+    '#value' => (!empty($field_value['value'])) ? $field_value['value'] : ((!empty($element['#value']['caption'])) ? $element['#value']['caption'] : []),
+    '#default_value' => (!empty($element['#value']['caption'])) ? $element['#value']['caption'] : (!empty($element['#value']['image_field_caption']) ? $element['#value']['image_field_caption']['value'] : ''),
+    '#access' => (bool) $element['#value']['fids'],
+    '#format' => (!empty($field_value['format'])) ? $field_value['format'] : ((!empty($element['#value']['caption_format'])) ? $element['#value']['caption_format'] : 'plain_text'),
+    '#required' => $element['#alt_field_required'],
+    '#element_validate' => $element['#alt_field_required'] ? ['_image_field_caption_validate_required'] : [],
+  ];
+
+  return $element;
+}
+
+/**
+ * Validate callback for caption field, if the user wants them required.
+ *
+ * This is separated in a validate function instead of a #required flag to
+ * avoid being validated on the process callback.
+ */
+function _image_field_caption_validate_required($element, FormStateInterface $form_state) {
+  // Only do validation if the function is triggered from other places than
+  // the image process form.
+  // Only do validation if the function is triggered from other places than
+  // the image process form.
+  $triggering_element = $form_state->getTriggeringElement();
+  if (!empty($triggering_element['#submit']) && in_array('file_managed_file_submit', $triggering_element['#submit'], TRUE)) {
+    $form_state->setLimitValidationErrors([]);
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function image_field_caption_theme() {
+  return [
+    'image_caption_formatter' => [
+      // As we extend the default image format, the variables passed to the callback function
+      // are the same than the original "callback" function ("image_formatter").
+      'variables' => [
+        'item' => NULL,
+        'item_attributes' => NULL,
+        'url' => NULL,
+        'image_style' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for image caption formatter templates.
+ *
+ * Default template: image-caption-formatter.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing all values from the original function
+ *   (template_preprocess_image_formatter()) and also:
+ *   - caption: An optional caption text.
+ */
+function template_preprocess_image_caption_formatter(&$variables) {
+  module_load_include('inc', 'image', 'image.field');
+  // Prepare the variables array with the original function.
+  template_preprocess_image_formatter($variables);
+  // Set the caption value.
+  $values = $variables['item']->getValue();
+  if (!empty($values['caption'])) {
+    $variables['caption'] = $values['caption'];
+  }
+}
+
+/**
+ * Implements hook_entity_storage_load().
+ */
+function image_field_caption_entity_storage_load(array $entities, $entity_type_id) {
+  $imageCaption = Drupal::service('image_field_caption.storage');
+
+  if (in_array($entity_type_id, $imageCaption->list('entity_type'))) {
+    // This means we already have some captions.. no need to do all kinds
+    // of checking then.
+
+    /** @var \Drupal\Core\Entity\Entity $entity */
+    foreach ($entities as $entity) {
+      // Same load avoiding check.
+      if (in_array($entity->bundle(), $imageCaption->list('bundle'))) {
+        $needToSave = FALSE;
+
+        /** @var \Drupal\Core\Field\FieldItemList $field */
+        foreach ($entity->getFields() as $fieldName => $field) {
+          $values = $entity->get($fieldName)->getValue();
+          foreach ($values as $delta => $value) {
+            // Get the caption associated to this field.
+            $revision_id = (empty($entity->getRevisionId()) ? $entity->id() : $entity->getRevisionId());
+            $caption = $imageCaption->getCaption(
+              $entity->getEntityTypeId(),
+              $entity->bundle(),
+              $fieldName,
+              $entity->id(),
+              $revision_id,
+              $entity->language()->getId(),
+              $delta
+            );
+
+            // Set the caption value.
+            if (!empty($caption)) {
+              $values[$delta] = $values[$delta] + $caption;
+              $needToSave = TRUE;
+            }
+          }
+
+          if ($needToSave) {
+            // Save all values.
+            $entity->get($fieldName)->setValue($values);
+          }
+        }
+
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function image_field_caption_entity_insert(EntityInterface $entity) {
+  image_field_caption_entity_update($entity);
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function image_field_caption_entity_update(EntityInterface $entity) {
+  $imageCaption = Drupal::service('image_field_caption.storage');
+
+  // For a fieldable entity.
+  if (($entity instanceof FieldableEntityInterface)) {
+    // Get the field names of all image fields.
+    $field_names = _image_field_caption_get_image_field_names($entity);
+    foreach ($field_names as $field_name) {
+      // Get the current field settings.
+      $settings = $entity->get($field_name)->getSettings();
+      // If the caption is not enabled => pass this field.
+      if (empty($settings['caption_field'])) {
+        continue;
+      }
+      // Delete the caption associated to this field.
+      $imageCaption->deleteCaption($entity->getEntityTypeId(), $entity->bundle(), $field_name, $entity->id(), $entity->language()
+        ->getId());
+      // Delete the caption revision associated to this field.
+      /*
+      $imageCaption->deleteCaptionRevision($entity->getEntityTypeId(), $entity->bundle(), $field_name, $entity->id(), $entity->getRevisionId(), $entity->language()->getId());
+      */
+      // Get the current field values.
+      $values = $entity->get($field_name)->getValue();
+      foreach ($values as $delta => $value) {
+        // If a caption text is defined.
+        if (!empty($value['image_field_caption']['value'])) {
+          // Insert the caption associated to this field.
+          // @todo Do the insertion using a multiple query instead several queries into a foreach;
+          $revision_id = (empty($entity->getRevisionId()) ? $entity->id() : $entity->getRevisionId());
+          $imageCaption->insertCaption(
+            $entity->getEntityTypeId(),
+            $entity->bundle(),
+            $field_name,
+            $entity->id(),
+            $revision_id,
+            $entity->language()->getId(),
+            $delta,
+            $value['image_field_caption']['value'],
+            $value['image_field_caption']['format']
+          );
+          // Insert the caption revision associated to this field.
+          /*
+          if ($entity->isNewRevision()) {
+            $imageCaption->insertCaptionRevision(
+              $entity->getEntityTypeId(),
+              $entity->bundle(),
+              $field_name,
+              $entity->id(),
+              $revision_id,
+              $entity->language()->getId(),
+              $delta,
+              $value['image_field_caption']['value'],
+              $value['image_field_caption']['format']
+            );
+          }
+          */
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function image_field_caption_entity_delete(EntityInterface $entity) {
+  $imageCaption = Drupal::service('image_field_caption.storage');
+
+  // For a fieldable entity.
+  if (($entity instanceof FieldableEntityInterface)) {
+    // Get the field names of all image fields.
+    $field_names = _image_field_caption_get_image_field_names($entity);
+    foreach ($field_names as $field_name) {
+      // Delete the caption associated to this field.
+      $imageCaption->deleteCaption($entity->getEntityTypeId(), $entity->bundle(), $field_name, $entity->id(), $entity->language()
+        ->getId());
+      // Delete the caption revisions associated to this field.
+      /*
+      $imageCaption->deleteCaptionRevisions($entity->getEntityTypeId(), $entity->bundle(), $field_name, $entity->id(), $entity->language()->getId());
+      */
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_revision_delete().
+ */
+function image_field_caption_entity_revision_delete(EntityInterface $entity) {
+  // $imageCaption = Drupal::service('image_field_caption.storage');
+
+  /*
+// For a fieldable entity.
+if (($entity instanceof FieldableEntityInterface)) {
+  // Get the field names of all image fields.
+  $field_names = _image_field_caption_get_image_field_names($entity);
+  if (!empty($field_names)) {
+    // Delete the caption revisions associated to this specific revision.
+    $imageCaption->deleteCaptionRevisionsByRevisionId($entity->getRevisionId());
+  }
+}
+*/
+}
+
+/**
+ * Determines the image fields on an entity.
+ *
+ * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+ *   An entity whose fields to analyze.
+ *
+ * @return array
+ *   The names of the fields on this entity that support formatted text.
+ */
+function _image_field_caption_get_image_field_names(FieldableEntityInterface $entity) {
+  // Check if fields definitions are available.
+  $field_definitions = $entity->getFieldDefinitions();
+  if (empty($field_definitions)) {
+    return [];
+  }
+  // Only return image fields.
+  return array_keys(array_filter($field_definitions, function (FieldDefinitionInterface $definition) {
+    return in_array($definition->getType(), ['image'], TRUE);
+  }));
+}

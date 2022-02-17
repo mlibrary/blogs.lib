@@ -1,0 +1,5 @@
+services:
+  og_menu.event_subscriber:
+    class: Drupal\og_menu\EventSubscriber\OgMenuEventSubscriber
+    tags:
+      - { name: 'event_subscriber' }

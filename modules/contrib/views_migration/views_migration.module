@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * @file
+ * Provides view migration Drupal 7 to Drupal 8.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function views_migration_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.views_migratio':
+      $output = '';
+      $output .= '<h3>' . t('Views Migration') . '</h3>';
+      $output .= '<p>' . t('The views module migrates default drupal entity views') . '</p>';
+      return $output;
+  }
+}

@@ -1,0 +1,12 @@
+entity.ogmenu.collection:
+  title: 'OG Menu'
+  route_name: entity.ogmenu.collection
+  description: 'List OG Menu'
+  parent: system.admin_structure.menu
+  weight: 99
+
+og_menu.settings:
+  title: 'OG menu'
+  parent: og_ui.admin_index
+  description: 'Administer OG Menu.'
+  route_name: og_menu.settings

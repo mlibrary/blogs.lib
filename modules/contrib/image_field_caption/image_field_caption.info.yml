@@ -1,0 +1,14 @@
+name: Image Field Caption
+description: 'Provides a caption textarea for image fields.'
+package: Other
+
+dependencies:
+  - drupal:image
+
+type: module
+core_version_requirement: ^8 || ^9
+
+# Information added by Drupal.org packaging script on 2020-10-09
+version: '8.x-1.1'
+project: 'image_field_caption'
+datestamp: 1602264819

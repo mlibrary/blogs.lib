@@ -1,0 +1,18 @@
+id: d6_views_migration
+label: Views migration
+audit: false
+migration_tags:
+  - Drupal 6
+  - Views
+source:
+  plugin: d6_views_migration
+process:
+  id: name
+  label: human_name
+  description: description
+  tag: tag
+  base_table: base_table
+  base_field: base_field
+  display: display
+destination:
+  plugin: entity:view

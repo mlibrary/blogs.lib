@@ -1,0 +1,12 @@
+entity.ogmenu.add_form:
+  route_name: 'entity.ogmenu.add_form'
+  title: 'Add OG Menu'
+  appears_on:
+    - entity.ogmenu.collection
+
+entity.ogmenu_instance.add_link:
+  route_name: 'entity.ogmenu_instance.add_link'
+  title: 'Add link'
+  class: \Drupal\menu_ui\Plugin\Menu\LocalAction\MenuLinkAdd
+  appears_on:
+   - entity.ogmenu_instance.edit_form

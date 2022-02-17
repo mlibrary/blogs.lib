@@ -1,0 +1,11 @@
+{
+  "name": "drupal/image_field_caption",
+  "description": "Add caption to image field.",
+  "type": "drupal-module",
+  "homepage": "https://www.drupal.org/project/image_field_caption",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/image_field_caption",
+    "source": "https://git.drupalcode.org/project/image_field_caption"
+  },
+  "license": "GPL-2.0+"
+}

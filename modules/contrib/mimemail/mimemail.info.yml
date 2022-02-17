@@ -1,0 +1,16 @@
+name: 'Mime Mail'
+type: module
+description: 'Sends MIME-encoded emails with embedded images and attachments.'
+package: Mail
+core_version_requirement: ^8.8.2 || ^9
+dependencies:
+  - mailsystem:mailsystem
+test_dependencies:
+  - rules:rules
+
+configure: mimemail.settings
+
+# Information added by Drupal.org packaging script on 2021-12-05
+version: '8.x-1.0-alpha4'
+project: 'mimemail'
+datestamp: 1638738306

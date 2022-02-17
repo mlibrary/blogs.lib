@@ -1,0 +1,9 @@
+<?php
+/**
+ * Implements hook_mail_alter().
+ *
+ * Don't send any mail during migration.
+ */
+function custom_turn_off_mail_mail_alter(&$message) {
+  $message['send'] = FALSE;
+}

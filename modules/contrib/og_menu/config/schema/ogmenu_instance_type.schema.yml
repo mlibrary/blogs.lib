@@ -1,0 +1,12 @@
+og_menu.ogmenu.*:
+  type: config_entity
+  label: 'OG Menu config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    uuid:
+      type: string

@@ -1,0 +1,24 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display a formatted image field with a caption.
+ *
+ * Available variables:
+ * - image: A collection of image data.
+ * - image_style: An optional image style.
+ * - url: An optional URL the image can be linked to.
+ * - caption : An optional image caption.
+ *
+ * @see template_preprocess_image_caption_formatter()
+ *
+ * @ingroup themeable
+ */
+#}
+{% if url %}
+  <a href="{{ url }}">{{ image }}</a>
+{% else %}
+  {{ image }}
+{% endif %}
+{% if caption %}
+  <blockquote class="image-field-caption">{{ caption|raw }}</blockquote>
+{% endif %}

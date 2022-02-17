@@ -1,0 +1,19 @@
+administer og menu:
+  title: 'Administer OG Menu'
+  description: 'Allow to access the administration of OG Menu.'
+  restrict access: true
+
+add og menu instance entities:
+  title: 'Create new OG Menu instance entities'
+
+edit og menu instance entities:
+  title: 'Edit OG Menu instance entities'
+
+delete og menu instance entities:
+  title: 'Delete OG Menu instance entities'
+
+view og menu instance entities:
+  title: 'View OG Menu instance entities'
+
+add new links to og menu instance entities:
+  title: 'Add new links to OG Menu instance entities'

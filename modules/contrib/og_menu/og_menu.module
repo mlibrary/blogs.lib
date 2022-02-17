@@ -1,0 +1,118 @@
+<?php
+
+/**
+ * @file
+ * Main functions and hook implementations of the og_menu module.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\og\Og;
+use Drupal\og\OgGroupAudienceHelper;
+use Drupal\og\OgGroupAudienceHelperInterface;
+use Drupal\og_menu\Entity\OgMenuInstance;
+
+/**
+ * Implements hook_theme().
+ */
+function og_menu_theme() {
+  $theme = [];
+  $theme['ogmenu_instance'] = [
+    'render element' => 'elements',
+    'file' => 'ogmenu_instance.page.inc',
+    'template' => 'ogmenu_instance',
+  ];
+  $theme['ogmenu_instance_content_add_list'] = [
+    'render element' => 'content',
+    'variables' => ['content' => NULL],
+    'file' => 'ogmenu_instance.page.inc',
+  ];
+  return $theme;
+}
+
+/**
+ * Implements hook_entity_insert().
+ */
+function og_menu_entity_insert(EntityInterface $entity) {
+  // When a new group is created, automatically create a new menu for it if this
+  // option is enabled.
+  if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle()) && \Drupal::config('og_menu.settings')->get('autocreate')) {
+    $group_content_bundle_ids = \Drupal::service('og.group_type_manager')->getGroupContentBundleIdsByGroupBundle($entity->getEntityTypeId(), $entity->bundle());
+    if (!empty($group_content_bundle_ids['ogmenu_instance'])) {
+      foreach ($group_content_bundle_ids['ogmenu_instance'] as $bundle_id) {
+        $values = [
+          'langcode' => $entity->language()->getId(),
+          'type' => $bundle_id,
+          OgGroupAudienceHelperInterface::DEFAULT_FIELD => $entity->id(),
+        ];
+        $og_menu_instance = OgMenuInstance::create($values);
+        $og_menu_instance->save();
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function og_menu_entity_delete(EntityInterface $entity) {
+  // If a group is deleted, delete its associated OG Menus.
+  if (Og::isGroup($entity->getEntityTypeId(), $entity->bundle())) {
+    // This is only needed if Organic Groups is not taking care of orphaned
+    // group content itself.
+    if (!\Drupal::config('og.settings')->get('delete_orphans')) {
+      $storage = \Drupal::entityTypeManager()->getStorage('ogmenu_instance');
+      $properties = [OgGroupAudienceHelper::DEFAULT_FIELD => $entity->id()];
+      /** @var \Drupal\og_menu\Entity\OgMenuInstance $instance */
+      foreach ($storage->loadByProperties($properties) as $instance) {
+        $instance->delete();
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function og_menu_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (in_array($form_id, ['ogmenu_add_form', 'ogmenu_edit_form'])) {
+    // Behind the scenes an OG Menu is a group content type that is associated
+    // with its chosen group types. We are using the standard fieldset that is
+    // altered in by Organic Groups in entity bundle forms to configure the
+    // group types.
+    // By default the options provided by Organic Groups allow to turn any
+    // bundle in a group type or group content type, but this doesn't make sense
+    // for us.
+    // Alter the form so that the option to become group content is always
+    // enabled, and hide the group type / group content type options so they
+    // cannot be accidentally changed by an administrator.
+    $form['og']['og_is_group']['#access'] = FALSE;
+    $form['og']['og_group_content_bundle']['#access'] = FALSE;
+    $form['og']['og_group_content_bundle']['#default_value'] = TRUE;
+
+    // Make sure the OG fieldset is open, since the group type options are
+    // important for us.
+    $form['og']['#open'] = TRUE;
+
+    // Update the help texts so they make more sense in the context of OG Menu.
+    unset($form['og']['#description']);
+    $form['og']['og_target_type']['#description'] = t('The entity type of the groups to associate the OG Menu with.');
+    $form['og']['og_target_bundles']['#description'] = t('The bundles of the entity type to associate the OG Menu with. Optional, leave empty for all bundles.');
+  }
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ */
+function og_menu_module_implements_alter(&$implementations, $hook) {
+  if ($hook === 'form_alter') {
+    // Make sure og_menu_form_alter() runs after og_ui_menu_form_alter(). The
+    // latter populates the group types on the entity bundle form, but we need
+    // to alter them to ensure the 'Group type' option is always checked.
+    // @see og_menu_form_alter()
+    $implementation = $implementations['og_menu'];
+    unset($implementations['og_menu']);
+    $implementations['og_menu'] = $implementation;
+  }
+
+}
