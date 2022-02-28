@@ -31,12 +31,14 @@
         "drupal/migrate_upgrade": "^3.2",
         "drupal/mimemail": "^1.0@alpha",
         "drupal/mysql56": "^1.3",
-        "drupal/og": "1.0-alpha-7",
+        "drupal/og": "1.x-dev",
         "drupal/og_menu": "^1.0@alpha",
+        "drupal/openid_connect": "^1.2",
         "drupal/override_node_options": "^2.6",
         "drupal/panels": "^4.6",
         "drupal/panels_ipe": "^4.6",
         "drupal/pathauto": "^1.8",
+        "drupal/r4032login": "^2.1",
         "drupal/reroute_email": "^2.1",
         "drupal/scheduler": "^1.4",
         "drupal/views_bulk_operations": "^4.0",
@@ -87,6 +89,9 @@
             ]
         },
         "patches": {
+          "drupal/openid_connect": {
+            "https://www.drupal.org/node/3011413": "https://www.drupal.org/files/issues/2022-02-14/openid_connect-autologin-3011413-70.patch"
+          },
           "drupal/migrate_tools": {
             "https://www.drupal.org/node/2868762": "https://www.drupal.org/files/issues/2022-02-17/d7_migration_failing_on_d6_migrations-2868762-37.patch"
           }

@@ -38,8 +38,9 @@ class GroupForm extends ContentEntityForm {
 
     /** @var \Drupal\group\Entity\GroupTypeInterface $group_type */
     $group_type = $this->getEntity()->getGroupType();
+if (!empty($group_type)) {
     $replace = ['@group_type' => $group_type->label()];
-
+}
     // We need to adjust the actions when using the group creator wizard.
     if ($this->operation == 'add') {
       if ($form_state->get('group_wizard') && $form_state->get('group_wizard_id') == 'group_creator') {
