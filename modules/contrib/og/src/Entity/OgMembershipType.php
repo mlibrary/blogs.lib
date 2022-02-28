@@ -102,7 +102,7 @@ class OgMembershipType extends ConfigEntityBase implements OgMembershipTypeInter
    */
   public function delete() {
     if ($this->id() === OgMembershipInterface::TYPE_DEFAULT) {
-//      throw new \Exception('The default OG membership type cannot be deleted.');
+      throw new \Exception('The default OG membership type cannot be deleted.');
     }
     parent::delete();
   }

@@ -227,7 +227,7 @@ class ViewsBulkOperationsActionProcessor implements ViewsBulkOperationsActionPro
       'order' => 'ASC',
       'relationship' => 'none',
       'group_type' => 'group',
-      'exposed' => 'FALSE',
+      'exposed' => FALSE,
       'plugin_id' => 'standard',
     ]);
 

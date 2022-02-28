@@ -92,13 +92,7 @@ class ViewsBulkOperationsViewData implements ViewsBulkOperationsViewDataInterfac
     // Get view entity types and results fetcher callable.
     $event = new ViewsBulkOperationsEvent($this->getViewProvider(), $this->getData(), $view);
 
-    // @todo Remove the conditional when Drupal 8 is no longer supported.
-    if (floatval(\Drupal::VERSION) < 9) {
-      $this->eventDispatcher->dispatch(ViewsBulkOperationsEvent::NAME, $event);
-    }
-    else {
-      $this->eventDispatcher->dispatch($event, ViewsBulkOperationsEvent::NAME);
-    }
+    $this->eventDispatcher->dispatch($event, ViewsBulkOperationsEvent::NAME);
 
     $this->entityTypeIds = $event->getEntityTypeIds();
     $this->entityGetter = $event->getEntityGetter();
