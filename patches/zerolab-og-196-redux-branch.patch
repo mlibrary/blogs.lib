@@ -1,0 +1,1626 @@
+diff --git a/modules/contrib/og/og.routing.yml b/modules/contrib/og/og.routing.yml
+index cb910a7f..ddd4ef8a 100644
+--- a/modules/contrib/og/og.routing.yml
++++ b/modules/contrib/og/og.routing.yml
+@@ -1,5 +1,38 @@
+ # Routes for Organic groups.
+ 
++# OgRole entity routes.
++
++entity.og_role.collection:
++  path: 'admin/config/group/roles/{entity_type_id}/{bundle_id}'
++  defaults:
++    _entity_list: 'og_role'
++    _title_callback: '\Drupal\og_ui\Controller\OgUiController::rolesOverviewPageTitleCallback'
++  requirements:
++    _permission: 'administer organic groups'
++
++entity.og_role.add_form:
++  path: 'admin/config/group/roles/{entity_type_id}/{bundle_id}/add'
++  defaults:
++    _entity_form: og_role.default
++    _title: 'Add role'
++  requirements:
++    _permission: 'administer organic groups'
++
++entity.og_role.edit_form:
++  path: 'admin/config/group/role/{og_role}/edit'
++  defaults:
++    _entity_form: og_role.default
++    _title_callback: '\Drupal\og_ui\Form\OgRoleForm::editRoleTitleCallback'
++  requirements:
++    _entity_access: 'og_role.update'
++
++entity.og_role.delete_form:
++  path: 'admin/config/group/role/{og_role}/delete'
++  defaults:
++    _entity_form: og_role.delete
++  requirements:
++    _entity_access: 'og_role.delete'
++
+ og.subscribe:
+   path: 'group/{entity_type_id}/{group}/subscribe/{og_membership_type}'
+   defaults:
+diff --git a/modules/contrib/og/og_ui/og_ui.links.action.yml b/modules/contrib/og/og_ui/og_ui.links.action.yml
+new file mode 100644
+index 00000000..bef396cc
+--- /dev/null
++++ b/modules/contrib/og/og_ui/og_ui.links.action.yml
+@@ -0,0 +1,5 @@
++entity.og_role.add_form:
++  route_name: entity.og_role.add_form
++  title: 'Add role'
++  appears_on:
++    - entity.og_role.collection
+diff --git a/modules/contrib/og/og_ui/og_ui.links.menu.yml b/modules/contrib/og/og_ui/og_ui.links.menu.yml
+index e315cbf0..4ad45553 100644
+--- a/modules/contrib/og/og_ui/og_ui.links.menu.yml
++++ b/modules/contrib/og/og_ui/og_ui.links.menu.yml
+@@ -11,3 +11,19 @@ og_ui.settings:
+   parent: og_ui.admin_index
+   description: 'Administer OG settings.'
+   route_name: og_ui.settings
++
++og_ui.roles_permissions_overview:
++  title: 'OG roles'
++  parent: og_ui.admin_index
++  description: 'Administer OG roles.'
++  route_name: og_ui.roles_permissions_overview
++  route_parameters:
++    type: 'roles'
++
++og_ui.permissions_overview:
++  title: 'OG permissions'
++  parent: og_ui.admin_index
++  description: 'Administer OG permissions.'
++  route_name: og_ui.roles_permissions_overview
++  route_parameters:
++    type: 'permissions'
+diff --git a/modules/contrib/og/og_ui/og_ui.routing.yml b/modules/contrib/og/og_ui/og_ui.routing.yml
+index f653fa76..442df45f 100644
+--- a/modules/contrib/og/og_ui/og_ui.routing.yml
++++ b/modules/contrib/og/og_ui/og_ui.routing.yml
+@@ -25,18 +25,18 @@ og_ui.roles_permissions_overview:
+     _permission: 'administer organic groups'
+     type: '^(roles|permissions)$'
+ 
+-og_ui.roles_form:
+-  path: 'admin/config/group/roles/{entity_type}/{bundle}'
++og_ui.permissions_overview:
++  path: 'admin/config/group/permissions/{entity_type_id}/{bundle_id}'
+   defaults:
+-    _form: '\Drupal\og_ui\Form\OgRolesForm'
+-    _title: '@todo - create title callback'
++    _form: '\Drupal\og_ui\Form\OgPermissionsForm'
++    _title_callback: '\Drupal\og_ui\Form\OgPermissionsForm::titleCallback'
+   requirements:
+     _permission: 'administer organic groups'
+ 
+-og_ui.permissions_form:
+-  path: 'admin/config/group/permissions/{entity_type}/{bundle}'
++og_ui.permissions_edit_form:
++  path: 'admin/config/group/permissions/{entity_type_id}/{bundle_id}/{role_name}'
+   defaults:
+-    _form: '\Drupal\og_ui\Form\OgPermissionsForm'
+-    _title: '@todo - create title callback'
++    _form: '\Drupal\og_ui\Form\OgRolePermissionsForm'
++    _title_callback: '\Drupal\og_ui\Form\OgRolePermissionsForm::rolePermissionTitleCallback'
+   requirements:
+     _permission: 'administer organic groups'
+diff --git a/modules/contrib/og/og_ui/src/Controller/OgUiController.php b/modules/contrib/og/og_ui/src/Controller/OgUiController.php
+index a83197e7..38efb07a 100644
+--- a/modules/contrib/og/og_ui/src/Controller/OgUiController.php
++++ b/modules/contrib/og/og_ui/src/Controller/OgUiController.php
+@@ -4,6 +4,7 @@ declare(strict_types = 1);
+ 
+ namespace Drupal\og_ui\Controller;
+ 
++use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+ use Drupal\Core\Controller\ControllerBase;
+ use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+ use Drupal\Core\Entity\EntityTypeManagerInterface;
+@@ -74,13 +75,27 @@ class OgUiController extends ControllerBase {
+    *   The overview as a render array.
+    */
+   public function rolesPermissionsOverviewPage($type) {
++    $route = $type === 'roles' ? 'entity.og_role.collection' : 'og_ui.permissions_overview';
+     $action = $type === 'roles' ? $this->t('Edit roles') : $this->t('Edit permissions');
+     $header = [$this->t('Group type'), $this->t('Operations')];
+     $rows = [];
+     $build = [];
+ 
+     foreach ($this->groupTypeManager->getGroupMap() as $entity_type => $bundles) {
+-      $definition = $this->entityTypeManager->getDefinition($entity_type);
++      try {
++        $definition = $this->entityTypeManager->getDefinition($entity_type);
++      }
++      catch (PluginNotFoundException $e) {
++        // The entity type manager might throw this exception if the entity type
++        // is not defined. If this happens it means there is a discrepancy
++        // between the group types in config, and the modules that providing
++        // these entity types. This is not something we can rectify here but it
++        // does not block the rendering of the page. In the rare case that this
++        // occurs, let's log an error and exclude the entity type from the page.
++        $this->getLogger('og')->error('Error: the %entity_type entity type is not defined but is supposed to have group bundles.', ['%entity_type' => $entity_type]);
++        continue;
++      }
++
+       $bundle_info = $this->entityTypeBundleInfo->getBundleInfo($entity_type);
+       foreach ($bundles as $bundle) {
+         $rows[] = [
+@@ -88,16 +103,16 @@ class OgUiController extends ControllerBase {
+             'data' => $definition->getLabel() . ' - ' . $bundle_info[$bundle]['label'],
+           ],
+           [
+-            'data' => Link::createFromRoute($action, 'og_ui.' . $type . '_form', [
+-              'entity_type' => $entity_type,
+-              'bundle' => $bundle,
++            'data' => Link::createFromRoute($action, $route, [
++              'entity_type_id' => $entity_type,
++              'bundle_id' => $bundle,
+             ]),
+           ],
+         ];
+       }
+     }
+ 
+-    $build['roles_table'] = [
++    $build['roles_permissions_table'] = [
+       '#theme' => 'table',
+       '#header' => $header,
+       '#rows' => $rows,
+@@ -108,7 +123,7 @@ class OgUiController extends ControllerBase {
+   }
+ 
+   /**
+-   * Title callback for rolesPermissionsOverviewPage.
++   * Title callback for rolesPermissionsOverviewPage().
+    *
+    * @param string $type
+    *   The type of overview, either 'roles' or 'permissions'.
+@@ -120,4 +135,25 @@ class OgUiController extends ControllerBase {
+     return $this->t('OG @type overview', ['@type' => $type]);
+   }
+ 
++  /**
++   * Title callback for the roles overview page.
++   *
++   * @param string $entity_type_id
++   *   The group entity type ID.
++   * @param string $bundle_id
++   *   The group bundle ID.
++   *
++   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
++   *   The roles overview page title.
++   *
++   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
++   *   Thrown when the entity type with the given ID is not defined.
++   */
++  public function rolesOverviewPageTitleCallback($entity_type_id, $bundle_id) {
++    return $this->t('OG @type - @bundle roles', [
++      '@type' => $this->entityTypeManager->getDefinition($entity_type_id)->getLabel(),
++      '@bundle' => $this->entityTypeBundleInfo->getBundleInfo($entity_type_id)[$bundle_id]['label'],
++    ]);
++  }
++
+ }
+diff --git a/modules/contrib/og/og_ui/src/Form/OgPermissionsForm.php b/modules/contrib/og/og_ui/src/Form/OgPermissionsForm.php
+new file mode 100644
+index 00000000..2d7f3d11
+--- /dev/null
++++ b/modules/contrib/og/og_ui/src/Form/OgPermissionsForm.php
+@@ -0,0 +1,341 @@
++<?php
++
++declare(strict_types = 1);
++
++namespace Drupal\og_ui\Form;
++
++use Drupal\Component\Utility\Html;
++use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
++use Drupal\Core\Form\FormBase;
++use Drupal\Core\Form\FormStateInterface;
++use Drupal\og\GroupPermission;
++use Drupal\og\GroupTypeManager;
++use Drupal\og\Og;
++use Drupal\og\OgRoleManagerInterface;
++use Drupal\og\PermissionManagerInterface;
++use Drupal\user\RoleInterface;
++use Symfony\Component\DependencyInjection\ContainerInterface;
++use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
++
++/**
++ * Provide the group permissions form.
++ *
++ * @see \Drupal\user\Form\UserPermissionsForm
++ */
++class OgPermissionsForm extends FormBase {
++
++  /**
++   * The permission manager.
++   *
++   * @var \Drupal\og\PermissionManagerInterface
++   */
++  protected $permissionManager;
++
++  /**
++   * The role manager.
++   *
++   * @var \Drupal\og\OgRoleManagerInterface
++   */
++  protected $roleManager;
++
++  /**
++   * The group type manager.
++   *
++   * @var \Drupal\og\GroupTypeManager
++   */
++  protected $groupTypeManager;
++
++  /**
++   * The entity type bundle info service.
++   *
++   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
++   */
++  protected $entityTypeBundleInfo;
++
++  /**
++   * The group roles.
++   *
++   * @var \Drupal\og\OgRoleInterface[]|\Drupal\user\RoleInterface[]
++   */
++  protected $roles;
++
++  /**
++   * Constructs a new OgPermissionsForm.
++   *
++   * @param \Drupal\og\PermissionManagerInterface $permission_manager
++   *   The OG permission handler.
++   * @param \Drupal\og\OgRoleManagerInterface $role_manager
++   *   The OG role manager.
++   * @param \Drupal\og\GroupTypeManager $group_type_manager
++   *   The group type manager.
++   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
++   *   The entity type bundle info service.
++   */
++  public function __construct(PermissionManagerInterface $permission_manager, OgRoleManagerInterface $role_manager, GroupTypeManager $group_type_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info) {
++    $this->permissionManager = $permission_manager;
++    $this->roleManager = $role_manager;
++    $this->groupTypeManager = $group_type_manager;
++    $this->entityTypeBundleInfo = $entity_type_bundle_info;
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public static function create(ContainerInterface $container) {
++    return new static(
++      $container->get('og.permission_manager'),
++      $container->get('og.role_manager'),
++      $container->get('og.group_type_manager'),
++      $container->get('entity_type.bundle.info')
++    );
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function getFormId() {
++    return 'group_permissions';
++  }
++
++  /**
++   * Title callback for the group permissions page.
++   *
++   * @param string $entity_type_id
++   *   The group entity type id.
++   * @param string $bundle_id
++   *   The group bundle id.
++   *
++   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
++   *   The group permission title.
++   */
++  public function titleCallback($entity_type_id, $bundle_id) {
++    return $this->t('@bundle permissions', [
++      '@bundle' => $this->entityTypeBundleInfo->getBundleInfo($entity_type_id)[$bundle_id]['label'],
++    ]);
++  }
++
++  /**
++   * Returns the group roles to display in the form.
++   *
++   * @param string $entity_type_id
++   *   The group entity type id.
++   * @param string $bundle_id
++   *   The group entity bundle id.
++   *
++   * @return array
++   *   The group roles.
++   */
++  protected function getGroupRoles($entity_type_id, $bundle_id) {
++    if (empty($this->roles)) {
++      $this->roles = $this->roleManager->getRolesByBundle($entity_type_id, $bundle_id);
++    }
++
++    return $this->roles;
++  }
++
++  /**
++   * The group permissions form constructor.
++   *
++   * @param array $form
++   *   An associative array containing the structure of the form.
++   * @param \Drupal\Core\Form\FormStateInterface $form_state
++   *   The current state of the form.
++   * @param string $entity_type_id
++   *   The group entity type id.
++   * @param string $bundle_id
++   *   The group bundle id.
++   *
++   * @return array
++   *   The form structure.
++   */
++  public function buildForm(array $form, FormStateInterface $form_state, $entity_type_id = '', $bundle_id = '') {
++    // Return a 404 error when this is not a group.
++    if (!Og::isGroup($entity_type_id, $bundle_id)) {
++      throw new NotFoundHttpException();
++    }
++
++    // Render the link for hiding descriptions.
++    $form['system_compact_link'] = [
++      '#id' => FALSE,
++      '#type' => 'system_compact_link',
++    ];
++
++    $hide_descriptions = system_admin_compact_mode();
++
++    $form['permissions'] = [
++      '#type' => 'table',
++      '#header' => [$this->t('Permission')],
++      '#id' => 'permissions',
++      '#attributes' => ['class' => ['permissions', 'js-permissions']],
++      '#sticky' => TRUE,
++    ];
++
++    $roles = $this->getGroupRoles($entity_type_id, $bundle_id);
++
++    uasort($roles, function (RoleInterface $a, RoleInterface $b) {
++      if ($a->getWeight() == $b->getWeight()) {
++        return 0;
++      }
++      return ($a->getWeight() < $b->getWeight()) ? -1 : 1;
++    });
++
++    /** @var \Drupal\og\Entity\OgRole $role */
++    foreach ($roles as $role) {
++      $form['permissions']['#header'][] = [
++        'data' => $role->getLabel(),
++        'class' => ['checkbox'],
++      ];
++    }
++
++    $bundles = $this->groupTypeManager->getGroupContentBundleIdsByGroupBundle($entity_type_id, $bundle_id);
++    $group_permissions = $this->permissionManager->getDefaultGroupPermissions($entity_type_id, $bundle_id);
++    $group_content_permissions = $this->permissionManager->getDefaultEntityOperationPermissions($entity_type_id, $bundle_id, $bundles);
++
++    $permissions_by_provider = [
++      'Group' => [],
++      'Group content' => [],
++    ];
++
++    foreach ($group_permissions as $permission) {
++      if (!empty($permission->getProvider())) {
++        $permissions_by_provider[$permission->getProvider()][$permission->getName()] = $permission;
++      }
++      else {
++        $permissions_by_provider['Group'][$permission->getName()] = $permission;
++      }
++    }
++
++    foreach ($group_content_permissions as $permission) {
++      if (!empty($permission->getProvider())) {
++        $permissions_by_provider[$permission->getProvider()][$permission->getName()] = $permission;
++      }
++      else {
++        $permissions_by_provider['Group content'][$permission->getName()] = $permission;
++      }
++    }
++
++    foreach ($permissions_by_provider as $provider => $permissions) {
++      // Skip empty permission provider groups.
++      if (empty($permissions)) {
++        continue;
++      }
++
++      $form['permissions'][$provider] = [
++        [
++          '#wrapper_attributes' => [
++            'colspan' => count($roles) + 1,
++            'class' => ['module'],
++            'id' => 'provider-' . Html::getId($provider),
++          ],
++          '#markup' => $provider,
++        ],
++      ];
++
++      /** @var \Drupal\og\Permission $permission */
++      foreach ($permissions as $permission_name => $permission) {
++        // Fill in default values for the permission.
++        $perm_item = [
++          'title' => $permission->getTitle(),
++          'description' => $permission->getDescription(),
++          'restrict access' => $permission->getRestrictAccess(),
++          'warning' => $permission->getRestrictAccess() ? $this->t('Warning: Give to trusted roles only; this permission has security implications.') : '',
++        ];
++
++        $form['permissions'][$permission_name]['description'] = [
++          '#type' => 'inline_template',
++          '#template' => '<div class="permission"><span class="title">{{ title }}</span>{% if description or warning %}<div class="description">{% if warning %}<em class="permission-warning">{{ warning }}</em> {% endif %}{{ description }}</div>{% endif %}</div>',
++          '#context' => [
++            'title' => $perm_item['title'],
++          ],
++        ];
++
++        // Show the permission description.
++        if (!$hide_descriptions) {
++          $form['permissions'][$permission_name]['description']['#context']['description'] = $perm_item['description'];
++          $form['permissions'][$permission_name]['description']['#context']['warning'] = $perm_item['warning'];
++        }
++
++        foreach ($roles as $rid => $role) {
++          $rid_simple = $role->getName();
++
++          // The roles property indicates which roles the permission applies to.
++          $permission_applies = TRUE;
++          if ($permission instanceof GroupPermission) {
++            $target_roles = $permission->getApplicableRoles();
++            $permission_applies = empty($target_roles) || in_array($rid_simple, $target_roles);
++          }
++
++          if ($permission_applies) {
++            $form['permissions'][$permission_name][$rid] = [
++              '#title' => $role->getName() . ': ' . $perm_item['title'],
++              '#title_display' => 'invisible',
++              '#wrapper_attributes' => [
++                'class' => ['checkbox'],
++              ],
++              '#type' => 'checkbox',
++              '#default_value' => $role->hasPermission($permission_name) ? 1 : 0,
++              '#attributes' => ['class' => ['rid-' . $rid, 'js-rid-' . $rid]],
++              '#parents' => [$rid, $permission_name],
++            ];
++
++            // Show a column of disabled but checked checkboxes.
++            // Only applies to admins or default roles.
++            if ($roles[$rid]->get('is_admin') ||
++                in_array($rid_simple, $permission->getDefaultRoles())) {
++              $form['permissions'][$permission_name][$rid]['#disabled'] = TRUE;
++              $form['permissions'][$permission_name][$rid]['#default_value'] = TRUE;
++            }
++          }
++          else {
++            $form['permissions'][$permission_name][$rid] = [
++              '#title' => $role->getName() . ': ' . $perm_item['title'],
++              '#title_display' => 'invisible',
++              '#wrapper_attributes' => [
++                'class' => ['checkbox'],
++              ],
++              '#markup' => '-',
++            ];
++          }
++        }
++      }
++    }
++
++    $form['actions'] = ['#type' => 'actions'];
++    $form['actions']['submit'] = [
++      '#type' => 'submit',
++      '#value' => $this->t('Save permissions'),
++      '#button_type' => 'primary',
++    ];
++
++    $form['#attached']['library'][] = 'user/drupal.user.permissions';
++
++    return $form;
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function submitForm(array &$form, FormStateInterface $form_state) {
++    /** @var \Drupal\og\Entity\OgRole $roles */
++    foreach ($this->roles as $rid => $role) {
++      if (!$form_state->hasValue($rid)) {
++        continue;
++      }
++
++      $permissions = $form_state->getValue($rid);
++      foreach ($permissions as $permission => $grant) {
++        if ($grant) {
++          $role->grantPermission($permission);
++        }
++        else {
++          $role->revokePermission($permission);
++        }
++      }
++
++      $role->save();
++    }
++
++    $this->messenger()->addMessage($this->t('The changes have been saved.'));
++  }
++
++}
+diff --git a/modules/contrib/og/og_ui/src/Form/OgRoleDeleteForm.php b/modules/contrib/og/og_ui/src/Form/OgRoleDeleteForm.php
+new file mode 100644
+index 00000000..196a2fb5
+--- /dev/null
++++ b/modules/contrib/og/og_ui/src/Form/OgRoleDeleteForm.php
+@@ -0,0 +1,35 @@
++<?php
++
++declare(strict_types = 1);
++
++namespace Drupal\og_ui\Form;
++
++use Drupal\Core\Entity\EntityDeleteForm;
++use Drupal\Core\Url;
++
++/**
++ * Provides a form for deleting a node.
++ */
++class OgRoleDeleteForm extends EntityDeleteForm {
++
++  /**
++   * {@inheritdoc}
++   */
++  public function getCancelUrl() {
++    /** @var \Drupal\og\Entity\OgRole $role */
++    $role = $this->getEntity();
++
++    return Url::fromRoute('entity.og_role.collection', [
++      'entity_type_id' => $role->getGroupType(),
++      'bundle_id' => $role->getGroupBundle(),
++    ]);
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  protected function getRedirectUrl() {
++    return $this->getCancelUrl();
++  }
++
++}
+diff --git a/modules/contrib/og/og_ui/src/Form/OgRoleForm.php b/modules/contrib/og/og_ui/src/Form/OgRoleForm.php
+new file mode 100644
+index 00000000..e1c3d854
+--- /dev/null
++++ b/modules/contrib/og/og_ui/src/Form/OgRoleForm.php
+@@ -0,0 +1,143 @@
++<?php
++
++declare(strict_types = 1);
++
++namespace Drupal\og_ui\Form;
++
++use Drupal\Core\Entity\EntityForm;
++use Drupal\Core\Form\FormStateInterface;
++use Drupal\og\Entity\OgRole;
++use Drupal\og\Og;
++use Drupal\og\OgRoleInterface;
++use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
++
++/**
++ * Form to add or edit an OG role.
++ */
++class OgRoleForm extends EntityForm {
++
++  /**
++   * The entity being used by this form.
++   *
++   * @var \Drupal\og\Entity\OgRole
++   */
++  protected $entity;
++
++  /**
++   * {@inheritdoc}
++   */
++  public function buildForm(array $form, FormStateInterface $form_state, $entity_type_id = '', $bundle_id = '') {
++    $og_role = $this->entity;
++
++    if ($og_role->isNew()) {
++      // Return a 404 error when this is not a group.
++      if (!Og::isGroup($entity_type_id, $bundle_id)) {
++        throw new NotFoundHttpException();
++      }
++
++      $og_role->setGroupType($entity_type_id);
++      $og_role->setGroupBundle($bundle_id);
++    }
++
++    $form['label'] = [
++      '#type' => 'textfield',
++      '#title' => $this->t('Role name'),
++      '#default_value' => $og_role->label(),
++      '#size' => 30,
++      '#required' => TRUE,
++      '#maxlength' => 64,
++      '#description' => $this->t('The name for this role. Example: "Moderator", "Editorial board", "Site architect".'),
++    ];
++
++    $form['name'] = [
++      '#type' => 'machine_name',
++      '#default_value' => $og_role->getName(),
++      '#required' => TRUE,
++      '#disabled' => !$og_role->isNew(),
++      '#size' => 30,
++      '#maxlength' => 64,
++      '#machine_name' => [
++        'exists' => [$this, 'exists'],
++      ],
++      '#field_prefix' => $og_role->getGroupType() . '-' . $og_role->getGroupBundle() . '-',
++    ];
++    $form['weight'] = [
++      '#type' => 'value',
++      '#value' => $og_role->getWeight(),
++    ];
++
++    $form['role_type'] = [
++      '#type' => 'value',
++      '#value' => OgRoleInterface::ROLE_TYPE_STANDARD,
++    ];
++
++    return parent::buildForm($form, $form_state, $og_role);
++  }
++
++  /**
++   * Machine name callback.
++   *
++   * Cannot use OgRole::load as the #machine_name callback as we are only
++   * allowing editing the role name.
++   *
++   * @param string $role_name
++   *   The role name.
++   *
++   * @return \Drupal\og\Entity\OgRole|null
++   *   The OG role if it exists. NULL otherwise.
++   */
++  public function exists($role_name) {
++    $og_role = $this->entity;
++    return OgRole::getRole($og_role->getGroupType(), $og_role->getGroupBundle(), $role_name);
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function save(array $form, FormStateInterface $form_state) {
++    $og_role = $this->entity;
++
++    // Prevent leading and trailing spaces in role names.
++    $og_role->set('label', trim($og_role->label()));
++    $og_role->set('name', trim($og_role->get('name')));
++    $status = $og_role->save();
++
++    $edit_link = $this->entity->toLink($this->t('Edit'))->toString();
++    if ($status == SAVED_UPDATED) {
++      $this->messenger()->addMessage($this->t('OG role %label has been updated.', ['%label' => $og_role->label()]));
++      $this->logger('user')->notice('OG role %label has been updated.', [
++        '%label' => $og_role->label(),
++        'link' => $edit_link,
++      ]);
++    }
++    else {
++      $this->messenger()->addMessage($this->t('OG role %label has been added.', ['%label' => $og_role->label()]));
++      $this->logger('user')->notice('OG role %label has been added.', [
++        '%label' => $og_role->label(),
++        'link' => $edit_link,
++      ]);
++    }
++    // Cannot use $og_role->url() because we need to pass mandatory parameters.
++    $form_state->setRedirect('entity.og_role.collection', [
++      'entity_type_id' => $og_role->getGroupType(),
++      'bundle_id' => $og_role->getGroupBundle(),
++    ]);
++  }
++
++  /**
++   * Title callback for the edit form for an OG role.
++   *
++   * @param \Drupal\og\Entity\OgRole $og_role
++   *   The OG role being edited.
++   *
++   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
++   *   An object that, when cast to a string, returns the translated title
++   *   callback.
++   */
++  public function editRoleTitleCallback(OgRole $og_role) {
++    return $this->t('Edit OG role %label', [
++      '%label' => $og_role->getLabel(),
++    ]);
++  }
++
++}
+diff --git a/modules/contrib/og/og_ui/src/Form/OgRolePermissionsForm.php b/modules/contrib/og/og_ui/src/Form/OgRolePermissionsForm.php
+new file mode 100644
+index 00000000..6ddb94ed
+--- /dev/null
++++ b/modules/contrib/og/og_ui/src/Form/OgRolePermissionsForm.php
+@@ -0,0 +1,79 @@
++<?php
++
++declare(strict_types = 1);
++
++namespace Drupal\og_ui\Form;
++
++use Drupal\Core\Form\FormStateInterface;
++use Drupal\og\Entity\OgRole;
++
++/**
++ * Provide the group permissions form.
++ */
++class OgRolePermissionsForm extends OgPermissionsForm {
++
++  /**
++   * {@inheritdoc}
++   */
++  public function getFormId() {
++    return 'group_role_permissions';
++  }
++
++  /**
++   * Title callback for the roles overview page.
++   *
++   * @param string $entity_type_id
++   *   The group entity type id.
++   * @param string $bundle_id
++   *   The group bundle id.
++   * @param string $role_name
++   *   The group role name.
++   *
++   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
++   *   The role permission form title.
++   */
++  public function rolePermissionTitleCallback($entity_type_id, $bundle_id, $role_name) {
++    $role_id = implode('-', [
++      $entity_type_id,
++      $bundle_id,
++      $role_name,
++    ]);
++    $role = OgRole::load($role_id);
++    return $this->t('@bundle roles - @role permissions', [
++      '@bundle' => $this->entityTypeBundleInfo->getBundleInfo($entity_type_id)[$bundle_id]['label'],
++      '@role' => $role->getLabel(),
++    ]);
++  }
++
++  /**
++   * The group role permissions form constructor.
++   *
++   * @param array $form
++   *   An associative array containing the structure of the form.
++   * @param \Drupal\Core\Form\FormStateInterface $form_state
++   *   The current state of the form.
++   * @param string $entity_type_id
++   *   The group entity type id.
++   * @param string $bundle_id
++   *   The group bundle id.
++   * @param string $role_name
++   *   The group role name.
++   *
++   * @return array
++   *   The form structure.
++   */
++  public function buildForm(array $form, FormStateInterface $form_state, $entity_type_id = '', $bundle_id = '', $role_name = '') {
++    $role_id = implode('-', [
++      $entity_type_id,
++      $bundle_id,
++      $role_name,
++    ]);
++
++    if ($role = OgRole::load($role_id)) {
++      $this->roles = [$role->id() => $role];
++    }
++
++    return parent::buildForm($form, $form_state, $entity_type_id, $bundle_id);
++  }
++
++}
+diff --git a/modules/contrib/og/src/Entity/OgRole.php b/modules/contrib/og/src/Entity/OgRole.php
+index 89361ad4..0b015c26 100644
+--- a/modules/contrib/og/src/Entity/OgRole.php
++++ b/modules/contrib/og/src/Entity/OgRole.php
+@@ -18,12 +18,34 @@ use Drupal\user\Entity\Role;
+  * @ConfigEntityType(
+  *   id = "og_role",
+  *   label = @Translation("OG role"),
++ *   label_singular = @Translation("OG role"),
++ *   label_plural = @Translation("OG roles"),
++ *   label_count = @PluralTranslation(
++ *     singular = "@count OG role",
++ *     plural = "@count OG roles"
++ *   ),
++ *   handlers = {
++ *     "access" = "Drupal\og\OgRoleAccessControlHandler",
++ *     "form" = {
++ *       "default" = "Drupal\og_ui\Form\OgRoleForm",
++ *       "delete" = "Drupal\og_ui\Form\OgRoleDeleteForm",
++ *       "edit" = "Drupal\og_ui\Form\OgRoleForm",
++ *     },
++ *    "list_builder" = "Drupal\og\Entity\OgRoleListBuilder",
++ *   },
++ *   admin_permission = "administer organic groups",
+  *   static_cache = TRUE,
+  *   entity_keys = {
+  *     "id" = "id",
+  *     "label" = "label",
+  *     "weight" = "weight"
+  *   },
++ *   links = {
++ *     "collection" = "/admin/config/group/roles/{entity_type_id}/{bundle_id}",
++ *     "add-form" = "/admin/config/group/roles/{entity_type_id}/{bundle_id}/add",
++ *     "edit-form" = "/admin/config/group/role/{og_role}/edit",
++ *     "delete-form" = "/admin/config/group/role/{og_role}/delete",
++ *   },
+  *   config_export = {
+  *     "id",
+  *     "label",
+@@ -137,6 +159,13 @@ class OgRole extends Role implements OgRoleInterface {
+     return $this->set('role_type', $role_type);
+   }
+ 
++  /**
++   * {@inheritdoc}
++   */
++  public function isLocked() {
++    return $this->get('role_type') !== OgRoleInterface::ROLE_TYPE_STANDARD;
++  }
++
+   /**
+    * {@inheritdoc}
+    */
+diff --git a/modules/contrib/og/src/Entity/OgRoleListBuilder.php b/modules/contrib/og/src/Entity/OgRoleListBuilder.php
+new file mode 100644
+index 00000000..7bac7b5b
+--- /dev/null
++++ b/modules/contrib/og/src/Entity/OgRoleListBuilder.php
+@@ -0,0 +1,167 @@
++<?php
++
++declare(strict_types = 1);
++
++namespace Drupal\og\Entity;
++
++use Drupal\Core\Url;
++use Drupal\Core\Config\Entity\DraggableListBuilder;
++use Drupal\Core\Entity\EntityInterface;
++use Drupal\Core\Entity\EntityTypeInterface;
++use Drupal\Core\Entity\EntityStorageInterface;
++use Drupal\Core\Routing\RouteMatchInterface;
++use Drupal\og\Og;
++use Symfony\Component\DependencyInjection\ContainerInterface;
++use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
++
++/**
++ * Defines a class to build a listing of og_role entities.
++ *
++ * @see \Drupal\og\Entity\OgRole
++ */
++class OgRoleListBuilder extends DraggableListBuilder {
++
++  /**
++   * The group entity type.
++   *
++   * @var string
++   */
++  protected $groupType;
++
++  /**
++   * The group entity bundle id.
++   *
++   * @var string
++   */
++  protected $groupBundle;
++
++  /**
++   * {@inheritdoc}
++   */
++  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
++    return new static(
++      $entity_type,
++      $container->get('entity_type.manager')->getStorage($entity_type->id()),
++      $container->get('current_route_match')
++    );
++  }
++
++  /**
++   * Constructs a new OgRoleListBuilder object.
++   *
++   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
++   *   The entity type definition.
++   * @param \Drupal\Core\Entity\EntityStorageInterface $storage
++   *   The entity storage class.
++   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
++   *   The route matcher.
++   */
++  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, RouteMatchInterface $route_match) {
++    parent::__construct($entity_type, $storage);
++
++    // When on the default og_role list route,
++    // we should have a group entity type and bundle.
++    if ($route_match->getRouteName() == 'entity.og_role.collection') {
++      $parameters = $route_match->getParameters();
++
++      // Check if the route had a group type parameter.
++      if ($parameters->has('entity_type_id')) {
++        $this->groupType = $parameters->get('entity_type_id');
++      }
++      if ($parameters->has('bundle_id')) {
++        $this->groupBundle = $parameters->get('bundle_id');
++      }
++    }
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  protected function getEntityIds() {
++    $query = $this->getStorage()->getQuery()
++      ->condition('group_type', $this->groupType, '=')
++      ->condition('group_bundle', $this->groupBundle, '=')
++      ->sort($this->entityType->getKey('weight'));
++
++    // Only add the pager if a limit is specified.
++    if ($this->limit) {
++      $query->pager($this->limit);
++    }
++
++    return array_values($query->execute());
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function getFormId() {
++    return 'og_roles_admin';
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function buildHeader() {
++    $header['label'] = $this->t('Name');
++    return $header + parent::buildHeader();
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function buildRow(EntityInterface $entity) {
++    $row['label'] = $entity->label();
++    return $row + parent::buildRow($entity);
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function getDefaultOperations(EntityInterface $role) {
++    $operations = parent::getDefaultOperations($role);
++
++    // @todo If ($entity->hasLinkTemplate('edit-permissions-form')).
++    $operations['permissions'] = [
++      'title' => $this->t('Edit permissions'),
++      'weight' => 20,
++      'url' => Url::fromRoute('og_ui.permissions_edit_form', [
++        'entity_type_id' => $this->groupType,
++        'bundle_id' => $this->groupBundle,
++        'role_name' => $role->getName(),
++      ]),
++    ];
++
++    if ($role->isLocked()) {
++      if (isset($operations['edit'])) {
++        unset($operations['edit']);
++      }
++
++      if (isset($operations['delete'])) {
++        unset($operations['delete']);
++      }
++    }
++
++    return $operations;
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function render() {
++    // Return a 404 error when this is not a group.
++    if (!Og::isGroup($this->groupType, $this->groupBundle)) {
++      throw new NotFoundHttpException();
++    }
++
++    $build = parent::render();
++    $build['entities']['#empty'] = $this->t('There are no OG roles available yet. <a href="@link">Add an OG role</a>.', [
++      '@link' => Url::fromRoute('entity.og_role.add_form', [
++        'entity_type_id' => $this->groupType,
++        'bundle_id' => $this->groupBundle,
++      ])->toString(),
++    ]);
++
++    return $build;
++  }
++
++}
+diff --git a/modules/contrib/og/src/Entity/OgRoleRouteProvider.php b/modules/contrib/og/src/Entity/OgRoleRouteProvider.php
+new file mode 100644
+index 00000000..a70e858f
+--- /dev/null
++++ b/modules/contrib/og/src/Entity/OgRoleRouteProvider.php
+@@ -0,0 +1,59 @@
++<?php
++
++declare(strict_types = 1);
++
++namespace Drupal\og\Entity;
++
++use Drupal\Core\Entity\EntityTypeInterface;
++use Drupal\Core\Entity\Routing\AdminHtmlRouteProvider;
++
++/**
++ * Provides routes for og_roles.
++ */
++class OgRoleRouteProvider extends AdminHtmlRouteProvider {
++
++  /**
++   * {@inheritdoc}
++   */
++  protected function getAddFormRoute(EntityTypeInterface $entity_type) {
++    if ($route = parent::getAddFormRoute($entity_type)) {
++      $route->setOption('parameters', ['entity_type_id' => ['type' => 'entity:{entity_type_id}']])
++        ->setOption('parameters', ['bundle_id' => ['type' => '{entity_type}:{bundle_id}']]);
++      return $route;
++    }
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  protected function getEditFormRoute(EntityTypeInterface $entity_type) {
++    if ($route = parent::getEditFormRoute($entity_type)) {
++      $route->setDefault('_title_callback', '\Drupal\og_ui\Form\OgRoleForm::editRoleTitleCallback')
++        ->setOption('parameters', ['group_type' => ['type' => 'entity:group_type']])
++        ->setRequirement('_entity_access', 'og_role.update');
++      return $route;
++    }
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  protected function getDeleteFormRoute(EntityTypeInterface $entity_type) {
++    if ($route = parent::getDeleteFormRoute($entity_type)) {
++      $route->setDefault('_title_callback', '\Drupal\og_ui\Form\OgRoleForm::editRoleTitleCallback');
++      $route->setOption('parameters', ['group_type' => ['type' => 'entity:group_type']]);
++      return $route;
++    }
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  protected function getCollectionRoute(EntityTypeInterface $entity_type) {
++    if ($route = parent::getCollectionRoute($entity_type)) {
++      $route->setDefault('_title_callback', '\Drupal\og_ui\Controller\OgUiController::rolesOverviewPageTitleCallback');
++      return $route;
++    }
++  }
++
++}
+diff --git a/modules/contrib/og/src/OgRoleAccessControlHandler.php b/modules/contrib/og/src/OgRoleAccessControlHandler.php
+new file mode 100644
+index 00000000..aa535487
+--- /dev/null
++++ b/modules/contrib/og/src/OgRoleAccessControlHandler.php
+@@ -0,0 +1,46 @@
++<?php
++
++declare(strict_types = 1);
++
++namespace Drupal\og;
++
++use Drupal\Core\Access\AccessResult;
++use Drupal\Core\Entity\EntityAccessControlHandler;
++use Drupal\Core\Entity\EntityInterface;
++use Drupal\Core\Session\AccountInterface;
++
++/**
++ * Defines the access control handler for the user role entity type.
++ *
++ * @see \Drupal\og\Entity\OgRole
++ */
++class OgRoleAccessControlHandler extends EntityAccessControlHandler {
++
++  /**
++   * {@inheritdoc}
++   */
++  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
++    if ($operation == 'delete') {
++      list(, , $id) = explode('-', $entity->id(), 3);
++      $roles = [
++        OgRoleInterface::ANONYMOUS,
++        OgRoleInterface::AUTHENTICATED,
++        OgRoleInterface::ADMINISTRATOR,
++      ];
++
++      if (in_array($id, $roles)) {
++        return AccessResult::forbidden();
++      }
++    }
++
++    // Group roles have no 'view' route, but can be used in views to show what
++    // roles a member has. We therefore allow 'view' access so field formatters
++    // such as entity_reference_label will work.
++    if ($operation == 'view') {
++      return AccessResult::allowed()->addCacheableDependency($entity);
++    }
++
++    return parent::checkAccess($entity, $operation, $account);
++  }
++
++}
+diff --git a/modules/contrib/og/src/OgRoleInterface.php b/modules/contrib/og/src/OgRoleInterface.php
+index 23505603..c4162922 100644
+--- a/modules/contrib/og/src/OgRoleInterface.php
++++ b/modules/contrib/og/src/OgRoleInterface.php
+@@ -127,6 +127,17 @@ interface OgRoleInterface extends RoleInterface {
+    */
+   public function setRoleType($role_type);
+ 
++  /**
++   * Returns whether or not a role can be changed.
++   *
++   * This will return FALSE for all roles except the default roles 'non-member'
++   * and 'member'.
++   *
++   * @return bool
++   *   Whether or not the role is locked.
++   */
++  public function isLocked();
++
+   /**
+    * Returns the role name.
+    *
+diff --git a/modules/contrib/og/src/Permission.php b/modules/contrib/og/src/Permission.php
+index 777c2d17..850b2e58 100644
+--- a/modules/contrib/og/src/Permission.php
++++ b/modules/contrib/og/src/Permission.php
+@@ -37,6 +37,16 @@ abstract class Permission implements PermissionInterface {
+    */
+   protected $defaultRoles = [];
+ 
++  /**
++   * Permission provider.
++   *
++   * Defaults to 'Group' for GroupPermission and
++   * 'Group content' for GroupContentOperationPermission.
++   *
++   * @var string
++   */
++  protected $provider = '';
++
+   /**
+    * If the permission is security sensitive and should be limited to admins.
+    *
+@@ -151,6 +161,21 @@ abstract class Permission implements PermissionInterface {
+     return $this;
+   }
+ 
++  /**
++   * {@inheritdoc}
++   */
++  public function getProvider() {
++    return $this->get('provider');
++  }
++
++  /**
++   * {@inheritdoc}
++   */
++  public function setProvider($provider) {
++    $this->set('provider', $provider);
++    return $this;
++  }
++
+   /**
+    * Validates the given property and value.
+    *
+diff --git a/modules/contrib/og/src/PermissionInterface.php b/modules/contrib/og/src/PermissionInterface.php
+index da7d4e84..a16659a0 100644
+--- a/modules/contrib/og/src/PermissionInterface.php
++++ b/modules/contrib/og/src/PermissionInterface.php
+@@ -121,4 +121,22 @@ interface PermissionInterface {
+    */
+   public function setRestrictAccess($access);
+ 
++  /**
++   * Returns the provider.
++   *
++   * @return string
++   *   The provider.
++   */
++  public function getProvider();
++
++  /**
++   * Sets the provider.
++   *
++   * @param string $provider
++   *   The provider.
++   *
++   * @return $this
++   */
++  public function setProvider($provider);
++
+ }
+diff --git a/modules/contrib/og/src/Plugin/Derivative/OgLocalTask.php b/modules/contrib/og/src/Plugin/Derivative/OgLocalTask.php
+index 9135d932..f03b6486 100644
+--- a/modules/contrib/og/src/Plugin/Derivative/OgLocalTask.php
++++ b/modules/contrib/og/src/Plugin/Derivative/OgLocalTask.php
+@@ -30,7 +30,7 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
+    *
+    * @var \Drupal\Core\Routing\RouteProviderInterface
+    */
+-  protected $routProvider;
++  protected $routeProvider;
+ 
+   /**
+    * Creates an OgLocalTask object.
+@@ -42,7 +42,7 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
+    */
+   public function __construct(GroupTypeManagerInterface $group_type_manager, RouteProviderInterface $route_provider) {
+     $this->groupTypeManager = $group_type_manager;
+-    $this->routProvider = $route_provider;
++    $this->routeProvider = $route_provider;
+   }
+ 
+   /**
+@@ -64,7 +64,7 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
+     foreach (array_keys($this->groupTypeManager->getGroupMap()) as $entity_type_id) {
+       $route_name = "entity.$entity_type_id.og_admin_routes";
+ 
+-      if (!$this->routProvider->getRoutesByNames([$route_name])) {
++      if (!$this->routeProvider->getRoutesByNames([$route_name])) {
+         // Route not found.
+         continue;
+       }
+diff --git a/modules/contrib/og/tests/src/Kernel/Access/RolesAndPermissionsUiAccessTest.php b/modules/contrib/og/tests/src/Kernel/Access/RolesAndPermissionsUiAccessTest.php
+new file mode 100644
+index 00000000..49b3bb4e
+--- /dev/null
++++ b/modules/contrib/og/tests/src/Kernel/Access/RolesAndPermissionsUiAccessTest.php
+@@ -0,0 +1,326 @@
++<?php
++
++declare(strict_types = 1);
++
++namespace Drupal\Tests\og\Kernel\Access;
++
++use Drupal\KernelTests\KernelTestBase;
++use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
++use Drupal\Tests\user\Traits\UserCreationTrait;
++use Drupal\block_content\Entity\BlockContent;
++use Drupal\block_content\Entity\BlockContentType;
++use Drupal\og\Entity\OgRole;
++use Drupal\og\Og;
++use Drupal\og\OgMembershipInterface;
++use Drupal\og\OgRoleInterface;
++use Drupal\user\Entity\User;
++
++/**
++ * Tests access to the routes that serve the roles and permissions UI.
++ *
++ * This is handled in a kernel test rather than a functional test because there
++ * is a large matrix of users and routes to test and this would be very slow to
++ * handle in a functional test.
++ *
++ * @group og
++ */
++class RolesAndPermissionsUiAccessTest extends KernelTestBase {
++
++  use OgMembershipCreationTrait;
++  use UserCreationTrait;
++
++  /**
++   * {@inheritdoc}
++   */
++  public static $modules = [
++    'block_content',
++    'og',
++    'og_ui',
++    'system',
++    'user',
++  ];
++
++  /**
++   * A test group.
++   *
++   * @var \Drupal\Core\Entity\EntityInterface
++   */
++  protected $group;
++
++  /**
++   * Test users.
++   *
++   * @var \Drupal\Core\Session\AccountInterface[]
++   */
++  protected $users;
++
++  /**
++   * A test custom role.
++   *
++   * @var \Drupal\og\OgRoleInterface
++   */
++  protected $role;
++
++  /**
++   * {@inheritdoc}
++   */
++  public function setUp() {
++    parent::setUp();
++
++    $this->installEntitySchema('block_content');
++    $this->installEntitySchema('og_membership');
++    $this->installEntitySchema('user');
++    $this->installSchema('system', 'sequences');
++
++    // Create a "group" bundle on the Custom Block entity type and turn it into
++    // a group. Note we're not using the Entity Test entity for this since it
++    // does not have real support for multiple bundles.
++    BlockContentType::create(['id' => 'group'])->save();
++    Og::groupTypeManager()->addGroup('block_content', 'group');
++
++    // Create a custom 'moderator' role for our group type.
++    $this->role = OgRole::create();
++    $this->role
++      ->setGroupType('block_content')
++      ->setGroupBundle('group')
++      ->setName('moderator')
++      ->save();
++
++    // Create an anonymous test user.
++    $this->users['anonymous'] = User::getAnonymousUser();
++
++    // Create the root user. Since this is the first user we create this user
++    // will get UID 1 which is reserved for the root user.
++    $this->users['root user'] = $this->createUser();
++    $this->users['root user']->save();
++
++    // Create another global administrator. This is a user with a role which has
++    // the 'isAdmin' flag, indicating that this user has all possible
++    // permissions.
++    $this->users['global administrator'] = $this->createUser([], NULL, TRUE);
++    $this->users['global administrator']->save();
++
++    // Create a 'normal' authenticated user which is not part of the test group.
++    $this->users['non-member'] = $this->createUser();
++    $this->users['non-member']->save();
++
++    // Create a user which has the global permission to administer organic
++    // groups.
++    $this->users['global group administrator'] = $this->createUser(['administer organic groups']);
++    $this->users['global group administrator']->save();
++
++    // Create a test user for each membership type.
++    $membership_types = [
++      // The group administrator.
++      'administrator' => [
++        'state' => OgMembershipInterface::STATE_ACTIVE,
++        'role_name' => OgRoleInterface::ADMINISTRATOR,
++      ],
++      // A regular member of the group.
++      'member' => [
++        'state' => OgMembershipInterface::STATE_ACTIVE,
++        'role_name' => OgRoleInterface::AUTHENTICATED,
++      ],
++      // A blocked user.
++      'blocked' => [
++        'state' => OgMembershipInterface::STATE_BLOCKED,
++        'role_name' => OgRoleInterface::AUTHENTICATED,
++      ],
++      // A pending user.
++      'pending' => [
++        'state' => OgMembershipInterface::STATE_PENDING,
++        'role_name' => OgRoleInterface::AUTHENTICATED,
++      ],
++      // A "moderator" (a custom role).
++      'moderator' => [
++        'state' => OgMembershipInterface::STATE_ACTIVE,
++        'role_name' => OgRoleInterface::AUTHENTICATED,
++      ],
++    ];
++    foreach ($membership_types as $user_key => $membership_info) {
++      $user = $this->createUser();
++      $this->users[$user_key] = $user;
++
++      // The administrator is the first user to be created. In this case also
++      // create the group and set the administrator as the owner. The membership
++      // will be created automatically.
++      switch ($user_key) {
++        case 'administrator':
++          $this->group = BlockContent::create([
++            'title' => $this->randomString(),
++            'type' => 'group',
++            'uid' => $user->id(),
++          ]);
++          $this->group->save();
++          break;
++
++        // Create a normal membership for the other users.
++        default:
++          $this->createOgMembership($this->group, $user, [$membership_info['role_name']], $membership_info['state']);
++          break;
++      }
++    }
++  }
++
++  /**
++   * Checks whether users have access to routes.
++   *
++   * @param array $routes
++   *   An array of routes to test. Each value is an array with two keys:
++   *   - A string containing the route machine name to check.
++   *   - An array of route parameters to set.
++   * @param array $access_matrix
++   *   An associative array, keyed by user key, with as value a boolean that
++   *   represents whether or not the user is expected to have access to the
++   *   route.
++   *
++   * @dataProvider routeAccessDataProvider
++   */
++  public function testRouteAccess(array $routes, array $access_matrix): void {
++    foreach ($routes as $route_info) {
++      list($route, $parameters) = $route_info;
++      foreach ($access_matrix as $user_key => $should_have_access) {
++        $has_access = $this->container->get('access_manager')->checkNamedRoute($route, $parameters, $this->users[$user_key], FALSE);
++        $message = "The '$user_key' user is " . ($should_have_access ? '' : 'not ') . "expected to have access to the '$route' route.";
++        $this->assertEquals($should_have_access, $has_access, $message);
++      }
++    }
++  }
++
++  /**
++   * Data provider for ::testRouteAccess().
++   *
++   * @return array
++   *   An array of test cases. Each test case is an indexed array with the
++   *   following values:
++   *   - An array of routes to test. Each value is an array with two keys:
++   *     - A string containing the route machine name to check.
++   *     - An array of route parameters for the route.
++   *   - An associative array keyed by users, with the value a boolean
++   *     representing whether or not the user is expected to have access to the
++   *     routes.
++   */
++  public function routeAccessDataProvider() {
++    return [
++      [
++        [
++          // The main page of the Organic Groups configuration.
++          [
++            'og_ui.admin_index',
++            [],
++          ],
++          // The settings form.
++          [
++            'og_ui.settings',
++            [],
++          ],
++          // The roles overview table for all group types.
++          [
++            'og_ui.roles_permissions_overview',
++            ['type' => 'roles'],
++          ],
++          // The permissions overview table for all group types.
++          [
++            'og_ui.roles_permissions_overview',
++            ['type' => 'permissions'],
++          ],
++          // The permissions table for all roles of a specific group type.
++          [
++            'og_ui.permissions_overview',
++            [
++              'entity_type_id' => 'block_content',
++              'bundle_id' => 'group',
++            ],
++          ],
++          // The permissions form for administrators of a single group type.
++          [
++            'og_ui.permissions_edit_form',
++            [
++              'entity_type_id' => 'block_content',
++              'bundle_id' => 'group',
++              'role_name' => OgRoleInterface::ADMINISTRATOR,
++            ],
++          ],
++          // The permissions form for non-members of a single group type.
++          [
++            'og_ui.permissions_edit_form',
++            [
++              'entity_type_id' => 'block_content',
++              'bundle_id' => 'group',
++              'role_name' => OgRoleInterface::ANONYMOUS,
++            ],
++          ],
++          // The permissions form for members of a single group type.
++          [
++            'og_ui.permissions_edit_form',
++            [
++              'entity_type_id' => 'block_content',
++              'bundle_id' => 'group',
++              'role_name' => OgRoleInterface::AUTHENTICATED,
++            ],
++          ],
++          // The permissions form for "moderators" (a custom role) of a single
++          // group type.
++          [
++            'og_ui.permissions_edit_form',
++            [
++              'entity_type_id' => 'block_content',
++              'bundle_id' => 'group',
++              'role_name' => 'moderator',
++            ],
++          ],
++          // The overview of available roles for a group type.
++          [
++            'entity.og_role.collection',
++            [
++              'entity_type_id' => 'block_content',
++              'bundle_id' => 'group',
++            ],
++          ],
++          // The form to add a new role to a group type.
++          [
++            'entity.og_role.add_form',
++            [
++              'entity_type_id' => 'block_content',
++              'bundle_id' => 'group',
++            ],
++          ],
++          // The form to edit a custom role belonging to a group type.
++          [
++            'entity.og_role.edit_form',
++            [
++              'og_role' => 'block_content-group-moderator',
++            ],
++          ],
++          // The form to delete a custom role belonging to a group type.
++          [
++            'entity.og_role.delete_form',
++            [
++              'og_role' => 'block_content-group-moderator',
++            ],
++          ],
++        ],
++        [
++          // Since these routes are for managing the roles and permissions of
++          // all groups of the tested entity type and bundle, the forms should
++          // only be accessible to the root user, global administrators that
++          // have all permissions, and users that have the permission
++          // 'administer organic groups'.
++          // Group administrators should not have access to these
++          // pages, but they will have access to the forms that deal with
++          // group-specific roles and permissions. These are not tested here.
++          'root user' => TRUE,
++          'global administrator' => TRUE,
++          'global group administrator' => TRUE,
++          'anonymous' => FALSE,
++          'non-member' => FALSE,
++          'administrator' => FALSE,
++          'member' => FALSE,
++          'blocked' => FALSE,
++          'pending' => FALSE,
++        ],
++      ],
++    ];
++  }
++
++}
