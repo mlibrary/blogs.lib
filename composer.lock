@@ -3499,21 +3499,15 @@
         },
         {
             "name": "drupal/og",
-            "version": "1.0.0-alpha7",
+            "version": "dev-1.x",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/og.git",
-                "reference": "8.x-1.0-alpha7"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/og-8.x-1.0-alpha7.zip",
-                "reference": "8.x-1.0-alpha7",
-                "shasum": "7c2036884946afa376e8fd848829a0f8ff59a653"
+                "reference": "dec6a56b3a4ac1bbffb7897fabb4d459d36ca3c1"
             },
             "require": {
-                "drupal/core": "^8.8 || ^9.0",
-                "php": "^7.2"
+                "drupal/core": "^9.2",
+                "php": "^7.4 || ^8"
             },
             "require-dev": {
                 "drupal/coder": "^8.2",
@@ -3522,12 +3516,15 @@
             },
             "type": "drupal-module",
             "extra": {
+                "branch-alias": {
+                    "dev-1.x": "1.x-dev"
+                },
                 "drupal": {
-                    "version": "8.x-1.0-alpha7",
-                    "datestamp": "1633634599",
+                    "version": "8.x-1.x-dev",
+                    "datestamp": "1626945490",
                     "security-coverage": {
                         "status": "not-covered",
-                        "message": "Alpha releases are not covered by Drupal security advisories."
+                        "message": "Dev releases are not covered by Drupal security advisories."
                     }
                 }
             },
@@ -4361,17 +4358,17 @@
         },
         {
             "name": "drupal/views_bulk_operations",
-            "version": "4.0.1",
+            "version": "4.1.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/views_bulk_operations.git",
-                "reference": "4.0.1"
+                "reference": "4.1.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/views_bulk_operations-4.0.1.zip",
-                "reference": "4.0.1",
-                "shasum": "dfcd54a002ae6c9b156702c03601fa89121c777f"
+                "url": "https://ftp.drupal.org/files/projects/views_bulk_operations-4.1.0.zip",
+                "reference": "4.1.0",
+                "shasum": "acb6891afda4f973f043155e4f53e1b7d8ffe63d"
             },
             "require": {
                 "drupal/core": "^8.8 || ^9"
@@ -4385,8 +4382,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "4.0.1",
-                    "datestamp": "1642845502",
+                    "version": "4.1.0",
+                    "datestamp": "1646055586",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
