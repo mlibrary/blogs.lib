@@ -1,7 +1,7 @@
-diff --git a/modules/contrib/og/og.routing.yml b/modules/contrib/og/og.routing.yml
+diff --git a/og.routing.yml b/og.routing.yml
 index cb910a7f..ddd4ef8a 100644
---- a/modules/contrib/og/og.routing.yml
-+++ b/modules/contrib/og/og.routing.yml
+--- a/og.routing.yml
++++ b/og.routing.yml
 @@ -1,5 +1,38 @@
  # Routes for Organic groups.
  
@@ -41,21 +41,21 @@ index cb910a7f..ddd4ef8a 100644
  og.subscribe:
    path: 'group/{entity_type_id}/{group}/subscribe/{og_membership_type}'
    defaults:
-diff --git a/modules/contrib/og/og_ui/og_ui.links.action.yml b/modules/contrib/og/og_ui/og_ui.links.action.yml
+diff --git a/og_ui/og_ui.links.action.yml b/og_ui/og_ui.links.action.yml
 new file mode 100644
 index 00000000..bef396cc
 --- /dev/null
-+++ b/modules/contrib/og/og_ui/og_ui.links.action.yml
++++ b/og_ui/og_ui.links.action.yml
 @@ -0,0 +1,5 @@
 +entity.og_role.add_form:
 +  route_name: entity.og_role.add_form
 +  title: 'Add role'
 +  appears_on:
 +    - entity.og_role.collection
-diff --git a/modules/contrib/og/og_ui/og_ui.links.menu.yml b/modules/contrib/og/og_ui/og_ui.links.menu.yml
+diff --git a/og_ui/og_ui.links.menu.yml b/og_ui/og_ui.links.menu.yml
 index e315cbf0..4ad45553 100644
---- a/modules/contrib/og/og_ui/og_ui.links.menu.yml
-+++ b/modules/contrib/og/og_ui/og_ui.links.menu.yml
+--- a/og_ui/og_ui.links.menu.yml
++++ b/og_ui/og_ui.links.menu.yml
 @@ -11,3 +11,19 @@ og_ui.settings:
    parent: og_ui.admin_index
    description: 'Administer OG settings.'
@@ -76,10 +76,10 @@ index e315cbf0..4ad45553 100644
 +  route_name: og_ui.roles_permissions_overview
 +  route_parameters:
 +    type: 'permissions'
-diff --git a/modules/contrib/og/og_ui/og_ui.routing.yml b/modules/contrib/og/og_ui/og_ui.routing.yml
+diff --git a/og_ui/og_ui.routing.yml b/og_ui/og_ui.routing.yml
 index f653fa76..442df45f 100644
---- a/modules/contrib/og/og_ui/og_ui.routing.yml
-+++ b/modules/contrib/og/og_ui/og_ui.routing.yml
+--- a/og_ui/og_ui.routing.yml
++++ b/og_ui/og_ui.routing.yml
 @@ -25,18 +25,18 @@ og_ui.roles_permissions_overview:
      _permission: 'administer organic groups'
      type: '^(roles|permissions)$'
@@ -107,10 +107,10 @@ index f653fa76..442df45f 100644
 +    _title_callback: '\Drupal\og_ui\Form\OgRolePermissionsForm::rolePermissionTitleCallback'
    requirements:
      _permission: 'administer organic groups'
-diff --git a/modules/contrib/og/og_ui/src/Controller/OgUiController.php b/modules/contrib/og/og_ui/src/Controller/OgUiController.php
+diff --git a/og_ui/src/Controller/OgUiController.php b/og_ui/src/Controller/OgUiController.php
 index a83197e7..38efb07a 100644
---- a/modules/contrib/og/og_ui/src/Controller/OgUiController.php
-+++ b/modules/contrib/og/og_ui/src/Controller/OgUiController.php
+--- a/og_ui/src/Controller/OgUiController.php
++++ b/og_ui/src/Controller/OgUiController.php
 @@ -4,6 +4,7 @@ declare(strict_types = 1);
  
  namespace Drupal\og_ui\Controller;
@@ -204,11 +204,11 @@ index a83197e7..38efb07a 100644
 +  }
 +
  }
-diff --git a/modules/contrib/og/og_ui/src/Form/OgPermissionsForm.php b/modules/contrib/og/og_ui/src/Form/OgPermissionsForm.php
+diff --git a/og_ui/src/Form/OgPermissionsForm.php b/og_ui/src/Form/OgPermissionsForm.php
 new file mode 100644
 index 00000000..2d7f3d11
 --- /dev/null
-+++ b/modules/contrib/og/og_ui/src/Form/OgPermissionsForm.php
++++ b/og_ui/src/Form/OgPermissionsForm.php
 @@ -0,0 +1,341 @@
 +<?php
 +
@@ -551,11 +551,11 @@ index 00000000..2d7f3d11
 +  }
 +
 +}
-diff --git a/modules/contrib/og/og_ui/src/Form/OgRoleDeleteForm.php b/modules/contrib/og/og_ui/src/Form/OgRoleDeleteForm.php
+diff --git a/og_ui/src/Form/OgRoleDeleteForm.php b/og_ui/src/Form/OgRoleDeleteForm.php
 new file mode 100644
 index 00000000..196a2fb5
 --- /dev/null
-+++ b/modules/contrib/og/og_ui/src/Form/OgRoleDeleteForm.php
++++ b/og_ui/src/Form/OgRoleDeleteForm.php
 @@ -0,0 +1,35 @@
 +<?php
 +
@@ -592,11 +592,11 @@ index 00000000..196a2fb5
 +  }
 +
 +}
-diff --git a/modules/contrib/og/og_ui/src/Form/OgRoleForm.php b/modules/contrib/og/og_ui/src/Form/OgRoleForm.php
+diff --git a/og_ui/src/Form/OgRoleForm.php b/og_ui/src/Form/OgRoleForm.php
 new file mode 100644
 index 00000000..e1c3d854
 --- /dev/null
-+++ b/modules/contrib/og/og_ui/src/Form/OgRoleForm.php
++++ b/og_ui/src/Form/OgRoleForm.php
 @@ -0,0 +1,143 @@
 +<?php
 +
@@ -741,11 +741,11 @@ index 00000000..e1c3d854
 +  }
 +
 +}
-diff --git a/modules/contrib/og/og_ui/src/Form/OgRolePermissionsForm.php b/modules/contrib/og/og_ui/src/Form/OgRolePermissionsForm.php
+diff --git a/og_ui/src/Form/OgRolePermissionsForm.php b/og_ui/src/Form/OgRolePermissionsForm.php
 new file mode 100644
 index 00000000..6ddb94ed
 --- /dev/null
-+++ b/modules/contrib/og/og_ui/src/Form/OgRolePermissionsForm.php
++++ b/og_ui/src/Form/OgRolePermissionsForm.php
 @@ -0,0 +1,79 @@
 +<?php
 +
@@ -826,10 +826,10 @@ index 00000000..6ddb94ed
 +  }
 +
 +}
-diff --git a/modules/contrib/og/src/Entity/OgRole.php b/modules/contrib/og/src/Entity/OgRole.php
+diff --git a/src/Entity/OgRole.php b/src/Entity/OgRole.php
 index 89361ad4..0b015c26 100644
---- a/modules/contrib/og/src/Entity/OgRole.php
-+++ b/modules/contrib/og/src/Entity/OgRole.php
+--- a/src/Entity/OgRole.php
++++ b/src/Entity/OgRole.php
 @@ -18,12 +18,34 @@ use Drupal\user\Entity\Role;
   * @ConfigEntityType(
   *   id = "og_role",
@@ -879,11 +879,11 @@ index 89361ad4..0b015c26 100644
    /**
     * {@inheritdoc}
     */
-diff --git a/modules/contrib/og/src/Entity/OgRoleListBuilder.php b/modules/contrib/og/src/Entity/OgRoleListBuilder.php
+diff --git a/src/Entity/OgRoleListBuilder.php b/src/Entity/OgRoleListBuilder.php
 new file mode 100644
 index 00000000..7bac7b5b
 --- /dev/null
-+++ b/modules/contrib/og/src/Entity/OgRoleListBuilder.php
++++ b/src/Entity/OgRoleListBuilder.php
 @@ -0,0 +1,167 @@
 +<?php
 +
@@ -1052,11 +1052,11 @@ index 00000000..7bac7b5b
 +  }
 +
 +}
-diff --git a/modules/contrib/og/src/Entity/OgRoleRouteProvider.php b/modules/contrib/og/src/Entity/OgRoleRouteProvider.php
+diff --git a/src/Entity/OgRoleRouteProvider.php b/src/Entity/OgRoleRouteProvider.php
 new file mode 100644
 index 00000000..a70e858f
 --- /dev/null
-+++ b/modules/contrib/og/src/Entity/OgRoleRouteProvider.php
++++ b/src/Entity/OgRoleRouteProvider.php
 @@ -0,0 +1,59 @@
 +<?php
 +
@@ -1117,11 +1117,11 @@ index 00000000..a70e858f
 +  }
 +
 +}
-diff --git a/modules/contrib/og/src/OgRoleAccessControlHandler.php b/modules/contrib/og/src/OgRoleAccessControlHandler.php
+diff --git a/src/OgRoleAccessControlHandler.php b/src/OgRoleAccessControlHandler.php
 new file mode 100644
 index 00000000..aa535487
 --- /dev/null
-+++ b/modules/contrib/og/src/OgRoleAccessControlHandler.php
++++ b/src/OgRoleAccessControlHandler.php
 @@ -0,0 +1,46 @@
 +<?php
 +
@@ -1169,10 +1169,10 @@ index 00000000..aa535487
 +  }
 +
 +}
-diff --git a/modules/contrib/og/src/OgRoleInterface.php b/modules/contrib/og/src/OgRoleInterface.php
+diff --git a/src/OgRoleInterface.php b/src/OgRoleInterface.php
 index 23505603..c4162922 100644
---- a/modules/contrib/og/src/OgRoleInterface.php
-+++ b/modules/contrib/og/src/OgRoleInterface.php
+--- a/src/OgRoleInterface.php
++++ b/src/OgRoleInterface.php
 @@ -127,6 +127,17 @@ interface OgRoleInterface extends RoleInterface {
     */
    public function setRoleType($role_type);
@@ -1191,10 +1191,10 @@ index 23505603..c4162922 100644
    /**
     * Returns the role name.
     *
-diff --git a/modules/contrib/og/src/Permission.php b/modules/contrib/og/src/Permission.php
+diff --git a/src/Permission.php b/src/Permission.php
 index 777c2d17..850b2e58 100644
---- a/modules/contrib/og/src/Permission.php
-+++ b/modules/contrib/og/src/Permission.php
+--- a/src/Permission.php
++++ b/src/Permission.php
 @@ -37,6 +37,16 @@ abstract class Permission implements PermissionInterface {
     */
    protected $defaultRoles = [];
@@ -1234,10 +1234,10 @@ index 777c2d17..850b2e58 100644
    /**
     * Validates the given property and value.
     *
-diff --git a/modules/contrib/og/src/PermissionInterface.php b/modules/contrib/og/src/PermissionInterface.php
+diff --git a/src/PermissionInterface.php b/src/PermissionInterface.php
 index da7d4e84..a16659a0 100644
---- a/modules/contrib/og/src/PermissionInterface.php
-+++ b/modules/contrib/og/src/PermissionInterface.php
+--- a/src/PermissionInterface.php
++++ b/src/PermissionInterface.php
 @@ -121,4 +121,22 @@ interface PermissionInterface {
     */
    public function setRestrictAccess($access);
@@ -1261,10 +1261,10 @@ index da7d4e84..a16659a0 100644
 +  public function setProvider($provider);
 +
  }
-diff --git a/modules/contrib/og/src/Plugin/Derivative/OgLocalTask.php b/modules/contrib/og/src/Plugin/Derivative/OgLocalTask.php
+diff --git a/src/Plugin/Derivative/OgLocalTask.php b/src/Plugin/Derivative/OgLocalTask.php
 index 9135d932..f03b6486 100644
---- a/modules/contrib/og/src/Plugin/Derivative/OgLocalTask.php
-+++ b/modules/contrib/og/src/Plugin/Derivative/OgLocalTask.php
+--- a/src/Plugin/Derivative/OgLocalTask.php
++++ b/src/Plugin/Derivative/OgLocalTask.php
 @@ -30,7 +30,7 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
     *
     * @var \Drupal\Core\Routing\RouteProviderInterface
@@ -1292,11 +1292,11 @@ index 9135d932..f03b6486 100644
          // Route not found.
          continue;
        }
-diff --git a/modules/contrib/og/tests/src/Kernel/Access/RolesAndPermissionsUiAccessTest.php b/modules/contrib/og/tests/src/Kernel/Access/RolesAndPermissionsUiAccessTest.php
+diff --git a/tests/src/Kernel/Access/RolesAndPermissionsUiAccessTest.php b/tests/src/Kernel/Access/RolesAndPermissionsUiAccessTest.php
 new file mode 100644
 index 00000000..49b3bb4e
 --- /dev/null
-+++ b/modules/contrib/og/tests/src/Kernel/Access/RolesAndPermissionsUiAccessTest.php
++++ b/tests/src/Kernel/Access/RolesAndPermissionsUiAccessTest.php
 @@ -0,0 +1,326 @@
 +<?php
 +
