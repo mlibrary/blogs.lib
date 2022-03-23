@@ -1,0 +1,33 @@
+version: '3.1'
+
+services:
+  database:
+    image: mariadb
+    volumes:
+      - database:/var/lib/mysql
+      - ./drupal8-blogs.sql.gz:/docker-entrypoint-initdb.d/drupal8-blogs.sql.gz
+    environment:
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_USER=user
+      - MARIADB_PASSWORD=password
+      - MARIADB_DATABASE=drupal
+    restart: always
+
+  drupal:
+    build: .
+    #user: ${CURRENT_UID}
+    depends_on:
+      - database
+    ports:
+      - 25647:80
+    environment:
+      - MARIADB_USER=user
+      - MARIADB_PASSWORD=password
+      - MARIADB_DATABASE=drupal
+      - DATABASE_HOST=database
+      - DRUPAL_HASH_SALT='drupal_hash_salt'
+    volumes:
+      - ./:/var/www/html
+    restart: always
+volumes:
+  database:

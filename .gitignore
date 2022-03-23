@@ -56,32 +56,9 @@ sites/simpletest
 # */files
 # */private
 
-# Ignore SimpleTest multi-site environment.
-# simpletest
-
-#These are their own git repositories.
-/modules/cosign
-/modules/custom/custom_migrations
-/modules/custom/maintained_mods
-/modules/custom_um_staff_migrate
-/modules/entity_reference_exposed_filters
-/modules/entity_reference_views_select
-/modules/convert_nodes
-/modules/bulk_copy_fields
-/modules/bulk_update_fields
-/modules/term_csv_export_import
-/modules/autocomplete_field_match
-
 # Ignoring composer-installed .git repositories.
 /vendor/**/.git
 /modules/**/.git
 
-# Non-drupal applications and content.
-/coral
-/ts
-/linkscan
-/pagerate
-/ptf
-/sites/staff.lib.umich.edu/local
-/canvas
-
+# Ignore open_connect_settings for docker.
+openid_connect.settings.generic.yml

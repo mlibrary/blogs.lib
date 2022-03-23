@@ -1,75 +1,99 @@
-<img alt="Drupal Logo" src="https://www.drupal.org/files/Wordmark_blue_RGB.png" height="60px">
+# Blogs at blogs.lib.umich.edu
 
-Drupal is an open source content management platform supporting a variety of
-websites ranging from personal weblogs to large community-driven websites. For
-more information, visit the Drupal website, [Drupal.org][Drupal.org], and join
-the [Drupal community][Drupal community].
+University of Michigan Library Blogs site is a drupal application (https://www.drupal.org/).
 
-## Contributing
+## Prerequisites
 
-Drupal is developed on [Drupal.org][Drupal.org], the home of the international
-Drupal community since 2001!
+1. If you haven't already, you will need to install Docker or Docker Desktop (https://docs.docker.com/get-docker/) and Git (https://github.com/git-guides/install-git)
 
-[Drupal.org][Drupal.org] hosts Drupal's [GitLab repository][GitLab repository],
-its [issue queue][issue queue], and its [documentation][documentation]. Before
-you start working on code, be sure to search the [issue queue][issue queue] and
-create an issue if your aren't able to find an existing issue.
+2. To start working on it in docker please contact eliotwsc@umich.edu to obtain appropriate credentials for files and database.
 
-Every issue on Drupal.org automatically creates a new community-accessible fork
-that you can contribute to. Learn more about the code contribution process on
-the [Issue forks & merge requests page][issue forks].
+## 🚀 Quick start
 
-## Usage
+1.  **Clone `blogs.lib`.**
 
-For a brief introduction, see [USAGE.txt](/core/USAGE.txt). You can also find
-guides, API references, and more by visiting Drupal's [documentation
-page][documentation].
+```sh
+git clone https://github.com/mlibrary/blogs.lib.git && cd blogs.lib
+```
 
-You can quickly extend Drupal's core feature set by installing any of its
-[thousands of free and open source modules][modules]. With Drupal and its
-module ecosystem, you can often build most or all of what your project needs
-before writing a single line of code.
+2.  **Set up s3 credentials.**
 
-## Changelog
+Add credentials for s3 (NOTE: credentials must be supplied.)
 
-Drupal keeps detailed [change records][changelog]. You can search Drupal's
-changes for a record of every notable breaking change and new feature since
-2011.
+```sh
+tar -zxf aws-stub && vi .aws/credentials
+```
 
-## Security
+Add the key and secret supplied and save the credentials file
 
-For a list of security announcements, see the [Security advisories
-page][Security advisories] (available as [an RSS feed][security RSS]). This
-page also describes how to subscribe to these announcements via email.
+3.  **Get the data from an s3 bucket (NOTE: credentials must be supplied from prior step.)**
 
-For information about the Drupal security process, or to find out how to report
-a potential security issue to the Drupal security team, see the [Security team
-page][security team].
+```sh
+docker run --rm -it -v $(pwd)/.aws:/root/.aws -v $(pwd):/aws amazon/aws-cli s3 cp s3://blogs-lib-umich-edu/ ./ --recursive
+```
 
-## Need a helping hand?
+4.  **Set up files and database settings.**
 
-Visit the [Support page][support] or browse [over a thousand Drupal
-providers][service providers] offering design, strategy, development, and
-hosting services.
+```sh
+tar -zxf files.tar.gz -C sites/default && cp sites/default/docker.settings.php sites/default/settings.php && sudo chown -R www-data sites/default/files
+```
 
-## Legal matters
+5.  **Start the server.**
 
-Know your rights when using Drupal by reading Drupal core's
-[license](/core/LICENSE.txt).
+```sh
+docker-compose build && docker-compose up -d
+```
 
-Learn about the [Drupal trademark and logo policy here][trademark].
+6.  **Import the openid config for development.**
 
-[Drupal.org]: https://www.drupal.org
-[Drupal community]: https://www.drupal.org/community
-[GitLab repository]: https://git.drupalcode.org/project/drupal
-[issue queue]: https://www.drupal.org/project/issues/drupal
-[issue forks]: https://www.drupal.org/drupalorg/docs/gitlab-integration/issue-forks-merge-requests
-[documentation]: https://www.drupal.org/documentation
-[changelog]: https://www.drupal.org/list-changes/drupal
-[modules]: https://www.drupal.org/project/project_module
-[security advisories]: https://www.drupal.org/security
-[security RSS]: https://www.drupal.org/security/rss.xml
-[security team]: https://www.drupal.org/drupal-security-team
-[service providers]: https://www.drupal.org/drupal-services
-[support]: https://www.drupal.org/support
-[trademark]: https://www.drupal.com/trademark
+NOTE: you may get errors about other config but should be fine.
+If you get the error "[ERROR] Command "config:import:single", is not a valid command name." wait a minute. Container is not yet functional.
+
+```sh
+docker exec -it blogslib_drupal_1 drupal config:import:single --file=openid_connect.settings.generic.yml
+```
+
+7.  **Open the site. (NOTE: Takes a minute for mariadb to load up.)**
+
+Site should load at http://localhost:25647
+
+## 🚀 Completely Rebuild environment
+1.  **Pull the latest from git.**
+
+```sh
+git pull
+```
+
+2.  **Get fresh data from the s3 bucket (NOTE: credentials must be supplied from initial build.)
+
+```sh
+docker run --rm -it -v $(pwd)/.aws:/root/.aws -v $(pwd):/aws amazon/aws-cli s3 cp s3://blogs-lib-umich-edu/ ./ --recursive
+```
+
+3.  **Set up refreshed files.**
+
+```sh
+tar -zxvf files.tar.gz -C sites/default && sudo chown -R www-data sites/default/files
+```
+
+4.  **Rebuild docker with latest stuff.**
+
+Remove all associated volumes, images and containers. Download the latest.
+
+```sh
+docker rm -f blogslib_database_1 && docker rm -f blogslib_drupal_1 && docker volume rm -f blogslib_database && docker image rm -f mariadb:latest && docker image rm -f blogslib_drupal:latest && docker-compose build --no-cache && docker-compose up -d --force-recreate
+```
+
+5.  **Import the openid config for development. (NOTE: you may get errors about other config but should be fine.)**
+
+```sh
+docker exec -it blogslib_drupal_1 drupal config:import:single --file=openid_connect.settings.generic.yml
+```
+
+## Other handy commands
+
+**Update composer**
+
+```sh
+docker exec -it blogslib_drupal_1 composer update
+```

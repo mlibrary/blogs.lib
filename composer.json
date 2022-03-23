@@ -51,7 +51,15 @@
         "drupal/drupal": "*"
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "drupal/console": true,
+            "composer/installers": false,
+            "drupal/core-composer-scaffold": false,
+            "drupal/core-project-message": false,
+            "drupal/console-extend-plugin": true,
+            "cweagans/composer-patches": true
+        }
     },
     "extra": {
         "enable-patching": true,
