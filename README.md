@@ -37,7 +37,7 @@ sudo docker run --rm -it -v $(pwd)/.aws:/root/.aws -v $(pwd):/aws amazon/aws-cli
 4.  **Set up files and database settings.**
 
 ```sh
-tar -zxf files.tar.gz -C sites/default && cp sites/default/docker.settings.php sites/default/settings.php && sudo chown -R www-data sites/default/files
+tar -zxf files.tar.gz -C sites/default && cp sites/default/docker.settings.php sites/default/settings.php
 ```
 
 5.  **Start the server.**
@@ -46,7 +46,13 @@ tar -zxf files.tar.gz -C sites/default && cp sites/default/docker.settings.php s
 sudo docker-compose build && sudo docker-compose up -d
 ```
 
-6.  **Import the openid config for development.**
+6. **Set files permissions to apache**
+
+```sh
+sudo docker exec -it blogslib_drupal_1 chown -R www-data sites/default/files
+```
+
+7.  **Import the openid config for development.**
 
 NOTE: you may get errors about other config but should be fine.
 If you get the error "[ERROR] Command "config:import:single", is not a valid command name." wait a minute. Container is not yet functional.
@@ -55,7 +61,7 @@ If you get the error "[ERROR] Command "config:import:single", is not a valid com
 sudo docker exec -it blogslib_drupal_1 drupal config:import:single --file=openid_connect.settings.generic.yml
 ```
 
-7.  **Open the site. (NOTE: Takes a minute for mariadb to load up.)**
+8.  **Open the site. (NOTE: Takes a minute for mariadb to load up.)**
 
 Site should load at http://localhost:25647
 
