@@ -8,7 +8,7 @@ University of Michigan Library Blogs site is a drupal application (https://www.d
 
 2. To start working on it in docker please contact eliotwsc@umich.edu to obtain appropriate credentials for files and database.
 
-3. IMPORTANT! If you run Docker with a new non-Intel Apple chip, you may have issues! If you do and find a solution please let eliotwsc@umich.edu know.
+3. IMPORTANT! If you run Docker with a new non-Intel Apple chip, you may have issues! If you do and find a solution please post it in issues.
 
 ## 🚀 Quick start
 
