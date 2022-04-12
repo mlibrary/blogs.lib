@@ -5,7 +5,7 @@
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => 'f81e6bbd417edb9dfae4a0de7df3eab3c4968e95',
+        'reference' => '70be3cbd821a925905c8d948dc6d95989d1a5c03',
         'name' => 'drupal/recommended-project',
         'dev' => true,
     ),
@@ -445,6 +445,17 @@
                 0 => '9.3.9',
             ),
         ),
+        'drupal/convert_bundles' => array(
+            'pretty_version' => 'dev-1.x',
+            'version' => 'dev-1.x',
+            'type' => 'drupal-module',
+            'install_path' => __DIR__ . '/../../modules/contrib/convert_bundles',
+            'aliases' => array(
+                0 => '1.x-dev',
+            ),
+            'reference' => '7def3456aa0371c7ec36b52dcbc5cda784cf81a7',
+            'dev_requirement' => false,
+        ),
         'drupal/core' => array(
             'pretty_version' => '9.3.9',
             'version' => '9.3.9.0',
@@ -477,6 +488,15 @@
             'replaced' => array(
                 0 => '9.3.9',
             ),
+        ),
+        'drupal/core-composer-scaffold' => array(
+            'pretty_version' => '9.3.9',
+            'version' => '9.3.9.0',
+            'type' => 'composer-plugin',
+            'install_path' => __DIR__ . '/../drupal/core-composer-scaffold',
+            'aliases' => array(),
+            'reference' => 'a9dd9def8891e1c388719474720b57d3fe929a2f',
+            'dev_requirement' => false,
         ),
         'drupal/core-datetime' => array(
             'dev_requirement' => false,
@@ -1110,7 +1130,7 @@
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => 'f81e6bbd417edb9dfae4a0de7df3eab3c4968e95',
+            'reference' => '70be3cbd821a925905c8d948dc6d95989d1a5c03',
             'dev_requirement' => false,
         ),
         'drupal/reroute_email' => array(
@@ -1480,6 +1500,15 @@
             'install_path' => __DIR__ . '/../nikic/php-parser',
             'aliases' => array(),
             'reference' => '210577fe3cf7badcc5814d99455df46564f3c077',
+            'dev_requirement' => false,
+        ),
+        'oomphinc/composer-installers-extender' => array(
+            'pretty_version' => '2.0.1',
+            'version' => '2.0.1.0',
+            'type' => 'composer-plugin',
+            'install_path' => __DIR__ . '/../oomphinc/composer-installers-extender',
+            'aliases' => array(),
+            'reference' => 'cbf4b6f9a24153b785d09eee755b995ba87bd5f9',
             'dev_requirement' => false,
         ),
         'orno/di' => array(
@@ -2048,6 +2077,15 @@
             'install_path' => __DIR__ . '/../webmozart/path-util',
             'aliases' => array(),
             'reference' => 'd939f7edc24c9a1bb9c0dee5cb05d8e859490725',
+            'dev_requirement' => false,
+        ),
+        'wikimedia/composer-merge-plugin' => array(
+            'pretty_version' => 'v2.0.1',
+            'version' => '2.0.1.0',
+            'type' => 'composer-plugin',
+            'install_path' => __DIR__ . '/../wikimedia/composer-merge-plugin',
+            'aliases' => array(),
+            'reference' => '8ca2ed8ab97c8ebce6b39d9943e9909bb4f18912',
             'dev_requirement' => false,
         ),
     ),

@@ -3,6 +3,8 @@ version: '3.1'
 services:
   database:
     image: mariadb
+    ports:
+      - 127.0.0.1:3306:3306
     volumes:
       - database:/var/lib/mysql
       - ./drupal8-blogs.sql.gz:/docker-entrypoint-initdb.d/drupal8-blogs.sql.gz
