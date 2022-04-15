@@ -1,0 +1,6 @@
+{
+  "name": "drupal/views_contextual_filters_or",
+  "description": "Modify views query to support OR conditions for contextual filters.",
+  "type": "drupal-module",
+  "license": "GPL-2.0+"
+}

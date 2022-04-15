@@ -8,6 +8,8 @@ libraries:
 base theme: umlib_base
 regions:
   header: 'Header'
+  banner: 'Banner'
   content: 'Content'
   sidebar_first: 'Sidebar first'
-  footer: 'Footer'
+  footer_first: 'Footer First'
+  footer_second: 'Footer Second'

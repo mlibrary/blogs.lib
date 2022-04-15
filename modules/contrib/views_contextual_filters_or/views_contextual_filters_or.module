@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * @file
+ * Primarily Drupal hooks to manipulate Views Contextual Filters OR.
+ *
+ * This is the main module file for Views Contextual Filters OR.
+ */
+
+/**
+ * Implements hook_config_schema_info_alter().
+ */
+function views_contextual_filters_or_config_schema_info_alter(&$definitions) {
+  $definitions['views.query.views_query']['mapping']['contextual_filters_or'] = [
+    'type' => 'boolean',
+    'label' => 'Contextual filters OR',
+  ];
+  if (\Drupal::moduleHandler()->moduleExists('search_api')) {
+    $definitions['views.query.search_api_query']['mapping']['contextual_filters_or'] = $definitions['views.query.views_query']['mapping']['contextual_filters_or'];
+  }
+}
