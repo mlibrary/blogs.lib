@@ -838,6 +838,11 @@ function core_field_views_data(FieldStorageConfigInterface $field_storage) {
         ],
       ];
     }
+
+    // Provide an argument plugin that has a meaningful titleQuery()
+    // implementation getting the entity label.
+    $data[$table_name][$field_name . '_target_id']['argument']['id'] = 'entity_target_id';
+    $data[$table_name][$field_name . '_target_id']['argument']['target_entity_type_id'] = $target_entity_type_id;
   }
 
   return $data;

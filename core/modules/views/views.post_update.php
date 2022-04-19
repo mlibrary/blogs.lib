@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Config\Entity\ConfigEntityUpdater;
+use Drupal\views\Views;
 use Drupal\views\ViewEntityInterface;
 use Drupal\views\ViewsConfigUpdater;
 
@@ -86,4 +87,34 @@ function views_post_update_sort_identifier(?array &$sandbox = NULL): void {
   \Drupal::classResolver(ConfigEntityUpdater::class)->update($sandbox, 'view', function (ViewEntityInterface $view) use ($view_config_updater): bool {
     return $view_config_updater->needsSortFieldIdentifierUpdate($view);
   });
+}
+
+/**
+ * Post update configured views for entity reference argument plugin IDs.
+ */
+function views_post_update_views_data_argument_plugin_id() {
+  $config_factory = \Drupal::configFactory();
+
+  // Loop through any view, on 'arguments', to update the plugin IDs.
+  foreach ($config_factory->listAll('views.view') as $config_name) {
+    $config = $config_factory->getEditable($config_name);
+    $save = FALSE;
+
+    foreach ($config->get('display') as $display_id => $display_config) {
+      foreach ((array) $config->get('display.' . $display_id . '.display_options.arguments') as $argument_id => $argument_config) {
+        // This update deals with the Entity reference field type.
+        $argument_table_data = Views::viewsData()->get($argument_config['table']);
+        $argument_definition = isset($argument_table_data[$argument_config['field']]['argument']) ? $argument_table_data[$argument_config['field']]['argument'] : NULL;
+        if (isset($argument_config['plugin_id']) && $argument_definition && $argument_config['plugin_id'] == 'numeric' && $argument_definition['id'] == 'entity_target_id') {
+          $config->set("display.$display_id.display_options.arguments.$argument_id.plugin_id", 'entity_target_id');
+          $config->set("display.$display_id.display_options.arguments.$argument_id.target_entity_type_id", $argument_definition['target_entity_type_id']);
+          $save = TRUE;
+        }
+      }
+    }
+
+    if ($save) {
+      $config->save();
+    }
+  }
 }

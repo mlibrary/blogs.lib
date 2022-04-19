@@ -111,6 +111,9 @@
           "ignore-duplicates": true
         },
         "patches": {
+          "drupal/core": {
+            "https://www.drupal.org/node/2640994": "https://www.drupal.org/files/issues/2022-02-11/drupal-2640994-122-9.3.patch"
+          },
           "drupal/openid_connect": {
             "https://www.drupal.org/node/3011413": "https://www.drupal.org/files/issues/2022-02-14/openid_connect-autologin-3011413-70.patch"
           },
