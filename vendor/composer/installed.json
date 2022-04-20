@@ -2415,62 +2415,18 @@
             "install-path": "../drupal/console-extend-plugin"
         },
         {
-            "name": "drupal/convert_bundles",
-            "version": "dev-1.x",
-            "version_normalized": "dev-1.x",
-            "source": {
-                "type": "git",
-                "url": "https://git.drupalcode.org/project/convert_bundles.git",
-                "reference": "7def3456aa0371c7ec36b52dcbc5cda784cf81a7"
-            },
-            "require": {
-                "drupal/core": "^8 || ^9"
-            },
-            "type": "drupal-module",
-            "extra": {
-                "branch-alias": {
-                    "dev-1.x": "1.x-dev"
-                },
-                "drupal": {
-                    "version": "8.x-1.0-alpha6+2-dev",
-                    "datestamp": "1621952077",
-                    "security-coverage": {
-                        "status": "not-covered",
-                        "message": "Project has not opted into security advisory coverage!"
-                    }
-                }
-            },
-            "installation-source": "source",
-            "notification-url": "https://packages.drupal.org/8/downloads",
-            "license": [
-                "GPL-2.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "el1_1el",
-                    "homepage": "https://www.drupal.org/user/1795292"
-                }
-            ],
-            "description": "Convert entity bundles from one value to another",
-            "homepage": "https://www.drupal.org/project/convert_bundles",
-            "support": {
-                "source": "https://git.drupalcode.org/project/convert_bundles"
-            },
-            "install-path": "../../modules/contrib/convert_bundles"
-        },
-        {
             "name": "drupal/core",
-            "version": "9.3.9",
-            "version_normalized": "9.3.9.0",
+            "version": "9.3.12",
+            "version_normalized": "9.3.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core.git",
-                "reference": "86b0c4496e20ae7f945e9a7f0404fafe191ab774"
+                "reference": "ed6af33093f66a9c5048d02f9f2c326ad0e7e90c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core/zipball/86b0c4496e20ae7f945e9a7f0404fafe191ab774",
-                "reference": "86b0c4496e20ae7f945e9a7f0404fafe191ab774",
+                "url": "https://api.github.com/repos/drupal/core/zipball/ed6af33093f66a9c5048d02f9f2c326ad0e7e90c",
+                "reference": "ed6af33093f66a9c5048d02f9f2c326ad0e7e90c",
                 "shasum": ""
             },
             "require": {
@@ -2637,7 +2593,7 @@
                 "drupal/workflows": "self.version",
                 "drupal/workspaces": "self.version"
             },
-            "time": "2022-03-21T21:21:58+00:00",
+            "time": "2022-04-20T14:25:27+00:00",
             "type": "drupal-core",
             "extra": {
                 "drupal-scaffold": {
@@ -2666,6 +2622,9 @@
                         "[web-root]/profiles/README.txt": "assets/scaffold/files/profiles.README.txt",
                         "[web-root]/themes/README.txt": "assets/scaffold/files/themes.README.txt"
                     }
+                },
+                "patches_applied": {
+                    "https://www.drupal.org/node/2640994": "https://www.drupal.org/files/issues/2022-02-11/drupal-2640994-122-9.3.patch"
                 }
             },
             "installation-source": "dist",
@@ -2714,7 +2673,7 @@
             ],
             "description": "Drupal is an open source content management platform powering millions of websites and applications.",
             "support": {
-                "source": "https://github.com/drupal/core/tree/9.3.9"
+                "source": "https://github.com/drupal/core/tree/9.3.12"
             },
             "install-path": "../../core"
         },
@@ -3827,6 +3786,55 @@
                 "source": "https://git.drupalcode.org/project/mailsystem"
             },
             "install-path": "../../modules/contrib/mailsystem"
+        },
+        {
+            "name": "drupal/migrate_file_to_media",
+            "version": "2.0.8",
+            "version_normalized": "2.0.8.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/migrate_file_to_media.git",
+                "reference": "2.0.8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/migrate_file_to_media-2.0.8.zip",
+                "reference": "2.0.8",
+                "shasum": "1b15baf6153222b2b727c7dcce17d2edd610e22e"
+            },
+            "require": {
+                "drupal/core": "^8 || ^9",
+                "drupal/migrate_plus": "*",
+                "drupal/migrate_tools": "*"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "2.0.8",
+                    "datestamp": "1647246828",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "installation-source": "dist",
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "ayalon",
+                    "homepage": "https://www.drupal.org/user/419226"
+                }
+            ],
+            "description": "Migrate file fields to media fields.",
+            "homepage": "https://www.drupal.org/project/migrate_file_to_media",
+            "support": {
+                "source": "https://git.drupalcode.org/project/migrate_file_to_media"
+            },
+            "install-path": "../../modules/contrib/migrate_file_to_media"
         },
         {
             "name": "drupal/migrate_plus",
@@ -5136,6 +5144,53 @@
                 "docs": "https://www.drupal.org/docs/8/modules/views-bulk-operations-vbo"
             },
             "install-path": "../../modules/contrib/views_bulk_operations"
+        },
+        {
+            "name": "drupal/views_contextual_filters_or",
+            "version": "1.3.0",
+            "version_normalized": "1.3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/views_contextual_filters_or.git",
+                "reference": "8.x-1.3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/views_contextual_filters_or-8.x-1.3.zip",
+                "reference": "8.x-1.3",
+                "shasum": "92369481206bc4db23dcf3ca17b4bc1cc3f3f1f3"
+            },
+            "require": {
+                "drupal/core": "^8 || ^9"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "8.x-1.3",
+                    "datestamp": "1640344336",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "installation-source": "dist",
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0+"
+            ],
+            "authors": [
+                {
+                    "name": "m.lebedev",
+                    "homepage": "https://www.drupal.org/user/2566550"
+                }
+            ],
+            "description": "Modify views query to support OR conditions for contextual filters.",
+            "homepage": "https://www.drupal.org/project/views_contextual_filters_or",
+            "support": {
+                "source": "https://git.drupalcode.org/project/views_contextual_filters_or"
+            },
+            "install-path": "../../modules/contrib/views_contextual_filters_or"
         },
         {
             "name": "drupal/views_field_view",

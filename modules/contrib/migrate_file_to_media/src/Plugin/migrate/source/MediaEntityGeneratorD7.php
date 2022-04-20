@@ -129,6 +129,8 @@ class MediaEntityGeneratorD7 extends Node implements ContainerFactoryPluginInter
       'file_name' => $this->t('The file name.'),
       'file_alt' => $this->t('The file arl.'),
       'file_title' => $this->t('The file title.'),
+      'file_mime' => $this->t('The file mime type'),
+      'file_type' => $this->t('The file type'),
     ];
   }
 
@@ -188,7 +190,7 @@ class MediaEntityGeneratorD7 extends Node implements ContainerFactoryPluginInter
     $this->handleTranslations($query);
 
     if (isset($this->configuration['bundle'])) {
-      $query->condition('n.type', $this->configuration['bundle']);
+      $query->condition('n.type', $this->configuration['bundle'], is_array($this->configuration['bundle']) ? 'IN' : '=');
     }
 
     return $query;
@@ -220,15 +222,22 @@ class MediaEntityGeneratorD7 extends Node implements ContainerFactoryPluginInter
 
         foreach ($field_value as $reference) {
 
-          // Support remote file urls.
-          $file_url = $all_files[$reference['fid']]['uri'];
-          if (!empty($this->configuration['d7_file_url'])) {
-            $file_url = str_replace('public://', '', $file_url);
-            $file_path = UrlHelper::encodePath($file_url);
-            $file_url = $this->configuration['d7_file_url'] . $file_path;
-          }
-
           if (!empty($all_files[$reference['fid']]['uri'])) {
+
+            // Support remote file urls.
+            $file_url = $all_files[$reference['fid']]['uri'];
+            if (!empty($this->configuration['d7_file_url'])) {
+              $file_url = str_replace('public://', '', $file_url);
+              $file_path = UrlHelper::encodePath($file_url);
+              $file_url = $this->configuration['d7_file_url'] . $file_path;
+            }
+
+            // Make sure the file name is correct based on the file url.
+            $file_name = $all_files[$reference['fid']]['filename'];
+            $file_url_pieces = explode('/', $file_url);
+            if ($file_name !== end($file_url_pieces)) {
+              $file_name = end($file_url_pieces);
+            }
 
             $files_found[] = [
               'nid' => $entity['nid'],
@@ -239,8 +248,10 @@ class MediaEntityGeneratorD7 extends Node implements ContainerFactoryPluginInter
               'description' => isset($reference['description']) ? $reference['description'] : NULL,
               'langcode' => $this->configuration['langcode'],
               'entity' => $entity,
-              'file_name' => $all_files[$reference['fid']]['filename'],
+              'file_name' => $file_name,
               'file_path' => $file_url,
+              'file_mime' => $all_files[$reference['fid']]['filemime'],
+              'file_type' => $all_files[$reference['fid']]['type'],
             ];
           }
         }

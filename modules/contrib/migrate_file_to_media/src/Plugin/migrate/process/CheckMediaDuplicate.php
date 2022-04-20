@@ -4,6 +4,7 @@ namespace Drupal\migrate_file_to_media\Plugin\migrate\process;
 
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\MigrateSkipRowException;
+use Drupal\migrate\MigrateSkipProcessException;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
 
@@ -26,7 +27,12 @@ class CheckMediaDuplicate extends ProcessPluginBase {
       $query->isNotNull('media_id');
       $result = $query->execute()->fetchObject();
       if (!empty($result->fid)) {
-        throw new MigrateSkipRowException();
+        if (isset($this->configuration['skip_method']) && $this->configuration['skip_method'] == 'process') {
+          throw new MigrateSkipProcessException();
+        }
+        else {
+          throw new MigrateSkipRowException();
+        }
       }
     }
 

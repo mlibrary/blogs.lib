@@ -13,6 +13,8 @@ source:
     d7_file_url: 'http://<d7-domain.tld>/sites/default/files/'
     field_names:
         - field_image
+    # Using default language code unless other specified.
+    langcode: 'und'
 
 destination:
     plugin: entity:media

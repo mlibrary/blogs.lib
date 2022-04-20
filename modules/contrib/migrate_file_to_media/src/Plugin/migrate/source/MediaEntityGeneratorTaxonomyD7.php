@@ -2,11 +2,8 @@
 
 namespace Drupal\migrate_file_to_media\Plugin\migrate\source;
 
-use Drupal\Core\Database\Connection;
-use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\migrate\Plugin\MigrationInterface;
@@ -29,35 +26,13 @@ class MediaEntityGeneratorTaxonomyD7 extends Term implements ContainerFactoryPlu
   protected $sourceFields = [];
 
   /**
-   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
-   */
-  private $entityFieldManager;
-
-  /**
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  private $entityTypeManager;
-
-  /**
-   * @var \Drupal\Core\Database\Connection
-   */
-  private $connection;
-
-  /**
-   * @var \Drupal\Core\Entity\Query\QueryFactory
-   */
-  private $entityQuery;
-
-  /**
    * MediaEntityGenerator constructor.
    *
    * @param array $configuration
    * @param $plugin_id
    * @param $plugin_definition
    * @param \Drupal\migrate\Plugin\MigrationInterface $migration
-   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   * @param \Drupal\Core\Database\Connection $connection
    *
    * @throws \Drupal\migrate\MigrateException
    */
@@ -66,17 +41,10 @@ class MediaEntityGeneratorTaxonomyD7 extends Term implements ContainerFactoryPlu
     $plugin_id,
     $plugin_definition,
     MigrationInterface $migration,
-    EntityFieldManagerInterface $entity_field_manager,
     EntityTypeManagerInterface $entity_type_manager,
-    Connection $connection,
-    StateInterface $state,
-    EntityManagerInterface $entity_manager,
-    ModuleHandlerInterface $module_handler
+    StateInterface $state
   ) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $migration, $state, $entity_manager, $module_handler);
-    $this->entityFieldManager = $entity_field_manager;
-    $this->entityTypeManager = $entity_type_manager;
-    $this->connection = $connection;
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $migration, $state, $entity_type_manager);
 
     // Do not Join tables.
     $this->configuration['ignore_map'] = TRUE;
@@ -102,13 +70,8 @@ class MediaEntityGeneratorTaxonomyD7 extends Term implements ContainerFactoryPlu
       $plugin_id,
       $plugin_definition,
       $migration,
-      $container->get('entity_field.manager'),
       $container->get('entity_type.manager'),
-      $container->get('database'),
-      $container->get('entity_type.manager'),
-      $container->get('state'),
-      $container->get('entity.manager'),
-      $container->get('module_handler')
+      $container->get('state')
     );
   }
 
@@ -175,6 +138,8 @@ class MediaEntityGeneratorTaxonomyD7 extends Term implements ContainerFactoryPlu
               'entity' => $entity,
               'file_name' => $all_files[$reference['fid']]['filename'],
               'file_path' => $file_url,
+              'file_mime' => $all_files[$reference['fid']]['filemime'],
+              'file_type' => $all_files[$reference['fid']]['type'],
             ];
           }
         }

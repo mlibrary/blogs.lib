@@ -4,10 +4,13 @@ namespace Drupal\migrate_file_to_media\Plugin\migrate\process;
 
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\MigrateSkipRowException;
+use Drupal\migrate\MigrateSkipProcessException;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
 
 /**
+ * Available configuration keys
+ * - migration: A single migration ID, or an array of migration IDs.
  *
  * @MigrateProcessPlugin(
  *   id = "check_duplicate"
@@ -30,7 +33,12 @@ class CheckDuplicate extends ProcessPluginBase {
         return $result->fid;
       }
     }
-    throw new MigrateSkipRowException();
+    if (isset($this->configuration['skip_method']) && $this->configuration['skip_method'] == 'process') {
+      throw new MigrateSkipProcessException();
+    }
+    else {
+      throw new MigrateSkipRowException();
+    }
   }
 
 }

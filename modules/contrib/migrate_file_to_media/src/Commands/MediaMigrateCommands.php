@@ -232,8 +232,9 @@ class MediaMigrateCommands extends DrushCommands {
    * @param $migration_name
    *
    * @option check-existing-media Check for existing media
+   * @option d7-mode TRUE if the source database is a Drupal 7
    */
-  public function duplicateImageDetection($migration_name, $options = ['check-existing-media' => FALSE]) {
+  public function duplicateImageDetection($migration_name, $options = ['check-existing-media' => FALSE, 'd7-mode' => FALSE]) {
 
     $manager = $this->migrationPluginManager;
     $plugins = $manager->createInstances([]);
@@ -300,11 +301,17 @@ class MediaMigrateCommands extends DrushCommands {
 
           $duplicate_fid = $file->id();
           if ($result) {
-            $existing_file = File::load($result->fid);
-            if (!empty($existing_file)) {
-              $duplicate_fid = $existing_file->id();
+            if (!$options['d7-mode']) {
+              $existing_file = File::load($result->fid);
+              $existing_file_id = $existing_file ? $existing_file->id() : FALSE;
+            }
+            else {
+              $existing_file_id = $result->fid;
+            }
+            if ($existing_file_id) {
+              $duplicate_fid = $existing_file_id;
               $this->output()
-                ->writeln("Duplicate found for file {$existing_file->id()}");
+                ->writeln("Duplicate found for file {$existing_file_id}");
             }
           }
 

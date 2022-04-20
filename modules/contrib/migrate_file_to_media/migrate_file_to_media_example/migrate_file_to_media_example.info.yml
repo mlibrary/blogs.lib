@@ -12,7 +12,7 @@ config_devel:
   - migrate_plus.migration.migrate_file_to_media_example_article_images_step1_de
   - migrate_plus.migration.migrate_file_to_media_example_article_images_step2
 
-# Information added by Drupal.org packaging script on 2021-03-09
-version: '2.0.7'
+# Information added by Drupal.org packaging script on 2022-03-14
+version: '2.0.8'
 project: 'migrate_file_to_media'
-datestamp: 1615320880
+datestamp: 1647246830

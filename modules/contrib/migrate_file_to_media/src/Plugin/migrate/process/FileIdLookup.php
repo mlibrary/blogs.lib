@@ -4,6 +4,7 @@ namespace Drupal\migrate_file_to_media\Plugin\migrate\process;
 
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\MigrateSkipRowException;
+use Drupal\migrate\MigrateSkipProcessException;
 use Drupal\migrate\Plugin\migrate\process\MigrationLookup;
 use Drupal\migrate\Row;
 
@@ -19,8 +20,17 @@ class FileIdLookup extends MigrationLookup {
    * {@inheritdoc}
    */
   public function transform($value, MigrateExecutableInterface $migrate_executable, Row $row, $destination_property) {
-    if ($value['target_id'] || $value['fid']) {
-      $fid = !empty($value['target_id']) ? $value['target_id'] : $value['fid'];
+    $fid = null;
+    if (!empty($value)) {
+      if (is_array($value)) {
+        $fid = !empty($value['target_id']) ? $value['target_id'] : $value['fid'];
+      }
+      else {
+        $fid = $value;
+      }
+    }
+
+    if ($fid) {
       $query = \Drupal::database()->select('migrate_file_to_media_mapping', 'map');
       $query->fields('map');
       $query->condition('fid', $fid, '=');
@@ -35,7 +45,13 @@ class FileIdLookup extends MigrationLookup {
         return parent::transform($result->target_fid, $migrate_executable, $row, $destination_property);
       }
     }
-    throw new MigrateSkipRowException();
+
+    if (isset($this->configuration['skip_method']) && $this->configuration['skip_method'] == 'process') {
+      throw new MigrateSkipProcessException();
+    }
+    else {
+      throw new MigrateSkipRowException();
+    }
   }
 
 }
