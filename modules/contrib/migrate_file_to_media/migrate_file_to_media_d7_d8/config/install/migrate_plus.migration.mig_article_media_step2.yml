@@ -1,0 +1,28 @@
+# This migration links the newly created media entities with entity reference field on the target bundle.
+
+id: mig_article_media_step2
+label: Article Media Mapping
+
+source:
+    key: migration_source_db
+
+    plugin: d7_node
+    node_type: article
+
+destination:
+    plugin: entity:node
+
+process:
+    nid: nid
+    changed: changed
+
+    field_media:
+        plugin: file_id_lookup
+        source: field_image
+        migration: mig_article_media_step1
+        no_stub: true
+
+migration_dependencies:
+    optional:
+        - mig_article_node
+        - mig_article_media_step1

@@ -1,0 +1,176 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the migrate_to_media module.
+ */
+
+use Drupal\Core\Database\Database;
+
+/**
+ * Implements hook_install().
+ */
+function migrate_to_media_install() {
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function migrate_to_media_uninstall() {
+}
+
+/**
+ * Add new media_id field to migrate_file_to_media_mapping table.
+ */
+function migrate_file_to_media_update_8001() {
+
+  $field = [
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'default' => NULL,
+    'description' => 'Existing media id.',
+  ];
+  $schema = Database::getConnection()->schema();
+  $schema->addField('migrate_file_to_media_mapping', 'media_id', $field);
+}
+
+/**
+ * Add new mapping table migrate_file_to_media_mapping_media.
+ */
+function migrate_file_to_media_update_8002() {
+  $tables = migrate_file_to_media_schema();
+  $schema = Database::getConnection()->schema();
+  $schema->createTable('migrate_file_to_media_mapping_media', $tables['migrate_file_to_media_mapping_media']);
+}
+
+/**
+ * Add new migration_id field to migrate_file_to_media_mapping table.
+ */
+function migrate_file_to_media_update_8003() {
+
+  $field = [
+    'type' => 'varchar_ascii',
+    'length' => 255,
+    'not null' => TRUE,
+    'default' => '',
+    'description' => 'Migration ID.',
+  ];
+  $schema = Database::getConnection()->schema();
+  $schema->addField('migrate_file_to_media_mapping', 'migration_id', $field);
+}
+
+/**
+ * Implements hook_schema().
+ */
+function migrate_file_to_media_schema() {
+  $schema['migrate_file_to_media_mapping'] = [
+    'description' => 'Mapping of files.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique record ID.',
+      ],
+      'migration_id' => [
+        'type' => 'varchar_ascii',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Migration ID.',
+      ],
+      'type' => [
+        'type' => 'varchar_ascii',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Type of the record.',
+      ],
+      'fid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => NULL,
+        'description' => 'The unique file id of the file',
+      ],
+      'target_fid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => NULL,
+        'description' => 'The file id of the same file binarywise.',
+      ],
+      'media_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => NULL,
+        'description' => 'Existing media id.',
+      ],
+      'binary_hash' => [
+        'type' => 'varchar_ascii',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Type of the record.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'type' => ['type'],
+      'migration_id' => ['migration_id'],
+      'fid' => ['fid'],
+      'target_fid' => ['target_fid'],
+      'binary_hash' => ['binary_hash'],
+    ],
+  ];
+
+  $schema['migrate_file_to_media_mapping_media'] = [
+    'description' => 'Mapping of media entities.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique record ID.',
+      ],
+      'media_bundle' => [
+        'type' => 'varchar_ascii',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Type of the media bundle.',
+      ],
+      'fid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => NULL,
+        'description' => 'The unique file id of the file',
+      ],
+      'entity_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => NULL,
+        'description' => 'The media entity id',
+      ],
+      'target_entity_id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'default' => NULL,
+        'description' => 'The duplicate media entity.',
+      ],
+      'binary_hash' => [
+        'type' => 'varchar_ascii',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Type of the record.',
+      ],
+    ],
+    'primary key' => ['id'],
+    'indexes' => [
+      'media_bundle' => ['media_bundle'],
+      'fid' => ['fid'],
+      'entity_id' => ['entity_id'],
+      'target_entity_id' => ['target_entity_id'],
+      'binary_hash' => ['binary_hash'],
+    ],
+  ];
+
+  return $schema;
+}

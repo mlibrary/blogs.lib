@@ -1,0 +1,43 @@
+# This migration links the newly created media entities with entity reference field on the target bundle.
+
+id: {{ plugin_id }}_step2
+label: {{ plugin_label }} Mapping
+migration_group: {{ migration_group }}
+source:
+  plugin: content_entity:{{ entity_type }}
+  bundle: {{ source_bundle }}
+  include_translations: {{ has_translation ? 'true' : 'false' }}
+
+destination:
+  plugin: entity:{{ entity_type }}
+{% if has_translation %}  translations: true{% endif %}
+
+process:
+  {{ id_key }}: {{ id_key }}
+
+  type:
+    plugin: default_value
+    default_value: {{ source_bundle }}
+    
+{% for field_name in source_field_name %}
+  {{ field_name }}_media:
+    plugin: file_id_lookup
+    source: {{ field_name }}
+    migration: {{ plugin_id }}_step1
+    no_stub: true
+{% endfor %}
+
+{% if has_translation %}
+  langcode: langcode
+{% endif %}
+
+migration_dependencies:
+  optional:
+  - {{ plugin_id }}_step1
+
+dependencies:
+  module:
+    - {{ machine_name }}
+  enforced:
+    module:
+      - {{ machine_name }}

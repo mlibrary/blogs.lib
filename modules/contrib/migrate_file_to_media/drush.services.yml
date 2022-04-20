@@ -1,0 +1,12 @@
+services:
+  migrate_file_to_media.commands:
+    class: \Drupal\migrate_file_to_media\Commands\MediaMigrateCommands
+    arguments: ['@entity_field.manager', '@entity_type.manager', '@database', '@plugin.manager.migration','@stream_wrapper_manager', '@file_system']
+    tags:
+    - { name: drush.command }
+
+  migrate_file_to_media.media_migration_generator:
+    class: Drupal\migrate_file_to_media\Generators\MediaMigrateGenerator
+    arguments: ['@entity_type.manager']
+    tags:
+    - { name: drush.generator }

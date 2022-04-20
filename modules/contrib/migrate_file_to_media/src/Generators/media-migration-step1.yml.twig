@@ -1,0 +1,76 @@
+# File to Media Migration configuration for {{ plugin_label }} migration
+
+id: {{ plugin_id }}_step1{% if translation_language %}_{{ lang_code }}{% endif %}
+
+label: {{ plugin_label }} Media
+migration_group: {{ migration_group }}
+source:
+  plugin: media_entity_generator
+  entity_type: {{ entity_type }}
+  bundle: {{ source_bundle }}
+  langcode: {{ lang_code }}
+  field_names:
+{% for field_name in source_field_name %}
+    - {{ field_name }}
+{% endfor %}
+
+destination:
+  plugin: entity:media
+  {% if translation_language %}  translations: true{% endif %}
+
+process:
+  bundle:
+    plugin: default_value
+    default_value: {{ target_bundle }}
+
+  # Using the alt tag if available, else the file name.
+  name:
+    plugin: media_name
+    source: file_name
+
+{% if translation_language is null %}
+  # This process plugin will skip the whole row if a existing media is found.
+  existing_media_file:
+    plugin: check_media_duplicate
+    source: target_id
+
+  # This process plugin will skip the whole row if a duplicate image is found.
+  unique_file_id:
+    plugin: check_duplicate
+    source: target_id
+{% endif %}
+
+{% if translation_language %}
+  mid:
+    plugin: migration_lookup
+    migration: {{ plugin_id }}_step1
+    source: target_id
+    no_stub: true
+
+{% endif %}
+
+  # Map the field {{ target_bundle }}
+  {{ target_field }}/target_id: target_id
+{% if target_bundle == 'image' %}
+  {{ target_field }}/alt: alt
+  {{ target_field }}/title: title
+{% elseif target_bundle == 'file' %}
+  {{ target_field }}/display: display
+  {{ target_field }}/description: description
+{% endif %}
+
+  langcode: langcode
+  uid: uid
+
+{% if translation_language %}
+  content_translation_source:
+    plugin: default_value
+    default_value: {{ source_lang_code }}
+{% endif %}
+
+dependencies:
+  module:
+    - {{ machine_name }}
+  enforced:
+    module:
+      - {{ machine_name }}

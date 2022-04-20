@@ -1,0 +1,40 @@
+# Migration for article nodes
+
+id: mig_article_node
+label: Article Node
+description: Config for mig article node migration
+deriver: Drupal\node\Plugin\migrate\D7NodeDeriver
+
+source:
+    key: migration_source_db
+
+    plugin: d7_node
+    node_type: article
+
+destination:
+    plugin: entity:node
+
+process:
+    nid: nid
+    type: type
+    title: title
+    uid:
+        plugin: default_value
+        default_value: 1
+
+    status: status
+    created: created
+    changed: changed
+    comment: comment
+    promote: promote
+    sticky: sticky
+
+    body:
+        plugin: sub_process
+        source: body
+        process:
+            value: value
+            summary: summary
+            format:
+                plugin: default_value
+                default_value: full_html

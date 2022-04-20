@@ -1,0 +1,50 @@
+# File to Media Migration configuration for Article Images migration
+
+id: migrate_file_to_media_example_article_images_step1_de
+label: Article Images Media
+migration_group: media
+source:
+  plugin: media_entity_generator
+  entity_type: node
+  bundle: article
+  langcode: de
+  field_names:
+    - field_image
+    - field_image2
+
+destination:
+  plugin: entity:media
+  translations: true
+process:
+  bundle:
+    plugin: default_value
+    default_value: image
+
+  mid:
+    plugin: migration_lookup
+    migration: migrate_file_to_media_example_article_images_step1
+    source: target_id
+    no_stub: true
+
+  
+  # Using the alt tag if available, else the file name.
+  name:
+    plugin: media_name
+    source: file_name
+  
+  # This process plugin will skip the whole row if a existing media is found.
+  existing_media_file:
+    plugin: check_media_duplicate
+    source: target_id
+
+  # This process plugin will skip the whole row if a duplicate image is found.
+  unique_file_id:
+    plugin: check_duplicate
+    source: target_id
+
+  # Map the field image
+  field_media_image/target_id: target_id
+  field_media_image/alt: alt
+  field_media_image/title: title
+
+  langcode: langcode
