@@ -135,7 +135,11 @@ function template_preprocess_image_caption_formatter(&$variables) {
   // Set the caption value.
   $values = $variables['item']->getValue();
   if (!empty($values['caption'])) {
-    $variables['caption'] = $values['caption'];
+    $variables['caption'] = [
+      '#type' => 'processed_text',
+      '#text' => $values['caption'],
+      '#format' => $values['caption_format'],
+    ];
   }
 }
 

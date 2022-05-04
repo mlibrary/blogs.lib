@@ -312,7 +312,7 @@ function reroute_email_check_email_by_permission(string $email): bool {
   /** @var \Drupal\user\UserInterface $account */
   $account = reset($users);
 
-  $roles = \Drupal::config('reroute_email.settings')->get(REROUTE_EMAIL_ROLES);
+  $roles = (array) \Drupal::config('reroute_email.settings')->get(REROUTE_EMAIL_ROLES);
   foreach ($roles as $role) {
     if ($account->hasRole($role)) {
       return TRUE;

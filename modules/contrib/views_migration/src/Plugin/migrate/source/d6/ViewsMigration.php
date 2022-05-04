@@ -478,9 +478,55 @@ class ViewsMigration extends SqlBase {
         ];
       }
     }
+    if (isset($display_options['menu'])) {
+      $menu_name_map = [
+        'main-menu' => 'main',
+        'management' => 'admin',
+        'navigation' => 'tools',
+        'user-menu' => 'account',
+      ];
+      if (isset($menu_name_map[$display_options['menu']['name']])) {
+        $display_options['menu']['name'] = $menu_name_map[$display_options['menu']['name']];
+      }
+      $display_options['menu']['menu_name'] = $display_options['menu']['name'];
+    }
     if (isset($display_options['row_plugin'])) {
+      $row_plugin_map = [
+        'node' => 'entity:node',
+        'users' => 'entity:user',
+        'taxonomy_term' => 'entity:taxonomy_term',
+        'file_managed' => 'entity:file',
+      ];
+      if ($row_plugin_map[$display_options['row_plugin']]) {
+        $display_options['row_plugin'] = $row_plugin_map[$display_options['row_plugin']];
+      }
+      $display_options['row']['type'] = $display_options['row_plugin'];
       if (!in_array($display_options['row_plugin'], $this->pluginList['row'])) {
-        $display_options['row_plugin'] = 'fields';
+        switch ($display_options['row_plugin']) {
+          case 'node_rss':
+            $rowOptions = $display_options['row_options'];
+            $display_options['row'] = [
+              'type' => $display_options['row_plugin'],
+              'options' => [
+                'relationship' => $rowOptions['relationship'],
+                'view_mode' => $rowOptions['item_length'],
+              ],
+            ];
+            unset($display_options['row_plugin']);
+            unset($display_options['row_options']);
+            break;
+
+          default:
+            $display_options['row_plugin'] = 'fields';
+            break;
+        }
+      }
+      if (isset($display_options['row_options'])) {
+        $rowOptions = $display_options['row_options'];
+        $display_options['row']['options'] = [
+          'relationship' => $rowOptions['relationship'],
+          'view_mode' => $rowOptions['item_length'],
+        ];
       }
     }
     if (isset($display_options['style_plugin'])) {
@@ -642,6 +688,19 @@ class ViewsMigration extends SqlBase {
       elseif (isset($data['alter']['text'])) {
         $data['alter']['text'] = str_replace("[", "{{", $data['alter']['text']);
         $fields[$key]['alter']['text'] = str_replace("]", "}}", $data['alter']['text']);
+      }
+      if (($data['field'] == 'area' && isset($data['content']) && ($option == 'header'|| $option == 'footer'))) {
+        $content_value = str_replace("[", " {{", $data['content']);
+        $content_value = str_replace("]", " }}", $content_value);
+        $content_format = 'basic_html';
+        $fields[$key]['content'] = [
+          'value' => $content_value,
+          'format' => $content_format,
+        ];
+      }
+      if (($data['field'] == 'view' && isset($data['view_to_insert']) && ($option == 'header'|| $option == 'footer'))) {
+        $fields[$key]['plugin_id'] = 'migration_view';
+        $fields[$key]['field'] = 'migration_view';
       }
       if (isset($data['table'])) {
         if (isset($tableMap[$data['table']])) {

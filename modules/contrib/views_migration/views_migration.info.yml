@@ -7,7 +7,8 @@ dependencies:
   - drupal:views
   - drupal:migrate
   - drupal:migrate_drupal
-# Information added by Drupal.org packaging script on 2021-10-31
-version: '1.1.7'
+
+# Information added by Drupal.org packaging script on 2022-03-20
+version: '1.1.8'
 project: 'views_migration'
-datestamp: 1635699154
+datestamp: 1647798887

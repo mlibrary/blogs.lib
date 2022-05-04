@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitc9962eb9856ad5f92dd092d71eede9b9
+class ComposerStaticInit68e209e9f62f30c9c8386fa8ffce0d8f
 {
     public static $files = array (
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
@@ -20,7 +20,6 @@ class ComposerStaticInitc9962eb9856ad5f92dd092d71eede9b9
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
-        '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
         '07d7f1a47144818725fd8d91a907ac57' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/create_uploaded_file.php',
         'da94ac5d3ca7d2dbab84ce561ce72bfd' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/marshal_headers_from_sapi.php',
         '3d97c8dcdfba8cb85d3b34f116bb248b' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/marshal_method_from_sapi.php',
@@ -40,6 +39,7 @@ class ComposerStaticInitc9962eb9856ad5f92dd092d71eede9b9
         'def43f6c87e4f8dfd0c9e1b1bab14fe8' => __DIR__ . '/..' . '/symfony/polyfill-iconv/bootstrap.php',
         '2f69d3914119f042cca9e44442d5ce95' => __DIR__ . '/../..' . '/core/includes/bootstrap.inc',
         '6db5533840cb1ae1bc049452845aa88e' => __DIR__ . '/../..' . '/core/includes/guzzle_php81_shim.php',
+        '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
         '801c31d8ed748cfa537fa45402288c95' => __DIR__ . '/..' . '/psy/psysh/src/functions.php',
         '952683d815ff0a7bf322b93c0be7e4e4' => __DIR__ . '/..' . '/chi-teck/drupal-code-generator/src/bootstrap.php',
         '9e4824c5afbdc1482b6025ce3d4dfde8' => __DIR__ . '/..' . '/league/csv/src/functions_include.php',
@@ -155,7 +155,6 @@ class ComposerStaticInitc9962eb9856ad5f92dd092d71eede9b9
             'Drupal\\Console\\Core\\' => 20,
             'Drupal\\Console\\Composer\\Plugin\\' => 31,
             'Drupal\\Console\\' => 15,
-            'Drupal\\Composer\\Plugin\\Scaffold\\' => 32,
             'Drupal\\Component\\' => 17,
             'DrupalCodeGenerator\\' => 20,
             'Doctrine\\Common\\Lexer\\' => 22,
@@ -477,10 +476,6 @@ class ComposerStaticInitc9962eb9856ad5f92dd092d71eede9b9
         array (
             0 => __DIR__ . '/..' . '/drupal/console/src',
         ),
-        'Drupal\\Composer\\Plugin\\Scaffold\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/drupal/core-composer-scaffold',
-        ),
         'Drupal\\Component\\' => 
         array (
             0 => __DIR__ . '/../..' . '/core/lib/Drupal/Component',
@@ -648,11 +643,11 @@ class ComposerStaticInitc9962eb9856ad5f92dd092d71eede9b9
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitc9962eb9856ad5f92dd092d71eede9b9::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitc9962eb9856ad5f92dd092d71eede9b9::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitc9962eb9856ad5f92dd092d71eede9b9::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInitc9962eb9856ad5f92dd092d71eede9b9::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInitc9962eb9856ad5f92dd092d71eede9b9::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit68e209e9f62f30c9c8386fa8ffce0d8f::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit68e209e9f62f30c9c8386fa8ffce0d8f::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit68e209e9f62f30c9c8386fa8ffce0d8f::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit68e209e9f62f30c9c8386fa8ffce0d8f::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit68e209e9f62f30c9c8386fa8ffce0d8f::$classMap;
 
         }, null, ClassLoader::class);
     }

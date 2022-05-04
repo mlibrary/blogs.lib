@@ -126,12 +126,11 @@ class GroupRevisionCheck implements AccessInterface {
     // revisions. The latter is checked because if it was set, we might allow
     // access so the revisions tab shows up.
     $group_type = $group->getGroupType();
-if (!empty($group_type)) {
     if ($operation === 'view' && $group->isDefaultRevision() && $this->countDefaultLanguageRevisions($group) === 1 && !$group_type->shouldCreateNewRevision()) {
       $this->accessCache[$cid] = AccessResult::forbidden()->addCacheableDependency($group_type)->addCacheableDependency($group);
       return $this->accessCache[$cid];
     }
-}
+
     // Perform basic permission checks first and return no-access results.
     $this->accessCache[$cid] = GroupAccessResult::allowedIfHasGroupPermission($group, $account, $map[$operation]);
     if (!$this->accessCache[$cid]->isAllowed()) {

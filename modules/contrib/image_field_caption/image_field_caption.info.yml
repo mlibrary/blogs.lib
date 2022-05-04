@@ -8,7 +8,7 @@ dependencies:
 type: module
 core_version_requirement: ^8 || ^9
 
-# Information added by Drupal.org packaging script on 2020-10-09
-version: '8.x-1.1'
+# Information added by Drupal.org packaging script on 2022-05-03
+version: '8.x-1.2'
 project: 'image_field_caption'
-datestamp: 1602264819
+datestamp: 1651596325

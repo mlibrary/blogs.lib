@@ -105,7 +105,27 @@ function reroute_email_update_8201() {
   // Update the list of allowed email addresses.
   $addresses = $config->get($old[REROUTE_EMAIL_ALLOWLIST]);
   $config->set(REROUTE_EMAIL_ALLOWLIST, $addresses);
-  $config->clear($old[REROUTE_EMAIL_ENABLE]);
+  $config->save();
+
+  // Return a message to the user.
+  return t('Reroute email module updates completed successfully. Please visit configuration page to check.');
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Remove outdated "whitelist" config property.
+ *
+ * @see https://www.drupal.org/project/reroute_email/issues/3256244
+ */
+function reroute_email_update_8202() {
+  // Check to see if the property still exists.
+  $config = \Drupal::configFactory()->getEditable('reroute_email.settings');
+  if (NULL === $config->get('whitelist')) {
+    return t('The outdated property "whitelist" has already been removed. This update is to be skipped.');
+  }
+  // Remove the property.
+  $config->clear('whitelist');
   $config->save();
 
   // Return a message to the user.

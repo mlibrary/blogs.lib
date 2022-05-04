@@ -127,10 +127,7 @@ class GroupListBuilder extends EntityListBuilder {
     // EntityListBuilder sets the table rows using the #rows property, so we
     // need to add the render array using the 'data' key.
     $row['name']['data'] = $entity->toLink()->toRenderable();
-//\Drupal::logger('lti_tool_provider')->notice('<pre><code>' . print_r($row['name']['data'], TRUE) . '</code></pre>' );
-if (!empty($entity->getGroupType())) {
     $row['type'] = $entity->getGroupType()->label();
-}
     $row['status'] = $entity->isPublished() ? $this->t('Published') : $this->t('Unpublished');
     $row['uid'] = $entity->getOwner()->label();
     return $row + parent::buildRow($entity);
@@ -179,7 +176,7 @@ if (!empty($entity->getGroupType())) {
         ];
       }
     }
-if (!empty($entity->getGroupType())) {
+
     if ($entity->getGroupType()->shouldCreateNewRevision() && $entity->hasPermission('view group revisions', $this->currentUser)) {
       $operations['revisions'] = [
         'title' => $this->t('Revisions'),
@@ -187,7 +184,7 @@ if (!empty($entity->getGroupType())) {
         'url' => $entity->toUrl('version-history'),
       ];
     }
-}
+
     // Add the current path or destination as a redirect to the operation links.
     $destination = $this->redirectDestination->getAsArray();
     foreach ($operations as $key => $operation) {

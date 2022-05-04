@@ -367,13 +367,10 @@ class Group extends EditorialContentEntityBase implements GroupInterface {
     //   groups should not get this functionality because it may create
     //   incomplete group memberships.
     $group_type = $this->getGroupType();
-if (!empty($group_type)) {
-//\Drupal::logger('lti_tool_provider')->notice('<pre><code>' . print_r($this, TRUE) . '</code></pre>' );
     if ($update === FALSE && $group_type->creatorGetsMembership()) {
       $values = ['group_roles' => $group_type->getCreatorRoleIds()];
       $this->addMember($this->getOwner(), $values);
     }
-}
   }
 
   /**

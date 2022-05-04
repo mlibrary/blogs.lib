@@ -1,0 +1,5 @@
+services:
+  views_migration.plugin_event_subscriber:
+    class: Drupal\views_migration\Plugin\PluginEventSubscriber
+    tags:
+      - { name: event_subscriber }

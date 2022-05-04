@@ -159,7 +159,7 @@ class SettingsForm extends ConfigFormBase implements TrustedCallbackInterface {
       '#title' => $this->t('Skip email rerouting for roles:'),
       '#description' => $this->t("Emails that belong to users with selected roles won't be rerouted."),
       '#options' => $roles,
-      '#default_value' => $this->rerouteConfig->get(REROUTE_EMAIL_ROLES),
+      '#default_value' => (array) $this->rerouteConfig->get(REROUTE_EMAIL_ROLES),
     ];
 
     $form[REROUTE_EMAIL_DESCRIPTION] = [
