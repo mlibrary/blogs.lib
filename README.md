@@ -78,7 +78,7 @@ git pull
 sudo docker run --rm -it -v $(pwd)/.aws:/root/.aws -v $(pwd):/aws amazon/aws-cli s3 cp s3://blogs-lib-umich-edu/ ./ --recursive
 ```
 
-3.  **Set up refreshed files.**
+3.  **Set up refreshed files. (NOTE: you may want to mv sites/default/files sites/default/files- or rm -r sites/default/files)**
 
 ```sh
 tar -zxvf files.tar.gz -C sites/default && sudo chown -R www-data sites/default/files
@@ -86,13 +86,13 @@ tar -zxvf files.tar.gz -C sites/default && sudo chown -R www-data sites/default/
 
 4.  **Rebuild docker with latest stuff.**
 
-Remove all associated volumes, images and containers. Download the latest.
+Remove all associated volumes, images and containers. Download the latest. Note that you may have names other than blogslib_drupal_1 and blogslib_database_1.
 
 ```sh
 sudo docker rm -f blogslib_database_1 && sudo docker rm -f blogslib_drupal_1 && sudo docker volume rm -f blogslib_database && sudo docker image rm -f mariadb:latest && sudo docker image rm -f blogslib_drupal:latest && sudo docker-compose build --no-cache && sudo docker-compose up -d --force-recreate
 ```
 
-5.  **Import the openid config for development. (NOTE: you may get errors about other config but should be fine.)**
+5.  **Import the openid config for development. (NOTE: you need to wait for database to start up. Should go green.)**
 
 ```sh
 sudo docker exec -it blogslib_drupal_1 drupal config:import:single --file=openid_connect.settings.generic.yml
