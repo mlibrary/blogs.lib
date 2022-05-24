@@ -32,7 +32,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '77176d9925c6f8cdc73932b4bce97eceba962527',
+    'reference' => '481b8ed15da0fba0ca60f39006d2fb81adc6d427',
     'name' => 'drupal/recommended-project',
   ),
   'versions' => 
@@ -294,6 +294,15 @@ private static $installed = array (
       array (
         0 => '9.3.12',
       ),
+    ),
+    'drupal/better_exposed_filters' => 
+    array (
+      'pretty_version' => '5.0.0',
+      'version' => '5.0.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8.x-5.0',
     ),
     'drupal/big_pipe' => 
     array (
@@ -688,6 +697,15 @@ private static $installed = array (
       ),
       'reference' => '8.x-3.7',
     ),
+    'drupal/ctools_views' => 
+    array (
+      'pretty_version' => '3.7.0',
+      'version' => '3.7.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => NULL,
+    ),
     'drupal/datetime' => 
     array (
       'replaced' => 
@@ -738,6 +756,15 @@ private static $installed = array (
       array (
         0 => '9.3.12',
       ),
+    ),
+    'drupal/entity_reference_exposed_filters' => 
+    array (
+      'pretty_version' => '1.0.0-alpha3',
+      'version' => '1.0.0.0-alpha3',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8.x-1.0-alpha3',
     ),
     'drupal/field' => 
     array (
@@ -895,6 +922,15 @@ private static $installed = array (
       ),
       'reference' => '8.x-1.1',
     ),
+    'drupal/jquery_ui_datepicker' => 
+    array (
+      'pretty_version' => '1.2.0',
+      'version' => '1.2.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8.x-1.2',
+    ),
     'drupal/jquery_ui_draggable' => 
     array (
       'pretty_version' => '1.2.0',
@@ -912,6 +948,24 @@ private static $installed = array (
       array (
       ),
       'reference' => '8.x-1.2',
+    ),
+    'drupal/jquery_ui_slider' => 
+    array (
+      'pretty_version' => '1.1.0',
+      'version' => '1.1.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8.x-1.1',
+    ),
+    'drupal/jquery_ui_touch_punch' => 
+    array (
+      'pretty_version' => '1.0.0',
+      'version' => '1.0.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '1.0.0',
     ),
     'drupal/jsonapi' => 
     array (
@@ -1235,7 +1289,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '77176d9925c6f8cdc73932b4bce97eceba962527',
+      'reference' => '481b8ed15da0fba0ca60f39006d2fb81adc6d427',
     ),
     'drupal/reroute_email' => 
     array (
@@ -1429,6 +1483,15 @@ private static $installed = array (
         0 => '9.3.12',
       ),
     ),
+    'drupal/views_block_filter_block' => 
+    array (
+      'pretty_version' => '1.2.0',
+      'version' => '1.2.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8.x-1.2',
+    ),
     'drupal/views_bulk_operations' => 
     array (
       'pretty_version' => '4.1.2',
@@ -1530,6 +1593,15 @@ private static $installed = array (
       array (
       ),
       'reference' => '196bacc76e7a72a63d0e1220926dbb190272db97',
+    ),
+    'furf/jquery-ui-touch-punch' => 
+    array (
+      'pretty_version' => 'master',
+      'version' => 'dev-master',
+      'aliases' => 
+      array (
+      ),
+      'reference' => NULL,
     ),
     'grasmash/expander' => 
     array (

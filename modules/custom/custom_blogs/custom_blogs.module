@@ -1,0 +1,17 @@
+<?php
+/**
+ * Implements hook_menu_local_tasks_alter().
+ *
+ * Change tab names.
+ */
+function custom_blogs_menu_local_tasks_alter(&$data, $route_name) {
+  if ($route_name === 'entity.node.canonical') {
+    /** @var \Drupal\node\Entity\Node $node */
+    $node = \Drupal::routeMatch()->getParameter('node');
+    $bundles = ['blog', 'blog_post'];
+    if (in_array($node->bundle(), $bundles)) {
+      $data['tabs'][0]['entity.node.edit_form']['#link']['title'] = 'Edit Post';
+      $data['tabs'][0]['og.og_admin_routes:node.og_admin_routes']['#link']['title'] = 'Blog Admin';
+    }
+  }
+}
