@@ -42,19 +42,51 @@
 {% set theyear = currentyear %}
 {% set older = FALSE %}
 {% set oldernotset = TRUE %}
+{% set firstrowyear = rows[0].link|split(' ')[1] %}
+{% set coutyear = 0 %}
+{% set blog = drupal_token('current-page:query:blog') %}
+{% set keys = drupal_token('current-page:query:keys') %}
+{% set filtered = FALSE %}
+{% set kfiltered = FALSE %}
+{% set bfiltered = FALSE %}
+{% if '[' not in keys and keys|length %}
+  {% set filtered = TRUE %}
+  {% set kfiltered = TRUE %}
+{% endif %}
+{% if  '[' not in blog and blog|length and blog != 'All' %}
+  {% set filtered = TRUE %}
+  {% set bfiltered = TRUE %}
+{% endif %}
+{% if filtered %}
+<div><strong>All Dates</strong>
+  {% if kfiltered %}
+<span><strong>for keyword</strong>: {{ keys }}</span>
+  {% endif %}
+  {% if bfiltered %}
+<span><strong>in Blog</strong>: {{ drupal_field('title', 'node', blog) }}</span>
+  {% endif %}
+</div>
+{% endif %}
 <ul class="year-menu">
+  {% if currentyear == firstrowyear %}
+  {% set countyear = countyear + 1 %}
   <li>
     <input type="radio" name="menuopt" id="drop-{{ theyear }}" />
     <label class="opener" for="drop-{{ theyear }}">{{ theyear }}</label>
     <label class="closer" for="dropclose">{{ theyear }}</label>
     <ul>
+  {% endif %}
       {% for row in rows %}
         {% set date = row.link|split(' ') %}
         {% set month = date[0] %}
         {% set year = date[1] %}
         {% if year != theyear %}
           {% if year > currentyear - 3 %}
-            </ul></li><li>
+  {% if currentyear == firstrowyear or countyear > 0 %}
+            </ul></li>
+  {% endif %}
+  {% set countyear = countyear + 1 %}
+          <li>
             <input type="radio" name="menuopt" id="drop-{{ year }}" />
             <label class="opener" for="drop-{{ year }}">{{ year }}</label>
             <label class="closer" for="dropclose">{{ year }}</label>
@@ -66,7 +98,11 @@
         {% set theyear = year %}
         {% if older %}
           {% if oldernotset %}
-            </ul></li><li>
+  {% if currentyear == firstrowyear or countyear > 0 %}
+            </ul></li>
+  {% endif %}
+  {% set countyear = countyear + 1 %}
+            <li>
             <input type="radio" name="menuopt" id="drop-older" />
             <label class="opener" for="drop-older">Older</label>
             <label class="closer" for="dropclose">Older</label>
@@ -86,3 +122,6 @@
     <input type="radio" name="menuopt" id="dropclose" />
   </li>
 </ul>
+{% if path("<current>") | split('/') | last != 'blogs' %}
+<div><a href="/blogs?keys={{ keys }}&blog={{ blog }}">Reset Date</a></div>
+{% endif %}
