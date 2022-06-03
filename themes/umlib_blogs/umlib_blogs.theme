@@ -1,0 +1,120 @@
+<?php
+
+use Drupal\Core\Template\Attribute;
+use Drupal\Core\Url;
+
+/**
+ * Prepares variables for views summary templates.
+ *
+ * The summary prints a single record from a row, with fields.
+ *
+ * Default template: views-view-summary.html.twig.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - view: A ViewExecutable object.
+ *   - rows: The raw row data.
+ */
+function umlib_blogs_preprocess_views_view_summary(&$variables) {
+  /** @var \Drupal\views\ViewExecutable $view */
+  $view = $variables['view'];
+  $argument = $view->argument[$view->build_info['summary_level']];
+
+  $url_options = [];
+
+  if (!empty($view->exposed_raw_input)) {
+    $url_options['query'] = $view->exposed_raw_input;
+  }
+
+  $active_urls = [
+    // Force system path.
+    Url::fromRoute('<current>', [], ['alias' => TRUE])->toString(),
+    // Force system path.
+    Url::fromRouteMatch(\Drupal::routeMatch())->setOption('alias', TRUE)->toString(),
+    // Could be an alias.
+    Url::fromRoute('<current>')->toString(),
+    // Could be an alias.
+    Url::fromRouteMatch(\Drupal::routeMatch())->toString(),
+  ];
+  $active_urls = array_combine($active_urls, $active_urls);
+
+  // Collect all arguments foreach row, to be able to alter them for example
+  // by the validator. This is not done per single argument value, because this
+  // could cause performance problems.
+  $row_args = [];
+
+  foreach ($variables['rows'] as $id => $row) {
+    $row_args[$id] = $argument->summaryArgument($row);
+  }
+
+  /* ADDED to https://api.drupal.org/api/drupal/core%21modules%21views%21views.theme.inc/function/template_preprocess_views_view_summary_unformatted/9.3.x */
+  // View counts are incorrect with keyword searches.
+  $counts = array_count_values($row_args);
+  $counts_wrong = array_keys(array_filter($counts, function($item) {
+    return $item !== 1;
+  }));
+  $has_counted = [];
+  /* END ADDED */
+
+  $argument->processSummaryArguments($row_args);
+
+  foreach ($variables['rows'] as $id => $row) {
+    $variables['rows'][$id]->attributes = [];
+    $variables['rows'][$id]->link = $argument->summaryName($row);
+    $args = $view->args;
+    $args[$argument->position] = $row_args[$id];
+
+    /* ADDED to https://api.drupal.org/api/drupal/core%21modules%21views%21views.theme.inc/function/template_preprocess_views_view_summary_unformatted/9.3.x */
+    if (in_array($args[0], $counts_wrong)) {
+      if (in_array($args[0], $has_counted)) {
+        unset($variables['rows'][$id]);
+        continue;
+      }
+      else {
+        $variables['rows'][$id]->count = $counts[$args[0]];
+        $has_counted[] = $args[0];
+      }
+    }
+    /* END ADDED */
+
+    if (!empty($argument->options['summary_options']['base_path'])) {
+      $base_path = $argument->options['summary_options']['base_path'];
+      $tokens = $view->getDisplay()->getArgumentsTokens();
+      $base_path = $argument->globalTokenReplace($base_path, $tokens);
+      // @todo Views should expect and store a leading /. See:
+      //   https://www.drupal.org/node/2423913
+      $url = Url::fromUserInput('/' . $base_path);
+      try {
+        /** @var \Symfony\Component\Routing\Route $route */
+        $route_name = $url->getRouteName();
+        $route = \Drupal::service('router.route_provider')->getRouteByName($route_name);
+
+        $route_variables = $route->compile()->getVariables();
+        $parameters = $url->getRouteParameters();
+
+        foreach ($route_variables as $variable_name) {
+          $parameters[$variable_name] = array_shift($args);
+        }
+
+        $url->setRouteParameters($parameters);
+      }
+      catch (Exception $e) {
+        // If the given route doesn't exist, default to <front>
+        $url = Url::fromRoute('<front>');
+      }
+    }
+    else {
+      $url = $view->getUrl($args)->setOptions($url_options);
+    }
+    $variables['rows'][$id]->url = $url->toString();
+
+    /* CHANGED from https://api.drupal.org/api/drupal/core%21modules%21views%21views.theme.inc/function/template_preprocess_views_view_summary_unformatted/9.3.x */
+    if (!in_array($args[0], $counts_wrong)) {
+      $variables['rows'][$id]->count = intval($row->{$argument->count_alias});
+    }
+    /* END CHANGED */
+
+    $variables['rows'][$id]->attributes = new Attribute($variables['rows'][$id]->attributes);
+    $variables['rows'][$id]->active = isset($active_urls[$variables['rows'][$id]->url]);
+  }
+}

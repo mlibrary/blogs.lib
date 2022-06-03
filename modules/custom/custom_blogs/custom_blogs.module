@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Implements hook_menu_local_tasks_alter().
  *
@@ -13,5 +14,20 @@ function custom_blogs_menu_local_tasks_alter(&$data, $route_name) {
       $data['tabs'][0]['entity.node.edit_form']['#link']['title'] = 'Edit Post';
       $data['tabs'][0]['og.og_admin_routes:node.og_admin_routes']['#link']['title'] = 'Blog Admin';
     }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $form_id) {
+  $view = $form_state->getStorage('view');
+  if (($view['view']->id() == 'all_posts') && ($view['view']->current_display == 'block_1')) {
+    $actions['actions'] = $form['actions'];
+    unset($form['actions']);
+    $positions = array_keys($form);
+    $keys_position = array_search('keys', $positions);
+    //Note that to actually move actions, it needs to be set within a numerically keyed array.
+    array_splice($form, $keys_position + 1, 0, [$actions]);
   }
 }
