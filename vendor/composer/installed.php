@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => '682018c73578402665f83e5c527a03a6b2e4052f',
+    'reference' => '5fae56d34f8efb42b6419ea5d3abfad331fd80e9',
     'name' => 'drupal/recommended-project',
   ),
   'versions' => 
@@ -191,6 +191,15 @@
       ),
       'reference' => '5b668aef16090008790395c02c893b1ba13f7e08',
     ),
+    'doctrine/cache' => 
+    array (
+      'pretty_version' => '1.13.0',
+      'version' => '1.13.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '56cd022adb5514472cb144c087393c1821911d09',
+    ),
     'doctrine/collections' => 
     array (
       'pretty_version' => '1.6.8',
@@ -200,6 +209,33 @@
       ),
       'reference' => '1958a744696c6bb3bb0d28db2611dc11610e78af',
     ),
+    'doctrine/common' => 
+    array (
+      'pretty_version' => '2.13.3',
+      'version' => '2.13.3.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'f3812c026e557892c34ef37f6ab808a6b567da7f',
+    ),
+    'doctrine/event-manager' => 
+    array (
+      'pretty_version' => '1.1.1',
+      'version' => '1.1.1.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '41370af6a30faa9dc0368c4a6814d596e81aba7f',
+    ),
+    'doctrine/inflector' => 
+    array (
+      'pretty_version' => '1.4.4',
+      'version' => '1.4.4.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '4bd5c1cdfcd00e9e2d8c484f79150f67e5d355d9',
+    ),
     'doctrine/lexer' => 
     array (
       'pretty_version' => '1.2.3',
@@ -208,6 +244,15 @@
       array (
       ),
       'reference' => 'c268e882d4dbdd85e36e4ad69e02dc284f89d229',
+    ),
+    'doctrine/persistence' => 
+    array (
+      'pretty_version' => '1.3.8',
+      'version' => '1.3.8.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '7a6eac9fb6f61bba91328f15aa7547f4806ca288',
     ),
     'doctrine/reflection' => 
     array (
@@ -700,6 +745,15 @@
       array (
         0 => '9.3.14',
       ),
+    ),
+    'drupal/devel' => 
+    array (
+      'pretty_version' => '4.1.5',
+      'version' => '4.1.5.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '4.1.5',
     ),
     'drupal/dynamic_page_cache' => 
     array (
@@ -1263,7 +1317,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '682018c73578402665f83e5c527a03a6b2e4052f',
+      'reference' => '5fae56d34f8efb42b6419ea5d3abfad331fd80e9',
     ),
     'drupal/reroute_email' => 
     array (

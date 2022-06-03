@@ -31,6 +31,7 @@
         "drupal/config_devel": "^1.8",
         "drupal/console": "^1.9",
         "drupal/core": "^9.3",
+        "drupal/devel": "^4.1",
         "drupal/entity_reference_exposed_filters": "^1.0@alpha",
         "drupal/field_group": "^3.2",
         "drupal/file_entity": "^2.0@beta",
