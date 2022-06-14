@@ -483,6 +483,10 @@ abstract class AbstractObjectNormalizer extends AbstractNormalizer
                     return (float) $data;
                 }
 
+                if ('false' === $builtinType && false === $data) {
+                    return $data;
+                }
+
                 if (('is_'.$builtinType)($data)) {
                     return $data;
                 }

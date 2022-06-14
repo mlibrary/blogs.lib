@@ -257,7 +257,6 @@ class MediaMigrateCommands extends DrushCommands {
 
     while ($source->valid()) {
       $row = $source->current();
-
       // Support remote images.
       if (!$this->isLocalUri($row->getSourceProperty('file_path'))) {
         $file = File::create([
@@ -266,8 +265,16 @@ class MediaMigrateCommands extends DrushCommands {
         ]);
       }
       else {
+$target_id = $row->getSourceProperty('target_id');
+if (empty($target_id)) {
+  $target_id = $row->get('field_blog_banner');
+  if (!$target_id) {
+    $target_id = $row->get('field_blog_feature_image');
+  }
+  $target_id = $target_id[0]['target_id'];
+}
         /** @var \Drupal\file\Entity\File $file */
-        $file = File::load($row->getSourceProperty('target_id'));
+        $file = File::load($target_id);
       }
 
       if (!$file) {
