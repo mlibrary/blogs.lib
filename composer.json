@@ -139,6 +139,9 @@
           "drupal/og": {
             "https://github.com/zerolab/og/tree/196-redux": "patches/zerolab-og-196-redux-branch.patch"
           },
+          "drupal/migrate_file_to_media": {
+            "custom file to media hack": "hack-file-to-media-migrate.patch"
+          },
           "drupal/migrate_tools": {
             "https://www.drupal.org/node/2868762": "https://www.drupal.org/files/issues/2022-02-17/d7_migration_failing_on_d6_migrations-2868762-37.patch"
           }
