@@ -81,7 +81,7 @@ sudo docker run --rm -it -v $(pwd)/.aws:/root/.aws -v $(pwd):/aws amazon/aws-cli
 3.  **Set up refreshed files. (NOTE: you may want to mv sites/default/files sites/default/files- or rm -r sites/default/files)**
 
 ```sh
-tar -zxvf files.tar.gz -C sites/default && sudo chown -R www-data sites/default/files
+sudo tar -zxvf files.tar.gz -C sites/default && sudo chown -R www-data sites/default/files
 ```
 
 4.  **Rebuild docker with latest stuff.**
