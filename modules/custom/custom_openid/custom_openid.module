@@ -1,0 +1,36 @@
+<?php
+use Drupal\node\NodeInterface;
+use Drupal\user\Entity\User;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\node\Entity\Node;
+use Drupal\taxonomy\Entity\Term;
+use Drupal\paragraphs\Entity\Paragraph;
+
+/**
+ * Implements hook_openid_connect_pre_authorize().
+ */
+function custom_openid_openid_connect_pre_authorize($account, array $context) {
+  if (isset($context['userinfo']['preferred_username']) || isset($context['userinfo']['email'])) {
+    $uname = $context['userinfo']['preferred_username'];
+    if (empty($uname)) {
+      $uname = explode('@', $context['userinfo']['email'])[0];
+    }
+// UNCOMMENT 3 LINES BELOW and replace YOUR_USERNAME_HERE and USER_YOU_WANT_TO_BE_HERE with appropriate values
+//    if (in_array($uname,['YOUR_USERNAME_HERE']) && strpos($_SERVER['HTTP_USER_AGENT'], 'Chrome')) {
+//      return user_load_by_name('USER_YOU_WANT_TO_BE_HERE');
+//    }
+  }
+  if (is_bool($account) || !$account) {
+    if (isset($context['userinfo']['email'])) {
+      $account = user_load_by_name(explode('@', $context['userinfo']['email'])[0]);
+    }
+  }
+  // Allow access only for current users
+  if (($account && !$account->isBlocked() && $account->hasRole('authenticated'))
+    && $context['plugin_id'] == 'generic'
+  ) {
+    return $account;
+  }
+  // Deny all other users.
+  return FALSE;
+}

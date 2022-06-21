@@ -1,0 +1,9 @@
+name: Custom OpenID
+type: module
+description: stuff for Open ID
+package: UM Staff Custom
+core_version_requirement: ^8 || ^9
+
+dependencies:
+  - drupal:openid_connect
+  - drupal:r4032login
