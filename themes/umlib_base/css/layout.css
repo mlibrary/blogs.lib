@@ -1,0 +1,19 @@
+/* Layout */
+:root {
+  --viewport-margin: 16px;
+}
+
+@media (min-width: 720px) {
+  :root {
+    --viewport-margin: 40px;
+  }
+}
+
+.viewport-container {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--viewport-margin);
+  padding-right: var(--viewport-margin);
+}

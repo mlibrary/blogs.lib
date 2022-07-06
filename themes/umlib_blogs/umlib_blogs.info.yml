@@ -1,15 +1,15 @@
 name: UM Library Blogs
 type: theme
-description: 'A theme for UM Library Blogs.'
+description: "A theme for UM Library Blogs."
 core_version_requirement: ^9
 libraries:
   - umlib_blogs/global-styling
   - umlib_blogs/global-scripts
 base theme: umlib_base
 regions:
-  header: 'Header'
-  banner: 'Banner'
-  content: 'Content'
-  sidebar_first: 'Sidebar first'
-  footer_first: 'Footer First'
-  footer_second: 'Footer Second'
+  header: "Header"
+  banner: "Banner"
+  content: "Content"
+  sidebar_first: "Sidebar first"
+  footer_first: "Footer First"
+  footer_second: "Footer Second"
