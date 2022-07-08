@@ -18,16 +18,48 @@ function custom_blogs_menu_local_tasks_alter(&$data, $route_name) {
 }
 
 /**
- * Implements hook_form_alter().
+ * Implements hook_form_FORM_ID_alter().
  */
 function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $form_id) {
   $view = $form_state->getStorage('view');
   if (($view['view']->id() == 'all_posts') && ($view['view']->current_display == 'block_1')) {
+    //This moves the search button to the search box.
     $actions['actions'] = $form['actions'];
     unset($form['actions']);
     $positions = array_keys($form);
     $keys_position = array_search('keys', $positions);
     //Note that to actually move actions, it needs to be set within a numerically keyed array.
     array_splice($form, $keys_position + 1, 0, [$actions]);
+  }
+  if (($view['view']->id() == 'recent_posts') && ($view['view']->current_display == 'block_1')) {
+    //This alters the title of the search box and adds a reset link.
+    $node = \Drupal::routeMatch()->getParameter('node');
+    $form['keys']['#title'] = $form['keys']['#title'] . ' ' . $node->getTitle();
+    $form['#info']['filter-keys']['label'] = $form['#info']['filter-keys']['label'] . ' ' . $node->getTitle();
+    if ($form['actions']['reset']['#access']) {
+      $form['actions']['reset'] = ['#markup' => \Drupal\Core\Render\Markup::create('<div><a href="'.$form['#action'].'">Reset results list</a></div>')];
+    }
+  }
+}
+
+/**
+ * Implements hook_views_pre_render().
+ */
+function custom_blogs_views_pre_render(\Drupal\views\ViewExecutable $view) {
+  if ($view->id() == 'blogroll_view' && $view->current_display == 'block_2') {
+    //This removes the block if the field isnt set.
+    if (count($view->result) == 1 && empty($view->result[0]->_entity->get('field_blogroll')->getValue())) {
+      unset($view->result[0]);
+    }
+  }
+}
+
+/**
++ * Implements hook_views_post_render().
++ */
+function custom_blogs_views_post_render(\Drupal\views\ViewExecutable $view, array &$output, \Drupal\views\Plugin\views\cache\CachePluginBase $cache) {
+  if (empty(\Drupal::request()->get('keys')) && $view->id() == 'recent_posts' && $view->current_display == 'block_1') {
+    //This sets the title if the search keys are empty.
+    $view->setTitle('Recent Posts');
   }
 }
