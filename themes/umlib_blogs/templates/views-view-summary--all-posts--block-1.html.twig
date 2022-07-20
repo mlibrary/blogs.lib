@@ -122,6 +122,6 @@
     <input type="radio" name="menuopt" id="dropclose" />
   </li>
 </ul>
-{% if path("<current>") | split('/') | last != 'blogs' %}
-<div><a href="/blogs?keys={{ keys }}&blog={{ blog }}">Reset Date</a></div>
+{% if path("<current>") | split('/') | last != 'all-posts' %}
+<div><a href="/all-posts?keys={{ keys }}&blog={{ blog }}">Reset Date</a></div>
 {% endif %}

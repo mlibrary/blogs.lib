@@ -1,6 +1,20 @@
 <?php
 
 /**
+ * Implements hook_link_alter().
+ */
+function custom_blogs_link_alter(&$vars) {
+  if (
+    $vars['url']->isRouted()
+    && $vars['url']->getRouteName() === 'user.page'
+    && (string) $vars['text'] === (string) t('My account')
+  ) {
+    $vars['text'] = t('@name', ['@name' => \Drupal::currentUser()->getDisplayName()]);
+    $vars['url'] = \Drupal\Core\Url::fromUri('route:<nolink>');
+  }
+}
+
+/**
  * Implements hook_menu_local_tasks_alter().
  *
  * Change tab names.
@@ -22,6 +36,7 @@ function custom_blogs_menu_local_tasks_alter(&$data, $route_name) {
  * Implements hook_form_FORM_ID_alter().
  */
 function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $form_id) {
+  $path = \Drupal::service('path.current')->getPath();
   $view = $form_state->getStorage('view');
   if (($view['view']->id() == 'all_posts') && ($view['view']->current_display == 'block_1')) {
     //This moves the search button to the search box.
@@ -31,6 +46,11 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $
     $keys_position = array_search('keys', $positions);
     //Note that to actually move actions, it needs to be set within a numerically keyed array.
     array_splice($form, $keys_position + 1, 0, [$actions]);
+  }
+  if (($view['view']->id() == 'all_posts') && ($path != '/all-posts')) {
+    unset($form['keys']['#title']);
+    unset($form['#info']['filter-keys']['label']);
+    unset($form['blog']);
   }
   if (($view['view']->id() == 'recent_posts') && ($view['view']->current_display == 'block_1')) {
     //This alters the title of the search box and adds a reset link.
