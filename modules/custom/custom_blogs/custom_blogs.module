@@ -73,6 +73,41 @@ function custom_blogs_views_pre_render(\Drupal\views\ViewExecutable $view) {
       unset($view->result[0]);
     }
   }
+  if ($view->id() == 'author' && $view->current_display == 'page_1') {
+    $author_display_name = '';
+    if (isset($view->args[0]) && $author = user_load_by_name($view->args[0])) {
+      $author_display_name = $author->get('field_user_display')->value;
+      if (isset($view->args[1])) {
+        $author_names = [];
+        $conjunction = ' or ';
+        if (strpos($view->args[1], ',') !== FALSE) {
+          $author_names = explode(',', $view->args[1]);
+          $conjunction = ' and ';
+        }
+        else if (strpos($view->args[1], '+') !== FALSE) {
+          $author_names = explode('+', $view->args[1]);
+        }
+        else if (strpos($view->args[1], ' ') !== FALSE) {
+          $author_names = explode(' ', $view->args[1]);
+        }
+        else {
+          $author_names[] = $view->args[1];
+        }
+        $last = array_key_last($author_names);
+        foreach ($author_names as $key => $author_name) {
+          if ($author_name != $view->args[0]) {
+            $join = ', ';
+            if ($key == $last) {
+              $join = $conjunction;
+            }
+            $author = user_load_by_name($author_name);
+            $author_display_name .= $join . $author->get('field_user_display')->value;
+          }
+        }
+      }
+      $view->setTitle('Posts by '. $author_display_name);
+    }
+  }
 }
 
 /**
