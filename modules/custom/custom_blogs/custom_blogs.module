@@ -37,6 +37,7 @@ function custom_blogs_menu_local_tasks_alter(&$data, $route_name) {
  */
 function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $form_id) {
   $path = \Drupal::service('path.current')->getPath();
+  $query = \Drupal::request()->query->keys();
   $view = $form_state->getStorage('view');
   if (($view['view']->id() == 'all_posts') && ($view['view']->current_display == 'block_1')) {
     //This moves the search button to the search box.
@@ -50,7 +51,9 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $
   if (($view['view']->id() == 'all_posts') && ($path != '/all-posts')) {
     unset($form['keys']['#title']);
     unset($form['#info']['filter-keys']['label']);
-    unset($form['blog']);
+    if (empty($query)) {
+      unset($form['blog']);
+    }
   }
   if (($view['view']->id() == 'recent_posts') && ($view['view']->current_display == 'block_1')) {
     //This alters the title of the search box and adds a reset link.
