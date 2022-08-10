@@ -1,0 +1,8 @@
+login-return-page-link:
+  version: 1.x
+  js:
+    js/login_return_page.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/jquery.once

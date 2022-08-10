@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * Implements hook_page_attachments().
+ */
+function custom_blogs_page_attachments(array &$attachments) {
+  $attachments['#attached']['library'][] = 'custom_blogs/login-return-page-link';
+}
+
+/**
  * Implements hook_link_alter().
  */
 function custom_blogs_link_alter(&$vars) {
