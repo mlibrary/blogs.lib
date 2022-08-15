@@ -32,7 +32,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '7f20c7c295d5679bf55ac188ae186936a147f1cf',
+    'reference' => '22fa0913fb617f9e1a41c4cbfef0abc2bba1b248',
     'name' => 'drupal/recommended-project',
   ),
   'versions' => 
@@ -1232,6 +1232,15 @@ private static $installed = array (
         0 => '9.3.19',
       ),
     ),
+    'drupal/oembed_providers' => 
+    array (
+      'pretty_version' => '2.1.0',
+      'version' => '2.1.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '2.1.0',
+    ),
     'drupal/olivero' => 
     array (
       'replaced' => 
@@ -1342,7 +1351,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '7f20c7c295d5679bf55ac188ae186936a147f1cf',
+      'reference' => '22fa0913fb617f9e1a41c4cbfef0abc2bba1b248',
     ),
     'drupal/reroute_email' => 
     array (
