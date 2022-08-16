@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d25a09331ef236a062a8882320076f28",
+    "content-hash": "05a4afb907e0bb7d9d6702a52411da0f",
     "packages": [
         {
             "name": "alchemy/zippy",
@@ -2163,6 +2163,54 @@
             }
         },
         {
+            "name": "drupal/anchor_link",
+            "version": "1.9.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/anchor_link.git",
+                "reference": "8.x-1.9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/anchor_link-8.x-1.9.zip",
+                "reference": "8.x-1.9",
+                "shasum": "48d343f29dc034bf2deb7de858498fb80d558ca8"
+            },
+            "require": {
+                "drupal/core": "^8 || ^9"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "8.x-1.9",
+                    "datestamp": "1643826959",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Mohammed J. Razem",
+                    "homepage": "https://www.drupal.org/user/255384"
+                },
+                {
+                    "name": "Rajab Natshah",
+                    "homepage": "https://www.drupal.org/user/1414312"
+                }
+            ],
+            "description": "This plugin module adds the better link dialog and anchor related features to CKEditor in Drupal 9",
+            "homepage": "https://www.drupal.org/project/anchor_link",
+            "support": {
+                "source": "https://git.drupalcode.org/project/anchor_link"
+            }
+        },
+        {
             "name": "drupal/better_exposed_filters",
             "version": "5.1.0",
             "source": {
@@ -2525,6 +2573,54 @@
             "support": {
                 "source": "https://git.drupalcode.org/project/captcha",
                 "issues": "https://www.drupal.org/project/issues/captcha"
+            }
+        },
+        {
+            "name": "drupal/ckeditor_abbreviation",
+            "version": "2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/ckeditor_abbreviation.git",
+                "reference": "2.0.1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/ckeditor_abbreviation-2.0.1.zip",
+                "reference": "2.0.1",
+                "shasum": "e148cb984eed86ad02bcafa050ae058b179a572f"
+            },
+            "require": {
+                "drupal/core": "^8 || ^9"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "2.0.1",
+                    "datestamp": "1597938425",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0+"
+            ],
+            "authors": [
+                {
+                    "name": "boromino",
+                    "homepage": "https://www.drupal.org/user/859722"
+                }
+            ],
+            "description": "Adds CKEditor abbreviation button.",
+            "homepage": "https://www.drupal.org/project/ckeditor_abbreviation",
+            "keywords": [
+                "Drupal"
+            ],
+            "support": {
+                "source": "http://cgit.drupalcode.org/ckeditor_abbreviation",
+                "issues": "http://drupal.org/project/issues/ckeditor_abbreviation"
             }
         },
         {

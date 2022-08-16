@@ -32,7 +32,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '22fa0913fb617f9e1a41c4cbfef0abc2bba1b248',
+    'reference' => '4f26e575dfb802a00f7fc392703cb4ce286eb6f0',
     'name' => 'drupal/recommended-project',
   ),
   'versions' => 
@@ -312,6 +312,15 @@ private static $installed = array (
         0 => '9.3.19',
       ),
     ),
+    'drupal/anchor_link' => 
+    array (
+      'pretty_version' => '1.9.0',
+      'version' => '1.9.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8.x-1.9',
+    ),
     'drupal/automated_cron' => 
     array (
       'replaced' => 
@@ -433,6 +442,15 @@ private static $installed = array (
       array (
         0 => '9.3.19',
       ),
+    ),
+    'drupal/ckeditor_abbreviation' => 
+    array (
+      'pretty_version' => '2.0.1',
+      'version' => '2.0.1.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '2.0.1',
     ),
     'drupal/claro' => 
     array (
@@ -1351,7 +1369,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '22fa0913fb617f9e1a41c4cbfef0abc2bba1b248',
+      'reference' => '4f26e575dfb802a00f7fc392703cb4ce286eb6f0',
     ),
     'drupal/reroute_email' => 
     array (

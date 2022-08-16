@@ -1,0 +1,14 @@
+{
+  "name": "drupal/ckeditor_abbreviation",
+  "type": "drupal-module",
+  "description": "Adds CKEditor abbreviation button.",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/ckeditor_abbreviation",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "http://drupal.org/project/issues/ckeditor_abbreviation",
+    "source": "http://cgit.drupalcode.org/ckeditor_abbreviation"
+  },
+  "require": { }
+}
