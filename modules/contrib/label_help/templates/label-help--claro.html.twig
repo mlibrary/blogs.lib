@@ -1,0 +1,20 @@
+{#
+/**
+ * @file
+ * Render label help markup for the Claro admin theme stack.
+ *
+ * Available variables:
+ * - attributes: HTML attributes for the datetime form element.
+ * - content: the label help message markup to display.
+ *
+ * @ingroup themeable
+ */
+#}
+{{ attach_library('label_help/claro') }}
+{%
+  set classes = [
+    'form-item__description',
+    'form-item__description--label-help'
+  ]
+%}
+<div{{ attributes.addClass(classes) }}>{{ content }}</div>

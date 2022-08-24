@@ -82,7 +82,7 @@ class OgSelection extends DefaultSelection {
     }
 
     $user_groups = $this->getUserGroups();
-    if (!$user_groups) {
+    if (!$user_groups || $this->currentUser->hasPermission('administer organic groups')) {
       return $query;
     }
 

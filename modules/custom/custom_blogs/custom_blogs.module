@@ -63,8 +63,28 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $
   if (($view['view']->id() == 'recent_posts') && ($view['view']->current_display == 'block_1')) {
     //This alters the title of the search box and adds a reset link.
     $node = \Drupal::routeMatch()->getParameter('node');
-    $form['keys']['#title'] = $form['keys']['#title'] . ' ' . $node->getTitle();
-    $form['#info']['filter-keys']['label'] = $form['#info']['filter-keys']['label'] . ' ' . $node->getTitle();
+    if ($node->hasField('og_audience')) {
+      $blog_id = $node->get('og_audience')->target_id;
+      $blog = \Drupal\node\Entity\Node::load($blog_id);
+      if ($blog) {
+        $form['#action'] = $blog->toUrl()->toString();
+        $form['keys']['#title'] = $form['keys']['#title'] . ' ' . $blog->getTitle();
+        $form['#info']['filter-keys']['label'] = $form['#info']['filter-keys']['label'] . ' ' . $blog->getTitle();
+      }
+    }
+/*    elseif ($node->hasField('field_blog_post_group_ref')) {
+      $blog_id = $node->get('field_blog_post_group_ref')->target_id;
+      $blog = \Drupal\node\Entity\Node::load($blog_id);
+      if ($blog) {
+        $form['#action'] = $blog->toUrl()->toString();
+        $form['keys']['#title'] = $form['keys']['#title'] . ' ' . $blog->getTitle();
+        $form['#info']['filter-keys']['label'] = $form['#info']['filter-keys']['label'] . ' ' . $blog->getTitle();
+      }
+    }
+*/    else {
+      $form['keys']['#title'] = $form['keys']['#title'] . ' ' . $node->getTitle();
+      $form['#info']['filter-keys']['label'] = $form['#info']['filter-keys']['label'] . ' ' . $node->getTitle();
+    }
     if ($form['actions']['reset']['#access']) {
       $form['actions']['reset'] = ['#markup' => \Drupal\Core\Render\Markup::create('<div><a href="'.$form['#action'].'">Reset results list</a></div>')];
     }
@@ -75,6 +95,32 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $
  * Implements hook_views_pre_render().
  */
 function custom_blogs_views_pre_render(\Drupal\views\ViewExecutable $view) {
+  if ($view->id() == 'blogs_filtered_by_membership' && $view->current_display == 'entity_reference_1') {
+    //arg[0] is loggedin user. pass to get memberships.
+    //don't do anything if user is og administrator.
+    $user = \Drupal\user\Entity\User::load($view->args[0]);
+    if (!$user->hasPermission('administer organic groups')) {
+      $og_view = \Drupal::entityTypeManager()
+        ->getStorage('view')
+        ->load('get_membership_ids')
+        ->getExecutable();
+      $og_view->initDisplay();
+      $og_view->setDisplay('default');
+      $og_view->setArguments([$view->args[0]]);
+      $og_view->execute();
+      $og_result = $og_view->result;
+      $blog_ids = [];
+      foreach ($og_result as $result) {
+        $blog_ids[] = $result->_entity->getGroupId();
+      }
+      foreach ($view->result as $id => $value) {
+        $nid = $value->_entity->id();
+        if (!in_array($nid, $blog_ids)) {
+          unset($view->result[$id]);
+        }
+      }
+    }
+  }
   if ($view->id() == 'blogroll_view' && $view->current_display == 'block_2') {
     //This removes the block if the field isnt set.
     if (count($view->result) == 1 && empty($view->result[0]->_entity->get('field_blogroll')->getValue())) {

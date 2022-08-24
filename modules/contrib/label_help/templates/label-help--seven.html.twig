@@ -1,0 +1,22 @@
+{#
+/**
+ * @file
+ * Render label help markup for the Seven admin theme stack.
+ *
+ * Available variables:
+ * - attributes: HTML attributes for the datetime form element.
+ * - content: the label help message markup to display.
+ *
+ * @ingroup themeable
+ */
+#}
+{{ attach_library('label_help/seven') }}
+{%
+  set classes = [
+    'description',
+    'description--label-help',
+    'label-description'
+  ]
+%}
+<div{{ attributes.addClass(classes) }}>{{ content }}</div>
+

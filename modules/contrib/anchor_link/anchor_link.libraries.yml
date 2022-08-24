@@ -1,8 +1,0 @@
-drupal.anchor_link:
-  version: VERSION
-  css:
-    theme:
-      css/anchor_link.css: { every_page: 1 }
-  dependencies:
-    - core/drupal
-    - core/drupalSettings

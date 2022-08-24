@@ -1,0 +1,7 @@
+node.type.*.third_party.label_help:
+  type: mapping
+  label: 'Label help message'
+  mapping:
+    label_help:
+      type: text
+      label: 'Label help message'

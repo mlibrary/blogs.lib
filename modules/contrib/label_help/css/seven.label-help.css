@@ -1,0 +1,22 @@
+.label .label-description,
+table th .label-description {
+  text-transform: none;
+  font-weight: normal;
+}
+
+div.description.label-description,
+.form-item .description.label-description {
+  margin: 0 0 .2rem;
+}
+
+/* Ensure label help does not show up between label and required indicator. */
+h4.label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+h4.label .label-description {
+  order: 1;
+  flex: 0 0 100%;
+}

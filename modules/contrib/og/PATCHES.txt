@@ -5,3 +5,7 @@ https://github.com/zerolab/og/tree/196-redux
 Source: patches/zerolab-og-196-redux-branch.patch
 
 
+fix og admin selection permissions
+Source: patches/fix_og_admin_selection.patch
+
+

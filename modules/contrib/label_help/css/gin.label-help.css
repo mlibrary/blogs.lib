@@ -1,0 +1,21 @@
+/* See also styles inherited from base theme in claro.label-help.css */
+
+.form-item__label + .form-item__description--label-help,
+.form-item__label + .form-item__prefix .form-item__description--label-help {
+  /* tighten whitespace between label + description */
+  margin-top: -4px;
+}
+
+/* Undo alignment fix from claro.label-help.css. */
+.form-type--boolean .form-item__description {
+  margin-left: 0; /* LTR */
+}
+
+/* Fix max-width issues with description inside label. */
+h4.form-item__label {
+  max-width: 520px;
+}
+
+h4.form-item__label .form-item__description--label-help {
+  max-width: initial;
+}

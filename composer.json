@@ -8,6 +8,30 @@
             "type": "composer",
             "url": "https://packages.drupal.org/8"
         },
+        "fakeobjects": {
+          "type": "package",
+          "package": {
+            "name": "ckeditor-plugin/fakeobjects",
+            "version": "4.8.0",
+            "type": "drupal-library",
+            "dist": {
+              "url": "https://download.ckeditor.com/fakeobjects/releases/fakeobjects_4.14.1.zip",
+              "type": "zip"
+            }
+          }
+        },
+        "link": {
+          "type": "package",
+          "package": {
+            "name": "ckeditor-plugin/link",
+            "version": "4.8.0",
+            "type": "drupal-library",
+            "dist": {
+              "url": "https://download.ckeditor.com/link/releases/link_4.14.1.zip",
+              "type": "zip"
+            }
+          }
+        },
         "jquery_ui_touch_punch": {
           "type": "package",
           "package": {
@@ -22,9 +46,12 @@
         }
     },
     "require": {
+        "ckeditor-plugin/fakeobjects": "^4.8",
+        "ckeditor-plugin/link": "^4.8",
         "composer/installers": "^1.9",
         "cweagans/composer-patches": "1.x-dev",
-        "drupal/anchor_link": "1.x",
+        "drupal/allowed_formats": "^1.5",
+        "drupal/anchor_link": "2.x",
         "drupal/better_exposed_filters": "^5.0",
         "drupal/block_class": "^1.3",
         "drupal/calendar": "^1.0@alpha",
@@ -34,6 +61,7 @@
         "drupal/console": "^1.9",
         "drupal/core": "^9.3",
         "drupal/devel": "^4.1",
+        "drupal/editor_advanced_link": "^2.0",
         "drupal/entity_reference_exposed_filters": "^1.0@alpha",
         "drupal/field_group": "^3.2",
         "drupal/file_entity": "^2.0@beta",
@@ -41,7 +69,9 @@
         "drupal/group": "^1.4",
         "drupal/image_field_caption": "^1.1",
         "drupal/jquery_ui_accordion": "^1.1",
+        "drupal/label_help": "^2",
         "drupal/libraries": "^3.0@beta",
+        "drupal/link_attributes": "^1.11",
         "drupal/linked_field": "^1.3",
         "drupal/location_migration": "^1.0@beta",
         "drupal/migrate_file_to_media": "^2.0",
@@ -52,6 +82,7 @@
         "drupal/mimemail": "^1.0@alpha",
         "drupal/mysql56": "^1.3",
         "drupal/oembed_providers": "^2.1",
+        "drupal/og": "1.x-dev",
         "drupal/openid_connect": "^1.2",
         "drupal/override_node_options": "^2.6",
         "drupal/panels": "^4.6",
@@ -134,13 +165,18 @@
         "patches": {
           "drupal/core": {
             "https://www.drupal.org/node/2640994": "https://www.drupal.org/files/issues/2022-02-11/drupal-2640994-122-9.3.patch",
-            "https://www.drupal.org/node/2858392": "https://www.drupal.org/files/issues/2018-10-17/2858392-14.patch"
+            "https://www.drupal.org/node/2858392": "https://www.drupal.org/files/issues/2018-10-17/2858392-14.patch",
+            "https://www.drupal.org/node/2985168": "https://www.drupal.org/files/issues/2022-06-01/2985168-125.patch"
           },
           "drupal/openid_connect": {
             "https://www.drupal.org/node/3011413": "https://www.drupal.org/files/issues/2022-02-14/openid_connect-autologin-3011413-70.patch"
           },
           "drupal/og": {
-            "https://github.com/zerolab/og/tree/196-redux": "patches/zerolab-og-196-redux-branch.patch"
+            "https://github.com/zerolab/og/tree/196-redux": "patches/zerolab-og-196-redux-branch.patch",
+            "fix og admin selection permissions": "patches/fix_og_admin_selection.patch"
+          },
+          "drupal/entity_reference_exposed_filters": {
+            "a customization for eref to facilitate blogs and og": "patches/custom_eref_blogs.patch"
           },
           "drupal/migrate_file_to_media": {
             "custom file to media hack": "patches/hack-file-to-media-migrate.patch"

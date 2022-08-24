@@ -35,6 +35,14 @@
       $(once('media-library-toggle', '.js-media-library-item-weight', context)).parent().hide();
     }
   };
+  Drupal.behaviors.MediaLibraryWidgetEditItem = {
+    attach: function attach() {
+      $('.media-library-widget .edit-media').once('media-library-edit').on('click', function () {
+        $(this).closest('.media-library-selection').find('.selected-media').removeClass('selected-media');
+        $(this).parent().find('article').addClass('selected-media');
+      });
+    }
+  };
   Drupal.behaviors.MediaLibraryWidgetDisableButton = {
     attach: function attach(context) {
       once('media-library-disable', '.js-media-library-open-button[data-disabled-focus="true"]', context).forEach(function (button) {

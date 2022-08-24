@@ -1,0 +1,17 @@
+seven:
+  version: VERSION
+  css:
+    theme:
+      css/seven.label-help.css: {}
+
+claro:
+  version: VERSION
+  css:
+    theme:
+      css/claro.label-help.css: {}
+
+gin:
+  version: VERSION
+  css:
+    theme:
+      css/gin.label-help.css: {}

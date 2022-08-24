@@ -379,78 +379,6 @@ class MediaLibraryWidget extends WidgetBase implements TrustedCallbackInterface 
       ];
     }
 
-    $element['selection'] = [
-      '#type' => 'container',
-      '#theme_wrappers' => [
-        'container__media_library_widget_selection',
-      ],
-      '#attributes' => [
-        'class' => [
-          'js-media-library-selection',
-        ],
-      ],
-    ];
-
-    foreach ($referenced_entities as $delta => $media_item) {
-      $element['selection'][$delta] = [
-        '#theme' => 'media_library_item__widget',
-        '#attributes' => [
-          'class' => [
-            'js-media-library-item',
-          ],
-          // Add the tabindex '-1' to allow the focus to be shifted to the next
-          // media item when an item is removed. We set focus to the container
-          // because we do not want to set focus to the remove button
-          // automatically.
-          // @see ::updateWidget()
-          'tabindex' => '-1',
-          // Add a data attribute containing the delta to allow us to easily
-          // shift the focus to a specific media item.
-          // @see ::updateWidget()
-          'data-media-library-item-delta' => $delta,
-        ],
-        'remove_button' => [
-          '#type' => 'submit',
-          '#name' => $field_name . '-' . $delta . '-media-library-remove-button' . $id_suffix,
-          '#value' => $this->t('Remove'),
-          '#media_id' => $media_item->id(),
-          '#attributes' => [
-            'aria-label' => $this->t('Remove @label', ['@label' => $media_item->label()]),
-          ],
-          '#ajax' => [
-            'callback' => [static::class, 'updateWidget'],
-            'wrapper' => $wrapper_id,
-            'progress' => [
-              'type' => 'throbber',
-              'message' => $this->t('Removing @label.', ['@label' => $media_item->label()]),
-            ],
-          ],
-          '#submit' => [[static::class, 'removeItem']],
-          // Prevent errors in other widgets from preventing removal.
-          '#limit_validation_errors' => $limit_validation_errors,
-        ],
-        // @todo Make the view mode configurable in https://www.drupal.org/project/drupal/issues/2971209
-        'rendered_entity' => $view_builder->view($media_item, 'media_library'),
-        'target_id' => [
-          '#type' => 'hidden',
-          '#value' => $media_item->id(),
-        ],
-        // This hidden value can be toggled visible for accessibility.
-        'weight' => [
-          '#type' => 'number',
-          '#theme' => 'input__number__media_library_item_weight',
-          '#title' => $this->t('Weight'),
-          '#access' => $multiple_items,
-          '#default_value' => $delta,
-          '#attributes' => [
-            'class' => [
-              'js-media-library-item-weight',
-            ],
-          ],
-        ],
-      ];
-    }
-
     $cardinality_unlimited = ($element['#cardinality'] === FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
     $remaining = $element['#cardinality'] - count($referenced_entities);
 
@@ -485,6 +413,9 @@ class MediaLibraryWidget extends WidgetBase implements TrustedCallbackInterface 
       'bundle' => $entity->bundle(),
       'field_name' => $field_name,
     ];
+    if (isset($form['#form_mode'])) {
+      $opener_parameters['form_mode'] = $form['#form_mode'];
+    }
     // Only add the entity ID when we actually have one. The entity ID needs to
     // be a string to ensure that the media library state generates its
     // tamper-proof hash in a consistent way.
@@ -496,6 +427,92 @@ class MediaLibraryWidget extends WidgetBase implements TrustedCallbackInterface 
       }
     }
     $state = MediaLibraryState::create('media_library.opener.field_widget', $allowed_media_type_ids, $selected_type_id, $remaining, $opener_parameters);
+
+    $element['selection'] = [
+      '#type' => 'container',
+      '#theme_wrappers' => [
+        'container__media_library_widget_selection',
+      ],
+      '#attributes' => [
+        'class' => [
+          'js-media-library-selection',
+        ],
+      ],
+    ];
+
+    foreach ($referenced_entities as $delta => $media_item) {
+      $element['selection'][$delta] = [
+        '#theme' => 'media_library_item__widget',
+        '#attributes' => [
+          'class' => [
+            'js-media-library-item',
+          ],
+          // Add the tabindex '-1' to allow the focus to be shifted to the next
+          // media item when an item is removed. We set focus to the container
+          // because we do not want to set focus to the remove button
+          // automatically.
+          // @see ::updateWidget()
+          'tabindex' => '-1',
+          // Add a data attribute containing the delta to allow us to easily
+          // shift the focus to a specific media item.
+          // @see ::updateWidget()
+          'data-media-library-item-delta' => $delta,
+        ],
+        'remove_button' => [
+          '#type' => 'submit',
+          '#name' => $field_name . '-' . $delta . '-media-library-remove-button' . $id_suffix,
+          '#value' => $this->t('Remove'),
+          '#weight' => -10,
+          '#media_id' => $media_item->id(),
+          '#attributes' => [
+            'aria-label' => $this->t('Remove @label', ['@label' => $media_item->label()]),
+          ],
+          '#ajax' => [
+            'callback' => [static::class, 'updateWidget'],
+            'wrapper' => $wrapper_id,
+            'progress' => [
+              'type' => 'throbber',
+              'message' => $this->t('Removing @label.', ['@label' => $media_item->label()]),
+            ],
+          ],
+          '#submit' => [[static::class, 'removeItem']],
+          // Prevent errors in other widgets from preventing removal.
+          '#limit_validation_errors' => $limit_validation_errors,
+        ],
+        'edit_button' => [
+          '#type' => 'button',
+          '#value' => $this->t('Edit'),
+          '#weight' => -5,
+          '#access' => $media_item->access('update'),
+          '#attributes' => [
+            'type' => 'button',
+            'class' => ['edit-media', 'use-ajax'],
+            'href' => $media_item->toUrl('edit-form', ['query' => $state->all()])->toString(),
+            'data-dialog-type' => 'modal',
+            'data-dialog-options' => '{"width":"80%"}',
+          ],
+        ],
+        // @todo Make the view mode configurable in https://www.drupal.org/project/drupal/issues/2971209
+        'rendered_entity' => $view_builder->view($media_item, 'media_library'),
+        'target_id' => [
+          '#type' => 'hidden',
+          '#value' => $media_item->id(),
+        ],
+        // This hidden value can be toggled visible for accessibility.
+        'weight' => [
+          '#type' => 'number',
+          '#theme' => 'input__number__media_library_item_weight',
+          '#title' => $this->t('Weight'),
+          '#access' => $multiple_items,
+          '#default_value' => $delta,
+          '#attributes' => [
+            'class' => [
+              'js-media-library-item-weight',
+            ],
+          ],
+        ],
+      ];
+    }
 
     // Add a button that will load the Media library in a modal using AJAX.
     $element['open_button'] = [

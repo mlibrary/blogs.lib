@@ -1,0 +1,13 @@
+diff --git a/src/Plugin/EntityReferenceSelection/OgSelection.php b/src/Plugin/EntityReferenceSelection/OgSelection.php
+index 20abe1c3..1f9c09a1 100644
+--- a/src/Plugin/EntityReferenceSelection/OgSelection.php
++++ b/src/Plugin/EntityReferenceSelection/OgSelection.php
+@@ -82,7 +82,7 @@ protected function buildEntityQuery($match = NULL, $match_operator = 'CONTAINS')
+     }
+ 
+     $user_groups = $this->getUserGroups();
+-    if (!$user_groups) {
++    if (!$user_groups || $this->currentUser->hasPermission('administer organic groups')) {
+       return $query;
+     }
+ 

@@ -1,0 +1,23 @@
+.form-item__description--label-help {
+  font-weight: 400;
+}
+
+/* Description before and label help should align with the checkbox. */
+.form-type--boolean .form-item__description {
+  margin-left: -1.6875rem; /* LTR */
+}
+
+.form-type--boolean .form-boolean ~ .form-item__description {
+  margin-left: 0;
+}
+
+/* Ensure label help does not show up between label and required indicator. */
+h4.form-item__label  {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+h4.form-item__label .form-item__description--label-help {
+  order: 1;
+  flex: 0 0 100%;
+}

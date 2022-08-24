@@ -1,0 +1,34 @@
+diff --git a/modules/contrib/entity_reference_exposed_filters/src/Plugin/views/filter/EREFNodeTitles.php b/modules/contrib/entity_reference_exposed_filters/src/Plugin/views/filter/EREFNodeTitles.php
+index 84df3fe6..5ee6f761 100644
+--- a/modules/contrib/entity_reference_exposed_filters/src/Plugin/views/filter/EREFNodeTitles.php
++++ b/modules/contrib/entity_reference_exposed_filters/src/Plugin/views/filter/EREFNodeTitles.php
+@@ -312,7 +312,7 @@ public function generateOptions() {
+       // Run through the bundles.
+       foreach (array_keys($all_bundles) as $bundle) {
+         foreach ($this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle) as $field_definition) {
+-          if ($field_definition->getType() == 'entity_reference' && $field_definition->getName() == $relationship_field_name) {
++          if (in_array($field_definition->getType(), ['entity_reference', 'og_standard_reference']) && $field_definition->getName() == $relationship_field_name) {
+             if ($field_definition->getName() == 'uid') {
+               continue;
+             }
+@@ -328,13 +328,18 @@ public function generateOptions() {
+               $target_entity_type_id = $target_entity_type_id[1];
+             }
+             // Filter out entity reference views.
+-            if (($handler_settings = $field_obj->getSetting('handler_settings')) && !empty($handler_settings['view'])) {
++            $handler_settings = $field_obj->getSetting('handler_settings');
++            if ($relationship_field_name == 'og_audience') {
++              $handler_settings['view'] = [];
++              $handler_settings['target_bundles']['blog'] = 'blog';
++            }
++            if ($handler_settings && !empty($handler_settings['view'])) {
+               \Drupal::messenger()->addError($this->t('This is targeting a field filtered by a view. Cannot get bundle.'), 'error');
+               \Drupal::messenger()->addError($this->t('Please use a field filtered by content type only.'), 'error');
+               return [];
+             }
+             // Get all the targets (content types etc) that this might hit.
+-            $target_bundles = array_keys($field_obj->getSetting('handler_settings')['target_bundles']);
++            $target_bundles = array_keys($handler_settings['target_bundles']);
+             $bundles_needed[] = $bundle;
+ 
+             // Get the options together.
