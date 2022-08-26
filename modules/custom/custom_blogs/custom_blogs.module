@@ -168,8 +168,16 @@ function custom_blogs_views_pre_render(\Drupal\views\ViewExecutable $view) {
 + * Implements hook_views_post_render().
 + */
 function custom_blogs_views_post_render(\Drupal\views\ViewExecutable $view, array &$output, \Drupal\views\Plugin\views\cache\CachePluginBase $cache) {
-  if (empty(\Drupal::request()->get('keys')) && $view->id() == 'recent_posts' && $view->current_display == 'block_1') {
-    //This sets the title if the search keys are empty.
-    $view->setTitle('Recent Posts');
+  if ($view->id() == 'recent_posts' && $view->current_display == 'block_1') {
+    if (empty(\Drupal::request()->get('keys'))) {
+      //This sets the title if the search keys are empty.
+      $view->setTitle('Recent Posts');
+    }
+    else {
+      $blog_id = $view->args[0];
+      $blog = \Drupal\node\Entity\Node::load($blog_id);
+      $title = $blog->getTitle();
+      $view->setTitle('Posts in ' . $title);
+    }
   }
 }
