@@ -52,9 +52,10 @@ a {
   color: var(--color-teal-400);
   text-decoration: underline;
 }
+
 a:hover {
-    text-decoration-thickness: 2px;
-  }
+  text-decoration-thickness: 2px;
+}
 
 /* Typography and text  */
 
@@ -67,6 +68,8 @@ h1 {
 .heading-serif {
   font-size: 3.5rem;
   font-family: var(--font-second-family);
+  font-weight: 400;
+  padding-bottom: 1.125rem;
 }
 
 h2 {
@@ -79,6 +82,7 @@ h3 {
   font-size: 1.5rem;
   font-weight: normal;
   line-height: var(--line-height-heading);
+  margin-bottom: .75rem;
 }
 
 h4 {
@@ -106,6 +110,7 @@ kbd {
   white-space: nowrap;
 }
 
+ul,
 [role="list"] {
   padding: 0;
   list-style: none;
@@ -132,6 +137,7 @@ kbd {
  source: https://web.dev/prefers-reduced-motion/
  */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   ::before,
   ::after {

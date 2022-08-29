@@ -6,6 +6,7 @@ libraries:
   - umlib_blogs/global-styling
   - umlib_blogs/global-scripts
 base theme: umlib_base
+screenshot: um-library-theme.png
 regions:
   header: "Header"
   banner: "Banner"
@@ -13,3 +14,4 @@ regions:
   sidebar_first: "Sidebar first"
   footer_first: "Footer First"
   footer_second: "Footer Second"
+  footer_third: "Footer Third"

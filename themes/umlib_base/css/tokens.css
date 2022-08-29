@@ -42,8 +42,8 @@
   --color-green-300: #57bc75;
   --color-green-400: #20a848;
   --color-green-500: #198539;
-  --font-base-family: "Muli", sans-serif;
-  --font-second-family: "Crimson Text", serif;
+  --font-base-family: "Muli",sans-serif;
+  --font-second-family: "Crimson Text",serif;
   --bold: 700;
   --regular: 400;
   --semibold: 600;
@@ -60,10 +60,21 @@
   --text-x-small: 1.125rem;
   --text-xx-small: 1rem;
   --text-xxx-small: 0.875rem;
-  --z-space-small: rgba(0, 0, 0, 0.2) 0px 2px 8px 0px;
-  --z-space-medium: rgba(0, 0, 0, 0.2) 0px 2px 16px 0px;
+  --space-xxx-small: 2px;
+  --space-xx-small: 4px;
+  --space-x-small: 8px;
+  --space-small: 12px;
+  --space-medium: 16px;
+  --space-large: 24px;
+  --space-x-large: 32px;
+  --space-xx-large: 40px;
+  --space-xxx-large: 48px;
+  --space-xxxx-large: 64px;
+  --space-xxxxx-large: 96px;
+  --z-space-small: rgba(0,0,0,0.2) 0px 2px 8px 0px;
+  --z-space-medium: rgba(0,0,0,0.2) 0px 2px 16px 0px;
   --opacity-75: 0.75;
-  --opacity-50: 0.5;
-  --opacity-30: 0.3;
+  --opacity-50: 0.50;
+  --opacity-30: 0.30;
   --radius-default: 4px;
 }
