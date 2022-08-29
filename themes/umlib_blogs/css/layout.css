@@ -2,10 +2,31 @@ nav {
   display: inline;
 }
 
-nav ul li{
+nav ul li {
   display: inline;
 }
 
-#block-umlib-blogs-branding {
-  display: inline;
+main {
+  margin-top: 2rem;
+}
+
+.layout-content {
+  max-width: calc(75% - 8px);
+}
+
+@media screen and (max-width:900px) {
+  .layout-content {
+    max-width: calc(100% - 8px);
+  }
+}
+
+aside.layout-sidebar-first {
+  max-width: calc(25% - 8px);
+}
+
+@media screen and (max-width:900px) {
+  aside.layout-sidebar-first {
+    max-width: calc(100% - 8px);
+  }
+
 }
