@@ -194,6 +194,14 @@ function custom_blogs_views_post_render(\Drupal\views\ViewExecutable $view, arra
       $view->setTitle($view->getTitle() . ' in Blog <em>' . $title . '</em>');
     }
   }
+  if ($view->id() == 'browse_by_tag' && $view->current_display == 'block_2') {
+    if (isset($view->args[0]) && is_numeric($view->args[0])) {
+      $blog_id = $view->args[0];
+      $blog = \Drupal\node\Entity\Node::load($blog_id);
+      $title = $blog->getTitle();
+      $view->setTitle($view->getTitle() . ' in <em>' . $title . '</em>');
+    }
+  }
   if ($view->id() == 'recent_posts' && $view->current_display == 'block_1') {
     if (empty(\Drupal::request()->get('keys'))) {
       //This sets the title if the search keys are empty.
