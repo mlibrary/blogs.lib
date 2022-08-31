@@ -186,6 +186,14 @@ function custom_blogs_views_pre_render(\Drupal\views\ViewExecutable $view) {
 + * Implements hook_views_post_render().
 + */
 function custom_blogs_views_post_render(\Drupal\views\ViewExecutable $view, array &$output, \Drupal\views\Plugin\views\cache\CachePluginBase $cache) {
+  if ($view->id() == 'taxonomy_term' && $view->current_display == 'page_1') {
+    if (isset($view->args[1]) && $view->args[1] != 'all') {
+      $blog_id = $view->args[1];
+      $blog = \Drupal\node\Entity\Node::load($blog_id);
+      $title = $blog->getTitle();
+      $view->setTitle($view->getTitle() . ' in Blog <em>' . $title . '</em>');
+    }
+  }
   if ($view->id() == 'recent_posts' && $view->current_display == 'block_1') {
     if (empty(\Drupal::request()->get('keys'))) {
       //This sets the title if the search keys are empty.
