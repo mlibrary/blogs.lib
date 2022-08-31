@@ -8,14 +8,32 @@ function custom_blogs_page_attachments(array &$attachments) {
 }
 
 /**
- * Implements hook_link_alter().
+ * Implements hook_preprocess_HOOK().
  */
+function custom_blogs_preprocess_block(&$variables) {
+  if ($variables['elements']["#plugin_id"] === 'system_menu_block:account') {
+    $variables['#cache']['max-age'] = 0;
+    $variables['elements']['#cache']['max-age'] = 0;
+    if (!empty($variables['content']['#items']['user.page'])) {
+      $variables['content']['#items']['user.page']['url'] = Drupal\Core\Url::fromUri('route:<nolink>');
+      $variables['content']['#items']['user.page']['url']->setOption('attributes', ['data-drupal-link-system-path' => 'user']);
+      $variables['content']['#items']['user.page']['title'] = t('@name', ['@name' => \Drupal::currentUser()->getDisplayName()]);
+    }
+  }
+}
+
+/**
+ * Implements hook_link_alter().
+ *
+Abandoned due to https://www.drupal.org/node/2795443, https://www.drupal.org/node/3082473
 function custom_blogs_link_alter(&$vars) {
   if (
     $vars['url']->isRouted()
     && $vars['url']->getRouteName() === 'user.page'
     && (string) $vars['text'] === (string) t('My account')
   ) {
+    $vars['#cache']['max-age'] = 0;
+    $vars['elements']['#cache']['max-age'] = 0;
     $vars['text'] = t('@name', ['@name' => \Drupal::currentUser()->getDisplayName()]);
     $vars['url'] = \Drupal\Core\Url::fromUri('route:<nolink>');
   }
