@@ -1,6 +1,31 @@
 <?php
 
 /**
+* Implements hook_ENTITY_TYPE_view_alter().
+*/
+function custom_blogs_paragraph_view_alter(array &$build, Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display) {
+  if ($entity->bundle() == 'get_in_touch') {
+    $name = $entity->get('field_name')->value;
+    $email = $entity->get('field_email')->value;
+    if (!empty($name) && !empty($email)) {
+      unset($build['field_email']);
+    }
+    if (!empty($name) && empty($email)) {
+      $build['field_name'][0]['#markup'] = strip_tags($build['field_name'][0]['#markup']);
+    }
+  }
+}
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter().
+ */
+function custom_blogs_field_widget_entity_reference_paragraphs_form_alter(&$element, &$form_state, $context) {
+  // Skip "Confirm deletion / Restore actions" behavior for all paragraphs.
+  // see https://www.drupal.org/node/2831409
+  $element['top']['links']['remove_button']['#paragraphs_mode'] = 'removed';
+}
+
+/**
  * Implements hook_page_attachments().
  */
 function custom_blogs_page_attachments(array &$attachments) {

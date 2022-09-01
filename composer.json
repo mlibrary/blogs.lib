@@ -87,6 +87,7 @@
         "drupal/override_node_options": "^2.6",
         "drupal/panels": "^4.6",
         "drupal/panels_ipe": "^4.6",
+        "drupal/paragraphs": "^1.15",
         "drupal/pathauto": "^1.8",
         "drupal/r4032login": "^2.1",
         "drupal/reroute_email": "^2.1",
