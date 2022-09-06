@@ -10,20 +10,25 @@ use Drupal\paragraphs\Entity\Paragraph;
  * Implements hook_openid_connect_pre_authorize().
  */
 function custom_openid_openid_connect_pre_authorize($account, array $context) {
+  $uname = NULL;
   if (isset($context['userinfo']['preferred_username']) || isset($context['userinfo']['email'])) {
     $uname = $context['userinfo']['preferred_username'];
     if (empty($uname)) {
-      $uname = explode('@', $context['userinfo']['email'])[0];
+      $uname = explode('@', $context['userinfo']['email']);
+      if ($uname[1] == 'umich.edu') {
+        $uname = $uname[0];
+      }
+      else {
+        $uname = $context['userinfo']['email'];
+      }
     }
 // UNCOMMENT 3 LINES BELOW and replace YOUR_USERNAME_HERE and USER_YOU_WANT_TO_BE_HERE with appropriate values
 //    if (in_array($uname,['YOUR_USERNAME_HERE']) && strpos($_SERVER['HTTP_USER_AGENT'], 'Chrome')) {
 //      return user_load_by_name('USER_YOU_WANT_TO_BE_HERE');
 //    }
   }
-  if (is_bool($account) || !$account) {
-    if (isset($context['userinfo']['email'])) {
-      $account = user_load_by_name(explode('@', $context['userinfo']['email'])[0]);
-    }
+  if ((is_bool($account) || !$account) && $uname) {
+    $account = user_load_by_name($uname);
   }
   // Allow access only for current users
   if (($account && !$account->isBlocked() && $account->hasRole('authenticated'))
