@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2bf0ff98ad3c60a9a1011c6396a30968",
+    "content-hash": "3f4aeaeb76ee6f2eaaa9bb1d54a7563e",
     "packages": [
         {
             "name": "alchemy/zippy",
@@ -3319,6 +3319,58 @@
             "time": "2022-07-20T15:11:47+00:00"
         },
         {
+            "name": "drupal/create_user_permission",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/create_user_permission.git",
+                "reference": "2.0.0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/create_user_permission-2.0.0.zip",
+                "reference": "2.0.0",
+                "shasum": "1cebe39426d58999968594a4153ff438fc2827cc"
+            },
+            "require": {
+                "drupal/core": "^8 || ^9"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "2.0.0",
+                    "datestamp": "1593785456",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "efpapado",
+                    "homepage": "https://www.drupal.org/user/1009348"
+                },
+                {
+                    "name": "eiriksm",
+                    "homepage": "https://www.drupal.org/user/1014468"
+                },
+                {
+                    "name": "esolitos",
+                    "homepage": "https://www.drupal.org/user/1567500"
+                }
+            ],
+            "description": "Provides a permission to \"create users\", instead of having to \"administer users\"",
+            "homepage": "https://www.drupal.org/project/create_user_permission",
+            "support": {
+                "source": "https://git.drupalcode.org/project/create_user_permission"
+            }
+        },
+        {
             "name": "drupal/ctools",
             "version": "3.7.0",
             "source": {
@@ -5911,6 +5963,54 @@
             "homepage": "https://www.drupal.org/project/paragraphs",
             "support": {
                 "source": "https://git.drupalcode.org/project/paragraphs"
+            }
+        },
+        {
+            "name": "drupal/passwordless",
+            "version": "1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/passwordless.git",
+                "reference": "8.x-1.2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/passwordless-8.x-1.2.zip",
+                "reference": "8.x-1.2",
+                "shasum": "cb65d3ddff3389f62f1866b259f7355291a32222"
+            },
+            "require": {
+                "drupal/core": "^8 || ^9"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "8.x-1.2",
+                    "datestamp": "1615755486",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "antiorario",
+                    "homepage": "https://www.drupal.org/user/121829"
+                },
+                {
+                    "name": "richgerdes",
+                    "homepage": "https://www.drupal.org/user/3437973"
+                }
+            ],
+            "description": "Allows users to log in without using a password.",
+            "homepage": "https://www.drupal.org/project/passwordless",
+            "support": {
+                "source": "https://git.drupalcode.org/project/passwordless"
             }
         },
         {

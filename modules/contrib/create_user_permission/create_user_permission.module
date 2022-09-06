@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * @file
+ * The create user permission module.
+ */
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountInterface;
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function create_user_permission_form_user_register_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $access = \Drupal::currentUser()->hasPermission('create users');
+  if (!$access) {
+    // No use in form altering anything.
+    return;
+  }
+  $register_setting = \Drupal::config('user.settings')
+    ->get('register');
+
+  if ($register_setting != 'visitors') {
+    // Set the admin value to true, so that our user actually gets created with
+    // no intervention.
+    $form['administer_users']['#value'] = TRUE;
+    $form['account']['status']['#default_value'] = 1;
+  }
+  // Make it possible to send an email to the newly created user.
+  $form['account']['notify']['#access'] = \Drupal::currentUser()->hasPermission('create users');
+}
+
+/**
+ * Implements hook_entity_create_access().
+ */
+function create_user_permission_entity_create_access(AccountInterface $account, array $context, $entity_bundle) {
+  if (empty($context["entity_type_id"]) || $context["entity_type_id"] !== 'user') {
+    return AccessResult::neutral();
+  }
+  return AccessResult::allowedIfHasPermission($account, 'create users');
+}

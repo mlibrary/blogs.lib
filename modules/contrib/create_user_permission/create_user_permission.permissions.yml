@@ -1,0 +1,3 @@
+create users:
+  title: 'Create users'
+  description: 'Allows users to create users, without necessarily being able to edit and delete'

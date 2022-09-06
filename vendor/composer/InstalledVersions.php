@@ -32,7 +32,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '0828f948efef76a836b8cbdc0e4df621da91e884',
+    'reference' => 'fa32bc4d79f695375bbbeee1ac7b033da7b856c1',
     'name' => 'drupal/recommended-project',
   ),
   'versions' => 
@@ -778,6 +778,15 @@ private static $installed = array (
         0 => '9.3.19',
       ),
     ),
+    'drupal/create_user_permission' => 
+    array (
+      'pretty_version' => '2.0.0',
+      'version' => '2.0.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '2.0.0',
+    ),
     'drupal/ctools' => 
     array (
       'pretty_version' => '3.7.0',
@@ -1407,6 +1416,15 @@ private static $installed = array (
       ),
       'reference' => '8.x-1.15',
     ),
+    'drupal/passwordless' => 
+    array (
+      'pretty_version' => '1.2.0',
+      'version' => '1.2.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8.x-1.2',
+    ),
     'drupal/path' => 
     array (
       'replaced' => 
@@ -1460,7 +1478,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '0828f948efef76a836b8cbdc0e4df621da91e884',
+      'reference' => 'fa32bc4d79f695375bbbeee1ac7b033da7b856c1',
     ),
     'drupal/reroute_email' => 
     array (

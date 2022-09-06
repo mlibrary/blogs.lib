@@ -1,6 +1,73 @@
 <?php
 
 /**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function custom_blogs_form_user_form_alter(&$form, &$form_state, $form_id) {
+  if (!\Drupal::currentUser()->hasPermission('administer_user')) {
+    $form['account']['name']['#type'] = 'hidden';
+    $form['field_user_last']['#type'] = 'hidden';
+    $form['field_user_first']['#type'] = 'hidden';
+    $form['field_user_display']['#type'] = 'hidden';
+    $form['field_user_title']['#type'] = 'hidden';
+  }
+  if (empty($form['account']['name']['#default_value'])) {
+    $form['account']['name']['#value'] = user_password();
+  }
+  array_unshift($form['#validate'], '_custom_blogs_form_user_register_validate');
+}
+
+function _custom_blogs_form_user_register_validate(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $email = $form_state->getValue('mail');
+  $uname = NULL;
+  if ($email) {
+    $uname = explode('@', $email);
+    if ($uname[1] == 'umich.edu') {
+      $uname = $uname[0];
+    }
+    else {
+      $uname = $email;
+    }
+  }
+  if ($uname) {
+    $form_state->setValue('name', $uname);
+    $form_state->setValue('edit_name', $uname);
+    $user_data = _get_mcommunity_user($uname);
+    if ($user_data) {
+      $form_state->setValue(['field_user_last', 0, 'value'], $user_data['sn']);
+      $form_state->setValue(['field_user_first', 0, 'value'], $user_data['givenname']);
+      $form_state->setValue(['field_user_display', 0, 'value'], $user_data['displayname']);
+      $form_state->setValue(['field_user_title', 0, 'value'], $user_data['umichtitle']);
+    }
+  }
+  else {
+    $form_state->setErrorByName('blogs_username_error', t('Cannot create user ' . $uname));
+  }
+}
+
+function _get_mcommunity_user($name) {
+  $user_data = [];
+  if ($mcomm = \Drupal\Core\Site\Settings::get('mcommunity')) {
+    $ldap_config = parse_ini_file($mcomm, TRUE);
+    $ldap_resource = ldap_connect($ldap_config['connect']['uri']);
+    ldap_bind($ldap_resource, $ldap_config['bind']['dn'], $ldap_config['bind']['pw']);
+    $ldap_result = ldap_search(
+      $ldap_resource,
+      "ou=People,dc=umich,dc=edu",
+      "(uid=".$name.")",
+      ['entityid','displayName','title','mail','givenname','sn','umichtitle',]
+    );
+    $ldap_entries = ldap_get_entries($ldap_resource, $ldap_result);
+    $raw_data = array_filter($ldap_entries[0], function($k) { return !is_numeric($k); }, ARRAY_FILTER_USE_KEY);
+    foreach ($raw_data as $key => $data) {
+      $user_data[$key] = $data[0];
+    }
+  }
+
+  return $user_data;
+}
+
+/**
 * Implements hook_ENTITY_TYPE_view_alter().
 */
 function custom_blogs_paragraph_view_alter(array &$build, Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display) {

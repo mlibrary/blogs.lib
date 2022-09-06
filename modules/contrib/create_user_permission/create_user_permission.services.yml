@@ -1,0 +1,5 @@
+services:
+  create_user_permission.route_subscriber:
+    class: Drupal\create_user_permission\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }
