@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3f4aeaeb76ee6f2eaaa9bb1d54a7563e",
+    "content-hash": "472631294fa6860006f398f5e60de8fb",
     "packages": [
         {
             "name": "alchemy/zippy",
@@ -3063,16 +3063,16 @@
         },
         {
             "name": "drupal/core",
-            "version": "9.3.19",
+            "version": "9.3.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core.git",
-                "reference": "a2e0d65f7a4f31712ae829e1ff96827a8bb9e438"
+                "reference": "b32e65a1ebc76c24f6036924274d21c222e350ef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core/zipball/a2e0d65f7a4f31712ae829e1ff96827a8bb9e438",
-                "reference": "a2e0d65f7a4f31712ae829e1ff96827a8bb9e438",
+                "url": "https://api.github.com/repos/drupal/core/zipball/b32e65a1ebc76c24f6036924274d21c222e350ef",
+                "reference": "b32e65a1ebc76c24f6036924274d21c222e350ef",
                 "shasum": ""
             },
             "require": {
@@ -3314,9 +3314,9 @@
             ],
             "description": "Drupal is an open source content management platform powering millions of websites and applications.",
             "support": {
-                "source": "https://github.com/drupal/core/tree/9.3.19"
+                "source": "https://github.com/drupal/core/tree/9.3.21"
             },
-            "time": "2022-07-20T15:11:47+00:00"
+            "time": "2022-08-03T16:34:49+00:00"
         },
         {
             "name": "drupal/create_user_permission",
@@ -4307,6 +4307,65 @@
             "support": {
                 "source": "https://git.drupalcode.org/project/image_field_caption",
                 "issues": "https://www.drupal.org/project/issues/image_field_caption"
+            }
+        },
+        {
+            "name": "drupal/image_resize_filter",
+            "version": "1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/image_resize_filter.git",
+                "reference": "8.x-1.1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/image_resize_filter-8.x-1.1.zip",
+                "reference": "8.x-1.1",
+                "shasum": "5a8869959407f2eeec7495d5cf64396334e0a673"
+            },
+            "require": {
+                "drupal/core": "^8 || ^9"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "8.x-1.1",
+                    "datestamp": "1591040375",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "David Valdez (gnuget)",
+                    "homepage": "https://www.drupal.org/u/gnuget",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "Ra Mänd (ram4nd)",
+                    "homepage": "https://www.drupal.org/u/ram4nd",
+                    "role": "Co-maintainer"
+                },
+                {
+                    "name": "quicksketch",
+                    "homepage": "https://www.drupal.org/user/35821"
+                },
+                {
+                    "name": "ram4nd",
+                    "homepage": "https://www.drupal.org/user/601534"
+                }
+            ],
+            "description": "Resizes images based on width and height attributes and optionally link to the original image.",
+            "homepage": "https://www.drupal.org/project/image_resize_filter",
+            "support": {
+                "source": "https://git.drupalcode.org/project/image_resize_filter",
+                "issues": "https://www.drupal.org/project/issues/image_resize_filter"
             }
         },
         {
