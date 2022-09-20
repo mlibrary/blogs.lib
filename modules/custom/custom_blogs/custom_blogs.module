@@ -17,6 +17,9 @@ function custom_blogs_form_user_form_alter(&$form, &$form_state, $form_id) {
   array_unshift($form['#validate'], '_custom_blogs_form_user_register_validate');
 }
 
+/**
+ * custom_validate for user_form_alter().
+ */
 function _custom_blogs_form_user_register_validate(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
   $email = $form_state->getValue('mail');
   $uname = NULL;
@@ -45,6 +48,107 @@ function _custom_blogs_form_user_register_validate(&$form, \Drupal\Core\Form\For
   }
 }
 
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function custom_blogs_form_og_membership_default_add_form_alter(&$form, &$form_state, $form_id) {
+  // Note: requires create_user_permission module.
+  if (\Drupal::currentUser()->hasPermission('create users')  || \Drupal::currentUser()->hasPermission('administer_user')) {
+    array_unshift($form['#validate'], '_custom_blogs_form_og_membership_add_validate');
+    $form['uid']['widget'][0]['target_id']['#description'] = \Drupal\Core\Field\FieldFilteredMarkup::create('<p>Select an existing user from the dropdown menu after typing the first few letters OR<br/>enter a UM Id or an email address.<br/>Non UM email addresses will need a friend account created. See <a href="https://documentation.its.umich.edu/node/305" target="_blank">Create a Friend Account for Guest Access to U-M Computing Resources</a> for details.</p>');
+  }
+}
+
+/**
+ * custom_validate for og_membership_default_add_form_alter().
+ */
+function _custom_blogs_form_og_membership_add_validate(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  if (empty($form_state->getValue('uid')[0]['target_id'])) {
+    $user_input = $form_state->getUserInput();
+    $new_user_name = trim($user_input['uid'][0]['target_id']);
+    $uname = explode('@', $new_user_name);
+    if ($uname[1] == 'umich.edu') {
+      $new_user_name = $uname[0];
+    }
+    $new_user_roles = $user_input['roles'];
+    foreach ($new_user_roles as $key => $role) {
+      if (!empty($role)) {
+       $role = str_replace('node-', '', $role);
+       $role = str_replace('-', '_', $role);
+       $new_user_roles[] = $role;
+      }
+      unset($new_user_roles[$key]);
+    }
+    $new_user_roles[] = 'blog_drafter';
+    $new_user = NULL;
+    if (strpos($new_user_name, '@') === FALSE) {
+      if (user_validate_name($new_user_name)) {
+        $form_state->setErrorByName('uid', t('The username %name is not valid.', array('%name' => $new_user_name)));
+        return;
+      }
+      $user_data = _get_mcommunity_user($new_user_name);
+      if (isset($user_data['mail']) && !empty($user_data['mail'])) {
+        $new_user = \Drupal\user\Entity\User::create([
+            'name' => $new_user_name,
+            'mail' => $user_data['mail'],
+            'pass' => user_password(),
+            'status' => 1,
+            'roles' => $new_user_roles,
+        ]);
+        if (!empty($user_data['sn'])) {
+          $new_user->get('field_user_last')->setValue([['value' => $user_data['sn']]]);
+        }
+        if (!empty($user_data['givenname'])) {
+          $new_user->get('field_user_first')->setValue([['value' => $user_data['givenname']]]);
+        }
+        if (!empty(trim($user_data['displayname']))) {
+          $new_user->get('field_user_display')->setValue([['value' => $user_data['displayname']]]);
+        }
+        else if (!empty($user_data['sn']) && !empty($user_data['givenname'])) {
+          $new_user->get('field_user_display')->setValue([['value' => $user_data['givenname'].' '.$user_data['sn']]]);
+        }
+        if (!empty($user_data['umichtitle'])) {
+          $new_user->get('field_user_title')->setValue([['value' => $user_data['umichtitle']]]);
+        }
+      }
+    }
+    else {
+      if (!\Drupal::service('email.validator')->isValid($new_user_name)) {
+        $form_state->setErrorByName('uid', t('The email address %mail is not valid.', array('%mail' => $new_user_name)));
+        return;
+      }
+      if (user_validate_name($new_user_name)) {
+        $form_state->setErrorByName('uid', t('The username %name is not valid.', array('%name' => $new_user_name)));
+        return;
+      }
+      $message = \Drupal\Core\Render\Markup::create('<strong>There must be a friend account associated with this email address for user with id '.$new_user_name.' to log into this site. See <a href="https://documentation.its.umich.edu/node/305" target="_blank">Create a Friend Account for Guest Access to U-M Computing Resources</a></strong>');
+      $messenger = \Drupal::messenger();
+      $messenger->addMessage($message, $messenger::TYPE_WARNING);
+      $new_user = \Drupal\user\Entity\User::create([
+          'name' => $new_user_name,
+          'mail' => $new_user_name,
+          'pass' => user_password(),
+          'status' => 1,
+          'roles' => $new_user_roles,
+      ]);
+    }
+    if ($new_user instanceof \Drupal\user\Entity\User) {
+      $new_user->save();
+      $form_state->setValue('uid', [['target_id' => $new_user->id()]]);
+      $user_input['uid'][0]['target_id'] = $new_user->id();
+      $form_state->setUserInput($user_input);
+    }
+    else {
+      $message = \Drupal\Core\Render\Markup::create('<strong>No valid UM user was found with id '.$user_input['uid'][0]['target_id'].'. Please verify the id at <a href="https://mcommunity.umich.edu/" target="_blank">MCommunity</a> or enter a non UM email address and create a friend account at <a href="https://documentation.its.umich.edu/node/305" target="_blank">https://documentation.its.umich.edu/node/305</a>.</strong>');
+      $messenger = \Drupal::messenger();
+      $messenger->addMessage($message, $messenger::TYPE_ERROR);
+    }
+  }
+}
+
+/**
+ * get data from mcommunity().
+ */
 function _get_mcommunity_user($name) {
   $user_data = [];
   if ($mcomm = \Drupal\Core\Site\Settings::get('mcommunity')) {
@@ -68,17 +172,77 @@ function _get_mcommunity_user($name) {
 }
 
 /**
+* Implements hook_ENTITY_TYPE_presave().
+*/
+function custom_blogs_paragraph_presave($entity) {
+  if ($entity->bundle() == 'get_in_touch') {
+    _custom_blogs_make_sure_we_delete_empty_paragraphs($entity);
+  }
+}
+
+/**
+* Implements hook_ENTITY_TYPE_insert().
+*/
+function custom_blogs_paragraph_insert($entity) {
+  if ($entity->bundle() == 'get_in_touch') {
+    _custom_blogs_make_sure_we_delete_empty_paragraphs($entity);
+  }
+}
+
+/**
+* Implements hook_ENTITY_TYPE_update().
+*/
+function custom_blogs_paragraph_update($entity) {
+  if ($entity->bundle() == 'get_in_touch') {
+    _custom_blogs_make_sure_we_delete_empty_paragraphs($entity);
+  }
+}
+
+/**
 * Implements hook_ENTITY_TYPE_view_alter().
 */
 function custom_blogs_paragraph_view_alter(array &$build, Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display) {
   if ($entity->bundle() == 'get_in_touch') {
-    $name = $entity->get('field_name')->value;
-    $email = $entity->get('field_email')->value;
-    if (!empty($name) && !empty($email)) {
-      unset($build['field_email']);
+    $is_empty = _custom_blogs_make_sure_we_delete_empty_paragraphs($entity);
+    if (!$is_empty) {
+      $name = trim($entity->get('field_name')->value);
+      $email = trim($entity->get('field_email')->value);
+      if (empty($name)) {
+        unset($build['field_name']);
+      }
+      else if (empty($email)) {
+        unset($build['field_email']);
+      }
     }
-    if (!empty($name) && empty($email)) {
-      $build['field_name'][0]['#markup'] = strip_tags($build['field_name'][0]['#markup']);
+  }
+}
+
+/**
+ * custom function to remove empty paragraphs().
+ */
+// see if https://www.drupal.org/project/paragraphs/issues/2877695 is ever solved.
+function _custom_blogs_make_sure_we_delete_empty_paragraphs($entity) {
+  $name = trim($entity->get('field_name')->value);
+  $email = trim($entity->get('field_email')->value);
+  if (empty($name) && empty($email)) {
+    $entity->delete();
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+* Implements hook_ENTITY_TYPE_view_alter().
+*/
+function custom_blogs_node_view_alter(array &$build, Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display) {
+  if ($entity->bundle() == 'blog_post') {
+    $tags = $entity->get('field_blog_tag');
+    if ($tags && isset($build['field_blog_tag'][0]['#url']) && $entity->get('og_audience')) {
+      foreach ($tags as $delta => $tag) {
+        $build['field_blog_tag'][$delta]['#url']->setOption('query', [
+          'blog' => $entity->get('og_audience')->target_id,
+        ]);
+      }
     }
   }
 }
@@ -173,8 +337,18 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $
   if (($view['view']->id() == 'recent_posts') && ($view['view']->current_display == 'block_1')) {
     //This alters the title of the search box and adds a reset link.
     $node = \Drupal::routeMatch()->getParameter('node');
-    if ($node->hasField('og_audience')) {
+    $blog_id = NULL;
+    if (!$node) {
+      $nid = \Drupal::request()->query->get('blog');
+      if (is_numeric($nid)) {
+        $node = \Drupal\node\Entity\Node::load($nid);
+        $blog_id = $nid;
+      }
+    }
+    else if ($node->hasField('og_audience')) {
       $blog_id = $node->get('og_audience')->target_id;
+    }
+    if ($blog_id) {
       $blog = \Drupal\node\Entity\Node::load($blog_id);
       if ($blog) {
         $form['#action'] = $blog->toUrl()->toString();
@@ -191,13 +365,54 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $
         $form['#info']['filter-keys']['label'] = $form['#info']['filter-keys']['label'] . ' ' . $blog->getTitle();
       }
     }
-*/    else {
+*/
+    else if ($node) {
       $form['keys']['#title'] = $form['keys']['#title'] . ' ' . $node->getTitle();
       $form['#info']['filter-keys']['label'] = $form['#info']['filter-keys']['label'] . ' ' . $node->getTitle();
     }
     if ($form['actions']['reset']['#access']) {
       $form['actions']['reset'] = ['#markup' => \Drupal\Core\Render\Markup::create('<div><a href="'.$form['#action'].'">Reset results list</a></div>')];
     }
+  }
+}
+
+/**
+ * Implements hook_block_view_alter().
+ */
+function custom_blogs_block_view_alter(array &$build, \Drupal\Core\Block\BlockPluginInterface $block) {
+  if ($block->getDerivativeId() == 'recent_posts-block_1') {
+    $node = \Drupal::routeMatch()->getParameter('node');
+    if (!$node) {
+      $nid = \Drupal::request()->query->get('blog');
+      if (!is_numeric($nid)) {
+        $build = [];
+      }
+    }
+  }
+  if ($block->getDerivativeId() == 'all_posts-page_1') {
+    $node = \Drupal::routeMatch()->getParameter('node');
+    if (\Drupal::routeMatch()->getParameter('node') || is_numeric(\Drupal::request()->query->get('blog'))) {
+      $build = [];
+    }
+  }
+}
+
+/**
+ * Implements hook_views_query_alter().
+ */
+function custom_blogs_views_query_alter(\Drupal\views\ViewExecutable $view, \Drupal\views\Plugin\views\query\QueryPluginBase $query) {
+  if ($view->id() == 'manage_my_posts' && $view->current_display == 'page_2') {
+    $configuration = [
+      'type'       => 'INNER',
+      'table'      => 'og_membership',
+      'field'      => 'entity_id',
+      'left_table' => 'node_field_data_node__og_audience',
+      'left_field' => 'nid',
+      'operator'   => '=',
+      'extra'  => [[ 'field' => 'uid', 'value' => $view->args[0] ]],
+    ];
+    $join = \Drupal\views\Views::pluginManager('join')->createInstance('standard', $configuration);
+    $query->addRelationship('og_membership', $join, 'node_field_data_node__og_audience');
   }
 }
 
@@ -284,6 +499,7 @@ function custom_blogs_views_post_render(\Drupal\views\ViewExecutable $view, arra
       $blog = \Drupal\node\Entity\Node::load($blog_id);
       $title = $blog->getTitle();
       $view->setTitle($view->getTitle() . ' in Blog <em>' . $title . '</em>');
+      unset($output['#view']->field['og_audience']);
     }
   }
   if ($view->id() == 'browse_by_tag' && $view->current_display == 'block_2') {
