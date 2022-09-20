@@ -326,7 +326,7 @@ class EntityAutocomplete extends Textfield {
       '@entity_type_plural' => \Drupal::entityTypeManager()->getDefinition($element['#target_type'])->getPluralLabel(),
     ];
     if (empty($entities)) {
-      if ($strict) {
+      if ($strict && $element['#type'] !='og_autocomplete') {
         // Error if there are no entities available for a required field.
         $form_state->setError($element, t('There are no @entity_type_plural matching "%value".', $params));
       }

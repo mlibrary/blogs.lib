@@ -69,6 +69,7 @@
         "drupal/google_analytics": "^4.0",
         "drupal/group": "^1.4",
         "drupal/image_field_caption": "^1.1",
+        "drupal/image_resize_filter": "^1.1",
         "drupal/jquery_ui_accordion": "^1.1",
         "drupal/label_help": "^2",
         "drupal/libraries": "^3.0@beta",
@@ -169,7 +170,8 @@
           "drupal/core": {
             "https://www.drupal.org/node/2640994": "https://www.drupal.org/files/issues/2022-02-11/drupal-2640994-122-9.3.patch",
             "https://www.drupal.org/node/2858392": "https://www.drupal.org/files/issues/2018-10-17/2858392-14.patch",
-            "https://www.drupal.org/node/2985168": "https://www.drupal.org/files/issues/2022-06-01/2985168-125.patch"
+            "https://www.drupal.org/node/2985168": "https://www.drupal.org/files/issues/2022-06-01/2985168-125.patch",
+            "handle form validation on og_autocomplete": "patches/og_autocomplete_no_error.patch"
           },
           "drupal/openid_connect": {
             "https://www.drupal.org/node/3011413": "https://www.drupal.org/files/issues/2022-02-14/openid_connect-autologin-3011413-70.patch"

@@ -1,0 +1,13 @@
+diff --git a/core/lib/Drupal/Core/Entity/Element/EntityAutocomplete.php b/core/lib/Drupal/Core/Entity/Element/EntityAutocomplete.php
+index 083de1d6..f93abee4 100644
+--- a/core/lib/Drupal/Core/Entity/Element/EntityAutocomplete.php
++++ b/core/lib/Drupal/Core/Entity/Element/EntityAutocomplete.php
+@@ -326,7 +326,7 @@ protected static function matchEntityByTitle(SelectionInterface $handler, $input
+       '@entity_type_plural' => \Drupal::entityTypeManager()->getDefinition($element['#target_type'])->getPluralLabel(),
+     ];
+     if (empty($entities)) {
+-      if ($strict) {
++      if ($strict && $element['#type'] !='og_autocomplete') {
+         // Error if there are no entities available for a required field.
+         $form_state->setError($element, t('There are no @entity_type_plural matching "%value".', $params));
+       }
