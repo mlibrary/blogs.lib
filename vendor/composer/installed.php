@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => '4f7f7956a5e6c2b4267d8628c6fe87e25a656bc5',
+    'reference' => '6fe0dda6c5a06a85d0ab701771bee076b7515612',
     'name' => 'drupal/recommended-project',
   ),
   'versions' => 
@@ -1332,13 +1332,12 @@
     ),
     'drupal/og' => 
     array (
-      'pretty_version' => 'dev-1.x',
-      'version' => 'dev-1.x',
+      'pretty_version' => '1.0.0-alpha8',
+      'version' => '1.0.0.0-alpha8',
       'aliases' => 
       array (
-        0 => '1.x-dev',
       ),
-      'reference' => 'dec6a56b3a4ac1bbffb7897fabb4d459d36ca3c1',
+      'reference' => '8.x-1.0-alpha8',
     ),
     'drupal/olivero' => 
     array (
@@ -1468,7 +1467,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '4f7f7956a5e6c2b4267d8628c6fe87e25a656bc5',
+      'reference' => '6fe0dda6c5a06a85d0ab701771bee076b7515612',
     ),
     'drupal/reroute_email' => 
     array (

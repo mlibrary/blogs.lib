@@ -41,6 +41,19 @@ index cb910a7f..ddd4ef8a 100644
  og.subscribe:
    path: 'group/{entity_type_id}/{group}/subscribe/{og_membership_type}'
    defaults:
+diff --git a/og_ui/og_ui.info.yml b/og_ui/og_ui.info.yml
+index 2065b18a..8e616779 100644
+--- a/og_ui/og_ui.info.yml
++++ b/og_ui/og_ui.info.yml
+@@ -9,8 +9,3 @@ dependencies:
+   - og
+ 
+ configure: og_ui.admin_index
+-
+-# Information added by Drupal.org packaging script on 2022-08-26
+-version: '8.x-1.0-alpha8'
+-project: 'og'
+-datestamp: 1661523191
 diff --git a/og_ui/og_ui.links.action.yml b/og_ui/og_ui.links.action.yml
 new file mode 100644
 index 00000000..bef396cc
@@ -111,7 +124,7 @@ diff --git a/og_ui/src/Controller/OgUiController.php b/og_ui/src/Controller/OgUi
 index a83197e7..38efb07a 100644
 --- a/og_ui/src/Controller/OgUiController.php
 +++ b/og_ui/src/Controller/OgUiController.php
-@@ -4,6 +4,7 @@ declare(strict_types = 1);
+@@ -4,6 +4,7 @@
  
  namespace Drupal\og_ui\Controller;
  
@@ -119,7 +132,7 @@ index a83197e7..38efb07a 100644
  use Drupal\Core\Controller\ControllerBase;
  use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
  use Drupal\Core\Entity\EntityTypeManagerInterface;
-@@ -74,13 +75,27 @@ class OgUiController extends ControllerBase {
+@@ -74,13 +75,27 @@ public static function create(ContainerInterface $container) {
     *   The overview as a render array.
     */
    public function rolesPermissionsOverviewPage($type) {
@@ -148,7 +161,7 @@ index a83197e7..38efb07a 100644
        $bundle_info = $this->entityTypeBundleInfo->getBundleInfo($entity_type);
        foreach ($bundles as $bundle) {
          $rows[] = [
-@@ -88,16 +103,16 @@ class OgUiController extends ControllerBase {
+@@ -88,16 +103,16 @@ public function rolesPermissionsOverviewPage($type) {
              'data' => $definition->getLabel() . ' - ' . $bundle_info[$bundle]['label'],
            ],
            [
@@ -169,7 +182,7 @@ index a83197e7..38efb07a 100644
        '#theme' => 'table',
        '#header' => $header,
        '#rows' => $rows,
-@@ -108,7 +123,7 @@ class OgUiController extends ControllerBase {
+@@ -108,7 +123,7 @@ public function rolesPermissionsOverviewPage($type) {
    }
  
    /**
@@ -178,7 +191,7 @@ index a83197e7..38efb07a 100644
     *
     * @param string $type
     *   The type of overview, either 'roles' or 'permissions'.
-@@ -120,4 +135,25 @@ class OgUiController extends ControllerBase {
+@@ -120,4 +135,25 @@ public function rolesPermissionsOverviewTitleCallback($type) {
      return $this->t('OG @type overview', ['@type' => $type]);
    }
  
@@ -830,7 +843,7 @@ diff --git a/src/Entity/OgRole.php b/src/Entity/OgRole.php
 index 89361ad4..0b015c26 100644
 --- a/src/Entity/OgRole.php
 +++ b/src/Entity/OgRole.php
-@@ -18,12 +18,34 @@ use Drupal\user\Entity\Role;
+@@ -18,12 +18,34 @@
   * @ConfigEntityType(
   *   id = "og_role",
   *   label = @Translation("OG role"),
@@ -865,7 +878,7 @@ index 89361ad4..0b015c26 100644
   *   config_export = {
   *     "id",
   *     "label",
-@@ -137,6 +159,13 @@ class OgRole extends Role implements OgRoleInterface {
+@@ -137,6 +159,13 @@ public function setRoleType($role_type) {
      return $this->set('role_type', $role_type);
    }
  
@@ -1119,7 +1132,7 @@ index 00000000..a70e858f
 +}
 diff --git a/src/OgRoleAccessControlHandler.php b/src/OgRoleAccessControlHandler.php
 new file mode 100644
-index 00000000..aa535487
+index 00000000..9336c4ee
 --- /dev/null
 +++ b/src/OgRoleAccessControlHandler.php
 @@ -0,0 +1,46 @@
@@ -1146,7 +1159,7 @@ index 00000000..aa535487
 +   */
 +  protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
 +    if ($operation == 'delete') {
-+      list(, , $id) = explode('-', $entity->id(), 3);
++      [, , $id] = explode('-', $entity->id(), 3);
 +      $roles = [
 +        OgRoleInterface::ANONYMOUS,
 +        OgRoleInterface::AUTHENTICATED,
@@ -1173,7 +1186,7 @@ diff --git a/src/OgRoleInterface.php b/src/OgRoleInterface.php
 index 23505603..c4162922 100644
 --- a/src/OgRoleInterface.php
 +++ b/src/OgRoleInterface.php
-@@ -127,6 +127,17 @@ interface OgRoleInterface extends RoleInterface {
+@@ -127,6 +127,17 @@ public function getRoleType();
     */
    public function setRoleType($role_type);
  
@@ -1212,7 +1225,7 @@ index 777c2d17..850b2e58 100644
    /**
     * If the permission is security sensitive and should be limited to admins.
     *
-@@ -151,6 +161,21 @@ abstract class Permission implements PermissionInterface {
+@@ -151,6 +161,21 @@ public function setRestrictAccess($access) {
      return $this;
    }
  
@@ -1238,7 +1251,7 @@ diff --git a/src/PermissionInterface.php b/src/PermissionInterface.php
 index da7d4e84..a16659a0 100644
 --- a/src/PermissionInterface.php
 +++ b/src/PermissionInterface.php
-@@ -121,4 +121,22 @@ interface PermissionInterface {
+@@ -121,4 +121,22 @@ public function getRestrictAccess();
     */
    public function setRestrictAccess($access);
  
@@ -1283,7 +1296,7 @@ index 9135d932..f03b6486 100644
    }
  
    /**
-@@ -64,7 +64,7 @@ class OgLocalTask extends DeriverBase implements ContainerDeriverInterface {
+@@ -64,7 +64,7 @@ public function getDerivativeDefinitions($base_plugin_definition) {
      foreach (array_keys($this->groupTypeManager->getGroupMap()) as $entity_type_id) {
        $route_name = "entity.$entity_type_id.og_admin_routes";
  
@@ -1292,12 +1305,38 @@ index 9135d932..f03b6486 100644
          // Route not found.
          continue;
        }
+diff --git a/tests/modules/og_standard_reference_test_views/og_standard_reference_test_views.info.yml b/tests/modules/og_standard_reference_test_views/og_standard_reference_test_views.info.yml
+index dea0646e..e7718636 100644
+--- a/tests/modules/og_standard_reference_test_views/og_standard_reference_test_views.info.yml
++++ b/tests/modules/og_standard_reference_test_views/og_standard_reference_test_views.info.yml
+@@ -5,8 +5,3 @@ package: Testing
+ core_version_requirement: ^9
+ dependencies:
+  - drupal:views
+-
+-# Information added by Drupal.org packaging script on 2022-08-26
+-version: '8.x-1.0-alpha8'
+-project: 'og'
+-datestamp: 1661523191
+diff --git a/tests/modules/og_test/og_test.info.yml b/tests/modules/og_test/og_test.info.yml
+index 30931df5..3697da87 100644
+--- a/tests/modules/og_test/og_test.info.yml
++++ b/tests/modules/og_test/og_test.info.yml
+@@ -5,8 +5,3 @@ package: Testing
+ core_version_requirement: ^9
+ dependencies:
+   - drupal:options
+-
+-# Information added by Drupal.org packaging script on 2022-08-26
+-version: '8.x-1.0-alpha8'
+-project: 'og'
+-datestamp: 1661523191
 diff --git a/tests/src/Kernel/Access/RolesAndPermissionsUiAccessTest.php b/tests/src/Kernel/Access/RolesAndPermissionsUiAccessTest.php
 new file mode 100644
-index 00000000..49b3bb4e
+index 00000000..03bf5203
 --- /dev/null
 +++ b/tests/src/Kernel/Access/RolesAndPermissionsUiAccessTest.php
-@@ -0,0 +1,326 @@
+@@ -0,0 +1,327 @@
 +<?php
 +
 +declare(strict_types = 1);
@@ -1336,6 +1375,7 @@ index 00000000..49b3bb4e
 +    'block_content',
 +    'og',
 +    'og_ui',
++    'options',
 +    'system',
 +    'user',
 +  ];
@@ -1478,7 +1518,7 @@ index 00000000..49b3bb4e
 +   */
 +  public function testRouteAccess(array $routes, array $access_matrix): void {
 +    foreach ($routes as $route_info) {
-+      list($route, $parameters) = $route_info;
++      [$route, $parameters] = $route_info;
 +      foreach ($access_matrix as $user_key => $should_have_access) {
 +        $has_access = $this->container->get('access_manager')->checkNamedRoute($route, $parameters, $this->users[$user_key], FALSE);
 +        $message = "The '$user_key' user is " . ($should_have_access ? '' : 'not ') . "expected to have access to the '$route' route.";

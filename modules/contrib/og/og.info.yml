@@ -11,3 +11,8 @@ dependencies:
   - drupal:text
   - drupal:field
   - drupal:user
+
+# Information added by Drupal.org packaging script on 2022-08-26
+version: '8.x-1.0-alpha8'
+project: 'og'
+datestamp: 1661523191
