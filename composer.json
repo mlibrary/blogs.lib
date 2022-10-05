@@ -62,6 +62,7 @@
         "drupal/core": "^9.3",
         "drupal/create_user_permission": "^2.0",
         "drupal/devel": "^4.1",
+        "drupal/easy_breadcrumb": "^2.0",
         "drupal/editor_advanced_link": "^2.0",
         "drupal/entity_reference_exposed_filters": "^1.0@alpha",
         "drupal/field_group": "^3.2",

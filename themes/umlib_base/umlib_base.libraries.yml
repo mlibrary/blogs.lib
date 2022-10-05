@@ -6,6 +6,7 @@ global-styling:
       css/tokens.css: {}
       css/layout.css: {}
       css/component.css: {}
+      css/breadcrumb.css: {}
 global-scripts:
   version: 1.x
   js:
