@@ -9,3 +9,8 @@ dependencies:
   - og
 
 configure: og_ui.admin_index
+
+# Information added by Drupal.org packaging script on 2022-10-05
+version: '8.x-1.0-alpha9'
+project: 'og'
+datestamp: 1664950094

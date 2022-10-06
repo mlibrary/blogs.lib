@@ -41,19 +41,6 @@ index cb910a7f..ddd4ef8a 100644
  og.subscribe:
    path: 'group/{entity_type_id}/{group}/subscribe/{og_membership_type}'
    defaults:
-diff --git a/og_ui/og_ui.info.yml b/og_ui/og_ui.info.yml
-index 2065b18a..8e616779 100644
---- a/og_ui/og_ui.info.yml
-+++ b/og_ui/og_ui.info.yml
-@@ -9,8 +9,3 @@ dependencies:
-   - og
- 
- configure: og_ui.admin_index
--
--# Information added by Drupal.org packaging script on 2022-08-26
--version: '8.x-1.0-alpha8'
--project: 'og'
--datestamp: 1661523191
 diff --git a/og_ui/og_ui.links.action.yml b/og_ui/og_ui.links.action.yml
 new file mode 100644
 index 00000000..bef396cc
@@ -1305,32 +1292,6 @@ index 9135d932..f03b6486 100644
          // Route not found.
          continue;
        }
-diff --git a/tests/modules/og_standard_reference_test_views/og_standard_reference_test_views.info.yml b/tests/modules/og_standard_reference_test_views/og_standard_reference_test_views.info.yml
-index dea0646e..e7718636 100644
---- a/tests/modules/og_standard_reference_test_views/og_standard_reference_test_views.info.yml
-+++ b/tests/modules/og_standard_reference_test_views/og_standard_reference_test_views.info.yml
-@@ -5,8 +5,3 @@ package: Testing
- core_version_requirement: ^9
- dependencies:
-  - drupal:views
--
--# Information added by Drupal.org packaging script on 2022-08-26
--version: '8.x-1.0-alpha8'
--project: 'og'
--datestamp: 1661523191
-diff --git a/tests/modules/og_test/og_test.info.yml b/tests/modules/og_test/og_test.info.yml
-index 30931df5..3697da87 100644
---- a/tests/modules/og_test/og_test.info.yml
-+++ b/tests/modules/og_test/og_test.info.yml
-@@ -5,8 +5,3 @@ package: Testing
- core_version_requirement: ^9
- dependencies:
-   - drupal:options
--
--# Information added by Drupal.org packaging script on 2022-08-26
--version: '8.x-1.0-alpha8'
--project: 'og'
--datestamp: 1661523191
 diff --git a/tests/src/Kernel/Access/RolesAndPermissionsUiAccessTest.php b/tests/src/Kernel/Access/RolesAndPermissionsUiAccessTest.php
 new file mode 100644
 index 00000000..03bf5203

@@ -12,7 +12,7 @@ dependencies:
   - drupal:field
   - drupal:user
 
-# Information added by Drupal.org packaging script on 2022-08-26
-version: '8.x-1.0-alpha8'
+# Information added by Drupal.org packaging script on 2022-10-05
+version: '8.x-1.0-alpha9'
 project: 'og'
-datestamp: 1661523191
+datestamp: 1664950094
