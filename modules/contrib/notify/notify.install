@@ -1,0 +1,136 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the notify module.
+ */
+
+use Drupal\Core\Database\Database;
+
+/**
+ * Implements hook_uninstall().
+ */
+function notify_uninstall() {
+  \Drupal::state()->delete('notify_send_start');
+  \Drupal::state()->delete('notify_send_last');
+  \Drupal::state()->delete('notify_cron_next');
+  \Drupal::state()->delete('notify_num_sent');
+  \Drupal::state()->delete('notify_num_failed');
+  \Drupal::state()->delete('notify_users');
+}
+
+/**
+ * Drop the '{notify.teasers}' field
+ */
+function notify_update_8200(&$sandbox) {
+ $schema = Database::getConnection()->schema();
+ $schema->dropField('notify', 'teasers');
+}
+
+
+/**
+ * Implements hook_schema().
+ */
+function notify_schema() {
+  $schema['notify'] = [
+    'fields' => [
+      'uid' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'disp-width' => '10',
+      ],
+      'status' => [
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+        'disp-width' => '2',
+      ],
+      'node' => [
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+        'disp-width' => '2',
+      ],
+      'comment' => [
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+        'disp-width' => '2',
+      ],
+      'attempts' => [
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+        'disp-width' => '4',
+      ],
+    ],
+    'primary key' => ['uid'],
+  ];
+
+  $schema['notify_subscriptions'] = [
+    'description' => 'Stores custom subscriptions to node types.',
+    'fields' => [
+      'id' => [
+        'description' => 'primary key',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'uid' => [
+        'description' => '{users}.uid that subscribes to this type.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'nid' => [
+        'description' => '{node}.nid of the subscribed node.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'type' => [
+        'description' => 'machine-readable name of the subscribed type',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+    ],
+    'primary key' => ['id'],
+  ];
+
+  $schema['notify_unpublished_queue'] = [
+    'description' => 'Stores list of unpublished contents to determine what content have been published since last notification.',
+    'fields' => [
+      'id' => [
+        'description' => 'primary key',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'cid' => [
+        'description' => '{comment}.cid of the unpublished comment, or 0 if it is a node.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+      'nid' => [
+        'description' => '{node}.nid of the uinpublished node, or {node}.nid to the node which the comment is a reply.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ],
+    ],
+    'primary key' => ['id'],
+  ];
+
+  return $schema;
+}

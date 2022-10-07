@@ -37,5 +37,22 @@ function custom_openid_openid_connect_pre_authorize($account, array $context) {
     return $account;
   }
   // Deny all other users.
-  return FALSE;
+//  return FALSE;
+}
+
+/**
+ * Implements hook_openid_connect_userinfo_alter().
+ */
+function custom_openid_openid_connect_userinfo_alter(array &$userinfo, array $context) {
+  // Add some custom information.
+  if ($context['plugin_id'] == 'generic') {
+    $uname = explode('@', $userinfo['email']);
+    if ($uname[1] == 'umich.edu') {
+      $uname = $uname[0];
+    }
+    else {
+      $uname = $userinfo['email'];
+    }
+    $userinfo['name'] = $uname;
+  }
 }

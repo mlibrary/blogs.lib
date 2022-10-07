@@ -5844,6 +5844,57 @@
             "install-path": "../drupal/mysql56"
         },
         {
+            "name": "drupal/notify",
+            "version": "2.0.0-alpha1",
+            "version_normalized": "2.0.0.0-alpha1",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/notify.git",
+                "reference": "2.0.0-alpha1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/notify-2.0.0-alpha1.zip",
+                "reference": "2.0.0-alpha1",
+                "shasum": "a75e4ba8f3fd72b178fe568dca1349b72e3240b0"
+            },
+            "require": {
+                "drupal/core": "^9"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "2.0.0-alpha1",
+                    "datestamp": "1659627306",
+                    "security-coverage": {
+                        "status": "not-covered",
+                        "message": "Alpha releases are not covered by Drupal security advisories."
+                    }
+                }
+            },
+            "installation-source": "dist",
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "gisle",
+                    "homepage": "https://www.drupal.org/user/409554"
+                },
+                {
+                    "name": "matt2000",
+                    "homepage": "https://www.drupal.org/user/143172"
+                }
+            ],
+            "description": "Enables notifications of new content and comments by e-mail.",
+            "homepage": "https://www.drupal.org/project/notify",
+            "support": {
+                "source": "https://git.drupalcode.org/project/notify"
+            },
+            "install-path": "../../modules/contrib/notify"
+        },
+        {
             "name": "drupal/oembed_providers",
             "version": "2.1.0",
             "version_normalized": "2.1.0.0",
@@ -5932,6 +5983,7 @@
                 },
                 "patches_applied": {
                     "https://github.com/zerolab/og/tree/196-redux": "patches/zerolab-og-196-redux-branch.patch",
+                    "allow membership lookup in hooks": "patches/og-get-memberships.patch",
                     "fix og admin selection permissions": "patches/fix_og_admin_selection.patch"
                 }
             },

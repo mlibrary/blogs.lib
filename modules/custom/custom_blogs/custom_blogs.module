@@ -1,9 +1,21 @@
 <?php
 
 /**
+ * Implements hook_node_access().
+ */
+function custom_blogs_node_access(NodeInterface $node, $op, AccountInterface $account){
+//WE NEED TO CHECK GROUP PERMS HERE (and maybe elsewhere too)
+}
+
+/**
  * Implements hook_form_alter().
  */
 function custom_blogs_form_alter(&$form, &$form_state, $form_id) {
+  if (strpos($form_id, 'views_form_og_members_overview_default_node') !== FALSE) {
+    unset($form['header']['og_membership_bulk_form']['action']['#options']['og_membership_approve_pending_action']);
+    unset($form['header']['og_membership_bulk_form']['action']['#options']['og_membership_block_action']);
+    unset($form['header']['og_membership_bulk_form']['action']['#options']['og_membership_unblock_action']);
+  }
   $og_default_forms = ['og_membership_default_edit_form', 'og_membership_default_add_form'];
   $og_multiple_forms = ['og_membership_add_multiple_roles_action_form', 'og_membership_remove_multiple_roles_action_form'];
   if (!\Drupal::currentUser()->hasPermission('administer_user')) {
@@ -51,13 +63,6 @@ function _custom_blogs_form_user_register_validate(&$form, \Drupal\Core\Form\For
   if ($uname) {
     $form_state->setValue('name', $uname);
     $form_state->setValue('edit_name', $uname);
-    $user_data = _get_mcommunity_user($uname);
-    if ($user_data) {
-      $form_state->setValue(['field_user_last', 0, 'value'], $user_data['sn']);
-      $form_state->setValue(['field_user_first', 0, 'value'], $user_data['givenname']);
-      $form_state->setValue(['field_user_display', 0, 'value'], $user_data['displayname']);
-      $form_state->setValue(['field_user_title', 0, 'value'], $user_data['umichtitle']);
-    }
   }
   else {
     $form_state->setErrorByName('blogs_username_error', t('Cannot create user ' . $uname));
@@ -73,6 +78,155 @@ function custom_blogs_form_og_membership_default_add_form_alter(&$form, &$form_s
     array_unshift($form['#validate'], '_custom_blogs_form_og_membership_add_validate');
     $form['uid']['widget'][0]['target_id']['#description'] = \Drupal\Core\Field\FieldFilteredMarkup::create('<p>Select an existing user from the dropdown menu after typing the first few letters OR<br/>enter a UM Id or an email address.<br/>Non UM email addresses will need a friend account created. See <a href="https://documentation.its.umich.edu/node/305" target="_blank">Create a Friend Account for Guest Access to U-M Computing Resources</a> for details.</p>');
   }
+  $form['state']['#type'] = 'hidden';
+  $form['state']['#access'] = 0;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function custom_blogs_form_og_membership_default_edit_form_alter(&$form, &$form_state, $form_id) {
+  // Note: requires create_user_permission module.
+  if (\Drupal::currentUser()->hasPermission('create users')  || \Drupal::currentUser()->hasPermission('administer_user')) {
+    array_unshift($form['#validate'], '_custom_blogs_form_og_membership_edit_validate');
+  }
+  $form['state']['#type'] = 'hidden';
+  $form['state']['#access'] = 0;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function custom_blogs_form_og_membership_add_multiple_roles_action_form_alter(&$form, &$form_state, $form_id) {
+  // Note: requires create_user_permission module.
+  if (\Drupal::currentUser()->hasPermission('create users')  || \Drupal::currentUser()->hasPermission('administer_user')) {
+    array_unshift($form['#validate'], '_custom_blogs_form_og_membership_add_multiple_validate');
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function custom_blogs_form_og_membership_remove_multiple_roles_action_form_alter(&$form, &$form_state, $form_id) {
+  // Note: requires create_user_permission module.
+  if (\Drupal::currentUser()->hasPermission('create users')  || \Drupal::currentUser()->hasPermission('administer_user')) {
+    array_unshift($form['#validate'], '_custom_blogs_form_og_membership_remove_multiple_validate');
+  }
+}
+
+/**
+ * custom_validate for og_membership_add_multiple_roles_action_form_alter().
+ */
+function _custom_blogs_form_og_membership_add_multiple_validate(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $user_input = $form_state->getUserInput();
+  $new_user_roles = $user_input['roles'];
+  foreach ($new_user_roles as $key => $role) {
+    if (!empty($role) && $role != 'node-blog-administrator') {
+     $role = str_replace('node-', '', $role);
+     $role = str_replace('-', '_', $role);
+     $new_user_roles[] = $role;
+    }
+    unset($new_user_roles[$key]);
+  }
+  $members = $form_state->getBuildInfo()['callback_object']->getMemberships();
+  foreach ($members as $mid => $member) {
+    $user = $member->getOwner();
+    $user_name = $user->getAccountName();
+    foreach ($new_user_roles as $role) {
+      $user->addRole($role);
+    }
+    $user->save();
+  }
+}
+
+/**
+ * custom_validate for og_membership_remove_multiple_roles_action_form_alter().
+ */
+function _custom_blogs_form_og_membership_remove_multiple_validate(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $user_input = $form_state->getUserInput();
+  $new_user_roles = $user_input['roles'];
+  foreach ($new_user_roles as $key => $role) {
+    if (!empty($role) && $role != 'node-blog-administrator') {
+     $role = str_replace('node-', '', $role);
+     $role = str_replace('-', '_', $role);
+     $new_user_roles[] = $role;
+    }
+    unset($new_user_roles[$key]);
+  }
+  $members = $form_state->getBuildInfo()['callback_object']->getMemberships();
+  foreach ($members as $mid => $member) {
+    $gid = $member->getGroupId();
+    $user = $member->getOwner();
+    $user_name = $user->getAccountName();
+    $memberships = \Drupal::service('og.membership_manager')->getMemberships($user->id());
+    $all_roles = [];
+    foreach ($memberships as $membership) {
+      if ($membership->getGroupId() == $gid) {
+        continue;
+      }
+      $og_roles = $membership->getRoles();
+      foreach ($og_roles as $og_role) {
+        if ($og_role->getName() != 'member') {
+          $all_roles[] = 'blog_' . $og_role->getName();
+        }
+      }
+    }
+    $all_roles = array_unique($all_roles);
+    $user_roles = array_diff($new_user_roles, $all_roles);
+    foreach ($user_roles as $role) {
+      $user->removeRole($role);
+    }
+    $user->save();
+  }
+}
+
+/**
+ * custom_validate for og_membership_default_edit_form_alter().
+ */
+function _custom_blogs_form_og_membership_edit_validate(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $user_input = $form_state->getUserInput();
+  $new_user_roles = $user_input['roles'];
+  unset($new_user_roles['node-blog-administrator']);
+  $user_no_roles = [];
+  //Add roles.
+  foreach ($new_user_roles as $key => $role) {
+    if (!empty($role)) {
+      $role = str_replace('node-', '', $role);
+      $role = str_replace('-', '_', $role);
+      $new_user_roles[] = $role;
+    }
+    else {
+      $no_role = str_replace('node-', '', $key);
+      $no_role = str_replace('-', '_', $no_role);
+      $user_no_roles[] = $no_role;
+    }
+    unset($new_user_roles[$key]);
+  }
+  $user = $form['uid']['widget'][0]['target_id']['#default_value'][0];
+  $user_name = $user->getAccountName();
+  foreach ($new_user_roles as $role) {
+    $user->addRole($role);
+  }
+  //Remove unused roles.
+  $memberships = \Drupal::service('og.membership_manager')->getMemberships($user->id());
+  $all_roles = [];
+  foreach ($memberships as $membership) {
+    if ($membership->getGroupId() == $form['entity_id']['#value']) {
+      continue;
+    }
+    $og_roles = $membership->getRoles();
+    foreach ($og_roles as $og_role) {
+      if ($og_role->getName() != 'member') {
+        $all_roles[] = 'blog_' . $og_role->getName();
+      }
+    }
+  }
+  $all_roles = array_unique($all_roles);
+  $user_roles = array_diff($user_no_roles, $all_roles);
+  foreach ($user_roles as $role) {
+    $user->removeRole($role);
+  }
+  $user->save();
 }
 
 /**
@@ -88,14 +242,13 @@ function _custom_blogs_form_og_membership_add_validate(&$form, \Drupal\Core\Form
     }
     $new_user_roles = $user_input['roles'];
     foreach ($new_user_roles as $key => $role) {
-      if (!empty($role)) {
+      if (!empty($role) && $role != 'node-blog-administrator') {
        $role = str_replace('node-', '', $role);
        $role = str_replace('-', '_', $role);
        $new_user_roles[] = $role;
       }
       unset($new_user_roles[$key]);
     }
-    $new_user_roles[] = 'blog_drafter';
     $new_user = NULL;
     if (strpos($new_user_name, '@') === FALSE) {
       if (user_validate_name($new_user_name)) {
@@ -111,21 +264,6 @@ function _custom_blogs_form_og_membership_add_validate(&$form, \Drupal\Core\Form
             'status' => 1,
             'roles' => $new_user_roles,
         ]);
-        if (!empty($user_data['sn'])) {
-          $new_user->get('field_user_last')->setValue([['value' => $user_data['sn']]]);
-        }
-        if (!empty($user_data['givenname'])) {
-          $new_user->get('field_user_first')->setValue([['value' => $user_data['givenname']]]);
-        }
-        if (!empty(trim($user_data['displayname']))) {
-          $new_user->get('field_user_display')->setValue([['value' => $user_data['displayname']]]);
-        }
-        else if (!empty($user_data['sn']) && !empty($user_data['givenname'])) {
-          $new_user->get('field_user_display')->setValue([['value' => $user_data['givenname'].' '.$user_data['sn']]]);
-        }
-        if (!empty($user_data['umichtitle'])) {
-          $new_user->get('field_user_title')->setValue([['value' => $user_data['umichtitle']]]);
-        }
       }
     }
     else {
@@ -215,6 +353,31 @@ function custom_blogs_paragraph_update($entity) {
 }
 
 /**
+* Implements hook_ENTITY_TYPE_presave().
+*/
+function custom_blogs_user_presave($user) {
+  $user_name = $user->getAccountName();
+  if (strpos($user_name, '@') === FALSE) {
+    $user_data = _get_mcommunity_user($user_name);
+    if (!empty($user_data['sn'])) {
+      $user->get('field_user_last')->setValue([['value' => $user_data['sn']]]);
+    }
+    if (!empty($user_data['givenname'])) {
+      $user->get('field_user_first')->setValue([['value' => $user_data['givenname']]]);
+    }
+    if (!empty(trim($user_data['displayname']))) {
+      $user->get('field_user_display')->setValue([['value' => $user_data['displayname']]]);
+    }
+    else if (!empty($user_data['sn']) && !empty($user_data['givenname'])) {
+      $user->get('field_user_display')->setValue([['value' => $user_data['givenname'].' '.$user_data['sn']]]);
+    }
+    if (!empty($user_data['umichtitle'])) {
+      $user->get('field_user_title')->setValue([['value' => $user_data['umichtitle']]]);
+    }
+  }
+}
+
+/**
 * Implements hook_ENTITY_TYPE_view_alter().
 */
 function custom_blogs_paragraph_view_alter(array &$build, Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display) {
@@ -261,6 +424,11 @@ function custom_blogs_node_view_alter(array &$build, Drupal\Core\Entity\EntityIn
       }
     }
   }
+  if ($entity->bundle() == 'blog' && $display->id() == 'node.blog.subscribe') {
+    $build['#post_render'][] = function ($html, array $elements) {
+      return str_replace(' group', ' '.$elements['#node']->label(), $html);
+    };
+  }
 }
 
 /**
@@ -291,23 +459,6 @@ function custom_blogs_preprocess_block(&$variables) {
       $variables['content']['#items']['user.page']['url']->setOption('attributes', ['data-drupal-link-system-path' => 'user']);
       $variables['content']['#items']['user.page']['title'] = t('@name', ['@name' => \Drupal::currentUser()->getDisplayName()]);
     }
-  }
-}
-
-/**
- * Implements hook_link_alter().
- *
-Abandoned due to https://www.drupal.org/node/2795443, https://www.drupal.org/node/3082473
-function custom_blogs_link_alter(&$vars) {
-  if (
-    $vars['url']->isRouted()
-    && $vars['url']->getRouteName() === 'user.page'
-    && (string) $vars['text'] === (string) t('My account')
-  ) {
-    $vars['#cache']['max-age'] = 0;
-    $vars['elements']['#cache']['max-age'] = 0;
-    $vars['text'] = t('@name', ['@name' => \Drupal::currentUser()->getDisplayName()]);
-    $vars['url'] = \Drupal\Core\Url::fromUri('route:<nolink>');
   }
 }
 
@@ -372,16 +523,6 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $
         $form['#info']['filter-keys']['label'] = $form['#info']['filter-keys']['label'] . ' ' . $blog->getTitle();
       }
     }
-/*    elseif ($node->hasField('field_blog_post_group_ref')) {
-      $blog_id = $node->get('field_blog_post_group_ref')->target_id;
-      $blog = \Drupal\node\Entity\Node::load($blog_id);
-      if ($blog) {
-        $form['#action'] = $blog->toUrl()->toString();
-        $form['keys']['#title'] = $form['keys']['#title'] . ' ' . $blog->getTitle();
-        $form['#info']['filter-keys']['label'] = $form['#info']['filter-keys']['label'] . ' ' . $blog->getTitle();
-      }
-    }
-*/
     else if ($node) {
       $form['keys']['#title'] = $form['keys']['#title'] . ' ' . $node->getTitle();
       $form['#info']['filter-keys']['label'] = $form['#info']['filter-keys']['label'] . ' ' . $node->getTitle();
@@ -410,6 +551,14 @@ function custom_blogs_block_view_alter(array &$build, \Drupal\Core\Block\BlockPl
     if (\Drupal::routeMatch()->getParameter('node') || is_numeric(\Drupal::request()->query->get('blog'))) {
       $build = [];
     }
+  }
+  if ($block->getPluginId() == 'page_title_block') {
+    $build['#post_render'][] = function ($html, array $elements) {
+      return str_replace('the group ', ' ', $html);
+    };
+    $build['#post_render'][] = function ($html, array $elements) {
+      return str_replace('join', 'subscribe to', $html);
+    };
   }
 }
 

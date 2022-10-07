@@ -1,0 +1,13 @@
+diff --git a/src/Form/OgChangeMultipleRolesFormBase.php b/src/Form/OgChangeMultipleRolesFormBase.php
+index c63d6fb8..596e82bf 100644
+--- a/src/Form/OgChangeMultipleRolesFormBase.php
++++ b/src/Form/OgChangeMultipleRolesFormBase.php
+@@ -162,7 +162,7 @@ protected function getTempStore() {
+    * @return \Drupal\og\OgMembershipInterface[]
+    *   The array of memberships.
+    */
+-  protected function getMemberships() {
++  public function getMemberships() {
+     if (empty($this->memberships)) {
+       $membership_ids = $this->getTempStore()->get('membership_ids');
+       if (!empty($membership_ids)) {

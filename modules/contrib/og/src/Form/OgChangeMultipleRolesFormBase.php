@@ -162,7 +162,7 @@ class OgChangeMultipleRolesFormBase extends FormBase {
    * @return \Drupal\og\OgMembershipInterface[]
    *   The array of memberships.
    */
-  protected function getMemberships() {
+  public function getMemberships() {
     if (empty($this->memberships)) {
       $membership_ids = $this->getTempStore()->get('membership_ids');
       if (!empty($membership_ids)) {

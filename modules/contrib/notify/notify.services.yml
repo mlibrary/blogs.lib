@@ -1,0 +1,4 @@
+services:
+  notify:
+    class: Drupal\notify\Notify
+    arguments: ['@database', '@config.factory', '@state', '@datetime.time']

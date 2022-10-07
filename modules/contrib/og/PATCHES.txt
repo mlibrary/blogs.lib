@@ -5,6 +5,10 @@ https://github.com/zerolab/og/tree/196-redux
 Source: patches/zerolab-og-196-redux-branch.patch
 
 
+allow membership lookup in hooks
+Source: patches/og-get-memberships.patch
+
+
 fix og admin selection permissions
 Source: patches/fix_og_admin_selection.patch
 
