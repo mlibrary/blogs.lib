@@ -361,3 +361,32 @@ input[type="submit"] {
 #block-views-block-browse-by-tag-block-1 {
   margin-top: 2rem;
 }
+
+/* Pagination */
+ul.pager__items.js-pager__items {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+li.pager__item {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  background: var(--color-neutral-100);
+  padding: 1rem 1.25rem;
+  margin: 0.25rem;
+}
+
+li.pager__item.is-active {
+  background-color: var(--color-teal-400);
+}
+
+li.pager__item a {
+  color: var(--color-neutral-400);
+  text-decoration: none;
+  font-weight: var(--semibold);
+}
+
+li.pager__item.is-active a {
+  color: #fff;
+}
