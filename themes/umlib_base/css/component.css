@@ -276,6 +276,19 @@ input[type="submit"] {
   padding: 0.5rem 1rem;
 }
 
+select {
+  height: 40px;
+  font-size: 1rem;
+  margin: 0;
+  border: solid 1px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 1px 4px rgb(0 0 0 / 10%);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  width: 200px !important;
+  font-family: inherit;
+  color: var(--color-neutral-00);
+}
+
 /* Tags */
 
 .tags .views-field.views-field-name {
