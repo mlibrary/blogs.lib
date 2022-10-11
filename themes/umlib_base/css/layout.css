@@ -1,4 +1,4 @@
-/* Layout */
+/* Layout Utilities */
 :root {
   --viewport-margin: 16px;
 }
@@ -31,5 +31,3 @@
 .align-baseline {
   align-items: baseline;
 }
-
-/* A-Z */
