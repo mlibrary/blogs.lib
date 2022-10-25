@@ -258,7 +258,6 @@ li.pager__item {
   align-items: center;
   border-radius: 4px;
   background: var(--color-neutral-100);
-  padding: 1rem 1.25rem;
   margin: 0.25rem;
 }
 
@@ -266,12 +265,25 @@ li.pager__item.is-active {
   background-color: var(--color-teal-400);
 }
 
-li.pager__item a {
+li.pager__item a, li.pager__item.pager__item--ellipsis {
   color: var(--color-neutral-400);
   text-decoration: none;
   font-weight: var(--semibold);
+  padding: 1rem 1.25rem;
+  border-bottom: solid 2px transparent;
 }
 
 li.pager__item.is-active a {
   color: #fff;
+}
+
+li.pager__item.is-active a:hover {
+  color: #fff;
+  border-bottom: solid 2px var(--color-maize-400);
+  border-radius: 4px;
+}
+
+li.pager__item a:hover, li.pager__item.pager__item--ellipsis:hover {
+  border-bottom: solid 2px var(--color-teal-400);
+  border-radius: 4px;
 }

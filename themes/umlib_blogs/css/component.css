@@ -56,6 +56,10 @@ span[data-drupal-link-system-path="user"]::before {
   margin-top: 2rem;
 }
 
+.recent-posts > footer {
+  margin-top: 1.5rem;
+}
+
 /* Search Forms */
 
 /* Search form A-Z */
