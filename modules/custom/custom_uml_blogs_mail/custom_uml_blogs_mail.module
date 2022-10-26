@@ -1,0 +1,73 @@
+<?php
+
+/**
+ * Implements hook_module_implements_alter().
+ *
+ * Ensure custom_uml_mail runs last when hook_mail_alter is invoked.
+ */
+function custom_uml_blogs_mail_module_implements_alter(&$implementations, $hook) {
+  if (($hook == 'mail_alter' || $hook == 'mail') && isset($implementations['custom_uml_blogs_mail'])) {
+    $group = $implementations['custom_uml_blogs_mail'];
+    unset($implementations['custom_uml_blogs_mail']);
+    $implementations['custom_uml_blogs_mail'] = $group;
+    // If the reroute_email module is installed, ensure that comes after ours so
+    // rerouted emails are still rerouted.
+    if (isset($implementations['reroute_email'])) {
+      $group = $implementations['reroute_email'];
+      unset($implementations['reroute_email']);
+      $implementations['reroute_email'] = $group;
+    }
+  }
+}
+
+/**
+ * Implements hook_mail_alter().
+ *
+ * Alter destination of outgoing emails if reroute_email is enabled.
+ */
+function custom_uml_blogs_mail_mail_alter(&$message) {
+  $sitemail = \Drupal::config('system.site')->get('mail');
+  $message['headers']['From'] = $message['headers']['Sender'] = $message['headers']['Errors-To'] = $message['headers']['Reply-to'] = 'U-M Library Blogs' . ' <' . $sitemail . '>';
+  if ($message['id'] == 'notify_notice') {
+    unset($message['params']['content']);
+    unset($message['body']); //array of multiple Drupal\Core\Render\Markup
+    unset($message['subject']); //Drupal\Core\StringTranslation\TranslatableMarkup
+    $account = $message['params']['user'];
+    $memberships = \Drupal::service('og.membership_manager')->getMemberships($account->id());
+    $user_gids = [];
+    foreach ($memberships as $membership) {
+      $user_gid = $membership->getGroupId();
+      $user_gids[] = $user_gid;
+    }
+    $nodes = $message['params']['nodes'];
+    $groups = [];
+    foreach ($nodes as $nid => $node) {
+      $gid = $node->get('og_audience')->target_id;
+      if (!in_array($gid, $user_gids)) {
+        unset($nodes[$nid]);
+      }
+      else {
+        $group = \Drupal\node\Entity\Node::load($gid);
+        $groups[$gid] =$group;
+        $alias = str_replace('default', '', \Drupal::service('path_alias.manager')->getAliasByPath('/node/'.$node->id()));
+        $host = \Drupal::request()->getSchemeAndHttpHost();
+        $url = $host . $alias;
+        $message['body'][] = \Drupal\Core\Render\Markup::create('<h2>'.$group->getTitle().': '.$node->getTitle().'</h2><p>'.$node->get('field_blog_post_summary')->value.'</p><p><a href="'.$url.'">Read the full post!</a></p>');
+        $message['subject'] = $group->getTitle().': '.$node->getTitle();
+      }
+    }
+    $message['params']['nodes'] = $nodes;
+    if (count($nodes) > 1 && count($groups) == 1) {
+      $message['subject'] = $group->getTitle().' has new posts';
+    }
+    if (count($nodes) > 1 && count($groups) > 1) {
+      $message['subject'] = count($groups).' blogs you subscribe to have new posts';
+    }
+  }
+}
+/**
+ * Implements hook_mail().
+ */
+function custom_uml_blogs_mail_mail($key, &$message, $params) {
+//this wasnt firing
+}
