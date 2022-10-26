@@ -1,10 +1,178 @@
 <?php
 
 /**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function custom_blogs_form_node_blog_post_form_alter(&$form, &$form_state, $form_id) {
+  $node = $form_state->getFormObject()->getEntity();
+  $account = \Drupal::currentUser();
+  $accessible = _custom_blogs_test_og_access($node, 'edit', $account);
+  if (!empty($accessible)) {
+    foreach ($accessible as $gid => $access) {
+      switch ($access) {
+        case 'blog_manager':
+          //Managers should be able to do anything from core and og.
+        break;
+        case 'blog_author':
+          //Authors should be able to do anything from core and og.
+        break;
+        case 'blog_drafter':
+          if (count($accessible) > 1) {
+            $form['drafter_gid'] = [
+              '#type' => 'value',
+              '#value' => $gid,
+            ];
+            array_unshift($form['#validate'], '_custom_blogs_form_blog_post_publish_validate');
+          }
+        break;
+        case 'blog_member':
+          unset($form['og_audience']['widget']['#options'][$gid]);
+        break;
+      }
+    }
+  }
+  array_unshift($form['#validate'], '_custom_blogs_form_blog_post_set_author');
+}
+
+/**
+ * custom_validate for blog_post_publish().
+ */
+function _custom_blogs_form_blog_post_publish_validate(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $gid = $form_state->getValue('og_audience')[0]['target_id'];
+  $drafter_gid = $form_state->getValue('drafter_gid');
+  if ($gid == $drafter_gid) {
+    $blog_name = \Drupal\node\Entity\Node::load($gid)->getTitle();
+    if ($form_state->getValue('status')['value'] == 1) {
+      $form_state->setErrorByName('status', t('Cannot publish in blog ' . $blog_name));
+    }
+    if (!empty($form_state->getValue('publish_on')[0]['value'])) {
+      $form_state->setErrorByName('publish_on', t('Cannot set to publish in blog ' . $blog_name));
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function custom_blogs_form_node_blog_post_edit_form_alter(&$form, &$form_state, $form_id) {
+  $node = $form_state->getFormObject()->getEntity();
+  $account = \Drupal::currentUser();
+  $accessible = _custom_blogs_test_og_access($node, 'edit', $account);
+  if (!empty($accessible)) {
+    foreach ($accessible as $gid => $access) {
+      switch ($access) {
+        case 'blog_manager':
+          //Managers should be able to do anything from core and og.
+        break;
+        case 'blog_author':
+          //Authors should be able to do anything from core and og.
+        break;
+        case 'blog_drafter':
+          if ($gid == $node->get('og_audience')->target_id) {
+            $form['publish_on']['#disabled'] = TRUE;
+            $form['status']['#disabled'] = TRUE;
+          }
+          $form['drafter_gid'] = [
+            '#type' => 'value',
+            '#value' => $gid,
+          ];
+          array_unshift($form['#validate'], '_custom_blogs_form_blog_post_publish_validate');
+        break;
+        case 'blog_member':
+          unset($form['og_audience']['widget']['#options'][$gid]);
+          //this should come from og -  return \Drupal\Core\Access\AccessResult::forbidden(); //view only.
+        break;
+      }
+    }
+  }
+  array_unshift($form['#validate'], '_custom_blogs_form_blog_post_set_author');
+}
+
+/**
+ * custom_validate for blog_post_form().
+ */
+function _custom_blogs_form_blog_post_set_author(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $authors = $form_state->getValue('field_author_s_');
+  $has_author = FALSE;
+  foreach ($authors as $key => $author) {
+    if (is_numeric($key) && isset($author['target_id']) && !empty($author['target_id'])) {
+      $has_author = TRUE;
+      break;
+    }
+  }
+  if (!$has_author) {
+    $form_state->setValue('field_author_s_', [['target_id' => $form_state->getValue('uid')[0]['target_id']]]);
+  }
+}
+
+/**
  * Implements hook_node_access().
  */
-function custom_blogs_node_access(NodeInterface $node, $op, AccountInterface $account){
-//WE NEED TO CHECK GROUP PERMS HERE (and maybe elsewhere too)
+function custom_blogs_node_access($node, $op, $account){
+//  $access = _custom_blogs_test_og_access($node, $op, $account);
+}
+
+function _custom_blogs_test_og_access($node, $op, $account, $gid = 'all'){
+  if ($op == 'view' || $account->hasPermission('administer_user')) {
+    return;
+  }
+  $memberships = \Drupal::service('og.membership_manager')->getMemberships($account->id());
+  $roles = $account->getRoles();
+  if ($node->id() && $gid != 'all') {
+    $gid = $node->id();
+    if ($node->hasField('og_audience')) {
+      $gid = $node->get('og_audience')->target_id;
+    }
+  }
+  $og_roles = [];
+  // Access in this order.
+  $all_og_roles = ['blog_manager', 'blog_author', 'blog_drafter', 'blog_member'];
+  foreach ($memberships as $membership) {
+    if ($membership->getGroupId() != $gid && $gid != 'all') {
+      continue;
+    }
+    else {
+      $get_gid = $membership->getGroupId();
+    }
+    $get_og_roles = $membership->getRoles();
+    foreach ($get_og_roles as $get_og_role) {
+      $get_og_role = str_replace('node-', '', $get_og_role->id());
+      $get_og_role = str_replace('-', '_', $get_og_role);
+      $og_roles[$get_gid][] = $get_og_role;
+    }
+    if (count($og_roles[$get_gid]) == 1) {
+      $og_roles[$get_gid] = $og_roles[$get_gid][0];
+    }
+    else {
+      foreach ($all_og_roles as $all_og_role) {
+        if (in_array($all_og_role, $og_roles[$get_gid])) {
+          //use the 'highest' role
+          $og_roles[$get_gid] = $all_og_role;
+          break;
+        }
+      }
+    }
+  }
+  if ($gid == 'all') {
+    return $og_roles;
+  }
+  //Check if user has extra core roles from another group.
+  $extra_roles = array_diff($roles, $og_roles);
+  foreach ($extra_roles as $key => $value) {
+    if (strpos($value, 'blog_') === FALSE) {
+      unset($extra_roles[$key]);
+    }
+  }
+  //Most users probably have only one group. //hmmm. we dont want to allow create on another group....
+  if (empty($extra_roles)) {
+    return;
+  }
+  foreach ($all_og_roles as $all_og_role) {
+    if (in_array($all_og_role, $og_roles)) {
+      //return the 'highest' role
+      return [$gid => $all_og_role];
+    }
+  }
 }
 
 /**
@@ -476,6 +644,9 @@ function custom_blogs_menu_local_tasks_alter(&$data, $route_name) {
       $bundle_label = str_replace('Blog ', '', $node->type->entity->label());
       $data['tabs'][0]['entity.node.edit_form']['#link']['title'] = 'Edit '.$bundle_label;
       $data['tabs'][0]['og.og_admin_routes:node.og_admin_routes']['#link']['title'] = 'Blog Members';
+      $og_admin_url = $data['tabs'][0]['og.og_admin_routes:node.og_admin_routes']['#link']['url'];
+      $og_admin_members_url = \Drupal\Core\Url::fromRoute('entity.node.og_admin_routes.members', $og_admin_url->getRouteParameters(), $og_admin_url->getOptions());
+      $data['tabs'][0]['og.og_admin_routes:node.og_admin_routes']['#link']['url'] = $og_admin_members_url;
     }
   }
 }
@@ -486,7 +657,7 @@ function custom_blogs_menu_local_tasks_alter(&$data, $route_name) {
 function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $form_id) {
   $path = \Drupal::service('path.current')->getPath();
   $view = $form_state->getStorage('view');
-  if (($view['view']->id() == 'all_posts') && ($view['view']->current_display == 'block_1')) {
+  if (($view['view']->id() == 'all_posts')) {
     //This moves the search button to the search box.
     $actions['actions'] = $form['actions'];
     unset($form['actions']);
@@ -494,14 +665,33 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $
     $keys_position = array_search('keys', $positions);
     //Note that to actually move actions, it needs to be set within a numerically keyed array.
     array_splice($form, $keys_position + 1, 0, [$actions]);
+    $form['keys']['#title_display'] = 'invisible';
+    $form['keys']['#title'] = 'Search All Blogs';
+    $form['#info']['filter-keys']['label'] = $form['keys']['#title'];
+    $form['keys']['#placeholder'] = \Drupal\Core\Render\Markup::create(str_replace('search ', 'Search within ', strtolower($form['keys']['#title'])));
+    $form['#prefix'] = '<h3>'.$form['keys']['#title'].'</h3>';
+    $blog_id = NULL;
+    $nid = \Drupal::request()->query->get('blog');
+    if (is_numeric($nid)) {
+      $node = \Drupal\node\Entity\Node::load($nid);
+      $blog_id = $nid;
+    }
+    if ($blog_id) {
+      $blog = \Drupal\node\Entity\Node::load($blog_id);
+      if ($blog) {
+        $form['keys']['#title'] = 'Search in ' . $blog->getTitle();
+        $form['#info']['filter-keys']['label'] = $form['keys']['#title'];
+        $form['keys']['#placeholder'] = \Drupal\Core\Render\Markup::create(str_replace('Search ', 'Search within ', $form['keys']['#title']));
+        $form['#prefix'] = '<h3>'.$form['keys']['#title'].'</h3>';
+      }
+    }
   }
   //Unset these if we arent on the all-posts page with optional date
   if (($view['view']->id() == 'all_posts') && (!strpos($path, 'all-posts'))) {
-    unset($form['keys']['#title']);
-    unset($form['#info']['filter-keys']['label']);
     unset($form['blog']);
   }
-  if (($view['view']->id() == 'recent_posts') && ($view['view']->current_display == 'block_1')) {
+  if ($view['view']->id() == 'recent_posts') {
+    $form['keys']['#title_display'] = 'invisible';
     //This alters the title of the search box and adds a reset link.
     $node = \Drupal::routeMatch()->getParameter('node');
     $blog_id = NULL;
@@ -527,9 +717,11 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $
       $form['keys']['#title'] = $form['keys']['#title'] . ' ' . $node->getTitle();
       $form['#info']['filter-keys']['label'] = $form['#info']['filter-keys']['label'] . ' ' . $node->getTitle();
     }
+    $form['keys']['#placeholder'] = \Drupal\Core\Render\Markup::create(str_replace('Search in', 'Search within', $form['keys']['#title']));
     if ($form['actions']['reset']['#access']) {
       $form['actions']['reset'] = ['#markup' => \Drupal\Core\Render\Markup::create('<div><a href="'.$form['#action'].'">Reset results list</a></div>')];
     }
+    $form['#prefix'] = '<h3>'.$form['keys']['#title'].'</h3>';
   }
 }
 
@@ -548,7 +740,7 @@ function custom_blogs_block_view_alter(array &$build, \Drupal\Core\Block\BlockPl
   }
   if ($block->getDerivativeId() == 'all_posts-page_1') {
     $node = \Drupal::routeMatch()->getParameter('node');
-    if (\Drupal::routeMatch()->getParameter('node') || is_numeric(\Drupal::request()->query->get('blog'))) {
+    if (\Drupal::routeMatch()->getParameter('node') || (is_numeric(\Drupal::request()->query->get('blog')) && \Drupal::routeMatch()->getRouteName() != 'view.all_posts.page_1')) {
       $build = [];
     }
   }
@@ -678,7 +870,13 @@ function custom_blogs_views_post_render(\Drupal\views\ViewExecutable $view, arra
   if ($view->id() == 'recent_posts' && $view->current_display == 'block_1') {
     if (empty(\Drupal::request()->get('keys'))) {
       //This sets the title if the search keys are empty.
-      $view->setTitle('Recent Posts');
+//im not sure we need this      $view->setTitle('Recent Posts');
+    }
+    if (is_numeric(\Drupal::request()->get('blog'))) {
+      $blog_id = \Drupal::request()->get('blog');
+      $blog = \Drupal\node\Entity\Node::load($blog_id);
+      $title = $blog->getTitle();
+      $view->setTitle('Posts in ' . $title);
     }
     else {
       $blog_id = $view->args[0];
