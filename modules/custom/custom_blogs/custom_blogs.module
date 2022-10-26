@@ -43,10 +43,10 @@ function _custom_blogs_form_blog_post_publish_validate(&$form, \Drupal\Core\Form
   if ($gid == $drafter_gid) {
     $blog_name = \Drupal\node\Entity\Node::load($gid)->getTitle();
     if ($form_state->getValue('status')['value'] == 1) {
-      $form_state->setErrorByName('status', t('Cannot publish in blog ' . $blog_name));
+      $form_state->setErrorByName('status', t('You do not have publishing access in ' . $blog_name.'. Uncheck Published at the bottom of the page and save.'));
     }
     if (!empty($form_state->getValue('publish_on')[0]['value'])) {
-      $form_state->setErrorByName('publish_on', t('Cannot set to publish in blog ' . $blog_name));
+      $form_state->setErrorByName('publish_on', t('You do not have publishing access in ' . $blog_name.' Unset "Scheduling options->Publish on" and save.'));
     }
   }
 }
