@@ -51,8 +51,7 @@ span[data-drupal-link-system-path="user"]::before {
   font-weight: var(--semibold);
 }
 
-#block-views-block-recent-posts-block-2,
-#block-views-block-browse-by-tag-block-1 {
+#block-views-block-recent-posts-block-2 {
   margin-top: 2rem;
 }
 
@@ -63,11 +62,15 @@ span[data-drupal-link-system-path="user"]::before {
 /* Search Forms */
 
 /* Search form A-Z */
-form#views-exposed-form-all-posts-page-1 {
+form#views-exposed-form-all-posts-page-1, form#views-exposed-form-recent-posts-block-1 {
   display: flex;
 }
 
 /* Tags */
+
+.tags {
+  margin-top: 2rem;
+}
 
 .tags .views-field.views-field-name {
   background-color: var(--color-neutral-100);
@@ -112,6 +115,22 @@ form#views-exposed-form-all-posts-page-1 {
   padding-right: .5rem;
 }
 
+@media screen and (max-width: 768px) {
+  .a-z-column-card {
+    width: 85vw !important;
+    margin-bottom: 1.5rem;
+  }
+  .a-z-column-card img {
+    width: 85vw !important;
+    height: auto;
+  }  
+  .layout-content {
+    border-bottom: solid 1px var(--color-neutral-100);
+    padding: 0;
+    margin-bottom: 2rem;
+  }
+}
+
 .a-z-column-card a {
   color: var(--color-neutral-400);
   font-weight: var(--semibold);
@@ -132,6 +151,10 @@ form#views-exposed-form-all-posts-page-1 {
 
 .a-z-column-card .views-field-title {
   margin-bottom: .25rem;
+}
+
+.a-z-column-card:last-child {
+  margin-bottom: 0;
 }
 
 /* Views Fields Title, Date, Description, and Author */
@@ -184,4 +207,28 @@ form#views-exposed-form-all-posts-page-1 {
 .tag-posts header,
 .all-posts header {
   color: var(--color-neutral-300);
+}
+
+/* Posts page */
+
+.social-media .field-content {
+  display: flex;
+  flex-direction: column;
+  text-decoration:none;
+  padding-top: .5rem;
+}
+
+.social-media .views-label {
+  color: var(--color-neutral-400);
+}
+
+.social-media .field-content a {
+  text-decoration:none;
+}
+
+.social-media .field-content .email::before {
+  font-family: "Material Icons";
+  content: '\e0be';
+  vertical-align: bottom;
+  padding-right: .125rem;
 }
