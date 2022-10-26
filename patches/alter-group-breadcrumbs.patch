@@ -1,0 +1,16 @@
+diff --git a/modules/contrib/easy_breadcrumb/src/EasyBreadcrumbBuilder.php b/modules/contrib/easy_breadcrumb/src/EasyBreadcrumbBuilder.php
+index ff037e15..b1eb8adb 100644
+--- a/modules/contrib/easy_breadcrumb/src/EasyBreadcrumbBuilder.php
++++ b/modules/contrib/easy_breadcrumb/src/EasyBreadcrumbBuilder.php
+@@ -351,6 +351,11 @@ public function build(RouteMatchInterface $route_match) {
+             }
+           }
+ 
++//add this to alter group breadcrumb titles
++if (strpos($title, '-get_title') !== false) {
++  $params = explode('-', str_replace('-get_title', '', $title));
++  $title = \Drupal::entityTypeManager()->getStorage($params[1])->load($params[0])->getTitle();
++}
+           // Get URL if it is provided.
+           $url = '';
+           if (isset($settings[1])) {

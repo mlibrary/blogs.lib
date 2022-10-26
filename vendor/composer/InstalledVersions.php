@@ -32,7 +32,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '9274fceb1bdc3e1d79e612f07856654894bc0419',
+    'reference' => 'e0e4f6166c7961f0e27ffed2c5530f23a5d25c4f',
     'name' => 'drupal/recommended-project',
   ),
   'versions' => 
@@ -513,6 +513,15 @@ private static $installed = array (
       array (
         0 => '9.3.22',
       ),
+    ),
+    'drupal/condition_query' => 
+    array (
+      'pretty_version' => '1.3.0',
+      'version' => '1.3.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8.x-1.3',
     ),
     'drupal/config' => 
     array (
@@ -1511,7 +1520,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '9274fceb1bdc3e1d79e612f07856654894bc0419',
+      'reference' => 'e0e4f6166c7961f0e27ffed2c5530f23a5d25c4f',
     ),
     'drupal/reroute_email' => 
     array (
@@ -1610,6 +1619,15 @@ private static $installed = array (
       ),
       'reference' => '2.0.2',
     ),
+    'drupal/swiftmailer' => 
+    array (
+      'pretty_version' => '2.2.0',
+      'version' => '2.2.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8.x-2.2',
+    ),
     'drupal/syslog' => 
     array (
       'replaced' => 
@@ -1699,6 +1717,15 @@ private static $installed = array (
       ),
     ),
     'drupal/variationcache' => 
+    array (
+      'pretty_version' => '1.0.0',
+      'version' => '1.0.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8.x-1.0',
+    ),
+    'drupal/view_unpublished' => 
     array (
       'pretty_version' => '1.0.0',
       'version' => '1.0.0.0',
@@ -1878,6 +1905,15 @@ private static $installed = array (
       array (
       ),
       'reference' => 'e98e3e6d4f86621a9b75f623996e6bbdeb4b9318',
+    ),
+    'html2text/html2text' => 
+    array (
+      'pretty_version' => '4.3.1',
+      'version' => '4.3.1.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '61ad68e934066a6f8df29a3d23a6460536d0855c',
     ),
     'laminas/laminas-diactoros' => 
     array (
@@ -2167,6 +2203,15 @@ private static $installed = array (
       array (
       ),
       'reference' => 'a9502dab59405e275a9f264536c4e1cb61fc3518',
+    ),
+    'swiftmailer/swiftmailer' => 
+    array (
+      'pretty_version' => 'v6.3.0',
+      'version' => '6.3.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8a5d5072dca8f48460fce2f4131fcc495eec654c',
     ),
     'symfony-cmf/routing' => 
     array (
@@ -2512,6 +2557,15 @@ private static $installed = array (
       array (
       ),
       'reference' => 'aeccc4dc52a9e634f1d1eebeb21eacfdcff1053d',
+    ),
+    'tijsverkoyen/css-to-inline-styles' => 
+    array (
+      'pretty_version' => '2.2.5',
+      'version' => '2.2.5.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '4348a3a06651827a27d989ad1d13efec6bb49b19',
     ),
     'twig/twig' => 
     array (

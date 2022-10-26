@@ -1,0 +1,13 @@
+diff --git a/modules/contrib/notify/src/Notify.php b/modules/contrib/notify/src/Notify.php
+index 0f052763..cd8c533b 100644
+--- a/modules/contrib/notify/src/Notify.php
++++ b/modules/contrib/notify/src/Notify.php
+@@ -712,7 +712,7 @@ public function send(): array {
+         if ($body) {
+           $watchdog_level = $this->config->get('notify_watchdog');
+           if (\Drupal::service('plugin.manager.mail')->mail('notify', 'notice', $userrow['mail'], $upl,
+-            ['content' => $body, 'user' => $userobj], NULL, TRUE)) {
++            ['content' => $body, 'user' => $userobj, 'nodes' => $nodes], NULL, TRUE)) {
+             if ($watchdog_level == 0) {
+               \Drupal::logger('notify')->notice('User %name (%mail) notified successfully.',
+                 ['%name' => $userrow['name'], '%mail' => $userrow['mail']]);

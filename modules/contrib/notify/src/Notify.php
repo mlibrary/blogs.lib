@@ -712,7 +712,7 @@ class Notify implements NotifyInterface {
         if ($body) {
           $watchdog_level = $this->config->get('notify_watchdog');
           if (\Drupal::service('plugin.manager.mail')->mail('notify', 'notice', $userrow['mail'], $upl,
-            ['content' => $body, 'user' => $userobj], NULL, TRUE)) {
+            ['content' => $body, 'user' => $userobj, 'nodes' => $nodes], NULL, TRUE)) {
             if ($watchdog_level == 0) {
               \Drupal::logger('notify')->notice('User %name (%mail) notified successfully.',
                 ['%name' => $userrow['name'], '%mail' => $userrow['mail']]);

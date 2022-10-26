@@ -351,6 +351,11 @@ class EasyBreadcrumbBuilder implements BreadcrumbBuilderInterface {
             }
           }
 
+//add this to alter group breadcrumb titles
+if (strpos($title, '-get_title') !== false) {
+  $params = explode('-', str_replace('-get_title', '', $title));
+  $title = \Drupal::entityTypeManager()->getStorage($params[1])->load($params[0])->getTitle();
+}
           // Get URL if it is provided.
           $url = '';
           if (isset($settings[1])) {
