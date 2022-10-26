@@ -777,6 +777,9 @@ function custom_blogs_views_query_alter(\Drupal\views\ViewExecutable $view, \Dru
  * Implements hook_views_pre_render().
  */
 function custom_blogs_views_pre_render(\Drupal\views\ViewExecutable $view) {
+  if ($view->id() == 'og_members_overview') {
+    $view->field['name']->options['settings']['link_to_entity'] = 0;
+  }
   if ($view->id() == 'blogs_filtered_by_membership' && $view->current_display == 'entity_reference_1') {
     //arg[0] is loggedin user. pass to get memberships.
     //don't do anything if user is og administrator.
