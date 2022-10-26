@@ -11,7 +11,7 @@ main {
 }
 
 .layout-content {
-  max-width: calc(75% - 8px);
+  max-width: calc(75% - 16px);
 }
 
 @media screen and (max-width:900px) {
