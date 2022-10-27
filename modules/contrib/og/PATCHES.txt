@@ -9,6 +9,10 @@ allow membership lookup in hooks
 Source: patches/og-get-memberships.patch
 
 
+add word email to subscribe
+Source: patches/add-word-email-to-og-subscribe.patch
+
+
 fix og admin selection permissions
 Source: patches/fix_og_admin_selection.patch
 

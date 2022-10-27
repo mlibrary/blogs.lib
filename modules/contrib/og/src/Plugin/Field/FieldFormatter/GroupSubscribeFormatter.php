@@ -162,7 +162,7 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
         return $elements;
       }
       // Member is pending or active.
-      $link['title'] = $this->t('Unsubscribe from group');
+      $link['title'] = $this->t('Unsubscribe from group email');
       $link['url'] = Url::fromRoute('og.unsubscribe', [
         'entity_type_id' => $entity_type_id,
         'group' => $group->id(),
@@ -189,7 +189,7 @@ class GroupSubscribeFormatter extends FormatterBase implements ContainerFactoryP
 
       /** @var \Drupal\Core\Access\AccessResult $access */
       if (($access = $this->ogAccess->userAccess($group, 'subscribe without approval', $user)) && $access->isAllowed()) {
-        $link['title'] = $this->t('Subscribe to group');
+        $link['title'] = $this->t('Subscribe to group email');
         $link['class'] = ['subscribe'];
         $link['url'] = $url;
       }

@@ -631,6 +631,21 @@ function custom_blogs_preprocess_block(&$variables) {
 }
 
 /**
+ * Implements hook_preprocess_HOOK().
+ */
+function custom_blogs_preprocess_breadcrumb(&$variables) {
+  if ($blog_id = \Drupal\Component\Utility\Html::escape(\Drupal::request()->query->get('blog'))) {
+    if (is_numeric($blog_id) && $blog = \Drupal\node\Entity\Node::load($blog_id)) {
+      array_splice($variables['breadcrumb'], 1, 0, [['text' => $blog->getTitle(), 'url' => '/node/'.$blog_id]]);
+    }
+  }
+  if (strpos(\Drupal::service('path.current')->getPath(), 'taxonomy/term') !== FALSE) {
+    $variables['#cache']['max-age'] = 0;
+    $variables['elements']['#cache']['max-age'] = 0;
+  }
+}
+
+/**
  * Implements hook_menu_local_tasks_alter().
  *
  * Change tab names.
@@ -847,6 +862,14 @@ function custom_blogs_views_pre_render(\Drupal\views\ViewExecutable $view) {
       $view->setTitle('Posts by '. $author_display_name);
     }
   }
+  if ($view->id() == 'blogs_rss' && in_array($view->current_display, ['feed_2', 'feed_4', 'feed_5'])) {
+    $broken_title = explode(' - ', $view->getTitle());
+    $blog = \Drupal\node\Entity\Node::load(trim($broken_title[0]));
+    if ($blog) {
+      $title = $blog->getTitle() . ' - ' . $broken_title[1];
+      $view->setTitle($title);
+    }
+  }
 }
 
 /**
@@ -856,9 +879,10 @@ function custom_blogs_views_post_render(\Drupal\views\ViewExecutable $view, arra
   if ($view->id() == 'taxonomy_term' && $view->current_display == 'page_1') {
     if (isset($view->args[1]) && $view->args[1] != 'all') {
       $blog_id = $view->args[1];
-      $blog = \Drupal\node\Entity\Node::load($blog_id);
-      $title = $blog->getTitle();
-      $view->setTitle($view->getTitle() . ' in Blog <em>' . $title . '</em>');
+      if ($blog = \Drupal\node\Entity\Node::load($blog_id)) {
+        $title = $blog->getTitle();
+        $view->setTitle($view->getTitle() . ' in Blog <em>' . $title . '</em>');
+      }
       unset($output['#view']->field['og_audience']);
     }
   }

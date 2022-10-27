@@ -1,0 +1,22 @@
+diff --git a/modules/contrib/og/src/Plugin/Field/FieldFormatter/GroupSubscribeFormatter.php b/modules/contrib/og/src/Plugin/Field/FieldFormatter/GroupSubscribeFormatter.php
+index dc503587..36153126 100644
+--- a/modules/contrib/og/src/Plugin/Field/FieldFormatter/GroupSubscribeFormatter.php
++++ b/modules/contrib/og/src/Plugin/Field/FieldFormatter/GroupSubscribeFormatter.php
+@@ -162,7 +162,7 @@ public function viewElements(FieldItemListInterface $items, $langcode) {
+         return $elements;
+       }
+       // Member is pending or active.
+-      $link['title'] = $this->t('Unsubscribe from group');
++      $link['title'] = $this->t('Unsubscribe from group email');
+       $link['url'] = Url::fromRoute('og.unsubscribe', [
+         'entity_type_id' => $entity_type_id,
+         'group' => $group->id(),
+@@ -189,7 +189,7 @@ public function viewElements(FieldItemListInterface $items, $langcode) {
+ 
+       /** @var \Drupal\Core\Access\AccessResult $access */
+       if (($access = $this->ogAccess->userAccess($group, 'subscribe without approval', $user)) && $access->isAllowed()) {
+-        $link['title'] = $this->t('Subscribe to group');
++        $link['title'] = $this->t('Subscribe to group email');
+         $link['class'] = ['subscribe'];
+         $link['url'] = $url;
+       }
