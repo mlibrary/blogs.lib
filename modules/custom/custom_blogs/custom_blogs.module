@@ -690,7 +690,12 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $
     //Note that to actually move actions, it needs to be set within a numerically keyed array.
     array_splice($form, $keys_position + 1, 0, [$actions]);
     $form['keys']['#title_display'] = 'invisible';
-    $form['keys']['#title'] = 'Search All Blogs';
+    if ($view['view']->id() == 'all_posts') {
+      $form['keys']['#title'] = 'Search All Blogs';
+    }
+    else if ($view['view']->id() == 'all_posts_date') {
+      $form['keys']['#title'] = 'Browse by Date';
+    }
     $form['#info']['filter-keys']['label'] = $form['keys']['#title'];
     $form['keys']['#placeholder'] = \Drupal\Core\Render\Markup::create(str_replace('search ', 'Search within ', strtolower($form['keys']['#title'])));
     $form['#prefix'] = '<h3>'.$form['keys']['#title'].'</h3>';
@@ -706,7 +711,12 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $
     if ($blog_id) {
       $blog = \Drupal\node\Entity\Node::load($blog_id);
       if ($blog) {
-        $form['keys']['#title'] = 'Search in ' . $blog->getTitle();
+        if ($view['view']->id() == 'all_posts') {
+          $form['keys']['#title'] = 'Search in ' . $blog->getTitle();
+        }
+        else if ($view['view']->id() == 'all_posts_date') {
+          $form['keys']['#title'] = 'Browse in ' . $blog->getTitle();
+        }
         $form['#info']['filter-keys']['label'] = $form['keys']['#title'];
         $form['keys']['#placeholder'] = \Drupal\Core\Render\Markup::create(str_replace('Search ', 'Search within ', $form['keys']['#title']));
         $form['#prefix'] = '<h3>'.$form['keys']['#title'].'</h3>';
