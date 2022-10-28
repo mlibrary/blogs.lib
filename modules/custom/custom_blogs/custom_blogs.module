@@ -634,12 +634,12 @@ function custom_blogs_preprocess_block(&$variables) {
  * Implements hook_preprocess_HOOK().
  */
 function custom_blogs_preprocess_breadcrumb(&$variables) {
-  if ($blog_id = \Drupal\Component\Utility\Html::escape(\Drupal::request()->query->get('blog'))) {
-    if (is_numeric($blog_id) && $blog = \Drupal\node\Entity\Node::load($blog_id)) {
-      array_splice($variables['breadcrumb'], 1, 0, [['text' => $blog->getTitle(), 'url' => '/node/'.$blog_id]]);
-    }
-  }
   if (strpos(\Drupal::service('path.current')->getPath(), 'taxonomy/term') !== FALSE) {
+    if ($blog_id = \Drupal\Component\Utility\Html::escape(\Drupal::request()->query->get('blog'))) {
+      if (is_numeric($blog_id) && $blog = \Drupal\node\Entity\Node::load($blog_id)) {
+        array_splice($variables['breadcrumb'], 1, 0, [['text' => $blog->getTitle(), 'url' => '/node/'.$blog_id]]);
+      }
+    }
     $variables['#cache']['max-age'] = 0;
     $variables['elements']['#cache']['max-age'] = 0;
   }
@@ -672,7 +672,16 @@ function custom_blogs_menu_local_tasks_alter(&$data, $route_name) {
 function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $form_id) {
   $path = \Drupal::service('path.current')->getPath();
   $view = $form_state->getStorage('view');
-  if (($view['view']->id() == 'all_posts')) {
+  if ($view['view']->id() == 'all_posts' || $view['view']->id() == 'all_posts_date') {
+    if ($form['#action'] != $path) {
+      /*
+      //to debug if needed.
+      dpm($form['#id']);
+      dpm($form['#action']);
+      dpm($path);
+      */
+      $form['#action'] = $path;
+    }
     //This moves the search button to the search box.
     $actions['actions'] = $form['actions'];
     unset($form['actions']);
@@ -685,6 +694,9 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $
     $form['#info']['filter-keys']['label'] = $form['keys']['#title'];
     $form['keys']['#placeholder'] = \Drupal\Core\Render\Markup::create(str_replace('search ', 'Search within ', strtolower($form['keys']['#title'])));
     $form['#prefix'] = '<h3>'.$form['keys']['#title'].'</h3>';
+    if (strpos($path, 'all-posts') !== FALSE) {
+      $form['#suffix'] = '<div><a href="/all-dates">Browse by Date</a></div>';
+    }
     $blog_id = NULL;
     $nid = \Drupal::request()->query->get('blog');
     if (is_numeric($nid)) {
@@ -702,7 +714,7 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $
     }
   }
   //Unset these if we arent on the all-posts page with optional date
-  if (($view['view']->id() == 'all_posts') && (!strpos($path, 'all-posts'))) {
+  if (($view['view']->id() == 'all_posts' && !strpos($path, 'all-posts')) || ($view['view']->id() == 'all_posts_date' && !strpos($path, 'all-dates'))) {
     unset($form['blog']);
   }
   if ($view['view']->id() == 'recent_posts') {
@@ -870,6 +882,20 @@ function custom_blogs_views_pre_render(\Drupal\views\ViewExecutable $view) {
       $view->setTitle($title);
     }
   }
+}
+
+/**
++ * Implements hook_views_pre_view().
++ */
+function custom_blogs_views_pre_view(\Drupal\views\ViewExecutable $view, $display_id, array &$args) {
+  if ($view->id() == 'blogs_rss' && in_array($view->current_display, ['feed_2', 'feed_4', 'feed_5'])) {
+    //no idea why this happens on some blogs andnot others.
+    if (!is_numeric($args[0])) {
+      $args[0] = str_replace('/node/', '',\Drupal::service('path_alias.manager')->getPathByAlias('/'.$args[0]));
+    }
+  }
+//here for debug if we need arg alterations.
+//$alias = \Drupal::service('path_alias.manager')->getAliasByPath('/node/'.$args[0]);
 }
 
 /**
