@@ -62,10 +62,41 @@ span[data-drupal-link-system-path="user"]::before {
 /* Search Forms */
 
 /* Search form A-Z */
-form#views-exposed-form-all-posts-page-1, form#views-exposed-form-recent-posts-block-1 {
-  display: flex;
+
+/* Aside forms use grid */
+aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-posts-block-1 {
+  display: grid;
+  margin: 1rem 0 1rem;
+  align-items: start;
+  row-gap: 1.5rem;
+  grid-template-columns: 2fr 1fr;
+  grid-template-areas:
+       "a b"
+       "c c"
 }
 
+#views-exposed-form-all-posts-page-1 > #edit-keys--2 {
+ grid-area: a;
+}
+
+#views-exposed-form-all-posts-page-1 > input#edit-submit-all-posts--2 {
+  grid-area: b;
+ }
+ 
+ #views-exposed-form-all-posts-page-1 > .js-form-item-blog {
+  grid-area: c;
+ }
+
+ .js-form-item-blog > label {
+  display: block;
+  font-weight: var(--bold);
+  padding-bottom: .5rem;
+ }
+
+ .js-form-item-blog > select {
+  width: 100% !important;
+ }
+ 
 /* Tags */
 
 .tags {
