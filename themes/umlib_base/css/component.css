@@ -234,6 +234,7 @@ input[type="text"] {
 
 input[type="submit"] {
   background-color: var(--color-maize-400);
+  color: var(--color-neutral-400);
   display: flex;
   align-items: center;
   border-radius: 2px;
