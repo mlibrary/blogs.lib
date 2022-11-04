@@ -756,7 +756,8 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, $form_state, $
     }
     $form['keys']['#placeholder'] = \Drupal\Core\Render\Markup::create(str_replace('Search in', 'Search within', $form['keys']['#title']));
     if ($form['actions']['reset']['#access']) {
-      $form['actions']['reset'] = ['#markup' => \Drupal\Core\Render\Markup::create('<div><a href="'.$form['#action'].'">Reset results list</a></div>')];
+      $form['#suffix'] = '<div><a href="'.$form['#action'].'">Reset results list</a></div>';
+      unset($form['actions']['reset']);
     }
     $form['#prefix'] = '<h3>'.$form['keys']['#title'].'</h3>';
   }
