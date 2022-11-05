@@ -1,0 +1,15 @@
+.views-field-field-author-s- {
+display:inline-block;
+}
+.views-field-field-author-s- ul li{
+display:inline-block;
+}
+.authors ~ .authors::before {
+  content: ', '; 
+}
+.views-field-field-author-s- ul {
+margin:0;
+}
+.views-field-field-author-s- article, .views-field-field-author-s- article div {
+display:inherit;
+}

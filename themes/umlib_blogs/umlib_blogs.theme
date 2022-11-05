@@ -3,18 +3,24 @@
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 
-/**
- * Prepares variables for views summary templates.
- *
- * The summary prints a single record from a row, with fields.
- *
- * Default template: views-view-summary.html.twig.
- *
- * @param array $variables
- *   An associative array containing:
- *   - view: A ViewExecutable object.
- *   - rows: The raw row data.
+/*
+ * Implements hook__theme_suggestions_HOOK_alter().
  */
+function umlib_blogs_theme_suggestions_item_list_alter(&$suggestions, $variables) {
+/*
+not using this but might be useful later
+  if (\Drupal::routeMatch()->getParameter('view_id')) {
+    $suggestions[] = 'item_list__' . str_replace('-','_',\Drupal::routeMatch()->getParameter('view_id'));
+    $suggestions[] = 'item_list__' . str_replace('-','_',\Drupal::routeMatch()->getParameter('view_id').'_'.\Drupal::routeMatch()->getParameter('display_id'));
+  }
+*/
+//This is a lousy way to do this. Cant get a field name in the item list hook to add class to li. Set a span with author class in views rewrite.
+  if (isset($variables['items'][0]) && strpos(get_class($variables['items'][0]), 'ViewsRenderPipelineMarkup') !== FALSE) {
+    if (strpos($variables['items'][0]->__toString(), 'class="author"') !== FALSE) {
+      $suggestions[] = 'item_list__author';
+    }
+  }
+}
 function umlib_blogs_preprocess_views_view_summary(&$variables) {
   /** @var \Drupal\views\ViewExecutable $view */
   $view = $variables['view'];
