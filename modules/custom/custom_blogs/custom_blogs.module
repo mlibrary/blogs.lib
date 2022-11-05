@@ -815,6 +815,19 @@ function custom_blogs_views_query_alter(\Drupal\views\ViewExecutable $view, \Dru
  * Implements hook_views_pre_render().
  */
 function custom_blogs_views_pre_render(\Drupal\views\ViewExecutable $view) {
+  if ($view->id() == "author" && $view->current_display == 'page_1') {
+    $nids = [];
+    foreach($view->result as $id => $value){
+      $nid = $value->_entity->id();
+      if (in_array($nid, $nids)) {
+        unset($view->result[$id]);
+      }
+      else {
+        $nids[] = $nid;
+      }
+    }
+    $view->total_rows = count($view->result);
+  }
   if ($view->id() == 'og_members_overview') {
     $view->field['name']->options['settings']['link_to_entity'] = 0;
   }
