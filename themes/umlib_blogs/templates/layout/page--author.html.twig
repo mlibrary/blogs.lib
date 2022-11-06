@@ -39,8 +39,9 @@ template_preprocess_page() * @see html.html.twig */ #}
   {{ page.highlighted }}
   {{ page.help }}
 
-  <main>
+  <main class="viewport-container">
     <a id="main-content" tabindex="-1"></a>{# link is in html.html.twig #}
+  <div class="grid-two-column">
     <div class="main-column">
       {{ page.content }}
     </div>
@@ -49,6 +50,7 @@ template_preprocess_page() * @see html.html.twig */ #}
       {{ page.sidebar_first }}
     </aside>
     {% endif %}
+  </div>
   </main>
 
   <footer class="footer">
