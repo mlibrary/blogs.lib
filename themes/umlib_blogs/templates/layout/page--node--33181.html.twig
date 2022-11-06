@@ -39,16 +39,18 @@ template_preprocess_page() * @see html.html.twig */ #}
   {{ page.highlighted }}
   {{ page.help }}
 
-  <main>
+  <main class="viewport-container" id="blog-page">
     <a id="main-content" tabindex="-1"></a>{# link is in html.html.twig #}
-    <div class="main-column">
+  <div class="grid-two-column-with-banner">
+   
       {{ page.content }}
-    </div>
-    {# /.layout-content #} {% if page.sidebar_first %}
-    <aside class="layout-sidebar-first" role="complementary">
+      
+   {% if page.sidebar_first %}
+    <aside class="layout-sidebar-first sidebar-node" role="complementary">
       {{ page.sidebar_first }}
     </aside>
     {% endif %}
+  </div>
   </main>
 
   <footer class="footer">

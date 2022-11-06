@@ -69,7 +69,7 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
   margin: 1rem 0 1rem;
   align-items: start;
   row-gap: 1.5rem;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr 1fr;
   grid-template-areas:
        "a b"
        "c c"
@@ -208,6 +208,7 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
 
 .blog-post-content img {
   max-width: 50%;
+  height: auto;
   display: block;
 }
 
@@ -340,74 +341,48 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
   text-decoration:none;
 }
 
+/*
 .social-media .field-content .email::before {
   font-family: "Material Icons";
   content: '\e0be';
   vertical-align: bottom;
   padding-right: .125rem;
-}
+} */
 
 /* All posts & Recent Posts - Post Cards */
 
-/* These use grid */
-
-.card-all-posts, .card-recent-posts {
-  margin: 2rem 0;
+.recent-posts-blog .views-row, .all-posts .views-row, .tag-posts .views-row,
+.author-posts .views-row {
+  padding-bottom: 1rem;
   border-bottom: solid 1px var(--color-neutral-100);
-  padding: 0 2rem 2rem 0;
-  max-width: 80ch;
-  display: grid;
-  align-items: start;
-  grid-template-columns: 10rem 11rem 4fr;
-  grid-template-rows: fit-content(4ch) fit-content(8ch) 1fr;
-  grid-template-areas:
-       "a b c"
-       "a d d"
-       "a e e"
-       "a f f";
+  max-width: 65ch;
 }
 
-@media screen and (max-width: 769px)  {
-  .card-all-posts, .card-recent-posts  {
-    display: block;
-  }
+.recent-posts-blog .views-row:last-child, 
+.all-posts .views-row:last-child, 
+.tag-posts .views-row:last-child,
+.author-posts .views-row:last-child {
+  border-bottom: none;
+} 
+
+
+#block-views-block-recent-posts-block-1 h3 {
+  margin-top: 2rem;
 }
 
-.card-all-posts > div.views-field.views-field-field-blog-feature-image-media img, .card-recent-posts > div.views-field.views-field-field-blog-feature-image-media img {
-  object-fit: contain;
-  object-position: top left;
-  width: 8.5rem;
+/* RSS */
+
+.rss-feed a {
+  margin-top: 1rem;
+  color: var(--color-neutral-300) !important;
+  font-weight: var(--semibold);
+  text-decoration: none !important;
 }
 
-.card-all-posts > div.views-field.views-field-field-blog-feature-image-media,
-.card-recent-posts > div.views-field.views-field-field-blog-feature-image-media {
- grid-area: a;
+.rss-feed a::before {
+  font-family: "Material Icons";
+  content: '\e0e5';
+  vertical-align: bottom;
+  padding-right: .125rem;
+  color: var(--color-neutral-300);
 }
-
-.card-all-posts > span.views-field.views-field-created,
-.card-recent-posts > span.views-field.views-field-created {
- grid-area: b;
-}
-
-.card-all-posts > span.views-field.views-field-field-author-s-,
-.card-recent-posts > span.views-field.views-field-field-author-s-
- {
- grid-area: c;
- padding-left: 0.5rem;
-}
-
-.card-all-posts > div.views-field.views-field-title,
-.card-recent-posts > div.views-field.views-field-title
- {
- grid-area: d;
-}
-.card-all-posts > div.views-field.views-field-field-blog-post-summary,
-.card-recent-posts > div.views-field.views-field-field-blog-post-summary {
- grid-area: e;
-}
-
-.card-all-posts > div.views-field.views-field-title-1, 
-.card-recent-posts > div.views-field.views-field-title-1 {
- grid-area: f;
-}
-
