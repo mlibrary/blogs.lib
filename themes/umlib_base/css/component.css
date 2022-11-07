@@ -256,22 +256,6 @@ select {
   color: var(--color-neutral-00);
 }
 
-/* Subscribe Form */
-
-.og-subscribe-confirm-form #edit-uid-wrapper,
-.og-subscribe-confirm-form  #edit-roles-wrapper{
-  padding: 1rem 0;
-}
-
-fieldset#edit-roles--wrapper .fieldset-wrapper {
-  padding-left: .5rem;
-}
-
-.og-subscribe-confirm-form > #edit-actions {
- display: flex;
- margin-top: 2rem;
-}
-
 /* Pagination */
 ul.pager__items.js-pager__items {
   margin-top: 2rem;

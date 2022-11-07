@@ -45,7 +45,7 @@ template_preprocess_page() * @see html.html.twig */ #}
     <div class="main-column">
       {{ page.content }}
     </div>
-    {# /.layout-content #} {% if page.sidebar_first %}
+    {% if page.sidebar_first %}
     <aside class="layout-sidebar-first" role="complementary">
       {{ page.sidebar_first }}
     </aside>
@@ -68,4 +68,4 @@ template_preprocess_page() * @see html.html.twig */ #}
     </div>
   </footer>
 </div>
-{# /.layout-container #}
+
