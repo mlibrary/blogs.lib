@@ -6,7 +6,7 @@
     'aliases' => 
     array (
     ),
-    'reference' => '001305119ce25144d3dc2d7ee58055c0480a2db4',
+    'reference' => '525ba38f45f0f696ca484709548394dbc9346e47',
     'name' => 'drupal/recommended-project',
   ),
   'versions' => 
@@ -1234,6 +1234,15 @@
         0 => '9.3.22',
       ),
     ),
+    'drupal/metatag' => 
+    array (
+      'pretty_version' => '1.22.0',
+      'version' => '1.22.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8.x-1.22',
+    ),
     'drupal/migrate' => 
     array (
       'replaced' => 
@@ -1494,7 +1503,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '001305119ce25144d3dc2d7ee58055c0480a2db4',
+      'reference' => '525ba38f45f0f696ca484709548394dbc9346e47',
     ),
     'drupal/reroute_email' => 
     array (
