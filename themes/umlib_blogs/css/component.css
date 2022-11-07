@@ -386,3 +386,19 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
   padding-right: .125rem;
   color: var(--color-neutral-300);
 }
+
+/* Subscribe Form */
+
+.og-subscribe-confirm-form #edit-uid-wrapper,
+.og-subscribe-confirm-form  #edit-roles-wrapper{
+  padding: 1rem 0;
+}
+
+fieldset#edit-roles--wrapper .fieldset-wrapper {
+  padding-left: .5rem;
+}
+
+.og-subscribe-confirm-form > #edit-actions {
+ display: flex;
+ margin-top: 2rem;
+}
