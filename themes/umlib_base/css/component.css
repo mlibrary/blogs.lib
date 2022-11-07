@@ -48,6 +48,10 @@
   flex-wrap: wrap;
 }
 
+.umlib-messages div, .umlib-messages div div {
+  display: block !important;
+}
+
 /* Footer */
 
 .footer {
