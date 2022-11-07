@@ -244,7 +244,10 @@ function custom_blogs_form_og_membership_default_add_form_alter(&$form, &$form_s
   // Note: requires create_user_permission module.
   if (\Drupal::currentUser()->hasPermission('create users')  || \Drupal::currentUser()->hasPermission('administer_user')) {
     array_unshift($form['#validate'], '_custom_blogs_form_og_membership_add_validate');
-    $form['uid']['widget'][0]['target_id']['#description'] = \Drupal\Core\Field\FieldFilteredMarkup::create('<p>Select an existing user from the dropdown menu after typing the first few letters OR<br/>enter a UM Id or an email address.<br/>Non UM email addresses will need a friend account created. See <a href="https://documentation.its.umich.edu/node/305" target="_blank">Create a Friend Account for Guest Access to U-M Computing Resources</a> for details.</p>');
+    $form['uid']['widget'][0]['target_id']['#description'] = \Drupal\Core\Field\FieldFilteredMarkup::create('<p>
+Anyone with an active uniqname or a U-M Friend Account can be added as a member. Begin typing and existing users will appear in the dropdown menu for selection. For new users, enter their full uniqname or Friend Account email address.
+</p><p>
+Non U-M email addresses will need to create their Friend Account first. See <a href="https://documentation.its.umich.edu/node/305" target="_blank">Create a Friend Account for Guest Access to U-M Computing Resources</a> for details.</p>');
   }
   $form['state']['#type'] = 'hidden';
   $form['state']['#access'] = 0;
