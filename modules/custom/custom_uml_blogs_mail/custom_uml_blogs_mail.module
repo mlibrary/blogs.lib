@@ -50,18 +50,23 @@ function custom_uml_blogs_mail_mail_alter(&$message) {
         $group = \Drupal\node\Entity\Node::load($gid);
         $groups[$gid] =$group;
         $alias = str_replace('default', '', \Drupal::service('path_alias.manager')->getAliasByPath('/node/'.$node->id()));
-        $host = \Drupal::request()->getSchemeAndHttpHost();
+        $host = \Drupal::request()->getScheme() . \Drupal::request()->getHost();
         $url = $host . $alias;
         $message['body'][] = \Drupal\Core\Render\Markup::create('<h2>'.$group->getTitle().': '.$node->getTitle().'</h2><p>'.$node->get('field_blog_post_summary')->value.'</p><p><a href="'.$url.'">Read the full post!</a></p>');
         $message['subject'] = $group->getTitle().': '.$node->getTitle();
       }
     }
-    $message['params']['nodes'] = $nodes;
-    if (count($nodes) > 1 && count($groups) == 1) {
-      $message['subject'] = $group->getTitle().' has new posts';
+    if (empty($groups)) {
+      $message['send'] = FALSE;
     }
-    if (count($nodes) > 1 && count($groups) > 1) {
-      $message['subject'] = count($groups).' blogs you subscribe to have new posts';
+    else {
+      $message['params']['nodes'] = $nodes;
+      if (count($nodes) > 1 && count($groups) == 1) {
+        $message['subject'] = $group->getTitle().' has new posts';
+      }
+      if (count($nodes) > 1 && count($groups) > 1) {
+        $message['subject'] = count($groups).' blogs you subscribe to have new posts';
+      }
     }
   }
 }
