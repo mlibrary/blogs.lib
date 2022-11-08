@@ -143,8 +143,12 @@
 
 .skip-links {
   background: var(--color-blue-400);
-  padding: 12px;
+  padding: 2rem;
   margin: 0 auto;
+}
+
+.skip-links > div {
+  text-align: center;
 }
 
 .skip-links ul {
@@ -159,6 +163,7 @@
 .skip-links a {
   color: #fff;
   padding: 8px;
+  margin: 0 auto;
 }
 
 .skip-links:not(:focus-within) {

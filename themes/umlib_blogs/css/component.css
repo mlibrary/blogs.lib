@@ -175,10 +175,13 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
   display: flex;
   align-items: baseline;
   margin: 2rem 0;
+  padding-top: 1rem;
   flex-flow: row wrap;
+  border-top: solid 1px var(--color-neutral-100);
 }
 
-.blog-tag-group h3 {
+.blog-tag-group h2 {
+  font-size: 1.25rem;
   padding-right: 1rem;
 }
 
