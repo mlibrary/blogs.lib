@@ -39,9 +39,13 @@ template_preprocess_page() * @see html.html.twig */ #}
   {{ page.highlighted }}
   {{ page.help }}
 
-  <main class="viewport-container" id="blog-page">
+  
+  <main  id="blog-page">
+    <div class="line"></div>
+  <div class="viewport-container">
     <a id="main-content" tabindex="-1"></a>{# link is in html.html.twig #}
-  <div class="grid-two-column-with-banner">
+    <div class="blog-banner-background"></div>
+    <div class="grid-two-column-with-banner">
    
       {{ page.content }}
       
@@ -50,6 +54,7 @@ template_preprocess_page() * @see html.html.twig */ #}
       {{ page.sidebar_first }}
     </aside>
     {% endif %}
+    </div>
   </div>
   </main>
 

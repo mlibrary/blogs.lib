@@ -16,6 +16,12 @@
   padding-left: .5rem;
 }
 
+/* Bullets */
+
+.bull {
+  color: var(--color-teal-400);
+}
+
 /* Images */
 
 .image-caption {
