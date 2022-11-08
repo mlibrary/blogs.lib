@@ -46,12 +46,12 @@
   {% if multiple %}
     <div{{ attributes.addClass('image-caption') }}>
       {% for item in items %}
-        <div{{ item.attributes }}>{{ item.content }}</div>
+        <div{{ item.attributes }}><em>{{ item.content }}</em></div>
       {% endfor %}
     </div>
   {% else %}
     {% for item in items %}
-      <div{{ attributes }}>{{ item.content }}</div>
+      <div{{ attributes }}><em>{{ item.content }}</em>{</div>
     {% endfor %}
   {% endif %}
 {% else %}
@@ -61,7 +61,7 @@
       <div>
     {% endif %}
     {% for item in items %}
-      <div{{ item.attributes }}>{{ item.content }}</div>
+      <div{{ item.attributes }}><em>{{ item.content }}</em></div>
     {% endfor %}
     {% if multiple %}
       </div>

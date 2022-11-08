@@ -55,8 +55,8 @@
     {% endfor %}
   {% endif %}
 {% else %}
-  <div{{ attributes.addClass('blog-tag-group') }}>
-    <h3{{ title_attributes.addClass(title_classes) }}>{{ label }}:</h3>
+  <div class="blog-tag-group">
+    <h2{{ title_attributes.addClass(title_classes) }}>{{ label }}:</h2>
     {% if multiple %}
       <ul {{ attributes.addClass('blog-tag-list') }}>
     {% endif %}
