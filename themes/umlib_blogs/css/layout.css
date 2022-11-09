@@ -10,6 +10,15 @@ main {
   padding-top: 2rem;
 }
 
+#a-z-page #block-umlib-blogs-page-title h1 {
+ margin-top: 0;
+}
+
+#a-z-page #block-exposedformall-postspage-1 {
+  margin-top: 1rem;
+ }
+ 
+
 /* Layout for Two Column Grid */
 /* A-Z page, All Posts page, Node page */
 
@@ -30,7 +39,6 @@ main {
 
 .layout-sidebar-first {
   grid-area: sidebar;
-  margin-top: 2rem;
 }
 
 .layout-sidebar-first img {
@@ -58,11 +66,41 @@ main {
   row-gap: 1rem;
   column-gap: 2rem;
   grid-template-columns: 2fr 1fr;
-  grid-template-rows: fit-content(4ch) fit-content(8ch) 1fr;
+  grid-template-rows: repeat(3, fit-content(4ch)) 1fr;
   grid-template-areas:
+       "message message"
        "bc  img"
-       "pg  img"
+       "pt  img"
+       "descr  img"
        "con sidebarblog";
+}
+
+@media screen and (max-width: 1080px)  {
+  #block-entityviewcontent-3 {
+    display: none;
+  }
+  .line {
+    display: none;;
+  }
+  .grid-two-column-with-banner {
+    display: grid;
+    row-gap: .5rem;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "message"     
+        "bc"
+        "pt"
+        "descr"
+        "con"
+        "sidebarblog";
+  }  
+  #block-views-block-recent-posts-block-1 {
+    border-top: solid 1px var(--color-neutral-100);
+  }
+}
+
+#block-views-block-unpublished-block-block-1 {
+  grid-area: message;
 }
 
 #block-breadcrumbs-3 {
@@ -70,10 +108,15 @@ main {
 }
 
 #block-umlib-blogs-page-title {
-  grid-area: pg;
+  grid-area: pt;
 }
 
-#block-umlib-blogs-system-main > article {
+#block-entityviewcontent-2 {
+  grid-area: descr;
+  padding-left: .5rem;
+}
+
+#block-entityviewcontent-3 {
   grid-area: img;
 }
 #block-views-block-recent-posts-block-1 {
@@ -82,22 +125,18 @@ main {
 
 .sidebar-node {
   grid-area: sidebarblog;
-  max-width: 45ch;
-  margin-left: 2rem;
+  max-width: 38ch;
+  margin-left: 4rem;
 }
 
-@media screen and (max-width: 1080px)  {
-  #block-umlib-blogs-system-main > article {
-    display: none;
-  }
-  .grid-two-column-with-banner {
-    display: grid;
-    row-gap: .5rem;
-    grid-template-columns: 1fr;
-    grid-template-areas:
-         "bc"
-         "pg"
-         "con"
-         "sidebarblog";
-  }  
+.line {
+  border-top: solid 1px var(--color-neutral-100);
+  position: absolute;
+  top: 23rem; /*27 for some room */
+  width: 100%;
 }
+
+#blog-page {
+  position: relative;
+}
+

@@ -40,22 +40,19 @@ template_preprocess_page() * @see html.html.twig */ #}
   {{ page.help }}
 
   
-  <main  id="blog-page">
+  <main id="blog-page">
     <div class="line"></div>
-  <div class="viewport-container">
-    <a id="main-content" tabindex="-1"></a>{# link is in html.html.twig #}
-    <div class="blog-banner-background"></div>
-    <div class="grid-two-column-with-banner">
-   
-      {{ page.content }}
-      
-   {% if page.sidebar_first %}
-    <aside class="layout-sidebar-first sidebar-node" role="complementary">
-      {{ page.sidebar_first }}
-    </aside>
-    {% endif %}
+    <div class="viewport-container">
+      <a id="main-content" tabindex="-1"></a>{# link is in html.html.twig #}
+      <div class="grid-two-column-with-banner">
+        {{ page.content }}
+       {% if page.sidebar_first %}
+         <aside class="layout-sidebar-first sidebar-node" role="complementary">
+           {{ page.sidebar_first }}
+           </aside>
+        {% endif %}
+        </div>
     </div>
-  </div>
   </main>
 
   <footer class="footer">

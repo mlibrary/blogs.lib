@@ -36,26 +36,24 @@ span[data-drupal-link-system-path="user"]::before {
   flex-flow: row wrap;
 }
 
-/* Blog */
+/* Blog post date */
 
-/*
-.line {
-  border: solid 1px var(--color-neutral-100);
-  width: 100%;
-  position: absolute;
-  top: 24rem;
+#block-views-block-post-date-block-1 {
+  padding-right: 0.5rem;
+  color: var(--color-neutral-300);
+  text-transform: uppercase;
+  font-weight: var(--semibold);
+  font-size: var(--text-base-size);
+  margin-bottom: .75rem;
 }
 
-#blog-page {
-  position: relative;
-}
+/* Get in Touch */
 
-@media screen and (max-width: 1080px)  {
-  .line {
-    display: none;
-  }
+.get-in-touch__block {
+  border-top: solid 1px var(--color-neutral-100);
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
-*/
 
 /* Recent Posts */
 
@@ -75,10 +73,6 @@ span[data-drupal-link-system-path="user"]::before {
   color: var(--color-neutral-400);
   font-size: 18px;
   font-weight: var(--semibold);
-}
-
-#block-views-block-recent-posts-block-2 {
-  margin-top: 2rem;
 }
 
 .recent-posts > footer {
@@ -134,8 +128,11 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
 
 /* A-Z Tags */
 
-.tags {
+#a-z-page .tags {
   margin-top: 2rem;
+}
+
+.tags {
   margin-bottom: 2rem;
   padding-top: 1rem;
   border-top: solid 1px var(--color-neutral-100);
@@ -213,15 +210,12 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
 
 .blog-author-group {
   display: inline-flex;
-  margin-bottom: 1rem;
-  align-items: flex-start;
+  margin-top: 1rem;
+  align-items: baseline;
 }
 .blog-author-group .blog-author {
   padding-right: .5rem;
-  color: var(--color-neutral-300);
-  text-transform: uppercase;
-  font-weight: var(--semibold);
-  font-size: var(--text-base-size);
+ 
 }
 
 .blog-author-group div {
@@ -246,7 +240,7 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
 }
 
 .blog-post-content img {
-  max-width: 50%;
+  max-width: 75%;
   height: auto;
   display: block;
 }
@@ -429,6 +423,9 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
   margin-top: 2rem;
 }
 
+.post-card > div.views-field.views-field-field-blog-post-body > div > p > img{
+  max-width: 50%;
+}
 
 /* Subscribe */
 
@@ -440,6 +437,21 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
 .subscribe h3 {
   margin-bottom: -.75rem;
 }
+
+#block-views-block-subscribe-anon-block-1 a {
+  color: var(--color-neutral-300) !important;
+  font-weight: var(--semibold);
+  text-decoration: none !important;
+  font-size: 1.125rem;
+}
+
+#block-views-block-subscribe-anon-block-1 a::before {
+  font-family: "Material Icons";
+  content: '\e0be';
+  vertical-align: bottom;
+  padding-right: .5rem;
+  color: var(--color-neutral-300);
+} 
 
 .subscribe a {
   color: var(--color-neutral-300) !important;
@@ -454,6 +466,10 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
   vertical-align: bottom;
   padding-right: .5rem;
   color: var(--color-neutral-300);
+}
+
+[about="/blogs-signup"] p {
+  padding: 1rem 0;
 }
 
 /* RSS */
