@@ -55,7 +55,7 @@
     {% endfor %}
   {% endif %}
 {% else %}
-  <div{{ attributes }}>
+  <div{{ attributes.addClass('get-in-touch__block') }}>
     <h3{{ title_attributes.addClass(title_classes) }}>{{ label }}</h3>
     {% if multiple %}
       <div>

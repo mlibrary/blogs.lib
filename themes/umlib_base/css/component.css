@@ -12,6 +12,14 @@
   width: 100%;
 }
 
+/* Adds styling for the status message in header */
+.umlib-messages > div> div {
+  margin-top: 1rem;
+  padding: 8px;
+  background: var(--color-teal-100);
+  border-left: solid 2px var(--color-teal-400);
+}
+
 .website-logo-link {
   margin-right: var(--space-medium);
   display: inline-block;

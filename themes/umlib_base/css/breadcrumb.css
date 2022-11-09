@@ -10,6 +10,7 @@
 
 .breadcrumbs ol {
   display: flex;
+  flex-flow: row wrap;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -19,13 +20,17 @@
   padding-left: 0;
 }
 
-.breadcrumbs a {
+.breadcrumbs a, .breadcrumbs span {
   display: inline;
-  padding: 16px 12px;
+  padding: 16px 10px;
 }
 
 .breadcrumbs li {
-  font-size: 0;
+  padding-top: .5rem;
+}
+
+.breadcrumbs li:last-child {
+  text-transform: capitalize;
 }
 
 .breadcrumbs a {
