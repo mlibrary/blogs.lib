@@ -50,9 +50,10 @@ function custom_uml_blogs_mail_mail_alter(&$message) {
         $group = \Drupal\node\Entity\Node::load($gid);
         $groups[$gid] =$group;
         $alias = str_replace('default', '', \Drupal::service('path_alias.manager')->getAliasByPath('/node/'.$node->id()));
-        $host = \Drupal::request()->getScheme() . \Drupal::request()->getHost();
+        $host = \Drupal::request()->getSchemeAndHttpHost();
         $url = $host . $alias;
-        $message['body'][] = \Drupal\Core\Render\Markup::create('<h2>'.$group->getTitle().': '.$node->getTitle().'</h2><p>'.$node->get('field_blog_post_summary')->value.'</p><p><a href="'.$url.'">Read the full post!</a></p>');
+        $unsubscribe_url = $host . '/group/node/' . $gid . '/unsubscribe';
+        $message['body'][] = \Drupal\Core\Render\Markup::create('<h2>'.$group->getTitle().': '.$node->getTitle().'</h2><p>'.$node->get('field_blog_post_summary')->value.'</p><p><a href="'.$url.'">Read the full post!</a></p><p><small><a href="'.$unsubscribe_url.'">Unsubscribe</a></small></p>');
         $message['subject'] = $group->getTitle().': '.$node->getTitle();
       }
     }
@@ -68,6 +69,23 @@ function custom_uml_blogs_mail_mail_alter(&$message) {
         $message['subject'] = count($groups).' blogs you subscribe to have new posts';
       }
     }
+    //add some debugging in case.
+    //dont do this, itll crash    $string = '<pre><code>' . print_r($message, TRUE) . '</code></pre>';
+    $string = '';
+    foreach ($message as $key => $value) {
+      if (is_array($value)) {
+        foreach ($value as $v_key => $v_value) {
+          if (is_string($v_value)) {
+            $string .= $v_key . ': ' . $v_value;
+          }
+        }
+      }
+      $string .= $key . ': ' . $value;
+    }
+    \Drupal::logger('custom_uml_blogs_mail')->notice('Email sent<br>message %message',
+    [
+      '%message' => $string,
+    ]);
   }
 }
 /**
