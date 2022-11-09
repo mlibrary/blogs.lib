@@ -1,0 +1,6 @@
+force_users_logout.individual_user_form:  
+  title: 'Force users logout settings'  
+  route_name: force_users_logout.individual_user_form  
+  description: 'Force users logout settings'  
+  parent: system.admin_config_development  
+  weight: 99

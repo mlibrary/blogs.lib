@@ -1,0 +1,37 @@
+force_users_logout.individual_user_form:
+  path: '/admin/config/force-users-logout/individualuser'
+  defaults:
+    _form: '\Drupal\force_users_logout\Form\IndividualUserLogoutForm'
+    _title: 'Individual User Logout'
+  requirements:
+    _permission: 'administer users'
+  options:
+    _admin_route: TRUE
+   
+force_users_logout.rolebased_logout_form:
+  path: '/admin/config/force-users-logout/rolebasedlogout'
+  defaults:
+    _form: '\Drupal\force_users_logout\Form\RoleBasedLogoutForm'
+    _title: 'Role Based User Logout'
+  requirements:
+    _permission: 'administer users'
+  options:
+    _admin_route: TRUE
+   
+force_users_logout.allotherusers_logout_form:
+  path: '/admin/config/force-users-logout/otheruserslogout'
+  defaults:
+    _form: '\Drupal\force_users_logout\Form\AllOtherUsersLogoutForm'
+    _title: 'All other Users Logout'
+  requirements:
+    _permission: 'administer users'
+  options:
+    _admin_route: TRUE
+   
+force_users_logout.autocomplete:
+  path: '/force-users-logout/autocomplete'
+  defaults:
+    _controller: '\Drupal\force_users_logout\Controller\AutocompleteController::handleAutocomplete'
+    _format: json
+  requirements:
+    _permission: 'administer users'

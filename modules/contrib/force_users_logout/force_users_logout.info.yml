@@ -1,0 +1,11 @@
+name: Force Users Logout
+type: module
+description: 'Allows admin to force logout of other users'
+configure: force_users_logout.individual_user_form
+core_version_requirement: ^8 || ^9 || ^10
+package: Development
+
+# Information added by Drupal.org packaging script on 2022-08-02
+version: '2.0.1'
+project: 'force_users_logout'
+datestamp: 1659439955

@@ -32,7 +32,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '525ba38f45f0f696ca484709548394dbc9346e47',
+    'reference' => '8128507606a2d8e6c91d80f2833d7b0236bc3f22',
     'name' => 'drupal/recommended-project',
   ),
   'versions' => 
@@ -979,6 +979,15 @@ private static $installed = array (
         0 => '9.3.22',
       ),
     ),
+    'drupal/force_users_logout' => 
+    array (
+      'pretty_version' => '2.0.1',
+      'version' => '2.0.1.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '2.0.1',
+    ),
     'drupal/forum' => 
     array (
       'replaced' => 
@@ -1529,7 +1538,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '525ba38f45f0f696ca484709548394dbc9346e47',
+      'reference' => '8128507606a2d8e6c91d80f2833d7b0236bc3f22',
     ),
     'drupal/reroute_email' => 
     array (

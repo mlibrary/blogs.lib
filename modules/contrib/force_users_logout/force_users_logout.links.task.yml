@@ -1,0 +1,15 @@
+force_users_logout.individual_user_form:
+  title: Individual User
+  route_name: force_users_logout.individual_user_form
+  base_route: force_users_logout.individual_user_form
+
+force_users_logout.rolebased_logout_form:
+  title: Role Based
+  route_name: force_users_logout.rolebased_logout_form
+  base_route: force_users_logout.individual_user_form
+
+force_users_logout.allotherusers_logout_form:
+  title: 'All Other Users'
+  route_name: force_users_logout.allotherusers_logout_form
+  base_route: force_users_logout.individual_user_form
+  weight: 10

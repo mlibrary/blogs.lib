@@ -68,6 +68,7 @@
         "drupal/entity_reference_exposed_filters": "^1.0@alpha",
         "drupal/field_group": "^3.2",
         "drupal/file_entity": "^2.0@beta",
+        "drupal/force_users_logout": "^2.0",
         "drupal/google_analytics": "^4.0",
         "drupal/group": "^1.4",
         "drupal/image_field_caption": "^1.1",
