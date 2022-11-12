@@ -1,0 +1,241 @@
+<?php
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\user\Entity\User;
+use Drupal\Core\Render\Markup;
+use Drupal\Core\Entity\EntityInterface;
+
+/**
+ * Implements hook_entity_delete().
+ */
+function custom_blogs_entity_delete(EntityInterface $entity) {
+  if ($entity->getEntityTypeId() == 'og_membership') {
+    $user = $entity->getOwner();
+    $roles = _custom_blogs_get_roles(array_flip($entity->getRolesIds()));
+    $gid = $entity->getGroupId();
+    $memberships = \Drupal::service('og.membership_manager')->getMemberships($user->id());
+    _custom_blogs_remove_membership_roles($memberships, $roles['remove'], $gid, $user);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function custom_blogs_form_og_membership_default_add_form_alter(&$form, &$form_state, $form_id) {
+  // Note: requires create_user_permission module.
+  if (\Drupal::currentUser()->hasPermission('create users')  || \Drupal::currentUser()->hasPermission('administer_user')) {
+    array_unshift($form['#validate'], '_custom_blogs_form_og_membership_add_validate');
+    $form['uid']['widget'][0]['target_id']['#description'] = \Drupal\Core\Field\FieldFilteredMarkup::create('<p>
+Anyone with an active uniqname or a U-M Friend Account can be added as a member. Begin typing and existing users will appear in the dropdown menu for selection. For new users, enter their full uniqname or Friend Account email address.
+</p><p>
+Non U-M email addresses will need to create their Friend Account first. See <a href="https://documentation.its.umich.edu/node/305" target="_blank">Create a Friend Account for Guest Access to U-M Computing Resources</a> for details.</p>');
+  }
+  $form['state']['#type'] = 'hidden';
+  $form['state']['#access'] = 0;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function custom_blogs_form_og_membership_default_edit_form_alter(&$form, &$form_state, $form_id) {
+  // Note: requires create_user_permission module.
+  if (\Drupal::currentUser()->hasPermission('create users')  || \Drupal::currentUser()->hasPermission('administer_user')) {
+    array_unshift($form['#validate'], '_custom_blogs_form_og_membership_edit_validate');
+  }
+  $form['state']['#type'] = 'hidden';
+  $form['state']['#access'] = 0;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function custom_blogs_form_og_membership_add_multiple_roles_action_form_alter(&$form, &$form_state, $form_id) {
+  // Note: requires create_user_permission module.
+  if (\Drupal::currentUser()->hasPermission('create users')  || \Drupal::currentUser()->hasPermission('administer_user')) {
+    array_unshift($form['#validate'], '_custom_blogs_form_og_membership_add_multiple_validate');
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function custom_blogs_form_og_membership_remove_multiple_roles_action_form_alter(&$form, &$form_state, $form_id) {
+  // Note: requires create_user_permission module.
+  if (\Drupal::currentUser()->hasPermission('create users')  || \Drupal::currentUser()->hasPermission('administer_user')) {
+    array_unshift($form['#validate'], '_custom_blogs_form_og_membership_remove_multiple_validate');
+  }
+}
+
+/**
+ * custom_validate for og_membership_add_multiple_roles_action_form_alter().
+ */
+function _custom_blogs_form_og_membership_add_multiple_validate(&$form, FormStateInterface $form_state) {
+  $user_input = $form_state->getUserInput();
+  $roles = _custom_blogs_get_roles($user_input['roles']);
+  $members = $form_state->getBuildInfo()['callback_object']->getMemberships();
+  _custom_blogs_add_membership_roles($members, $roles['add']);
+}
+
+/**
+ * custom_validate for og_membership_remove_multiple_roles_action_form_alter().
+ */
+function _custom_blogs_form_og_membership_remove_multiple_validate(&$form, FormStateInterface $form_state) {
+  $user_input = $form_state->getUserInput();
+  $roles = _custom_blogs_get_roles($user_input['roles']);
+  $members = $form_state->getBuildInfo()['callback_object']->getMemberships();
+  _custom_blogs_remove_members_roles($members, $roles['remove']);
+}
+
+/**
+ * custom_validate for og_membership_default_edit_form_alter().
+ */
+function _custom_blogs_form_og_membership_edit_validate(&$form, FormStateInterface $form_state) {
+  $user_input = $form_state->getUserInput();
+  $roles = _custom_blogs_get_roles($user_input['roles']);
+  $user = $form['uid']['widget'][0]['target_id']['#default_value'][0];
+  foreach ($roles['add'] as $role) {
+    $user->addRole($role);
+  }
+  $gid = $form['entity_id']['#value'];
+  $memberships = \Drupal::service('og.membership_manager')->getMemberships($user->id());
+  _custom_blogs_remove_membership_roles($memberships, $roles['remove'], $gid, $user);
+}
+
+/**
+ * custom_validate for og_membership_default_add_form_alter().
+ */
+function _custom_blogs_form_og_membership_add_validate(&$form, FormStateInterface $form_state) {
+  $user_input = $form_state->getUserInput();
+  $roles = _custom_blogs_get_roles($user_input['roles']);
+  if (empty($form_state->getValue('uid')[0]['target_id'])) {
+    $new_user_name = trim($user_input['uid'][0]['target_id']);
+    $uname = explode('@', $new_user_name);
+    if ($uname[1] == 'umich.edu') {
+      $new_user_name = $uname[0];
+    }
+    $new_user = NULL;
+    if (strpos($new_user_name, '@') === FALSE) {
+      if (user_validate_name($new_user_name)) {
+        $form_state->setErrorByName('uid', t('The username %name is not valid.', array('%name' => $new_user_name)));
+        return;
+      }
+      $user_data = _get_mcommunity_user($new_user_name);
+      if (isset($user_data['mail']) && !empty($user_data['mail'])) {
+        $new_user = User::create([
+            'name' => $new_user_name,
+            'mail' => $user_data['mail'],
+            'pass' => user_password(),
+            'status' => 1,
+            'roles' => $new_user_roles,
+        ]);
+      }
+    }
+    else {
+      if (!\Drupal::service('email.validator')->isValid($new_user_name)) {
+        $form_state->setErrorByName('uid', t('The email address %mail is not valid.', array('%mail' => $new_user_name)));
+        return;
+      }
+      if (user_validate_name($new_user_name)) {
+        $form_state->setErrorByName('uid', t('The username %name is not valid.', array('%name' => $new_user_name)));
+        return;
+      }
+      $message = Markup::create('<strong>There must be a friend account associated with this email address for user with id '.$new_user_name.' to log into this site. See <a href="https://documentation.its.umich.edu/node/305" target="_blank">Create a Friend Account for Guest Access to U-M Computing Resources</a></strong>');
+      $messenger = \Drupal::messenger();
+      $messenger->addMessage($message, $messenger::TYPE_WARNING);
+      $new_user = User::create([
+          'name' => $new_user_name,
+          'mail' => $new_user_name,
+          'pass' => user_password(),
+          'status' => 1,
+          'roles' => $roles['add'],
+      ]);
+    }
+    if ($new_user instanceof User) {
+      $new_user->save();
+      $form_state->setValue('uid', [['target_id' => $new_user->id()]]);
+      $user_input['uid'][0]['target_id'] = $new_user->id();
+      $form_state->setUserInput($user_input);
+    }
+    else {
+      $message = Markup::create('<strong>No valid UM user was found with id '.$user_input['uid'][0]['target_id'].'. Please verify the id at <a href="https://mcommunity.umich.edu/" target="_blank">MCommunity</a> or enter a non UM email address and create a friend account at <a href="https://documentation.its.umich.edu/node/305" target="_blank">https://documentation.its.umich.edu/node/305</a>.</strong>');
+      $messenger = \Drupal::messenger();
+      $messenger->addMessage($message, $messenger::TYPE_ERROR);
+    }
+  }
+  else {
+    $user = User::load($form_state->getValue('uid')[0]['target_id']);
+    foreach ($roles['add'] as $role) {
+      $user->addRole($role);
+    }
+    $user->save();
+  }
+}
+
+/**
+ * custom_helper to sort and match og roles().
+ */
+function _custom_blogs_get_roles($roles) {
+  if (isset($roles['node-blog-administrator'])) {
+    unset($new_user_roles['node-blog-administrator']);
+  }
+  foreach ($roles as $key => $role) {
+    $role_name = str_replace('node-', '', $key);
+    $role_name = str_replace('-', '_', $role_name);
+    if (!empty($role)) {
+     $roles['add'][] = $role_name;
+    }
+    else {
+      $roles['remove'][] = $role_name;
+    }
+    unset($roles[$key]);
+  }
+  return $roles;
+}
+
+/**
+ * custom_helper to add og roles for core().
+ */
+function _custom_blogs_add_membership_roles($members, $roles) {
+  foreach ($members as $mid => $member) {
+    $user = $member->getOwner();
+    foreach ($roles as $role) {
+      $user->addRole($role);
+    }
+    $user->save();
+  }
+}
+
+/**
+ * custom_helper to remove og roles for multiple users().
+ */
+function _custom_blogs_remove_members_roles($members, $roles) {
+  foreach ($members as $mid => $member) {
+    $gid = $member->getGroupId();
+    $user = $member->getOwner();
+    $memberships = \Drupal::service('og.membership_manager')->getMemberships($user->id());
+    _custom_blogs_remove_membership_roles($memberships, $roles, $gid, $user);
+  }
+}
+
+/**
+ * custom_helper to remove og roles().
+ */
+function _custom_blogs_remove_membership_roles($memberships, $roles, $gid, $user) {
+  $all_roles = [];
+  foreach ($memberships as $membership) {
+    if ($membership->getGroupId() == $gid) {
+      continue;
+    }
+    $og_roles = $membership->getRoles();
+    foreach ($og_roles as $og_role) {
+      if ($og_role->getName() != 'member') {
+        $all_roles[] = 'blog_' . $og_role->getName();
+      }
+    }
+  }
+  $all_roles = array_unique($all_roles);
+  $user_roles = array_diff($roles, $all_roles);
+  foreach ($user_roles as $role) {
+    $user->removeRole($role);
+  }
+  $user->save();
+}

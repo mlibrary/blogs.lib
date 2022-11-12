@@ -1,0 +1,7 @@
+name: Custom Blogs OG
+type: module
+description: some og stuff for blogs
+package: UM Custom
+
+version: '8.x-1.x-dev'
+core_version_requirement: ^8 || ^9
