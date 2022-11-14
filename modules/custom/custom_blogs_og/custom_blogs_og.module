@@ -7,7 +7,7 @@ use Drupal\Core\Entity\EntityInterface;
 /**
  * Implements hook_entity_delete().
  */
-function custom_blogs_entity_delete(EntityInterface $entity) {
+function custom_blogs_og_entity_delete(EntityInterface $entity) {
   if ($entity->getEntityTypeId() == 'og_membership') {
     $user = $entity->getOwner();
     $roles = _custom_blogs_get_roles(array_flip($entity->getRolesIds()));
@@ -20,7 +20,7 @@ function custom_blogs_entity_delete(EntityInterface $entity) {
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function custom_blogs_form_og_membership_default_add_form_alter(&$form, &$form_state, $form_id) {
+function custom_blogs_og_form_og_membership_default_add_form_alter(&$form, &$form_state, $form_id) {
   // Note: requires create_user_permission module.
   if (\Drupal::currentUser()->hasPermission('create users')  || \Drupal::currentUser()->hasPermission('administer_user')) {
     array_unshift($form['#validate'], '_custom_blogs_form_og_membership_add_validate');
@@ -36,7 +36,7 @@ Non U-M email addresses will need to create their Friend Account first. See <a h
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function custom_blogs_form_og_membership_default_edit_form_alter(&$form, &$form_state, $form_id) {
+function custom_blogs_og_form_og_membership_default_edit_form_alter(&$form, &$form_state, $form_id) {
   // Note: requires create_user_permission module.
   if (\Drupal::currentUser()->hasPermission('create users')  || \Drupal::currentUser()->hasPermission('administer_user')) {
     array_unshift($form['#validate'], '_custom_blogs_form_og_membership_edit_validate');
@@ -47,8 +47,9 @@ function custom_blogs_form_og_membership_default_edit_form_alter(&$form, &$form_
 
 /**
  * Implements hook_form_FORM_ID_alter().
+ * NOT using currently.
  */
-function custom_blogs_form_og_membership_add_multiple_roles_action_form_alter(&$form, &$form_state, $form_id) {
+function custom_blogs_og_form_og_membership_add_multiple_roles_action_form_alter(&$form, &$form_state, $form_id) {
   // Note: requires create_user_permission module.
   if (\Drupal::currentUser()->hasPermission('create users')  || \Drupal::currentUser()->hasPermission('administer_user')) {
     array_unshift($form['#validate'], '_custom_blogs_form_og_membership_add_multiple_validate');
@@ -58,7 +59,7 @@ function custom_blogs_form_og_membership_add_multiple_roles_action_form_alter(&$
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function custom_blogs_form_og_membership_remove_multiple_roles_action_form_alter(&$form, &$form_state, $form_id) {
+function custom_blogs_og_form_og_membership_remove_multiple_roles_action_form_alter(&$form, &$form_state, $form_id) {
   // Note: requires create_user_permission module.
   if (\Drupal::currentUser()->hasPermission('create users')  || \Drupal::currentUser()->hasPermission('administer_user')) {
     array_unshift($form['#validate'], '_custom_blogs_form_og_membership_remove_multiple_validate');
@@ -67,11 +68,31 @@ function custom_blogs_form_og_membership_remove_multiple_roles_action_form_alter
 
 /**
  * custom_validate for og_membership_add_multiple_roles_action_form_alter().
+ * NOT using currently.
  */
 function _custom_blogs_form_og_membership_add_multiple_validate(&$form, FormStateInterface $form_state) {
   $user_input = $form_state->getUserInput();
-  $roles = _custom_blogs_get_roles($user_input['roles']);
+  $roles = $user_input['roles'];
+  if (is_string($roles)) {
+    $role_name = $roles;
+    $user_input['roles'] = [$role_name];
+    $roles = _custom_blogs_get_all_roles();
+    $roles[$role_name] = $role_name;
+  }
+  $form_state->setUserInput($user_input);
+  $form_state->setValue('roles', $user_input['roles']);
   $members = $form_state->getBuildInfo()['callback_object']->getMemberships();
+  foreach ($members as $mid => $member) {
+    $member_roles = $member->getRoles();
+    foreach ($member_roles as $member_role) {
+      if ($member_role->getName() != 'member' && $member_role->id() != $user_input['roles'][0]) {
+        $member->revokeRole($member_role);
+      }
+    }
+    $member->save();
+  }
+  $roles = _custom_blogs_get_roles($roles);
+  _custom_blogs_remove_members_roles($members, $roles['remove']);
   _custom_blogs_add_membership_roles($members, $roles['add']);
 }
 
@@ -80,9 +101,26 @@ function _custom_blogs_form_og_membership_add_multiple_validate(&$form, FormStat
  */
 function _custom_blogs_form_og_membership_remove_multiple_validate(&$form, FormStateInterface $form_state) {
   $user_input = $form_state->getUserInput();
-  $roles = _custom_blogs_get_roles($user_input['roles']);
+  $input_roles = $user_input['roles'];
+  $roles = $user_input['roles'];
+  if ($form['roles']['#type'] == 'checkboxes') {
+    $roles = _custom_blogs_get_all_roles();
+    foreach ($input_roles as $key => $role) {
+      if (empty($role)) {
+        unset($input_roles[$key]);
+      }
+      else {
+        $roles[$role] = $role;
+      }
+    }
+  }
+  $user_input['roles'] = $input_roles;
+  $form_state->setUserInput($user_input);
+  $form_state->setValue('roles', $input_roles);
+  $roles = _custom_blogs_get_roles($roles);
   $members = $form_state->getBuildInfo()['callback_object']->getMemberships();
-  _custom_blogs_remove_members_roles($members, $roles['remove']);
+  //note that add and remove are reversed for this one.
+  _custom_blogs_remove_members_roles($members, $roles['add']);
 }
 
 /**
@@ -90,13 +128,27 @@ function _custom_blogs_form_og_membership_remove_multiple_validate(&$form, FormS
  */
 function _custom_blogs_form_og_membership_edit_validate(&$form, FormStateInterface $form_state) {
   $user_input = $form_state->getUserInput();
-  $roles = _custom_blogs_get_roles($user_input['roles']);
+  $roles = $user_input['roles'];
+  $gid = $form['entity_id']['#value'];
   $user = $form['uid']['widget'][0]['target_id']['#default_value'][0];
+  $memberships = \Drupal::service('og.membership_manager')->getMemberships($user->id());
+  if (is_string($roles)) {
+    if ($roles == 'node-blog-member') {
+      foreach ($memberships as $mid => $member) {
+        if ($gid == $member->getGroupId()) {
+          $member->setRoles();
+          $member->save();
+          $form_state->setValue('roles', []);
+        }
+      }
+    }
+    $roles = _custom_blogs_get_all_roles();
+    $roles[$user_input['roles']] = $user_input['roles'];
+  }
+  $roles = _custom_blogs_get_roles($roles);
   foreach ($roles['add'] as $role) {
     $user->addRole($role);
   }
-  $gid = $form['entity_id']['#value'];
-  $memberships = \Drupal::service('og.membership_manager')->getMemberships($user->id());
   _custom_blogs_remove_membership_roles($memberships, $roles['remove'], $gid, $user);
 }
 
@@ -105,7 +157,15 @@ function _custom_blogs_form_og_membership_edit_validate(&$form, FormStateInterfa
  */
 function _custom_blogs_form_og_membership_add_validate(&$form, FormStateInterface $form_state) {
   $user_input = $form_state->getUserInput();
-  $roles = _custom_blogs_get_roles($user_input['roles']);
+  $roles = $user_input['roles'];
+  if (is_string($roles)) {
+    if ($roles == 'node-blog-member') {
+      $form_state->setValue('roles', []);
+    }
+    $roles = _custom_blogs_get_all_roles();
+    $roles[$user_input['roles']] = $user_input['roles'];
+  }
+  $roles = _custom_blogs_get_roles($roles);
   if (empty($form_state->getValue('uid')[0]['target_id'])) {
     $new_user_name = trim($user_input['uid'][0]['target_id']);
     $uname = explode('@', $new_user_name);
@@ -238,4 +298,13 @@ function _custom_blogs_remove_membership_roles($memberships, $roles, $gid, $user
     $user->removeRole($role);
   }
   $user->save();
+}
+
+function _custom_blogs_get_all_roles() {
+  return [
+    'node-blog-member' => '',
+    'node-blog-drafter' => '',
+    'node-blog-author' => '',
+    'node-blog-manager' => '',
+  ];
 }

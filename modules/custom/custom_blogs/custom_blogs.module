@@ -180,12 +180,27 @@ function _custom_blogs_test_og_access($node, $op, $account, $gid = 'all'){
  */
 function custom_blogs_form_alter(&$form, &$form_state, $form_id) {
   if (strpos($form_id, 'views_form_og_members_overview_default_node') !== FALSE) {
+    //unset($form['header']['og_membership_bulk_form']['action']['#options']['og_membership_remove_multiple_roles_action']);
+    unset($form['header']['og_membership_bulk_form']['action']['#options']['og_membership_add_multiple_roles_action']);
     unset($form['header']['og_membership_bulk_form']['action']['#options']['og_membership_approve_pending_action']);
     unset($form['header']['og_membership_bulk_form']['action']['#options']['og_membership_block_action']);
     unset($form['header']['og_membership_bulk_form']['action']['#options']['og_membership_unblock_action']);
   }
   $og_default_forms = ['og_membership_default_edit_form', 'og_membership_default_add_form'];
   $og_multiple_forms = ['og_membership_add_multiple_roles_action_form', 'og_membership_remove_multiple_roles_action_form'];
+  if (in_array($form_id, $og_default_forms)) {
+    $form['roles']['widget']['#type'] = 'radios';
+    $form['roles']['widget']['#default_value'] = $form['roles']['widget']['#default_value'][0];
+  }
+  if (in_array($form_id, ['og_membership_add_multiple_roles_action_form'])) {
+    $form['roles']['#type'] = 'radios';
+  }
+  if (in_array($form_id, ['og_membership_remove_multiple_roles_action_form'])) {
+    $form['roles']['#type'] = 'checkboxes';
+  }
+  if (in_array($form_id, $og_default_forms)) {
+    $form['roles']['widget']['#options']['node-blog-member'] = 'Member';
+  }
   if (!\Drupal::currentUser()->hasPermission('administer_user')) {
     if (in_array($form_id, $og_default_forms)) {
       unset($form['roles']['widget']['#options']['node-blog-administrator']);
