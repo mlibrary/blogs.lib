@@ -108,12 +108,18 @@ function _custom_blogs_form_blog_post_set_author(&$form, \Drupal\Core\Form\FormS
 /**
  * Implements hook_node_access().
  */
-function custom_blogs_node_access($node, $op, $account){
-//  $access = _custom_blogs_test_og_access($node, $op, $account);
+function custom_blogs_node_access(\Drupal\node\NodeInterface $node, $op, \Drupal\Core\Session\AccountInterface $account){
+  if ($node->hasField('og_audience') && !$node->isPublished()) {
+    $gid = $node->get('og_audience')->target_id;
+    $access = _custom_blogs_test_og_access($node, $op, $account, $gid);
+    if (array_values($access)[0] == 'blog_manager') {
+      return \Drupal\Core\Access\AccessResult::allowed();
+    }
+  }
 }
 
 function _custom_blogs_test_og_access($node, $op, $account, $gid = 'all'){
-  if ($op == 'view' || $account->hasPermission('administer_user')) {
+  if ($op == 'view' && $node->isPublished() || $account->hasPermission('administer_user')) {
     return;
   }
   $memberships = \Drupal::service('og.membership_manager')->getMemberships($account->id());
