@@ -20,3 +20,18 @@
     }
   }
 })(jQuery, Drupal);
+
+var role = document.getElementById("view-roles-target-id-table-column");
+if (role) {
+  const params = new Proxy(new URLSearchParams(window.location.search), {
+    get: (searchParams, prop) => searchParams.get(prop),
+  });
+  let order = params.order;
+  let sort = params.sort;
+  if (order == 'roles_target_id' && sort == 'asc') {
+    role.innerHTML = '<a href="?order=roles_target_id&sort=desc">Roles</a>';
+  }
+  else {
+    role.innerHTML = '<a href="?order=roles_target_id&sort=asc">Roles</a>';
+  }
+}

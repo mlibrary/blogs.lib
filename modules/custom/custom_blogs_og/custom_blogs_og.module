@@ -3,6 +3,268 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\user\Entity\User;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\node\NodeInterface;
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Field\FieldFilteredMarkup;
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function custom_blogs_og_form_og_subscribe_confirm_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $form['description'] = ['#markup' => t('You can unsubscribe at any time.')];
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function custom_blogs_og_form_og_unsubscribe_confirm_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $node = $form_state->getFormObject()->getEntity()->getGroup();
+  $account = \Drupal::currentUser();
+  $accessible = _custom_blogs_test_og_access($node, 'edit', $account);
+  $form['description'] = ['#markup' => t('You can resubscribe at any time.')];
+  $access = $accessible[$node->id()];
+  if ($access != 'blog_member') {
+    $form['description'] = ['#markup' => t('<strong>Unsubscribing also removes your access to contribute to this blog.</strong><br/><em>If you resubscribe in the future, authoring access has to be granted separately by a blog manager.</em>')];
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function custom_blogs_og_form_node_blog_post_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $node = $form_state->getFormObject()->getEntity();
+  $account = \Drupal::currentUser();
+  $accessible = _custom_blogs_test_og_access($node, 'edit', $account);
+  if (!empty($accessible)) {
+    foreach ($accessible as $gid => $access) {
+      switch ($access) {
+        case 'blog_manager':
+          //Managers should be able to do anything from core and og.
+        break;
+        case 'blog_author':
+          //Authors should be able to do anything from core and og.
+        break;
+        case 'blog_drafter':
+          if (count($accessible) > 1) {
+            $form['drafter_gid'] = [
+              '#type' => 'value',
+              '#value' => $gid,
+            ];
+            array_unshift($form['#validate'], '_custom_blogs_form_blog_post_publish_validate');
+          }
+        break;
+        case 'blog_member':
+          unset($form['og_audience']['widget']['#options'][$gid]);
+        break;
+      }
+    }
+  }
+  array_unshift($form['#validate'], '_custom_blogs_form_blog_post_set_author');
+}
+
+/**
+ * custom_validate for blog_post_publish().
+ */
+function _custom_blogs_form_blog_post_publish_validate(&$form, FormStateInterface $form_state) {
+  $gid = $form_state->getValue('og_audience')[0]['target_id'];
+  $drafter_gid = $form_state->getValue('drafter_gid');
+  if ($gid == $drafter_gid) {
+    $blog_name = Node::load($gid)->getTitle();
+    if ($form_state->getValue('status')['value'] == 1) {
+      $form_state->setErrorByName('status', t('You do not have publishing access in ' . $blog_name.'. Uncheck Published at the bottom of the page and save.'));
+    }
+    if (!empty($form_state->getValue('publish_on')[0]['value'])) {
+      $form_state->setErrorByName('publish_on', t('You do not have publishing access in ' . $blog_name.' Unset "Scheduling options->Publish on" and save.'));
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function custom_blogs_og_form_node_blog_post_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $node = $form_state->getFormObject()->getEntity();
+  $account = \Drupal::currentUser();
+  $accessible = _custom_blogs_test_og_access($node, 'edit', $account);
+  if (!empty($accessible)) {
+    foreach ($accessible as $gid => $access) {
+      switch ($access) {
+        case 'blog_manager':
+          //Managers should be able to do anything from core and og.
+        break;
+        case 'blog_author':
+          //Authors should be able to do anything from core and og.
+        break;
+        case 'blog_drafter':
+          if ($gid == $node->get('og_audience')->target_id) {
+            $form['publish_on']['#disabled'] = TRUE;
+            $form['status']['#disabled'] = TRUE;
+          }
+          $form['drafter_gid'] = [
+            '#type' => 'value',
+            '#value' => $gid,
+          ];
+          array_unshift($form['#validate'], '_custom_blogs_form_blog_post_publish_validate');
+        break;
+        case 'blog_member':
+          unset($form['og_audience']['widget']['#options'][$gid]);
+          //this should come from og -  return AccessResult::forbidden(); //view only.
+        break;
+      }
+    }
+  }
+  array_unshift($form['#validate'], '_custom_blogs_form_blog_post_set_author');
+}
+
+/**
+ * custom_validate for blog_post_form().
+ */
+function _custom_blogs_form_blog_post_set_author(&$form, FormStateInterface $form_state) {
+  $authors = $form_state->getValue('field_author_s_');
+  $has_author = FALSE;
+  foreach ($authors as $key => $author) {
+    if (is_numeric($key) && isset($author['target_id']) && !empty($author['target_id'])) {
+      $has_author = TRUE;
+      break;
+    }
+  }
+  if (!$has_author) {
+    $form_state->setValue('field_author_s_', [['target_id' => $form_state->getValue('uid')[0]['target_id']]]);
+  }
+}
+
+/**
+ * Implements hook_node_access().
+ */
+function custom_blogs_og_node_access(NodeInterface $node, $op, AccountInterface $account){
+  if ($node->hasField('og_audience') && !$node->isPublished()) {
+    $gid = $node->get('og_audience')->target_id;
+    $access = _custom_blogs_test_og_access($node, $op, $account, $gid);
+    if (in_array(array_values($access)[0], ['blog_manager', 'blog_author'])) {
+      return AccessResult::allowed();
+    }
+  }
+}
+
+function _custom_blogs_test_og_access($node, $op, $account, $gid = 'all'){
+  if ($op == 'view' && $node->isPublished() || $account->hasPermission('administer_user')) {
+    return;
+  }
+  $memberships = \Drupal::service('og.membership_manager')->getMemberships($account->id());
+  $roles = $account->getRoles();
+  if ($node->id() && $gid != 'all') {
+    $gid = $node->id();
+    if ($node->hasField('og_audience')) {
+      $gid = $node->get('og_audience')->target_id;
+    }
+  }
+  $og_roles = [];
+  // Access in this order.
+  $all_og_roles = ['blog_manager', 'blog_author', 'blog_drafter', 'blog_member'];
+  foreach ($memberships as $membership) {
+    if ($membership->getGroupId() != $gid && $gid != 'all') {
+      continue;
+    }
+    else {
+      $get_gid = $membership->getGroupId();
+    }
+    $get_og_roles = $membership->getRoles();
+    foreach ($get_og_roles as $get_og_role) {
+      $get_og_role = str_replace('node-', '', $get_og_role->id());
+      $get_og_role = str_replace('-', '_', $get_og_role);
+      $og_roles[$get_gid][] = $get_og_role;
+    }
+    if (count($og_roles[$get_gid]) == 1) {
+      $og_roles[$get_gid] = $og_roles[$get_gid][0];
+    }
+    else {
+      foreach ($all_og_roles as $all_og_role) {
+        if (in_array($all_og_role, $og_roles[$get_gid])) {
+          //use the 'highest' role
+          $og_roles[$get_gid] = $all_og_role;
+          break;
+        }
+      }
+    }
+  }
+  if ($gid == 'all') {
+    return $og_roles;
+  }
+  //Check if user has extra core roles from another group.
+  $extra_roles = array_diff($roles, $og_roles);
+  foreach ($extra_roles as $key => $value) {
+    if (strpos($value, 'blog_') === FALSE) {
+      unset($extra_roles[$key]);
+    }
+  }
+  //Most users probably have only one group. //hmmm. we dont want to allow create on another group....
+  if (empty($extra_roles)) {
+    return;
+  }
+  foreach ($all_og_roles as $all_og_role) {
+    if (in_array($all_og_role, $og_roles)) {
+      //return the 'highest' role
+      return [$gid => $all_og_role];
+    }
+  }
+}
+
+/**
+ * Implements TEMPLATE_preprocess_views_view_field().
+ */
+function custom_blogs_og_preprocess_views_view_field(&$variables) {
+  $view = $variables['view'];
+  $field = $variables['field'];
+  if ($view->id() == 'og_members_overview') {
+    if ($field->field == 'roles_target_id') {
+      if (empty($field->original_value)) {
+        $variables['output'] = Markup::create('Subscriber');
+      }
+      else {
+        $variables['output'] = strip_tags($field->original_value->__toString());
+      }
+    }
+    if ($field->field == 'name') {
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function custom_blogs_og_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (strpos($form_id, 'views_form_og_members_overview_default_node') !== FALSE) {
+    //unset($form['header']['og_membership_bulk_form']['action']['#options']['og_membership_remove_multiple_roles_action']);
+    unset($form['header']['og_membership_bulk_form']['action']['#options']['og_membership_add_multiple_roles_action']);
+    unset($form['header']['og_membership_bulk_form']['action']['#options']['og_membership_approve_pending_action']);
+    unset($form['header']['og_membership_bulk_form']['action']['#options']['og_membership_block_action']);
+    unset($form['header']['og_membership_bulk_form']['action']['#options']['og_membership_unblock_action']);
+  }
+  $og_default_forms = ['og_membership_default_edit_form', 'og_membership_default_add_form'];
+  $og_multiple_forms = ['og_membership_add_multiple_roles_action_form', 'og_membership_remove_multiple_roles_action_form'];
+  if (in_array($form_id, $og_default_forms)) {
+    $form['roles']['widget']['#type'] = 'radios';
+    $form['roles']['widget']['#default_value'] = $form['roles']['widget']['#default_value'][0];
+  }
+  if (in_array($form_id, ['og_membership_add_multiple_roles_action_form'])) {
+    $form['roles']['#type'] = 'radios';
+  }
+  if (in_array($form_id, ['og_membership_remove_multiple_roles_action_form'])) {
+    $form['roles']['#type'] = 'checkboxes';
+  }
+  if (in_array($form_id, $og_default_forms)) {
+    $form['roles']['widget']['#options']['node-blog-member'] = 'Subscriber';
+  }
+  if (!\Drupal::currentUser()->hasPermission('administer_user')) {
+    if (in_array($form_id, $og_default_forms)) {
+      unset($form['roles']['widget']['#options']['node-blog-administrator']);
+    }
+    if (in_array($form_id, $og_multiple_forms)) {
+      unset($form['roles']['#options']['node-blog-administrator']);
+    }
+  }
+}
 
 /**
  * Implements hook_entity_delete().
@@ -24,7 +286,7 @@ function custom_blogs_og_form_og_membership_default_add_form_alter(&$form, &$for
   // Note: requires create_user_permission module.
   if (\Drupal::currentUser()->hasPermission('create users')  || \Drupal::currentUser()->hasPermission('administer_user')) {
     array_unshift($form['#validate'], '_custom_blogs_form_og_membership_add_validate');
-    $form['uid']['widget'][0]['target_id']['#description'] = \Drupal\Core\Field\FieldFilteredMarkup::create('<p>
+    $form['uid']['widget'][0]['target_id']['#description'] = FieldFilteredMarkup::create('<p>
 Anyone with an active uniqname or a U-M Friend Account can be added as a member. Begin typing and existing users will appear in the dropdown menu for selection. For new users, enter their full uniqname or Friend Account email address.
 </p><p>
 Non U-M email addresses will need to create their Friend Account first. See <a href="https://documentation.its.umich.edu/node/305" target="_blank">Create a Friend Account for Guest Access to U-M Computing Resources</a> for details.</p>');
