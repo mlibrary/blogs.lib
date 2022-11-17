@@ -1,0 +1,26 @@
+diff --git a/modules/contrib/og/src/Form/GroupSubscribeForm.php b/modules/contrib/og/src/Form/GroupSubscribeForm.php
+index 487384be..a0d05b2c 100644
+--- a/modules/contrib/og/src/Form/GroupSubscribeForm.php
++++ b/modules/contrib/og/src/Form/GroupSubscribeForm.php
+@@ -223,7 +223,7 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
+
+     $group = $membership->getGroup();
+
+-    $message = $membership->isActive() ? $this->t('You are now subscribed to the group.') : $this->t('Your subscription request has been sent.');
++    $message = $membership->isActive() ? $this->t('You are now subscribed to the blog.') : $this->t('Your subscription request has been sent.');
+     $this->messenger()->addMessage($message);
+
+     // User doesn't have access to the group entity, so redirect to front page,
+diff --git a/modules/contrib/og/src/Form/GroupUnsubscribeConfirmForm.php b/modules/contrib/og/src/Form/GroupUnsubscribeConfirmForm.php
+index 9217dedb..ad40ffcb 100644
+--- a/modules/contrib/og/src/Form/GroupUnsubscribeConfirmForm.php
++++ b/modules/contrib/og/src/Form/GroupUnsubscribeConfirmForm.php
+@@ -64,7 +64,7 @@ public function submitForm(array &$form, FormStateInterface $form_state) {
+     $form_state->setRedirectUrl($redirect);
+
+     $membership->delete();
+-    $this->messenger()->addMessage($this->t('You have unsubscribed from the group.'));
++    $this->messenger()->addMessage($this->t('You have unsubscribed from the blog.'));
+   }
+
+ }

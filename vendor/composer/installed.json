@@ -6167,6 +6167,7 @@
                     "https://github.com/zerolab/og/tree/196-redux": "patches/zerolab-og-196-redux-branch.patch",
                     "allow membership lookup in hooks": "patches/og-get-memberships.patch",
                     "add word email to subscribe": "patches/add-word-email-to-og-subscribe.patch",
+                    "change word group to blog in message": "patches/change-word-group-to-blog-in-message.patch",
                     "fix og admin selection permissions": "patches/fix_og_admin_selection.patch"
                 }
             },
@@ -6829,6 +6830,61 @@
                 "source": "https://git.drupalcode.org/project/r4032login"
             },
             "install-path": "../../modules/contrib/r4032login"
+        },
+        {
+            "name": "drupal/redirect",
+            "version": "1.8.0",
+            "version_normalized": "1.8.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/redirect.git",
+                "reference": "8.x-1.8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/redirect-8.x-1.8.zip",
+                "reference": "8.x-1.8",
+                "shasum": "a7a440423434472ff7115ae69df01553f763f839"
+            },
+            "require": {
+                "drupal/core": "^9.2 || ^10"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "8.x-1.8",
+                    "datestamp": "1661806955",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "installation-source": "dist",
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Berdir",
+                    "homepage": "https://www.drupal.org/user/214652"
+                },
+                {
+                    "name": "Dave Reid",
+                    "homepage": "https://www.drupal.org/user/53892"
+                },
+                {
+                    "name": "pifagor",
+                    "homepage": "https://www.drupal.org/user/2375692"
+                }
+            ],
+            "description": "Allows users to redirect from old URLs to new URLs.",
+            "homepage": "https://www.drupal.org/project/redirect",
+            "support": {
+                "source": "https://git.drupalcode.org/project/redirect"
+            },
+            "install-path": "../../modules/contrib/redirect"
         },
         {
             "name": "drupal/reroute_email",

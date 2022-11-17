@@ -64,7 +64,7 @@ class GroupUnsubscribeConfirmForm extends ContentEntityDeleteForm {
     $form_state->setRedirectUrl($redirect);
 
     $membership->delete();
-    $this->messenger()->addMessage($this->t('You have unsubscribed from the group.'));
+    $this->messenger()->addMessage($this->t('You have unsubscribed from the blog.'));
   }
 
 }

@@ -98,6 +98,7 @@
         "drupal/passwordless": "^1.2",
         "drupal/pathauto": "^1.8",
         "drupal/r4032login": "^2.1",
+        "drupal/redirect": "^1.8",
         "drupal/reroute_email": "^2.1",
         "drupal/scheduler": "^1.4",
         "drupal/structure_sync": "^2.0",
@@ -187,6 +188,7 @@
             "https://github.com/zerolab/og/tree/196-redux": "patches/zerolab-og-196-redux-branch.patch",
             "allow membership lookup in hooks": "patches/og-get-memberships.patch",
             "add word email to subscribe": "patches/add-word-email-to-og-subscribe.patch",
+            "change word group to blog in message": "patches/change-word-group-to-blog-in-message.patch",
             "fix og admin selection permissions": "patches/fix_og_admin_selection.patch"
           },
           "drupal/entity_reference_exposed_filters": {

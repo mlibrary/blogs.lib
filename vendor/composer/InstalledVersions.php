@@ -32,7 +32,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => '8128507606a2d8e6c91d80f2833d7b0236bc3f22',
+    'reference' => '3d14a1a4c3e0275d85c60b375fce53fe158b3b08',
     'name' => 'drupal/recommended-project',
   ),
   'versions' => 
@@ -1538,7 +1538,16 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => '8128507606a2d8e6c91d80f2833d7b0236bc3f22',
+      'reference' => '3d14a1a4c3e0275d85c60b375fce53fe158b3b08',
+    ),
+    'drupal/redirect' => 
+    array (
+      'pretty_version' => '1.8.0',
+      'version' => '1.8.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8.x-1.8',
     ),
     'drupal/reroute_email' => 
     array (

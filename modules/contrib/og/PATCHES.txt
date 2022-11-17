@@ -13,6 +13,10 @@ add word email to subscribe
 Source: patches/add-word-email-to-og-subscribe.patch
 
 
+change word group to blog in message
+Source: patches/change-word-group-to-blog-in-message.patch
+
+
 fix og admin selection permissions
 Source: patches/fix_og_admin_selection.patch
 
