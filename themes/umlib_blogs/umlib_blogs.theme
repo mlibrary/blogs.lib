@@ -3,6 +3,14 @@
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 
+function umlib_blogs_preprocess_html(&$variables) {
+  if (strpos($variables['head_title'], 'Group') !== FALSE) {
+    $variables['head_title'] = str_replace('Join Group', 'Subscribe to Blog', $variables['head_title']);
+    $variables['head_title'] = str_replace('Leave Group', 'Unsubscribe from Blog', $variables['head_title']);
+  }
+}
+
+
 /**
  * Implements hook_theme_suggestions_page_alter().
  */
