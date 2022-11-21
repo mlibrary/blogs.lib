@@ -32,7 +32,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'ddcaa7a9469d34d914ae2324eb27248b6285ceb8',
+    'reference' => 'fcfd529795356be21fe104ec06a62143b769b89a',
     'name' => 'drupal/recommended-project',
   ),
   'versions' => 
@@ -1547,7 +1547,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'ddcaa7a9469d34d914ae2324eb27248b6285ceb8',
+      'reference' => 'fcfd529795356be21fe104ec06a62143b769b89a',
     ),
     'drupal/redirect' => 
     array (
@@ -1737,6 +1737,15 @@ private static $installed = array (
       array (
       ),
       'reference' => '3.1.3',
+    ),
+    'drupal/twig_vardumper' => 
+    array (
+      'pretty_version' => '3.1.0',
+      'version' => '3.1.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '3.1.0',
     ),
     'drupal/update' => 
     array (

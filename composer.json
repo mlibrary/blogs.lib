@@ -117,6 +117,7 @@
         "drupal/structure_sync": "^2.0",
         "drupal/swiftmailer": "^2.2",
         "drupal/twig_tweak": "^3.1",
+        "drupal/twig_vardumper": "^3.1",
         "drupal/view_unpublished": "^1.0",
         "drupal/views_block_filter_block": "^1.2",
         "drupal/views_bulk_operations": "^4.0",
