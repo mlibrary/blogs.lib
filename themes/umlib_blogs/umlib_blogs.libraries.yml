@@ -8,6 +8,7 @@ global-styling:
       css/component.css: {}
       css/breadcrumb.css: {}
       css/views.css: {}
+      css/colorbox_style.css: {}
 global-scripts:
   version: 1.x
   js:

@@ -315,8 +315,9 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
   font-size: var(--text-base-size);
 }
 
-.views-field-title a {
-  color: var(--color-neutral-400);
+.views-field-title a,
+a .views-field-title span {
+  color: var(--color-neutral-400) !important;
   font-weight: var(--semibold);
   font-size: 1.125rem;
   text-decoration: underline;

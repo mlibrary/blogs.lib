@@ -4,12 +4,25 @@ use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 
 function umlib_blogs_preprocess_html(&$variables) {
-  if (strpos($variables['head_title'], 'Group') !== FALSE) {
+  $test_title = $variables['head_title']['title'];
+  if (strpos($test_title, 'Group') !== FALSE) {
     $variables['head_title'] = str_replace('Join Group', 'Subscribe to Blog', $variables['head_title']);
     $variables['head_title'] = str_replace('Leave Group', 'Unsubscribe from Blog', $variables['head_title']);
   }
 }
 
+/**
+ * Implements hook_theme_suggestions_HOOK().
+ *
+ * Add views grid template suggestions.
+ *
+ * @inheritdoc
+ */
+function umlib_blogs_theme_suggestions_views_view_grid_alter(array &$suggestions, array $variables) {
+  $suggestions[] = 'views_view_grid__' . $variables['view']->id();
+  $suggestions[] = 'views_view_grid__' . $variables['view']->current_display;
+  $suggestions[] = 'views_view_grid__' . $variables['view']->id() . '__' . $variables['view']->current_display;
+}
 
 /**
  * Implements hook_theme_suggestions_page_alter().
