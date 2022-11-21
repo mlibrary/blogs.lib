@@ -474,6 +474,7 @@
 				id: colorbox,
 				'class': $.support.opacity === false ? prefix + 'IE' : '', // class for optional IE8 & lower targeted CSS.
 				role: 'dialog',
+                                "aria-label": "Large Image Viewer",
 				tabindex: '-1'
 			}).hide();
 			$overlay = $tag(div, "Overlay").hide();

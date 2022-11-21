@@ -32,6 +32,18 @@
             }
           }
         },
+        "colorbox": {
+          "type": "package",
+          "package": {
+            "name": "jackmoore/colorbox",
+            "version": "1.6.4",
+            "type": "drupal-library",
+            "dist": {
+              "url": "https://github.com/jackmoore/colorbox/archive/1.6.4.zip",
+              "type": "zip"
+            }
+          }
+        },
         "jquery_ui_touch_punch": {
           "type": "package",
           "package": {
@@ -57,6 +69,7 @@
         "drupal/calendar": "^1.0@alpha",
         "drupal/captcha": "^1.2",
         "drupal/ckeditor_abbreviation": "^2.0",
+        "drupal/colorbox": "^2.0",
         "drupal/condition_query": "^1.3",
         "drupal/config_devel": "^1.8",
         "drupal/console": "^1.9",
@@ -113,6 +126,7 @@
         "drupal/viewsreference": "^1.7",
         "drush/drush": "^10.6",
         "furf/jquery-ui-touch-punch": "master",
+        "jackmoore/colorbox": "^1.6",
         "oomphinc/composer-installers-extender": "^2.0",
         "wikimedia/composer-merge-plugin": "^2.0"
     },
@@ -202,6 +216,9 @@
           },
           "drupal/notify": {
             "add nodes to message params": "https://www.drupal.org/files/issues/2022-10-26/add-nodes-to-notify.patch"
+          },
+          "jackmoore/colorbox": {
+            "add aria-label to colorbox": "patches/add-aria-label-to-colorbox.patch"
           },
           "drupal/migrate_tools": {
             "https://www.drupal.org/node/2868762": "https://www.drupal.org/files/issues/2022-02-17/d7_migration_failing_on_d6_migrations-2868762-37.patch"

@@ -2819,6 +2819,76 @@
             "install-path": "../../modules/contrib/ckeditor_abbreviation"
         },
         {
+            "name": "drupal/colorbox",
+            "version": "2.0.0",
+            "version_normalized": "2.0.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/colorbox.git",
+                "reference": "2.0.0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/colorbox-2.0.0.zip",
+                "reference": "2.0.0",
+                "shasum": "8cdbf92db81ce30225c3ff1c1e4c283c84ec9e03"
+            },
+            "require": {
+                "drupal/core": "^8.8 || ^9 || ^10"
+            },
+            "suggest": {
+                "jackmoore/colorbox": "The Colorbox library is required to use the drupal/colorbox module."
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "2.0.0",
+                    "datestamp": "1662740108",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                },
+                "drush": {
+                    "services": {
+                        "drush.services.yml": "^9"
+                    }
+                }
+            },
+            "installation-source": "dist",
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Neslee Canil Pinto",
+                    "homepage": "https://www.drupal.org/u/neslee-canil-pinto",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "Fredrik Jonsson",
+                    "homepage": "https://www.drupal.org/u/frjo",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "RenatoG",
+                    "homepage": "https://www.drupal.org/user/3326031"
+                },
+                {
+                    "name": "Unsupported Projects",
+                    "homepage": "https://www.drupal.org/user/291168"
+                }
+            ],
+            "description": "A light-weight, customizable lightbox plugin for jQuery.",
+            "homepage": "https://www.drupal.org/project/colorbox",
+            "support": {
+                "source": "https://git.drupalcode.org/project/colorbox",
+                "issues": "https://www.drupal.org/project/issues/colorbox"
+            },
+            "install-path": "../../modules/contrib/colorbox"
+        },
+        {
             "name": "drupal/condition_query",
             "version": "1.3.0",
             "version_normalized": "1.3.0.0",
@@ -8639,6 +8709,23 @@
                 "source": "https://github.com/mtibben/html2text/tree/4.3.1"
             },
             "install-path": "../html2text/html2text"
+        },
+        {
+            "name": "jackmoore/colorbox",
+            "version": "1.6.4",
+            "version_normalized": "1.6.4.0",
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/jackmoore/colorbox/archive/1.6.4.zip"
+            },
+            "type": "drupal-library",
+            "extra": {
+                "patches_applied": {
+                    "add aria-label to colorbox": "patches/add-aria-label-to-colorbox.patch"
+                }
+            },
+            "installation-source": "dist",
+            "install-path": "../../libraries/colorbox"
         },
         {
             "name": "laminas/laminas-diactoros",
