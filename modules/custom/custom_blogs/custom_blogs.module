@@ -74,7 +74,9 @@ function _get_mcommunity_user($name) {
     $ldap_entries = ldap_get_entries($ldap_resource, $ldap_result);
     $raw_data = array_filter($ldap_entries[0], function($k) { return !is_numeric($k); }, ARRAY_FILTER_USE_KEY);
     foreach ($raw_data as $key => $data) {
-      $user_data[$key] = $data[0];
+      if (isset($data[0])) {
+        $user_data[$key] = $data[0];
+      }
     }
   }
 

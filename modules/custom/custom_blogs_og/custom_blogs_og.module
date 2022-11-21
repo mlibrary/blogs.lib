@@ -141,8 +141,8 @@ function _custom_blogs_form_blog_post_set_author(&$form, FormStateInterface $for
 function custom_blogs_og_node_access(NodeInterface $node, $op, AccountInterface $account){
   if ($node->hasField('og_audience') && !$node->isPublished()) {
     $gid = $node->get('og_audience')->target_id;
-    $access = _custom_blogs_test_og_access($node, $op, $account, $gid);
-    if (in_array(array_values($access)[0], ['blog_manager', 'blog_author'])) {
+    $access = array_values(_custom_blogs_test_og_access($node, $op, $account, $gid));
+    if (isset($access[0]) && in_array($access[0], ['blog_manager', 'blog_author'])) {
       return AccessResult::allowed();
     }
   }
@@ -150,7 +150,7 @@ function custom_blogs_og_node_access(NodeInterface $node, $op, AccountInterface 
 
 function _custom_blogs_test_og_access($node, $op, $account, $gid = 'all'){
   if ($op == 'view' && $node->isPublished() || $account->hasPermission('administer_user')) {
-    return;
+    return [];
   }
   $memberships = \Drupal::service('og.membership_manager')->getMemberships($account->id());
   $roles = $account->getRoles();
@@ -201,7 +201,7 @@ function _custom_blogs_test_og_access($node, $op, $account, $gid = 'all'){
   }
   //Most users probably have only one group. //hmmm. we dont want to allow create on another group....
   if (empty($extra_roles)) {
-    return;
+    return [];
   }
   foreach ($all_og_roles as $all_og_role) {
     if (in_array($all_og_role, $og_roles)) {
@@ -246,7 +246,9 @@ function custom_blogs_og_form_alter(&$form, FormStateInterface $form_state, $for
   $og_multiple_forms = ['og_membership_add_multiple_roles_action_form', 'og_membership_remove_multiple_roles_action_form'];
   if (in_array($form_id, $og_default_forms)) {
     $form['roles']['widget']['#type'] = 'radios';
-    $form['roles']['widget']['#default_value'] = $form['roles']['widget']['#default_value'][0];
+    if (!empty($form['roles']['widget']['#default_value'])) {
+      $form['roles']['widget']['#default_value'] = $form['roles']['widget']['#default_value'][0];
+    }
   }
   if (in_array($form_id, ['og_membership_add_multiple_roles_action_form'])) {
     $form['roles']['#type'] = 'radios';
