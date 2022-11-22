@@ -182,15 +182,16 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
   padding-right: 1rem;
 }
 
-.blog-tag-list {
-  padding: 0;
-  margin: 0;
-  max-width: 75ch !important;
+ul.blog-tag-list {
+  display: inline-flex;
+  flex-flow: row wrap;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 .blog-tag-list li {
   display: inline;
-  margin: .5rem;
+  margin: .75rem .5rem;
 }
 
 .blog-tag-list li a {
@@ -205,6 +206,8 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
   border-bottom: solid 2px var(--color-teal-400);
   border-radius: 4px;
 }
+
+
 
 /* Blog post author */
 
@@ -233,20 +236,47 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
 .blog-post-content ul, .blog-post-content ol {
   padding-left: 1rem;
   max-width: 50ch;
+  margin: 0px 0px 0px 1.5rem;
 }
 
 .blog-post-content ul li {
-  list-style-type: circle;
+  list-style-type: disc;
 }
 
 .blog-post-content img {
-  max-width: 75%;
+  max-width: 38ch;
   height: auto;
   display: block;
 }
 
-.blog-post-content h3, .blog-post-content h2 {
-  padding-top: 1rem;
+.blog-post-content h2, 
+.blog-post-content h3, 
+.blog-post-content h4, 
+.blog-post-content h5 {
+  padding-top: 2rem;
+  padding-bottom: 1rem;
+}
+
+/* Featured Image */
+
+.featured-image  .image-caption {
+  color: var(--color-neutral-300);
+  font-style: normal;
+}
+.image-caption, figcaption {
+  color: var(--color-neutral-300);
+  font-style: normal;
+}
+
+
+/* Videos */
+
+.blog-post-content iframe {
+  max-width: 60ch;
+  aspect-ratio: 16 / 9;
+	height: 100%;
+	width: 100%;
+  margin: .5rem 0;
 }
 
 /* A-Z Cards */
@@ -385,22 +415,6 @@ a .views-field-title span {
 .social-media .field-content a {
   text-decoration:none;
 }
-
-/*
-.social-media .field-content .facebook:before {
-  content: url('../facebook.svg');
-  vertical-align: bottom;
-  padding-right: .125rem;
-} 
-
-
-.social-media .field-content .email::before {
-  font-family: "Material Icons";
-  content: '\e0be';
-  vertical-align: bottom;
-  padding-right: .125rem;
-} 
-*/
 
 /* All posts & Recent Posts - Post Cards */
 

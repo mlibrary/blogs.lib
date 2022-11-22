@@ -44,24 +44,24 @@
 
 {% if label_hidden %}
   {% if multiple %}
-    <div{{ attributes.addClass('image-caption') }}>
+    <div{{ attributes }}>
       {% for item in items %}
-        <div{{ item.attributes }}><em>{{ item.content }}</em></div>
+        <div{{ item.attributes }}>{{ item.content }}</div>
       {% endfor %}
     </div>
   {% else %}
     {% for item in items %}
-      <div{{ attributes }}><em>{{ item.content }}</em></div>
+      <div{{ attributes.addClass('image-caption') }}>{{ item.content }}</div>
     {% endfor %}
   {% endif %}
 {% else %}
-  <div{{ attributes.addClass('image-caption') }}>
+  <div{{ attributes}}>
     <div{{ title_attributes.addClass(title_classes) }}>{{ label }}</div>
     {% if multiple %}
       <div>
     {% endif %}
     {% for item in items %}
-      <div{{ item.attributes }}><em>{{ item.content }}</em></div>
+  <div{{ item.attributes }}>{{ item.content }}</div>
     {% endfor %}
     {% if multiple %}
       </div>
