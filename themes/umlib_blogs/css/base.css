@@ -1,25 +1,45 @@
 /* Typography */
 
+#a-z-page #block-umlib-blogs-page-title h1 {
+  font-size: 2.5rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  border-left: none;
+  padding-bottom: 0;
+  padding-left: 0;
+}
+
+@media screen and (max-width: 620px)  {
+  #a-z-page #block-umlib-blogs-page-title h1 {
+    margin-top: 0;
+  }
+}
+
 #block-umlib-blogs-page-title h1 {
   font-size: 2.5rem;
   margin-top: 2rem;
   margin-bottom: 1rem;
-  padding-bottom: 0;
-}
-
-#blog-page h1 {
-  font-size: 2.5rem;
-  margin-top: 1rem;
-  margin-bottom: .125rem;
   border-left: solid 4px var(--color-teal-400);
   padding-bottom: 0;
-  padding-left: .5rem;
+  padding-left: 1rem;
 }
 
 #blog-post-page h1 {
   font-size: 2.5rem;
   margin-top: 2rem;
   margin-bottom: .125rem;
+  border-left: solid 4px var(--color-teal-400);
+  padding-bottom: 0;
+  padding-left: 1rem;
+}
+
+#page-404 h1,
+#subscribe-page h1,
+#subscribe-blog-page #block-umlib-blogs-page-title h1,
+#unsubscribe-blog-page h1 {
+  font-size: 2.5rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
   border-left: solid 4px var(--color-teal-400);
   padding-bottom: 0;
   padding-left: 1rem;

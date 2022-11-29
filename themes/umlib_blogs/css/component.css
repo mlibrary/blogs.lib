@@ -1,4 +1,4 @@
-/* Menus */
+/* Navigation Menus */
 
 #block-umlib-blogs-usermenu ul li a,
 #block-umlib-blogs-usermenu ul li,
@@ -9,13 +9,34 @@
   text-decoration: none;
 }
 
-#block-umlib-blogs-usermenu ul li a:hover {
+#block-umlib-blogs-usermenu ul > li > a:hover,
+#block-umlib-blogs-local-tasks > ul.primary-edit-tasks > li > a:hover {
   text-decoration: underline;
 }
 
 #block-umlib-blogs-usermenu ul li,
 .primary-edit-tasks li {
   padding-right: .75rem;
+}
+
+@media screen and (max-width: 620px)  {
+  #block-umlib-blogs-usermenu > ul {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+  }
+  #block-umlib-blogs-usermenu > ul > li {
+    padding: 0.5rem 1rem 0.5rem 0;
+  }
+  #block-umlib-blogs-local-tasks > ul.primary-edit-tasks {
+    justify-content: left;
+    margin-bottom: 0;
+    margin-top: .5rem;
+  }
+  #block-umlib-blogs-local-tasks > ul.primary-edit-tasks > li {
+    padding: 0.5rem 1rem 0.5rem 0;
+  }
 }
 
 span[data-drupal-link-system-path="user"] {
@@ -55,6 +76,10 @@ span[data-drupal-link-system-path="user"]::before {
   padding-bottom: 1rem;
 }
 
+.paragraph--type--get-in-touch {
+  padding: 0.5rem 0;
+}
+
 /* Recent Posts */
 
 .recent-posts-block {
@@ -86,7 +111,7 @@ span[data-drupal-link-system-path="user"]::before {
 /* Aside forms use grid */
 aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-posts-block-1 {
   display: grid;
-  margin: 1rem 0 1rem;
+  margin: 1rem 0 0;
   align-items: start;
   row-gap: 1.5rem;
   grid-template-columns: 1fr 1fr;
@@ -122,6 +147,10 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
 .more-information {
   padding-top: 1rem;
   border-top: solid 1px var(--color-neutral-100);
+}
+
+.more-information > div > div > div > ul > li:not(:last-child) {
+  padding-bottom: .5rem;
 }
 
 /* Tags */
@@ -289,9 +318,23 @@ ul.blog-tag-list {
   margin-bottom: 2rem;
 }
 
+/*
+.a-z-view-link {
+  display: inline-block;
+}
+
+.a-z-grid-row {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
 .a-z-column-card {
   padding-right: .5rem;
+  width: 250px !important;
+  height: auto;
 }
+*/
 
 @media screen and (max-width: 768px) {
   .a-z-column-card {
@@ -329,10 +372,6 @@ ul.blog-tag-list {
 
 .a-z-column-card .views-field-title {
   margin-bottom: .25rem;
-}
-
-.a-z-column-card:last-child {
-  margin-bottom: 0;
 }
 
 /* Views Fields Title, Date, Description, and Author */
@@ -390,7 +429,10 @@ a .views-field-title span {
 
 .tag-posts header {
   display: flex;
-  justify-content: space-between
+}
+
+.tag-posts header > * + * {
+  padding-right: 1rem;
 }
 
 
@@ -432,6 +474,9 @@ a .views-field-title span {
   border-bottom: none;
 } 
 
+div#block-exposedformrecent-postsblock-1 {
+  padding-bottom: 1rem;
+}
 
 #block-views-block-recent-posts-block-1 h3,
 #block-exposedformrecent-postsblock-1 h3 {
@@ -440,6 +485,23 @@ a .views-field-title span {
 
 .post-card > div.views-field.views-field-field-blog-post-body > div > p > img{
   max-width: 50%;
+}
+
+/* RSS */
+
+.rss-feed a {
+  margin-top: 1rem;
+  color: var(--color-neutral-300) !important;
+  font-weight: var(--semibold);
+  text-decoration: none !important;
+}
+
+.rss-feed a::before {
+  font-family: "Material Icons";
+  content: '\e0e5';
+  vertical-align: bottom;
+  padding-right: .5rem;
+  color: var(--color-neutral-300);
 }
 
 /* Subscribe */
@@ -487,24 +549,17 @@ a .views-field-title span {
   padding: 1rem 0;
 }
 
-/* RSS */
-
-.rss-feed a {
-  margin-top: 1rem;
-  color: var(--color-neutral-300) !important;
-  font-weight: var(--semibold);
-  text-decoration: none !important;
+.image-subscribe-page {
+  max-width: 38rem;
 }
 
-.rss-feed a::before {
-  font-family: "Material Icons";
-  content: '\e0e5';
-  vertical-align: bottom;
-  padding-right: .5rem;
-  color: var(--color-neutral-300);
+@media screen and (max-width: 620px)  {
+  .image-subscribe-page {
+    display: none;
+  }
 }
 
-/* Subscribe Form */
+/* Subscribe & Unsubcribe Forms */
 
 .og-subscribe-confirm-form #edit-uid-wrapper,
 .og-subscribe-confirm-form  #edit-roles-wrapper{
@@ -515,7 +570,29 @@ fieldset#edit-roles--wrapper .fieldset-wrapper {
   padding-left: .5rem;
 }
 
-.og-subscribe-confirm-form > #edit-actions {
+.og-subscribe-confirm-form > #edit-actions,
+.og-unsubscribe-confirm-form > #edit-actions  {
  display: flex;
  margin-top: 2rem;
+}
+
+
+/* 404 */
+
+.image-404-page {
+  max-width: 38rem;
+}
+
+@media screen and (max-width: 620px)  {
+  .image-404-page {
+    display: none;
+  }
+}
+
+/* Footer */
+
+@media screen and (max-width: 620px)  {
+  #block-linkstocopyrightstatementandthecreativecommonsliscense > div > p {
+    max-width: 30ch;
+  }
 }
