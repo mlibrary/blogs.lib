@@ -10,10 +10,6 @@ main {
   padding-top: 2rem;
 }
 
-#a-z-page #block-umlib-blogs-page-title h1 {
- margin-top: 0;
-}
-
 #a-z-page #block-exposedformall-postspage-1 {
   margin-top: 1rem;
  }
@@ -46,7 +42,7 @@ main {
   height: auto;
 }
 
-@media screen and (max-width: 769px)  {
+@media screen and (max-width: 1180px)  {
   .grid-two-column{
     display: grid;
     align-items: start;
@@ -126,7 +122,6 @@ main {
 .sidebar-node {
   grid-area: sidebarblog;
   max-width: 38ch;
-  margin-left: 4rem;
 }
 
 .line {
