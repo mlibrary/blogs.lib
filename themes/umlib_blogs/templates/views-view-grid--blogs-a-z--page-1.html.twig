@@ -56,11 +56,13 @@
     {% for row in items %}
       <div{{ row.attributes.addClass(row_classes, options.row_class_default ? 'row-' ~ loop.index) }}>
         {% for column in row.content %}
-<a class="a-z-view-link" href="{{ path('entity.node.canonical', {'node': column.content['#row']._entity.id}) }}">
+
           <div{{ column.attributes.addClass(col_classes, options.col_class_default ? 'col-' ~ loop.index) }}>
+            <a class="a-z-view-link" href="{{ path('entity.node.canonical', {'node': column.content['#row']._entity.id}) }}">
             {{- column.content -}}
+            </a>
           </div>
-</a>
+
         {% endfor %}
       </div>
     {% endfor %}
