@@ -38,7 +38,7 @@ main {
 }
 
 .layout-sidebar-first img {
-  max-width: 100%;
+  max-width: calc(100% - 2rem);
   height: auto;
 }
 

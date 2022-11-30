@@ -229,6 +229,7 @@
 
 /* Colorbox focus for links */
 
-a.colorbox.cboxElement {
+a.colorbox.cboxElement,
+a.colorbox {
   display: inline-block;
 }
