@@ -113,7 +113,6 @@
   display: flex;
   align-items: baseline;
 }
-
 .footer__content .first-column ul li a svg {
   margin-right: .5rem;
 }
@@ -144,8 +143,13 @@
   .footer__disclaimer p+p {
     margin-left: 0;
   }
+  .footer__content > div {
+    max-width: 30ch;
+  }  
+  .footer__content {
+    gap: .5rem;
+  }  
 }
-
 
 /* Skip link */
 
