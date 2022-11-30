@@ -120,6 +120,11 @@ aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-pos
        "c c"
 }
 
+#block-exposedformall-postspage-1 > div > a {
+  display: block;
+  margin-top: 1rem;
+}
+
 @media screen and (max-width: 1170px) {
   aside #views-exposed-form-all-posts-page-1, aside #views-exposed-form-recent-posts-block-1 {
     width: 100%;
@@ -478,6 +483,18 @@ a .views-field-title span {
 }
 
 /* All posts & Recent Posts - Post Cards */
+
+.all-posts, .tag-posts {
+  margin-top: 3rem;
+}
+
+.year-menu > li > ul {
+  padding-left: .5rem;
+}
+
+.year-menu > li {
+  padding-bottom: .25rem;
+}
 
 .recent-posts-blog .views-row, .all-posts .views-row, .tag-posts .views-row,
 .author-posts .views-row {
