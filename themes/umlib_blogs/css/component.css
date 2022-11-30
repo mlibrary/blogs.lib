@@ -366,10 +366,6 @@ ul.blog-tag-list {
   text-underline-offset: 4px;
 }
 
-.a-z-column-card .views-field-title .field-content:hover {
-  box-shadow: inset 0 -1px var(--color-teal-400);
-}
-
 .a-z-column-card img {
   width: 250px;
   height: auto;
@@ -501,6 +497,8 @@ div#block-exposedformrecent-postsblock-1 {
   padding-bottom: 1rem;
 }
 
+#block-views-block-recent-posts-block-1 h2,
+#block-exposedformrecent-postsblock-1 h2,
 #block-views-block-recent-posts-block-1 h3,
 #block-exposedformrecent-postsblock-1 h3 {
   margin-top: 2rem;
