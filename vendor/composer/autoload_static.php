@@ -117,6 +117,7 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
             'Psr\\Container\\' => 14,
             'Psr\\Cache\\' => 10,
             'PhpParser\\' => 10,
+            'PHPMailer\\PHPMailer\\' => 20,
         ),
         'O' => 
         array (
@@ -399,6 +400,10 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         'PhpParser\\' => 
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
+        ),
+        'PHPMailer\\PHPMailer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
         'OomphInc\\ComposerInstallersExtender\\' => 
         array (

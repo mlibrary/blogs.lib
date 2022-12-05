@@ -32,7 +32,7 @@ private static $installed = array (
     'aliases' => 
     array (
     ),
-    'reference' => 'fcfd529795356be21fe104ec06a62143b769b89a',
+    'reference' => 'f1c7b3328bb8e9299fd721215cde176bab093ad4',
     'name' => 'drupal/recommended-project',
   ),
   'versions' => 
@@ -604,6 +604,15 @@ private static $installed = array (
       array (
         0 => '9.3.22',
       ),
+    ),
+    'drupal/content_moderation_notifications' => 
+    array (
+      'pretty_version' => '3.5.0',
+      'version' => '3.5.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8.x-3.5',
     ),
     'drupal/content_translation' => 
     array (
@@ -1547,7 +1556,7 @@ private static $installed = array (
       'aliases' => 
       array (
       ),
-      'reference' => 'fcfd529795356be21fe104ec06a62143b769b89a',
+      'reference' => 'f1c7b3328bb8e9299fd721215cde176bab093ad4',
     ),
     'drupal/redirect' => 
     array (
@@ -1624,6 +1633,15 @@ private static $installed = array (
       array (
         0 => '9.3.22',
       ),
+    ),
+    'drupal/smtp' => 
+    array (
+      'pretty_version' => '1.2.0',
+      'version' => '1.2.0.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8.x-1.2',
     ),
     'drupal/standard' => 
     array (
@@ -2101,6 +2119,15 @@ private static $installed = array (
       array (
       ),
       'reference' => 'b14fbe2ddb0b9f94f5b24cf08783d599f776fff0',
+    ),
+    'phpmailer/phpmailer' => 
+    array (
+      'pretty_version' => 'v6.6.5',
+      'version' => '6.6.5.0',
+      'aliases' => 
+      array (
+      ),
+      'reference' => '8b6386d7417526d1ea4da9edb70b8352f7543627',
     ),
     'politsin/jquery-ui-touch-punch' => 
     array (
