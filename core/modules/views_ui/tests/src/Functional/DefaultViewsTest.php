@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\views_ui\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
@@ -26,8 +25,8 @@ class DefaultViewsTest extends UITestBase {
    */
   protected $defaultTheme = 'stark';
 
-  protected function setUp($import_test_views = TRUE): void {
-    parent::setUp($import_test_views);
+  protected function setUp($import_test_views = TRUE, $modules = ['views_test_config']): void {
+    parent::setUp($import_test_views, $modules);
 
     $this->placeBlock('page_title_block');
   }
@@ -170,32 +169,14 @@ class DefaultViewsTest extends UITestBase {
    * Tests that enabling views moves them to the correct table.
    */
   public function testSplitListing() {
-    // Build a re-usable xpath query.
-    $xpath = '//div[@id="views-entity-list"]/div[@class = :status]/table//td/text()[contains(., :title)]';
-
-    $arguments = [
-      ':status' => 'views-list-section enabled',
-      ':title' => 'test_view_status',
-    ];
-
     $this->drupalGet('admin/structure/views');
-
-    $elements = $this->xpath($xpath, $arguments);
-    $this->assertCount(0, $elements, 'A disabled view is not found in the enabled views table.');
-
-    $arguments[':status'] = 'views-list-section disabled';
-    $elements = $this->xpath($xpath, $arguments);
-    $this->assertCount(1, $elements, 'A disabled view is found in the disabled views table.');
+    $this->assertSession()->elementNotExists('xpath', '//div[@id="views-entity-list"]/div[@class = "views-list-section enabled"]/table//td/text()[contains(., "test_view_status")]');
+    $this->assertSession()->elementsCount('xpath', '//div[@id="views-entity-list"]/div[@class = "views-list-section disabled"]/table//td/text()[contains(., "test_view_status")]', 1);
 
     // Enable the view.
     $this->clickViewsOperationLink('Enable', '/test_view_status/');
-
-    $elements = $this->xpath($xpath, $arguments);
-    $this->assertCount(0, $elements, 'After enabling a view, it is not found in the disabled views table.');
-
-    $arguments[':status'] = 'views-list-section enabled';
-    $elements = $this->xpath($xpath, $arguments);
-    $this->assertCount(1, $elements, 'After enabling a view, it is found in the enabled views table.');
+    $this->assertSession()->elementNotExists('xpath', '//div[@id="views-entity-list"]/div[@class = "views-list-section disabled"]/table//td/text()[contains(., "test_view_status")]');
+    $this->assertSession()->elementsCount('xpath', '//div[@id="views-entity-list"]/div[@class = "views-list-section enabled"]/table//td/text()[contains(., "test_view_status")]', 1);
 
     // Attempt to disable the view by path directly, with no token.
     $this->drupalGet('admin/structure/views/view/test_view_status/disable');
@@ -232,27 +213,9 @@ class DefaultViewsTest extends UITestBase {
    *   link. For example, if the link URL is expected to look like
    *   "admin/structure/views/view/glossary/*", then "/glossary/" could be
    *   passed as the expected unique string.
-   *
-   * @return
-   *   The page content that results from clicking on the link, or FALSE on
-   *   failure. Failure also results in a failed assertion.
    */
   public function clickViewsOperationLink($label, $unique_href_part) {
-    $links = $this->xpath('//a[normalize-space(text())=:label]', [':label' => (string) $label]);
-    foreach ($links as $link_index => $link) {
-      $position = strpos($link->getAttribute('href'), $unique_href_part);
-      if ($position !== FALSE) {
-        $index = $link_index;
-        break;
-      }
-    }
-    $this->assertTrue(isset($index), new FormattableMarkup('Link to "@label" containing @part found.', ['@label' => $label, '@part' => $unique_href_part]));
-    if (isset($index)) {
-      return $this->clickLink((string) $label, $index);
-    }
-    else {
-      return FALSE;
-    }
+    $this->assertSession()->elementExists('xpath', "//a[normalize-space(text())='$label' and contains(@href, '$unique_href_part')]")->click();
   }
 
 }

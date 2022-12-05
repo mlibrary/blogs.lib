@@ -28,7 +28,7 @@ class DateTimeFieldTest extends DateTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'classy';
+  protected $defaultTheme = 'stark';
 
   /**
    * {@inheritdoc}
@@ -127,7 +127,7 @@ class DateTimeFieldTest extends DateTestBase {
               $expected = $date_formatter->format($date->getTimestamp(), $new_value, '', DateTimeItemInterface::STORAGE_TIMEZONE);
               $expected_iso = $date_formatter->format($date->getTimestamp(), 'custom', 'Y-m-d\TH:i:s\Z', DateTimeItemInterface::STORAGE_TIMEZONE);
               $output = $this->renderTestEntity($id);
-              $expected_markup = '<time datetime="' . $expected_iso . '" class="datetime">' . $expected . '</time>';
+              $expected_markup = '<time datetime="' . $expected_iso . '">' . $expected . '</time>';
               $this->assertStringContainsString($expected_markup, $output, new FormattableMarkup('Formatted date field using %value format displayed as %expected with %expected_iso attribute in %timezone.', [
                 '%value' => $new_value,
                 '%expected' => $expected,
@@ -299,7 +299,7 @@ class DateTimeFieldTest extends DateTestBase {
             $expected = $date_formatter->format($date->getTimestamp(), $new_value);
             $expected_iso = $date_formatter->format($date->getTimestamp(), 'custom', 'Y-m-d\TH:i:s\Z', 'UTC');
             $output = $this->renderTestEntity($id);
-            $expected_markup = '<time datetime="' . $expected_iso . '" class="datetime">' . $expected . '</time>';
+            $expected_markup = '<time datetime="' . $expected_iso . '">' . $expected . '</time>';
             $this->assertStringContainsString($expected_markup, $output, new FormattableMarkup('Formatted date field using %value format displayed as %expected with %expected_iso attribute.', ['%value' => $new_value, '%expected' => $expected, '%expected_iso' => $expected_iso]));
             break;
         }
@@ -918,8 +918,7 @@ class DateTimeFieldTest extends DateTestBase {
     $this->drupalGet('node/add/date_content');
     $this->submitForm($edit, 'Save');
     $this->drupalGet('admin/structure/types/manage/date_content/fields/node.date_content.' . $field_name . '/storage');
-    $result = $this->xpath("//*[@id='edit-settings-datetime-type' and contains(@disabled, 'disabled')]");
-    $this->assertCount(1, $result, "Changing datetime setting is disabled.");
+    $this->assertSession()->elementsCount('xpath', "//*[@id='edit-settings-datetime-type' and contains(@disabled, 'disabled')]", 1);
     $this->assertSession()->pageTextContains('There is data for this field in the database. The field settings can no longer be changed.');
   }
 

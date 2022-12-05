@@ -71,8 +71,8 @@ class TaggedWithTest extends WizardTestBase {
    */
   protected $tagField;
 
-  protected function setUp($import_test_views = TRUE): void {
-    parent::setUp($import_test_views);
+  protected function setUp($import_test_views = TRUE, $modules = []): void {
+    parent::setUp($import_test_views, $modules);
 
     // Create two content types. One will have an autocomplete tagging field,
     // and one won't.
@@ -269,10 +269,10 @@ class TaggedWithTest extends WizardTestBase {
     $view['show[type]'] = $this->nodeTypeWithTags->id();
     $this->drupalGet('admin/structure/views/add');
     $this->submitForm($view, 'Update "of type" choice');
-    $this->assertNotEmpty($this->xpath($tags_xpath));
+    $this->assertSession()->elementExists('xpath', $tags_xpath);
     $view['show[type]'] = $this->nodeTypeWithoutTags->id();
     $this->submitForm($view, 'Update "of type" choice (2)');
-    $this->assertNotEmpty($this->xpath($tags_xpath));
+    $this->assertSession()->elementExists('xpath', $tags_xpath);
     $this->submitForm(['show[tagged_with]' => 'term1'], 'Save and edit');
     $this->assertSession()->statusCodeEquals(200);
     $this->getSession()->getPage()->hasContent('Has taxonomy term (= term1)');

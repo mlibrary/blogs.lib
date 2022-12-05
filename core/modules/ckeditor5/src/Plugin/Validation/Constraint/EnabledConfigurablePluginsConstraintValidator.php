@@ -40,18 +40,21 @@ class EnabledConfigurablePluginsConstraintValidator extends ConstraintValidator 
     }
 
     foreach ($configurable_enabled_definitions as $id => $definition) {
-      if ($definition->hasConditions() && isset($definition->getConditions()['imageUploadStatus']) && $definition->getConditions()['imageUploadStatus'] === TRUE) {
-        // This is the exception to the rule: this is a privileged plugin due to
-        // the Text Editor config entity's built-in image upload settings.
-        // @see \Drupal\editor\Entity\Editor::getImageUploadSettings()
-        // @see editor_image_upload_settings_form()
-        // @see \Drupal\ckeditor5\Plugin\CKEditor5Plugin\ImageUpload::buildConfigurationForm()
+      // Create a fresh instance of this CKEditor 5 plugin, not tied to a text
+      // editor configuration entity.
+      $plugin = $this->pluginManager->getPlugin($id, NULL);
+      // If this plugin is configurable but it has empty default configuration,
+      // that means the configuration must be stored out of band.
+      // @see \Drupal\ckeditor5\Plugin\CKEditor5Plugin\Image
+      // @see editor_image_upload_settings_form()
+      $default_configuration = $plugin->defaultConfiguration();
+      if ($default_configuration === []) {
         continue;
       }
 
       if (!isset($plugin_settings[$id]) || empty($plugin_settings[$id])) {
         $this->context->buildViolation($constraint->message)
-          ->setParameter('%plugin_label', $definition->label())
+          ->setParameter('%plugin_label', (string) $definition->label())
           ->setParameter('%plugin_id', $id)
           ->atPath("plugins.$id")
           ->addViolation();

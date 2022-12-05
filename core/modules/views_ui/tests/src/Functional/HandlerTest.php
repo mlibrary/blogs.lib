@@ -35,8 +35,8 @@ class HandlerTest extends UITestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp($import_test_views = TRUE): void {
-    parent::setUp($import_test_views);
+  protected function setUp($import_test_views = TRUE, $modules = ['views_test_config']): void {
+    parent::setUp($import_test_views, $modules);
 
     $this->placeBlock('page_title_block');
     ViewTestData::createTestViews(static::class, ['node_test_views']);
@@ -298,8 +298,7 @@ class HandlerTest extends UITestBase {
    * @internal
    */
   public function assertNoDuplicateField(string $field_name, string $entity_type): void {
-    $elements = $this->xpath('//td[.=:entity_type]/preceding-sibling::td[@class="title" and .=:title]', [':title' => $field_name, ':entity_type' => $entity_type]);
-    $this->assertCount(1, $elements, $field_name . ' appears just once in ' . $entity_type . '.');
+    $this->assertSession()->elementsCount('xpath', '//td[.="' . $entity_type . '"]/preceding-sibling::td[@class="title" and .="' . $field_name . '"]', 1);
   }
 
 }

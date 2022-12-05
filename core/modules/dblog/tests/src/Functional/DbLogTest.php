@@ -11,6 +11,7 @@ use Drupal\Core\Url;
 use Drupal\dblog\Controller\DbLogController;
 use Drupal\error_test\Controller\ErrorTestController;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\system\Functional\Menu\AssertBreadcrumbTrait;
 
 /**
  * Generate events and verify dblog entries; verify user access to log reports
@@ -20,6 +21,7 @@ use Drupal\Tests\BrowserTestBase;
  */
 class DbLogTest extends BrowserTestBase {
   use FakeLogEntries;
+  use AssertBreadcrumbTrait;
 
   /**
    * Modules to enable.
@@ -38,7 +40,7 @@ class DbLogTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'classy';
+  protected $defaultTheme = 'stark';
 
   /**
    * A user with some relevant administrative permissions.
@@ -160,23 +162,22 @@ class DbLogTest extends BrowserTestBase {
     $wid = $query->execute()->fetchField();
     $this->drupalGet('admin/reports/dblog/event/' . $wid);
 
-    $table = $this->xpath("//table[@class='dblog-event']");
-    $this->assertCount(1, $table);
+    $table = $this->assertSession()->elementExists('xpath', "//table[@class='dblog-event']");
 
     // Verify type, severity and location.
-    $type = $table[0]->findAll('xpath', "//tr/th[contains(text(), 'Type')]/../td");
-    $this->assertCount(1, $type);
-    $this->assertEquals('access denied', $type[0]->getText());
-    $severity = $table[0]->findAll('xpath', "//tr/th[contains(text(), 'Severity')]/../td");
-    $this->assertCount(1, $severity);
-    $this->assertEquals('Warning', $severity[0]->getText());
-    $location = $table[0]->findAll('xpath', "//tr/th[contains(text(), 'Location')]/../td/a");
+    $type = "//tr/th[contains(text(), 'Type')]/../td";
+    $this->assertSession()->elementsCount('xpath', $type, 1, $table);
+    $this->assertEquals('access denied', $table->findAll('xpath', $type)[0]->getText());
+    $severity = "//tr/th[contains(text(), 'Severity')]/../td";
+    $this->assertSession()->elementsCount('xpath', $severity, 1, $table);
+    $this->assertEquals('Warning', $table->findAll('xpath', $severity)[0]->getText());
+    $location = $table->findAll('xpath', "//tr/th[contains(text(), 'Location')]/../td/a");
     $this->assertCount(1, $location);
     $href = $location[0]->getAttribute('href');
     $this->assertEquals($this->baseUrl . '/' . $uri, $href);
 
     // Verify message.
-    $message = $table[0]->findAll('xpath', "//tr/th[contains(text(), 'Message')]/../td");
+    $message = $table->findAll('xpath', "//tr/th[contains(text(), 'Message')]/../td");
     $this->assertCount(1, $message);
     $regex = "@Path: .+admin/reports\. Drupal\\\\Core\\\\Http\\\\Exception\\\\CacheableAccessDeniedHttpException: The 'access site reports' permission is required\. in Drupal\\\\Core\\\\Routing\\\\AccessAwareRouter->checkAccess\(\) \(line \d+ of .+/core/lib/Drupal/Core/Routing/AccessAwareRouter\.php\)\.@";
     $this->assertMatchesRegularExpression($regex, $message[0]->getText());
@@ -366,9 +367,13 @@ class DbLogTest extends BrowserTestBase {
     $query = Database::getConnection()->select('watchdog');
     $query->addExpression('MIN([wid])');
     $wid = $query->execute()->fetchField();
-    $this->drupalGet('admin/reports/dblog/event/' . $wid);
-    $xpath = '//nav[@class="breadcrumb"]/ol/li[last()]/a';
-    $this->assertEquals('Recent log messages', current($this->xpath($xpath))->getText(), 'DBLogs link displayed at breadcrumb in event page.');
+    $trail = [
+      '' => 'Home',
+      'admin' => 'Administration',
+      'admin/reports' => 'Reports',
+      'admin/reports/dblog' => 'Recent log messages',
+    ];
+    $this->assertBreadcrumb('admin/reports/dblog/event/' . $wid, $trail);
   }
 
   /**
