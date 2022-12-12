@@ -72,10 +72,12 @@ function _get_mcommunity_user($name) {
       ['entityid','displayName','title','mail','givenname','sn','umichtitle',]
     );
     $ldap_entries = ldap_get_entries($ldap_resource, $ldap_result);
-    $raw_data = array_filter($ldap_entries[0], function($k) { return !is_numeric($k); }, ARRAY_FILTER_USE_KEY);
-    foreach ($raw_data as $key => $data) {
-      if (isset($data[0])) {
-        $user_data[$key] = $data[0];
+    if ($ldap_entries['count'] != 0) {
+      $raw_data = array_filter($ldap_entries[0], function($k) { return !is_numeric($k); }, ARRAY_FILTER_USE_KEY);
+      foreach ($raw_data as $key => $data) {
+        if (isset($data[0])) {
+          $user_data[$key] = $data[0];
+        }
       }
     }
   }
@@ -260,7 +262,7 @@ function custom_blogs_preprocess_block(&$variables) {
  */
 function custom_blogs_preprocess_breadcrumb(&$variables) {
   if (strpos(\Drupal::service('path.current')->getPath(), 'taxonomy/term') !== FALSE) {
-    if ($blog_id = Html::escape(\Drupal::request()->query->get('blog'))) {
+    if (!empty(\Drupal::request()->query->get('blog')) && $blog_id = Html::escape(\Drupal::request()->query->get('blog'))) {
       if (is_numeric($blog_id) && $blog = Node::load($blog_id)) {
         array_splice($variables['breadcrumb'], 1, 0, [['text' => $blog->getTitle(), 'url' => '/node/'.$blog_id]]);
       }
@@ -328,7 +330,10 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, FormStateInter
       $form['#suffix'] = '<div><a href="/all-dates">Browse by Date</a></div>';
     }
     $blog_id = NULL;
-    $nid = Html::escape(\Drupal::request()->query->get('blog'));
+    $nid = NULL;
+    if (!empty(\Drupal::request()->query->get('blog'))) {
+      $nid = Html::escape(\Drupal::request()->query->get('blog'));
+    }
     if (is_numeric($nid)) {
       $node = Node::load($nid);
       $blog_id = $nid;
@@ -357,14 +362,14 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, FormStateInter
     //This alters the title of the search box and adds a reset link.
     $node = \Drupal::routeMatch()->getParameter('node');
     $blog_id = NULL;
-    if (!$node) {
+    if (!$node && !empty(\Drupal::request()->query->get('blog'))) {
       $nid = Html::escape(\Drupal::request()->query->get('blog'));
       if (is_numeric($nid)) {
         $node = Node::load($nid);
         $blog_id = $nid;
       }
     }
-    else if ($node->hasField('og_audience')) {
+    else if ($node && $node->hasField('og_audience')) {
       $blog_id = $node->get('og_audience')->target_id;
     }
     if ($blog_id) {
@@ -378,6 +383,9 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, FormStateInter
     else if ($node) {
       $form['keys']['#title'] = $form['keys']['#title'] . ' ' . $node->getTitle();
       $form['#info']['filter-keys']['label'] = $form['#info']['filter-keys']['label'] . ' ' . $node->getTitle();
+    }
+    else {
+      $form['#attributes']['class'][] = 'hidden';
     }
     $form['keys']['#placeholder'] = Markup::create(str_replace('Search in', 'Search within', $form['keys']['#title']));
     if ($form['actions']['reset']['#access']) {
@@ -394,7 +402,7 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, FormStateInter
 function custom_blogs_block_view_alter(array &$build, BlockPluginInterface $block) {
   if ($block->getDerivativeId() == 'recent_posts-block_1') {
     $node = \Drupal::routeMatch()->getParameter('node');
-    if (!$node) {
+    if (!$node && !empty(\Drupal::request()->query->get('blog'))) {
       $nid = Html::escape(\Drupal::request()->query->get('blog'));
       if (!is_numeric($nid)) {
         $build = [];
@@ -403,7 +411,10 @@ function custom_blogs_block_view_alter(array &$build, BlockPluginInterface $bloc
   }
   if ($block->getDerivativeId() == 'all_posts-page_1') {
     $node = \Drupal::routeMatch()->getParameter('node');
-    if (\Drupal::routeMatch()->getParameter('node') || (is_numeric(Html::escape(\Drupal::request()->query->get('blog'))) && \Drupal::routeMatch()->getRouteName() != 'view.all_posts.page_1')) {
+    if (\Drupal::routeMatch()->getParameter('node') || 
+       (!empty(\Drupal::request()->query->get('blog')) && 
+        is_numeric(Html::escape(\Drupal::request()->query->get('blog'))) && 
+        \Drupal::routeMatch()->getRouteName() != 'view.all_posts.page_1')) {
       $build = [];
     }
   }
@@ -558,8 +569,8 @@ function custom_blogs_views_post_render(ViewExecutable $view, array &$output, Ca
     }
   }
   if ($view->id() == 'recent_posts' && $view->current_display == 'block_1') {
-    if (is_numeric(Html::escape(\Drupal::request()->get('blog')))) {
-      $blog_id = \Drupal::request()->get('blog');
+    if (is_numeric(\Drupal::request()->get('blog'))) {
+      $blog_id = Html::escape(\Drupal::request()->get('blog'));
       $blog = Node::load($blog_id);
       $title = $blog->getTitle();
       $view->setTitle('Posts in ' . $title);
