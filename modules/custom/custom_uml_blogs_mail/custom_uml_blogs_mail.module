@@ -42,19 +42,24 @@ function custom_uml_blogs_mail_mail_alter(&$message) {
     $nodes = $message['params']['nodes'];
     $groups = [];
     foreach ($nodes as $nid => $node) {
-      $gid = $node->get('og_audience')->target_id;
-      if (!in_array($gid, $user_gids)) {
-        unset($nodes[$nid]);
+      if ($node->hasField('og_audience')) {
+        $gid = $node->get('og_audience')->target_id;
+        if (!in_array($gid, $user_gids)) {
+          unset($nodes[$nid]);
+        }
+        else {
+          $group = \Drupal\node\Entity\Node::load($gid);
+          $groups[$gid] =$group;
+          $alias = str_replace('default', '', \Drupal::service('path_alias.manager')->getAliasByPath('/node/'.$node->id()));
+          $host = \Drupal::request()->getSchemeAndHttpHost();
+          $url = $host . $alias;
+          $unsubscribe_url = $host . '/group/node/' . $gid . '/unsubscribe';
+          $message['body'][] = \Drupal\Core\Render\Markup::create('<h2>'.$group->getTitle().': '.$node->getTitle().'</h2><p>'.$node->get('field_blog_post_summary')->value.'</p><p><a href="'.$url.'">Read the full post!</a></p><p><small><a href="'.$unsubscribe_url.'">Unsubscribe</a></small></p>');
+          $message['subject'] = $group->getTitle().': '.$node->getTitle();
+        }
       }
-      else {
-        $group = \Drupal\node\Entity\Node::load($gid);
-        $groups[$gid] =$group;
-        $alias = str_replace('default', '', \Drupal::service('path_alias.manager')->getAliasByPath('/node/'.$node->id()));
-        $host = \Drupal::request()->getSchemeAndHttpHost();
-        $url = $host . $alias;
-        $unsubscribe_url = $host . '/group/node/' . $gid . '/unsubscribe';
-        $message['body'][] = \Drupal\Core\Render\Markup::create('<h2>'.$group->getTitle().': '.$node->getTitle().'</h2><p>'.$node->get('field_blog_post_summary')->value.'</p><p><a href="'.$url.'">Read the full post!</a></p><p><small><a href="'.$unsubscribe_url.'">Unsubscribe</a></small></p>');
-        $message['subject'] = $group->getTitle().': '.$node->getTitle();
+      else{
+        unset($nodes[$nid]);
       }
     }
     if (empty($groups)) {
@@ -82,8 +87,14 @@ function custom_uml_blogs_mail_mail_alter(&$message) {
       }
       $string .= $key . ': ' . $value;
     }
-    \Drupal::logger('custom_uml_blogs_mail')->notice('Email sent<br>message %message',
+$string='';
+    $sent_text = 'Email NOT sent to '.$message['to'].' for blog post id(s) <pre><code>' . print_r(array_keys($nodes), TRUE) . '</code></pre>';
+    if ($message['send']) {
+      $sent_text = 'Email sent to '.$message['to'].' for blog id(s) <pre><code>' . print_r(array_keys($groups), TRUE) . '</code></pre>';
+    }
+    \Drupal::logger('custom_uml_blogs_mail')->notice('%is_sent<br>%message',
     [
+      '%is_sent' => $sent_text,
       '%message' => $string,
     ]);
   }
