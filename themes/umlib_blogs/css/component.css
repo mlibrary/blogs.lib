@@ -310,9 +310,11 @@ ul.blog-tag-list {
   color: var(--color-neutral-300);
   font-style: normal;
 }
+
 .image-caption, figcaption {
   color: var(--color-neutral-300);
   font-style: normal;
+  max-width: 60ch;
 }
 
 /* Videos */
