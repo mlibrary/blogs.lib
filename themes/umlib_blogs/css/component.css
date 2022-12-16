@@ -288,6 +288,7 @@ ul.blog-tag-list {
   max-width: 60ch;
   height: auto;
   display: block;
+  margin-top: 1.5rem;
 }
 
 @media screen and (max-width: 768px) {
@@ -303,6 +304,13 @@ ul.blog-tag-list {
   padding-top: 2rem;
   padding-bottom: 1rem;
 }
+
+/** This breaks the URL in a blog post **/
+
+.blog-post-content a[href] {
+  word-break: break-word;
+}
+
 
 /* Featured Image */
 
@@ -505,12 +513,19 @@ a .views-field-title span {
   max-width: 65ch;
 }
 
+
 .recent-posts-blog .views-row:last-child, 
 .all-posts .views-row:last-child, 
 .tag-posts .views-row:last-child,
 .author-posts .views-row:last-child {
   border-bottom: none;
 } 
+
+.views-field-field-blog-post-summary {
+   overflow-wrap: break-word;
+   word-wrap: break-word;
+   word-break: break-word;
+}
 
 div#block-exposedformrecent-postsblock-1 {
   padding-bottom: 1rem;
