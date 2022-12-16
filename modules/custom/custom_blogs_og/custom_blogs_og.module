@@ -211,6 +211,8 @@ function _custom_blogs_test_og_access($node, $op, $account, $gid = 'all'){
       return [$gid => $all_og_role];
     }
   }
+  //return empty in all other scenarios to avoid null error
+  return [];
 }
 
 /**
