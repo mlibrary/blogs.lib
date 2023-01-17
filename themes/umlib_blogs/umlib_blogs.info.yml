@@ -1,7 +1,7 @@
 name: UM Library Blogs
 type: theme
 description: "A theme for UM Library Blogs."
-core_version_requirement: ^9
+core_version_requirement: ^9 || ^10
 libraries:
   - umlib_blogs/global-styling
   - umlib_blogs/global-scripts
