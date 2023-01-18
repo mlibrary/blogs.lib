@@ -45,7 +45,7 @@ not using this but might be useful later
   }
 */
 //This is a lousy way to do this. Cant get a field name in the item list hook to add class to li. Set a span with author class in views rewrite.
-  if (isset($variables['items'][0]) && strpos(get_class($variables['items'][0]), 'ViewsRenderPipelineMarkup') !== FALSE) {
+  if (isset($variables['items'][0]) && is_object($variables['items'][0]) && strpos(get_class($variables['items'][0]), 'ViewsRenderPipelineMarkup') !== FALSE) {
     if (strpos($variables['items'][0]->__toString(), 'class="author"') !== FALSE) {
       $suggestions[] = 'item_list__author';
     }
