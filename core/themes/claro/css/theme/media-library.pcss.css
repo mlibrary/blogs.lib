@@ -708,6 +708,12 @@
 .media-library-item__edit,
 .media-library-item__edit:hover,
 .media-library-item__edit:focus,
+.media-library-item__edit.button,
+.media-library-item__edit.button:disabled,
+.media-library-item__edit.button:disabled:active,
+.media-library-item__edit.button:hover,
+.media-library-item__edit.button:focus,
+.media-library-item__edit.button:not(:focus),
 .media-library-item__remove,
 .media-library-item__remove:hover,
 .media-library-item__remove:focus,
@@ -748,7 +754,13 @@
   left: 10px;
 }
 
-.media-library-item__edit {
+.media-library-item__edit,
+.media-library-item__edit.button,
+.media-library-item__edit.button:disabled,
+.media-library-item__edit.button:disabled:active,
+.media-library-item__edit.button:hover,
+.media-library-item__edit.button:focus,
+.media-library-item__edit.button:not(:focus) {
   /* !important to override button class border. */
   border: 1px solid var(--color-gray-200) !important;
   background-image: url("../../images/icons/545560/pencil.svg");
@@ -756,7 +768,9 @@
   background-position: center;
   background-size: 12px;
 }
-.media-library-item__edit:active {
+.media-library-item__edit:active,
+.media-library-item__edit.button:active,
+.media-library-item__edit.button:disabled:active {
   background-image: url("../../../../misc/icons/ffffff/pencil.svg");
 }
 .media-library-item__remove,
