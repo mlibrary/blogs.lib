@@ -1,0 +1,19 @@
+diff --git a/core/modules/media_library/src/Plugin/Field/FieldWidget/MediaLibraryWidget.php b/core/modules/media_library/src/Plugin/Field/FieldWidget/MediaLibraryWidget.php
+index d631d2d1..d0000cf0 100644
+--- a/core/modules/media_library/src/Plugin/Field/FieldWidget/MediaLibraryWidget.php
++++ b/core/modules/media_library/src/Plugin/Field/FieldWidget/MediaLibraryWidget.php
+@@ -507,11 +507,12 @@ public function formElement(FieldItemListInterface $items, $delta, array $elemen
+           '#limit_validation_errors' => $limit_validation_errors,
+         ],
+         'edit_button' => [
+-          '#type' => 'submit',
++          '#type' => 'button',
+           '#value' => $this->t('Edit'),
+-          '#weight' => 1,
++          '#weight' => -5,
+           '#access' => $media_item->access('update'),
+           '#attributes' => [
++            'type' => 'button',
+             'class' => ['edit-media', 'use-ajax'],
+             'href' => $media_item->toUrl('edit-form', ['query' => $state->all()])->toString(),
+             'data-dialog-type' => 'modal',

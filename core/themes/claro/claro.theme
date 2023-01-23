@@ -327,6 +327,27 @@ function claro_preprocess_maintenance_page(&$variables) {
 }
 
 /**
+ * Implements hook_theme_suggestions_maintenance_page_alter().
+ */
+function claro_theme_suggestions_maintenance_page_alter(&$suggestions) {
+  try {
+    $is_front = \Drupal::service('path.matcher')->isFrontPage();
+  }
+  catch (Exception $e) {
+    // An exception could mean that the database is offline. This scenario
+    // should also be rendered using the frontpage template.
+    $is_front = TRUE;
+  }
+
+  if ($is_front) {
+    // Add theme suggestion for maintenance page rendered as front page. This
+    // allows separating different applications such as update.php from the
+    // actual maintenance page.
+    $suggestions[] = 'maintenance_page__front';
+  }
+}
+
+/**
  * Implements hook_preprocess_HOOK() for details.
  *
  * @todo Revisit when https://www.drupal.org/node/3056089 is in.
@@ -1395,6 +1416,8 @@ function claro_preprocess_item_list__media_library_add_form_media_list(array &$v
  * This targets each media item selected in an entity reference field.
  */
 function claro_preprocess_media_library_item__widget(array &$variables) {
+  $variables['content']['edit_button']['#attributes']['class'][] = 'media-library-item__edit';
+  $variables['content']['edit_button']['#attributes']['class'][] = 'icon-link';
   $variables['content']['remove_button']['#attributes']['class'][] = 'media-library-item__remove';
   $variables['content']['remove_button']['#attributes']['class'][] = 'icon-link';
 }

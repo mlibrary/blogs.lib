@@ -76,18 +76,21 @@
    * Allow users to edit media library items inside a modal.
    */
   Drupal.behaviors.MediaLibraryWidgetEditItem = {
-    attach: function attach() {
-      $('.media-library-widget .edit-media')
-        .once('media-library-edit')
-        .on('click', function () {
-          // Remove any "selected-media" classes.
-          $(this)
-            .closest('.media-library-selection')
-            .find('.selected-media')
-            .removeClass('selected-media');
-          // Mark the media item as selected to render it properly when submitting an ajax media edit request.
-          $(this).parent().find('article').addClass('selected-media');
-        });
+    attach: function attach(context) {
+      const mediaLibraryEdit = once(
+        'media-library-edit',
+        '.media-library-widget .edit-media',
+        context,
+      );
+      $(mediaLibraryEdit).on('click', function () {
+        // Remove any "selected-media" classes.
+        $(this)
+          .closest('.media-library-selection')
+          .find('.selected-media')
+          .removeClass('selected-media');
+        // Mark the media item as selected to render it properly when submitting an ajax media edit request.
+        $(this).parent().find('article').addClass('selected-media');
+      });
     },
   };
 

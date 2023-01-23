@@ -4,7 +4,6 @@
 * https://www.drupal.org/node/2815083
 * @preserve
 **/
-
 (function ($, Drupal, Sortable) {
   Drupal.behaviors.MediaLibraryWidgetSortable = {
     attach: function attach(context) {
@@ -42,8 +41,9 @@
     }
   };
   Drupal.behaviors.MediaLibraryWidgetEditItem = {
-    attach: function attach() {
-      $('.media-library-widget .edit-media').once('media-library-edit').on('click', function () {
+    attach: function attach(context) {
+      var mediaLibraryEdit = once('media-library-edit', '.media-library-widget .edit-media', context);
+      $(mediaLibraryEdit).on('click', function () {
         $(this).closest('.media-library-selection').find('.selected-media').removeClass('selected-media');
         $(this).parent().find('article').addClass('selected-media');
       });
