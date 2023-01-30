@@ -221,6 +221,9 @@
             "add nodes to message params": "https://www.drupal.org/files/issues/2022-10-26/add-nodes-to-notify.patch",
             "partial fix for unpublished nodes": "patches/notify-unpublished-scheduled-nodes-fix.patch"
           },
+          "drupal/reroute_email": {
+            "fix error": "patches/reroute_email-fix.patch"
+          },
           "jackmoore/colorbox": {
             "add aria-label to colorbox": "patches/add-aria-label-to-colorbox.patch"
           },

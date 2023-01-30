@@ -1,0 +1,18 @@
+diff --git a/modules/contrib/reroute_email/reroute_email.module b/modules/contrib/reroute_email/reroute_email.module
+index 21d25b30..15f49626 100644
+--- a/modules/contrib/reroute_email/reroute_email.module
++++ b/modules/contrib/reroute_email/reroute_email.module
+@@ -132,9 +132,12 @@ function reroute_email_mail_alter(&$message) {
+     if (is_string($message['body'])) {
+       $message['body'] = $msg . $message['body'];
+     }
+-    else {
++    elseif (isset($message['body'])) {
+       array_unshift($message['body'], $msg);
+     }
++    else {
++      $message['body'] = $msg;
++    }
+   }
+
+   // Abort sending of the email if the no rerouting addresses provided.
