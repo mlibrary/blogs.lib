@@ -5,3 +5,7 @@ add nodes to message params
 Source: https://www.drupal.org/files/issues/2022-10-26/add-nodes-to-notify.patch
 
 
+partial fix for unpublished nodes
+Source: patches/notify-unpublished-scheduled-nodes-fix.patch
+
+

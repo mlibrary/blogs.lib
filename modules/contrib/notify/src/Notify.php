@@ -265,6 +265,7 @@ class Notify implements NotifyInterface {
     $q->fields('n', ['nid']);
     if (count($ntype) >= 1) {
       $q->condition('n.type', $ntype, 'IN');
+$q->condition('u.status', 1);
     }
     if ($this->config->get('notify_include_updates')) {
       $q->condition((new Condition('OR'))

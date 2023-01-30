@@ -1,0 +1,12 @@
+diff --git a/modules/contrib/notify/src/Notify.php b/modules/contrib/notify/src/Notify.php
+index cd8c533b..93a0d005 100644
+--- a/modules/contrib/notify/src/Notify.php
++++ b/modules/contrib/notify/src/Notify.php
+@@ -265,6 +265,7 @@ public function selectContent(): array {
+     $q->fields('n', ['nid']);
+     if (count($ntype) >= 1) {
+       $q->condition('n.type', $ntype, 'IN');
++$q->condition('u.status', 1);
+     }
+     if ($this->config->get('notify_include_updates')) {
+       $q->condition((new Condition('OR'))
