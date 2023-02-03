@@ -6,3 +6,7 @@ login-return-page-link:
     - core/drupal
     - core/jquery
     - core/jquery.once
+stupid-scheduler-settings-wrapper:
+  css:
+    base:
+      css/stupid-scheduler-settings-wrapper.css: {}

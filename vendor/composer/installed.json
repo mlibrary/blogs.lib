@@ -3340,6 +3340,9 @@
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
                     }
+                },
+                "patches_applied": {
+                    "https://www.drupal.org/node/3027690": "https://www.drupal.org/files/issues/2021-08-03/content_moderation_notifications-dont_notify_for_same_state-3027690-23.patch"
                 }
             },
             "installation-source": "dist",
@@ -6022,7 +6025,8 @@
                     }
                 },
                 "patches_applied": {
-                    "add nodes to message params": "https://www.drupal.org/files/issues/2022-10-26/add-nodes-to-notify.patch"
+                    "add nodes to message params": "https://www.drupal.org/files/issues/2022-10-26/add-nodes-to-notify.patch",
+                    "partial fix for unpublished nodes": "patches/notify-unpublished-scheduled-nodes-fix.patch"
                 }
             },
             "installation-source": "dist",
@@ -6038,6 +6042,10 @@
                 {
                     "name": "matt2000",
                     "homepage": "https://www.drupal.org/user/143172"
+                },
+                {
+                    "name": "rik.scholten",
+                    "homepage": "https://www.drupal.org/user/3661104"
                 }
             ],
             "description": "Enables notifications of new content and comments by e-mail.",
@@ -6859,31 +6867,34 @@
         },
         {
             "name": "drupal/reroute_email",
-            "version": "2.1.1",
-            "version_normalized": "2.1.1.0",
+            "version": "2.2.0",
+            "version_normalized": "2.2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/reroute_email.git",
-                "reference": "2.1.1"
+                "reference": "2.2.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/reroute_email-2.1.1.zip",
-                "reference": "2.1.1",
-                "shasum": "a3ed4920867d04aa446a75f349ade90e31fd1926"
+                "url": "https://ftp.drupal.org/files/projects/reroute_email-2.2.0.zip",
+                "reference": "2.2.0",
+                "shasum": "e6513f840b228c863f3021f00288eb75e8c40320"
             },
             "require": {
-                "drupal/core": "^8.8 || ^9"
+                "drupal/core": "^9 || ^10"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "2.1.1",
-                    "datestamp": "1648587118",
+                    "version": "2.2.0",
+                    "datestamp": "1670926026",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
                     }
+                },
+                "patches_applied": {
+                    "fix error": "patches/reroute_email-fix.patch"
                 }
             },
             "installation-source": "dist",
@@ -6897,20 +6908,24 @@
                     "homepage": "https://www.drupal.org/user/407852"
                 },
                 {
-                    "name": "DYdave",
-                    "homepage": "https://www.drupal.org/user/467284"
+                    "name": "bohart",
+                    "homepage": "https://www.drupal.org/user/289861"
                 },
                 {
                     "name": "Devaraj johnson",
                     "homepage": "https://www.drupal.org/user/2698767"
                 },
                 {
-                    "name": "bohart",
-                    "homepage": "https://www.drupal.org/user/289861"
+                    "name": "DYdave",
+                    "homepage": "https://www.drupal.org/user/467284"
                 },
                 {
                     "name": "kbahey",
                     "homepage": "https://www.drupal.org/user/4063"
+                },
+                {
+                    "name": "Rajeshreeputra",
+                    "homepage": "https://www.drupal.org/user/3418561"
                 },
                 {
                     "name": "rfay",
@@ -7001,6 +7016,70 @@
                 "issues": "https://www.drupal.org/project/issues/scheduler"
             },
             "install-path": "../../modules/contrib/scheduler"
+        },
+        {
+            "name": "drupal/scheduler_content_moderation_integration",
+            "version": "1.4.0",
+            "version_normalized": "1.4.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/scheduler_content_moderation_integration.git",
+                "reference": "8.x-1.4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/scheduler_content_moderation_integration-8.x-1.4.zip",
+                "reference": "8.x-1.4",
+                "shasum": "0afb23b9a5e578f2859ae3eabad1d3aadaf70418"
+            },
+            "require": {
+                "drupal/core": "^8.7.7 || ^9",
+                "drupal/scheduler": "^1.1"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "8.x-1.4",
+                    "datestamp": "1653735087",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "installation-source": "dist",
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "chr.fritsch",
+                    "homepage": "https://www.drupal.org/user/2103716"
+                },
+                {
+                    "name": "daniel.bosen",
+                    "homepage": "https://www.drupal.org/user/404865"
+                },
+                {
+                    "name": "jonathan1055",
+                    "homepage": "https://www.drupal.org/user/92645"
+                },
+                {
+                    "name": "smustgrave",
+                    "homepage": "https://www.drupal.org/user/3252890"
+                },
+                {
+                    "name": "volkerk",
+                    "homepage": "https://www.drupal.org/user/57527"
+                }
+            ],
+            "description": "Scheduler sub-module providing content moderation functionality for publishing/unpublishing",
+            "homepage": "https://www.drupal.org/project/scheduler_content_moderation_integration",
+            "support": {
+                "source": "https://git.drupalcode.org/project/scheduler_content_moderation_integration"
+            },
+            "install-path": "../../modules/contrib/scheduler_content_moderation_integration"
         },
         {
             "name": "drupal/smtp",

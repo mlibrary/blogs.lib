@@ -27,6 +27,18 @@ class NotificationInformation implements NotificationInformationInterface {
    */
   protected $moderationInformation;
 
+
+  /**
+   * Flag that indicates if the previous state is real or defaulted.
+   *
+   * Defaulted means there is no previous state. However, because class needs
+   * to work with a real state, the workflow's default one is used. This flag
+   * is used to detect this case.
+   *
+   * @var bool
+   */
+  protected $previousStateIsDefaulted = FALSE;
+
   /**
    * Creates a new NotificationInformation instance.
    *
@@ -55,11 +67,11 @@ class NotificationInformation implements NotificationInformationInterface {
     $workflow = $this->getWorkflow($entity);
     if (isset($entity->last_revision)) {
       $previous_state = $workflow->getTypePlugin()->getState($entity->last_revision->moderation_state->value);
-
     }
 
     if (!$previous_state) {
       $previous_state = $workflow->getTypePlugin()->getInitialState($entity);
+      $this->previousStateIsDefaulted = TRUE;
     }
 
     return $previous_state;
@@ -94,6 +106,21 @@ class NotificationInformation implements NotificationInformationInterface {
   }
 
   /**
+   * Determines whether a transition represents an actual change of state.
+   *
+   * @param \Drupal\Core\Entity\ContentEntityInterface $entity
+   *   The entity undergoing a workflow transition.
+   *
+   * @return bool
+   *   Whether the transition's "from" and "to" states differ.
+   */
+  protected function isTransitionChange(ContentEntityInterface $entity) {
+    $current_state = $entity->moderation_state->value;
+    $previous_state = $this->getPreviousState($entity)->id();
+    return $this->previousStateIsDefaulted || ($current_state != $previous_state);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getNotifications(EntityInterface $entity) {
@@ -102,6 +129,11 @@ class NotificationInformation implements NotificationInformationInterface {
     if ($this->isModeratedEntity($entity)) {
       $workflow = $this->getWorkflow($entity);
       if ($transition = $this->getTransition($entity)) {
+        // If there's no real change in state, don't notify.
+        if (!$this->isTransitionChange($entity)) {
+          return [];
+        }
+
         // Find out if we have a config entity that contains this transition.
         $query = $this->entityTypeManager->getStorage('content_moderation_notification')
           ->getQuery()

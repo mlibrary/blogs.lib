@@ -18,6 +18,28 @@ use Drupal\user\Entity\UserInterface;
 /**
  * Implements hook_form_FORM_ID_alter().
  */
+function custom_blogs_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (in_array($form_id, ['node_blog_post_form', 'node_blog_post_edit_form'])) {
+    if ($form_state->getFormObject()->getEntity()->get('moderation_state')->value == 'published') {
+      $form['moderation_state']['#type'] = 'hidden';
+      $form['#attached']['library'][] = 'custom_blogs/stupid-scheduler-settings-wrapper';
+    }
+    // Not sure why this has happened both ways.
+    if (isset($form['publish_state']['widget'][0])) {
+      $form['publish_state']['widget'][0]['#default_value'][] = 'published';
+      unset($form['publish_state']['widget'][0]['#options']['_none']);
+    }
+    else {
+      $form['publish_state']['widget']['#default_value'][] = 'published';
+      unset($form['publish_state']['widget']['#options']['_none']);
+    }
+    $form['publish_state']['#type'] = 'hidden';
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
 function custom_blogs_form_user_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   if (!\Drupal::currentUser()->hasPermission('administer_user')) {
     $form['account']['name']['#type'] = 'hidden';
