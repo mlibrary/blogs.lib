@@ -114,6 +114,7 @@
         "drupal/redirect": "^1.8",
         "drupal/reroute_email": "^2.1",
         "drupal/scheduler": "^1.4",
+        "drupal/scheduler_content_moderation_integration": "^1.4",
         "drupal/smtp": "^1.2",
         "drupal/structure_sync": "^2.0",
         "drupal/swiftmailer": "^2.2",
@@ -220,6 +221,9 @@
           "drupal/notify": {
             "add nodes to message params": "https://www.drupal.org/files/issues/2022-10-26/add-nodes-to-notify.patch",
             "partial fix for unpublished nodes": "patches/notify-unpublished-scheduled-nodes-fix.patch"
+          },
+          "drupal/content_moderation_notifications": {
+            "https://www.drupal.org/node/3027690": "https://www.drupal.org/files/issues/2021-08-03/content_moderation_notifications-dont_notify_for_same_state-3027690-23.patch"
           },
           "drupal/reroute_email": {
             "fix error": "patches/reroute_email-fix.patch"

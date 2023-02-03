@@ -23,85 +23,19 @@ function custom_uml_blogs_mail_module_implements_alter(&$implementations, $hook)
 /**
  * Implements hook_mail_alter().
  *
- * Alter destination of outgoing emails if reroute_email is enabled.
+ * Alter destination of outgoing emails to group members.
  */
 function custom_uml_blogs_mail_mail_alter(&$message) {
-  $sitemail = \Drupal::config('system.site')->get('mail');
-  $message['headers']['From'] = $message['headers']['Sender'] = $message['headers']['Errors-To'] = $message['headers']['Reply-to'] = 'U-M Library Blogs' . ' <' . $sitemail . '>';
-  if ($message['id'] == 'notify_notice') {
-    unset($message['params']['content']);
-    unset($message['body']); //array of multiple Drupal\Core\Render\Markup
-    unset($message['subject']); //Drupal\Core\StringTranslation\TranslatableMarkup
-    $account = $message['params']['user'];
-    $memberships = \Drupal::service('og.membership_manager')->getMemberships($account->id());
-    $user_gids = [];
+  if ($message['id'] == 'content_moderation_notifications_content_moderation_notification') {
+    $node = $message['params']['context']['entity'];
+    $group_node = \Drupal\node\Entity\Node::load($node->get('og_audience')->target_id);
+    $memberships = \Drupal::service('og.membership_manager')->getGroupMembershipsByRoleNames($group_node, ['member']);
+    $bcc = '';
     foreach ($memberships as $membership) {
-      $user_gid = $membership->getGroupId();
-      $user_gids[] = $user_gid;
+      $bcc .= $membership->getOwner()->getEmail() . ',';
     }
-    $nodes = $message['params']['nodes'];
-    $groups = [];
-    foreach ($nodes as $nid => $node) {
-      if ($node->hasField('og_audience')) {
-        $gid = $node->get('og_audience')->target_id;
-        if (!in_array($gid, $user_gids)) {
-          unset($nodes[$nid]);
-        }
-        else {
-          $group = \Drupal\node\Entity\Node::load($gid);
-          $groups[$gid] =$group;
-          $alias = str_replace('default', '', \Drupal::service('path_alias.manager')->getAliasByPath('/node/'.$node->id()));
-          $host = \Drupal::request()->getSchemeAndHttpHost();
-          $url = $host . $alias;
-          $unsubscribe_url = $host . '/group/node/' . $gid . '/unsubscribe';
-          $message['body'][] = \Drupal\Core\Render\Markup::create('<h2>'.$group->getTitle().': '.$node->getTitle().'</h2><p>'.$node->get('field_blog_post_summary')->value.'</p><p><a href="'.$url.'">Read the full post!</a></p><p><small><a href="'.$unsubscribe_url.'">Unsubscribe</a></small></p>');
-          $message['subject'] = $group->getTitle().': '.$node->getTitle();
-        }
-      }
-      else{
-        unset($nodes[$nid]);
-      }
-    }
-    if (empty($groups)) {
-      $message['send'] = FALSE;
-    }
-    else {
-      $message['params']['nodes'] = $nodes;
-      if (count($nodes) > 1 && count($groups) == 1) {
-        $message['subject'] = $group->getTitle().' has new posts';
-      }
-      if (count($nodes) > 1 && count($groups) > 1) {
-        $message['subject'] = count($groups).' blogs you subscribe to have new posts';
-      }
-    }
-    //add some debugging in case.
-    //dont do this, itll crash    $string = '<pre><code>' . print_r($message, TRUE) . '</code></pre>';
-    $string = '';
-    foreach ($message as $key => $value) {
-      if (is_array($value)) {
-        foreach ($value as $v_key => $v_value) {
-          if (is_string($v_value)) {
-            $string .= $v_key . ': ' . $v_value;
-          }
-        }
-      }
-      $string .= $key . ': ' . $value;
-    }
-$string='';
-    $sent_text = 'Email NOT sent to '.$message['to'].' for blog post id(s) <pre><code>' . print_r(array_keys($nodes), TRUE) . '</code></pre>';
-    if ($message['send']) {
-      $sent_text = 'Email sent to '.$message['to'].' for blog id(s) <pre><code>' . print_r(array_keys($groups), TRUE) . '</code></pre>';
-    }
-    \Drupal::logger('custom_uml_blogs_mail')->notice('%is_sent<br>%message',
-    [
-      '%is_sent' => $sent_text,
-      '%message' => $string,
-    ]);
+    $message['bcc'] = rtrim($bcc, ',');
+    $message['headers']['Bcc'] = $message['bcc'];
+    \Drupal::messenger()->addMessage('All subscribers of ' . $group_node->getTitle() . ' have been sent a notification email.');
   }
-}
-/**
- * Implements hook_mail().
- */
-function custom_uml_blogs_mail_mail($key, &$message, $params) {
-//this wasnt firing
 }
