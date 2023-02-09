@@ -1,0 +1,3 @@
+[submodule "themes/umlib_base"]
+	path = themes/umlib_base
+	url = git@github.com:mlibrary/umlib_base.git
