@@ -1,5 +1,0 @@
-[submodule "themes/umlib_base"]
-	path = themes/umlib_base
-	url = https://github.com/mlibrary/umlib_base.git
-	update = merge
-	branch = main
