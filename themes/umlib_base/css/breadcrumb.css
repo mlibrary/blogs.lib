@@ -1,0 +1,53 @@
+/**
+ * @file
+ * Styles for breadcrumbs.
+ */
+
+[dir="rtl"] .breadcrumb ol {
+  /* This is required to win over specificity of [dir="rtl"] ol */
+  margin-right: 0;
+}
+
+.breadcrumbs ol {
+  display: flex;
+  flex-flow: row wrap;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.breadcrumbs li:first-child a {
+  padding-left: 0;
+}
+
+.breadcrumbs a, .breadcrumbs span {
+  display: inline;
+  padding: 16px 10px;
+}
+
+.breadcrumbs li {
+  padding-top: .5rem;
+}
+
+.breadcrumbs li:last-child {
+  text-transform: capitalize;
+}
+
+.breadcrumbs a {
+  font-size: 1rem;
+}
+
+.breadcrumbs a[aria-current='page'] {
+  color: var(--color-neutral-400);
+  text-decoration: none;
+}
+
+.breadcrumbs a[aria-current='page']:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+.breadcrumbs li:not(:first-child):before {
+  content: '\203A' !important;
+  font-size: 1rem;
+}

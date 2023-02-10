@@ -8,7 +8,20 @@
             "type": "composer",
             "url": "https://packages.drupal.org/8"
         },
-        "fakeobjects": {
+        "umlib_base-theme": {
+            "type": "package",
+            "package": {
+                "name": "mlibrary/umlib_base",
+                "version": "1.0",
+                "type": "drupal-theme",
+                "dist": {
+                    "type": "zip",
+                    "url": "https://github.com/mlibrary/umlib_base/archive/refs/heads/main.zip",
+                    "reference": "main"
+                }
+            }
+        },
+	"fakeobjects": {
           "type": "package",
           "package": {
             "name": "ckeditor-plugin/fakeobjects",
@@ -130,6 +143,7 @@
         "drush/drush": "^10.6",
         "furf/jquery-ui-touch-punch": "master",
         "jackmoore/colorbox": "^1.6",
+        "mlibrary/umlib_base": "^1.0",
         "oomphinc/composer-installers-extender": "^2.0",
         "wikimedia/composer-merge-plugin": "^2.0"
     },
@@ -166,7 +180,7 @@
             "profiles/contrib/{$name}": [
                 "type:drupal-profile"
             ],
-            "themes/contrib/{$name}": [
+            "themes/{$name}": [
                 "type:drupal-theme"
             ],
             "drush/Commands/contrib/{$name}": [
