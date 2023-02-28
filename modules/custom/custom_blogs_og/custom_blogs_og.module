@@ -452,9 +452,9 @@ function _custom_blogs_form_og_membership_add_validate(&$form, FormStateInterfac
         $new_user = User::create([
             'name' => $new_user_name,
             'mail' => $user_data['mail'],
-            'pass' => user_password(),
+            'pass' => \Drupal::service('password_generator')->generate(),
             'status' => 1,
-            'roles' => $new_user_roles,
+            'roles' => $roles['add'],
         ]);
       }
     }
@@ -473,7 +473,7 @@ function _custom_blogs_form_og_membership_add_validate(&$form, FormStateInterfac
       $new_user = User::create([
           'name' => $new_user_name,
           'mail' => $new_user_name,
-          'pass' => user_password(),
+          'pass' => \Drupal::service('password_generator')->generate(),
           'status' => 1,
           'roles' => $roles['add'],
       ]);
@@ -504,7 +504,7 @@ function _custom_blogs_form_og_membership_add_validate(&$form, FormStateInterfac
  */
 function _custom_blogs_get_roles($roles) {
   if (isset($roles['node-blog-administrator'])) {
-    unset($new_user_roles['node-blog-administrator']);
+    unset($roles['node-blog-administrator']);
   }
   foreach ($roles as $key => $role) {
     $role_name = str_replace('node-', '', $key);

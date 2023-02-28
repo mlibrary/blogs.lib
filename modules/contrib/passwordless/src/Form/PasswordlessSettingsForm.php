@@ -62,7 +62,7 @@ class PasswordlessSettingsForm extends ConfigFormBase {
     $form['passwordless_settings']['passwordless_toggle_sent_page'] = [
       '#type' => 'checkbox',
       '#title' => t('Enable confirmation page'),
-      '#description' => t('Check this box to display the confirmation message on a different page. Uncheck it to display it as a regular Drupal message. @test', ['@test' => Link::fromTextAndUrl(t('You can also test the confirmation page.'), new Url('passwordless.user_login_sent', [], ['attributes' => ['target' => '_blank']]))]),
+      '#description' => t('Check this box to display the confirmation message on a different page. Uncheck it to display it as a regular Drupal message. @test', ['@test' => Link::fromTextAndUrl(t('You can also test the confirmation page.'), new Url('passwordless.user_login_sent', [], ['attributes' => ['target' => '_blank']]))->toString()]),
       '#default_value' => $config->get('passwordless_toggle_sent_page'),
     ];
 
