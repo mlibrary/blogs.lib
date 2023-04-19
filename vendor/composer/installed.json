@@ -3370,17 +3370,17 @@
         },
         {
             "name": "drupal/core",
-            "version": "9.5.5",
-            "version_normalized": "9.5.5.0",
+            "version": "9.5.8",
+            "version_normalized": "9.5.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core.git",
-                "reference": "eae5e76a8b403cbd42b3465f567313b52d78b0dc"
+                "reference": "a9a1e4e1fe23fb8c83fd6aeafb740c1462a218fc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core/zipball/eae5e76a8b403cbd42b3465f567313b52d78b0dc",
-                "reference": "eae5e76a8b403cbd42b3465f567313b52d78b0dc",
+                "url": "https://api.github.com/repos/drupal/core/zipball/a9a1e4e1fe23fb8c83fd6aeafb740c1462a218fc",
+                "reference": "a9a1e4e1fe23fb8c83fd6aeafb740c1462a218fc",
                 "shasum": ""
             },
             "require": {
@@ -3460,7 +3460,7 @@
                 "drupal/core-uuid": "self.version",
                 "drupal/core-version": "self.version"
             },
-            "time": "2023-03-15T14:30:25+00:00",
+            "time": "2023-04-19T16:14:39+00:00",
             "type": "drupal-core",
             "extra": {
                 "drupal-scaffold": {
@@ -3541,7 +3541,7 @@
             ],
             "description": "Drupal is an open source content management platform powering millions of websites and applications.",
             "support": {
-                "source": "https://github.com/drupal/core/tree/9.5.5"
+                "source": "https://github.com/drupal/core/tree/9.5.8"
             },
             "install-path": "../../core"
         },
@@ -8671,17 +8671,17 @@
         },
         {
             "name": "guzzlehttp/psr7",
-            "version": "1.9.0",
-            "version_normalized": "1.9.0.0",
+            "version": "1.9.1",
+            "version_normalized": "1.9.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "e98e3e6d4f86621a9b75f623996e6bbdeb4b9318"
+                "reference": "e4490cabc77465aaee90b20cfc9a770f8c04be6b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/e98e3e6d4f86621a9b75f623996e6bbdeb4b9318",
-                "reference": "e98e3e6d4f86621a9b75f623996e6bbdeb4b9318",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/e4490cabc77465aaee90b20cfc9a770f8c04be6b",
+                "reference": "e4490cabc77465aaee90b20cfc9a770f8c04be6b",
                 "shasum": ""
             },
             "require": {
@@ -8699,13 +8699,8 @@
             "suggest": {
                 "laminas/laminas-httphandlerrunner": "Emit PSR-7 responses"
             },
-            "time": "2022-06-20T21:43:03+00:00",
+            "time": "2023-04-17T16:00:37+00:00",
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.9-dev"
-                }
-            },
             "installation-source": "dist",
             "autoload": {
                 "files": [
@@ -8764,7 +8759,7 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/psr7/issues",
-                "source": "https://github.com/guzzle/psr7/tree/1.9.0"
+                "source": "https://github.com/guzzle/psr7/tree/1.9.1"
             },
             "funding": [
                 {
@@ -8845,23 +8840,23 @@
         },
         {
             "name": "laminas/laminas-diactoros",
-            "version": "2.24.0",
-            "version_normalized": "2.24.0.0",
+            "version": "2.25.2",
+            "version_normalized": "2.25.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laminas/laminas-diactoros.git",
-                "reference": "6028af6c3b5ced4d063a680d2483cce67578b902"
+                "reference": "9f3f4bf5b99c9538b6f1dbcc20f6fec357914f9e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laminas/laminas-diactoros/zipball/6028af6c3b5ced4d063a680d2483cce67578b902",
-                "reference": "6028af6c3b5ced4d063a680d2483cce67578b902",
+                "url": "https://api.github.com/repos/laminas/laminas-diactoros/zipball/9f3f4bf5b99c9538b6f1dbcc20f6fec357914f9e",
+                "reference": "9f3f4bf5b99c9538b6f1dbcc20f6fec357914f9e",
                 "shasum": ""
             },
             "require": {
                 "php": "~8.0.0 || ~8.1.0 || ~8.2.0",
                 "psr/http-factory": "^1.0",
-                "psr/http-message": "^1.0"
+                "psr/http-message": "^1.1"
             },
             "conflict": {
                 "zendframework/zend-diactoros": "*"
@@ -8876,13 +8871,13 @@
                 "ext-gd": "*",
                 "ext-libxml": "*",
                 "http-interop/http-factory-tests": "^0.9.0",
-                "laminas/laminas-coding-standard": "^2.4.0",
+                "laminas/laminas-coding-standard": "^2.5",
                 "php-http/psr7-integration-tests": "^1.2",
-                "phpunit/phpunit": "^9.5.27",
+                "phpunit/phpunit": "^9.5.28",
                 "psalm/plugin-phpunit": "^0.18.4",
-                "vimeo/psalm": "^5.4"
+                "vimeo/psalm": "^5.6"
             },
-            "time": "2022-12-20T12:22:40+00:00",
+            "time": "2023-04-17T15:44:17+00:00",
             "type": "library",
             "extra": {
                 "laminas": {
@@ -9186,33 +9181,33 @@
         },
         {
             "name": "laminas/laminas-stdlib",
-            "version": "3.16.1",
-            "version_normalized": "3.16.1.0",
+            "version": "3.17.0",
+            "version_normalized": "3.17.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laminas/laminas-stdlib.git",
-                "reference": "f4f773641807c7ccee59b758bfe4ac4ba33ecb17"
+                "reference": "dd35c868075bad80b6718959740913e178eb4274"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laminas/laminas-stdlib/zipball/f4f773641807c7ccee59b758bfe4ac4ba33ecb17",
-                "reference": "f4f773641807c7ccee59b758bfe4ac4ba33ecb17",
+                "url": "https://api.github.com/repos/laminas/laminas-stdlib/zipball/dd35c868075bad80b6718959740913e178eb4274",
+                "reference": "dd35c868075bad80b6718959740913e178eb4274",
                 "shasum": ""
             },
             "require": {
-                "php": "~8.0.0 || ~8.1.0 || ~8.2.0"
+                "php": "~8.1.0 || ~8.2.0"
             },
             "conflict": {
                 "zendframework/zend-stdlib": "*"
             },
             "require-dev": {
-                "laminas/laminas-coding-standard": "^2.4.0",
-                "phpbench/phpbench": "^1.2.7",
-                "phpunit/phpunit": "^9.5.26",
-                "psalm/plugin-phpunit": "^0.18.0",
-                "vimeo/psalm": "^5.0.0"
+                "laminas/laminas-coding-standard": "^2.5",
+                "phpbench/phpbench": "^1.2.9",
+                "phpunit/phpunit": "^10.0.16",
+                "psalm/plugin-phpunit": "^0.18.4",
+                "vimeo/psalm": "^5.8"
             },
-            "time": "2022-12-03T18:48:01+00:00",
+            "time": "2023-03-20T13:51:37+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -10083,24 +10078,24 @@
         },
         {
             "name": "psr/http-factory",
-            "version": "1.0.1",
-            "version_normalized": "1.0.1.0",
+            "version": "1.0.2",
+            "version_normalized": "1.0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/http-factory.git",
-                "reference": "12ac7fcd07e5b077433f5f2bee95b3a771bf61be"
+                "reference": "e616d01114759c4c489f93b099585439f795fe35"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/http-factory/zipball/12ac7fcd07e5b077433f5f2bee95b3a771bf61be",
-                "reference": "12ac7fcd07e5b077433f5f2bee95b3a771bf61be",
+                "url": "https://api.github.com/repos/php-fig/http-factory/zipball/e616d01114759c4c489f93b099585439f795fe35",
+                "reference": "e616d01114759c4c489f93b099585439f795fe35",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.0.0",
-                "psr/http-message": "^1.0"
+                "psr/http-message": "^1.0 || ^2.0"
             },
-            "time": "2019-04-30T12:38:16+00:00",
+            "time": "2023-04-10T20:10:41+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -10120,7 +10115,7 @@
             "authors": [
                 {
                     "name": "PHP-FIG",
-                    "homepage": "http://www.php-fig.org/"
+                    "homepage": "https://www.php-fig.org/"
                 }
             ],
             "description": "Common interfaces for PSR-7 HTTP message factories",
@@ -10135,33 +10130,33 @@
                 "response"
             ],
             "support": {
-                "source": "https://github.com/php-fig/http-factory/tree/master"
+                "source": "https://github.com/php-fig/http-factory/tree/1.0.2"
             },
             "install-path": "../psr/http-factory"
         },
         {
             "name": "psr/http-message",
-            "version": "1.0.1",
-            "version_normalized": "1.0.1.0",
+            "version": "1.1",
+            "version_normalized": "1.1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/http-message.git",
-                "reference": "f6561bf28d520154e4b0ec72be95418abe6d9363"
+                "reference": "cb6ce4845ce34a8ad9e68117c10ee90a29919eba"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/http-message/zipball/f6561bf28d520154e4b0ec72be95418abe6d9363",
-                "reference": "f6561bf28d520154e4b0ec72be95418abe6d9363",
+                "url": "https://api.github.com/repos/php-fig/http-message/zipball/cb6ce4845ce34a8ad9e68117c10ee90a29919eba",
+                "reference": "cb6ce4845ce34a8ad9e68117c10ee90a29919eba",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0"
+                "php": "^7.2 || ^8.0"
             },
-            "time": "2016-08-06T14:39:51+00:00",
+            "time": "2023-04-04T09:50:52+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.0.x-dev"
+                    "dev-master": "1.1.x-dev"
                 }
             },
             "installation-source": "dist",
@@ -10191,7 +10186,7 @@
                 "response"
             ],
             "support": {
-                "source": "https://github.com/php-fig/http-message/tree/master"
+                "source": "https://github.com/php-fig/http-message/tree/1.1"
             },
             "install-path": "../psr/http-message"
         },
@@ -13431,17 +13426,17 @@
         },
         {
             "name": "symfony/var-dumper",
-            "version": "v5.4.21",
-            "version_normalized": "5.4.21.0",
+            "version": "v5.4.22",
+            "version_normalized": "5.4.22.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/var-dumper.git",
-                "reference": "6c5ac3a1be8b849d59a1a77877ee110e1b55eb74"
+                "reference": "e2edac9ce47e6df07e38143c7cfa6bdbc1a6dcc4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/6c5ac3a1be8b849d59a1a77877ee110e1b55eb74",
-                "reference": "6c5ac3a1be8b849d59a1a77877ee110e1b55eb74",
+                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/e2edac9ce47e6df07e38143c7cfa6bdbc1a6dcc4",
+                "reference": "e2edac9ce47e6df07e38143c7cfa6bdbc1a6dcc4",
                 "shasum": ""
             },
             "require": {
@@ -13465,7 +13460,7 @@
                 "ext-intl": "To show region name in time zone dump",
                 "symfony/console": "To use the ServerDumpCommand and/or the bin/var-dump-server script"
             },
-            "time": "2023-02-23T10:00:28+00:00",
+            "time": "2023-03-25T09:27:28+00:00",
             "bin": [
                 "Resources/bin/var-dump-server"
             ],
@@ -13503,7 +13498,7 @@
                 "dump"
             ],
             "support": {
-                "source": "https://github.com/symfony/var-dumper/tree/v5.4.21"
+                "source": "https://github.com/symfony/var-dumper/tree/v5.4.22"
             },
             "funding": [
                 {
