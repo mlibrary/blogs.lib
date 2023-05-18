@@ -24,14 +24,19 @@ function custom_blogs_form_alter(&$form, FormStateInterface $form_state, $form_i
       $form['moderation_state']['#type'] = 'hidden';
       $form['#attached']['library'][] = 'custom_blogs/stupid-scheduler-settings-wrapper';
     }
-    // Not sure why this has happened both ways.
-    if (isset($form['publish_state']['widget'][0])) {
-      $form['publish_state']['widget'][0]['#default_value'][] = 'published';
-      unset($form['publish_state']['widget'][0]['#options']['_none']);
-    }
-    else {
-      $form['publish_state']['widget']['#default_value'][] = 'published';
-      unset($form['publish_state']['widget']['#options']['_none']);
+    $roles = \Drupal::currentUser()->getRoles();
+    $allowed_roles = ['blog_author', 'blog_manager', 'admin', 'admin_light'];
+    $has_allowed_role = array_intersect($allowed_roles, $roles);
+    if (!empty($has_allowed_role)) {
+      // Not sure why this has happened both ways.
+      if (isset($form['publish_state']['widget'][0])) {
+        $form['publish_state']['widget'][0]['#default_value'][] = 'published';
+        unset($form['publish_state']['widget'][0]['#options']['_none']);
+      }
+      else {
+        $form['publish_state']['widget']['#default_value'][] = 'published';
+        unset($form['publish_state']['widget']['#options']['_none']);
+      }
     }
     $form['publish_state']['#type'] = 'hidden';
   }
