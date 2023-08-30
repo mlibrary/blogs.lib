@@ -2,35 +2,30 @@
 
 namespace Drupal\scheduler_rules_integration\Plugin\RulesAction;
 
-use Drupal\rules\Core\RulesActionBase;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Provides an 'Unpublish the node immediately' action.
+ * Provides an 'Unpublish immediately' action.
  *
  * @RulesAction(
- *   id = "scheduler_unpublish_now_action",
- *   label = @Translation("Unpublish the content immediately"),
- *   category = @Translation("Scheduler"),
- *   context_definitions = {
- *     "node" = @ContextDefinition("entity:node",
- *       label = @Translation("Node"),
- *       description = @Translation("The node to be unpublished now"),
- *     ),
- *   }
+ *   id = "scheduler_unpublish_now",
+ *   deriver = "Drupal\scheduler_rules_integration\Plugin\RulesAction\SchedulerRulesActionDeriver"
  * )
  */
-class UnpublishNow extends RulesActionBase {
+class UnpublishNow extends SchedulerRulesActionBase {
 
   /**
-   * Set the node status to Unpublished.
+   * Set the entity status to Unpublished.
    *
-   * This action should really be provided by Rules or by Core, but it is not
-   * yet done (as of Aug 2016). Scheduler users need this action so we provide
-   * it here. It could be removed later when Rules or Core includes it.
+   * This action is provided by the Rules Module but only for node content, not
+   * Media. There is also a problem with recursion in the Rules action due to
+   * autoSaveContext(). Hence better for Scheduler to provide this action.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to be unpublished.
    */
-  public function doExecute() {
-    $node = $this->getContextValue('node');
-    $node->setUnpublished();
+  public function doExecute(EntityInterface $entity) {
+    $entity->setUnpublished();
   }
 
 }

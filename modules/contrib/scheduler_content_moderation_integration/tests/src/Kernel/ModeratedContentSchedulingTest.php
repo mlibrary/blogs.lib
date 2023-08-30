@@ -15,11 +15,10 @@ class ModeratedContentSchedulingTest extends SchedulerContentModerationTestBase 
    * @dataProvider dataEntityTypes()
    */
   public function testPublishStateSchedule($entityTypeId, $bundle) {
-    $titleField = 'title';
+    $titleField = ($entityTypeId == 'media') ? 'name' : 'title';
     $storage = \Drupal::service('entity_type.manager')->getStorage($entityTypeId);
 
-    $entity = $this->drupalCreateNode([
-      'type' => $bundle,
+    $entity = $this->createEntity($entityTypeId, $bundle, [
       'title' => 'Published title',
       'moderation_state' => 'draft',
       'publish_on' => strtotime('yesterday'),
@@ -69,8 +68,7 @@ class ModeratedContentSchedulingTest extends SchedulerContentModerationTestBase 
   public function testUnpublishStateSchedule($entityTypeId, $bundle) {
     $storage = \Drupal::service('entity_type.manager')->getStorage($entityTypeId);
 
-    $entity = $this->drupalCreateNode([
-      'type' => $bundle,
+    $entity = $this->createEntity($entityTypeId, $bundle, [
       'title' => 'Published title',
       'moderation_state' => 'published',
       'unpublish_on' => strtotime('yesterday'),
@@ -99,8 +97,7 @@ class ModeratedContentSchedulingTest extends SchedulerContentModerationTestBase 
   public function testPublishOfDraft($entityTypeId, $bundle) {
     $storage = \Drupal::service('entity_type.manager')->getStorage($entityTypeId);
 
-    $entity = $this->drupalCreateNode([
-      'type' => $bundle,
+    $entity = $this->createEntity($entityTypeId, $bundle, [
       'title' => 'Published title',
       'moderation_state' => 'published',
     ]);
@@ -113,7 +110,7 @@ class ModeratedContentSchedulingTest extends SchedulerContentModerationTestBase 
 
     // Create a new pending revision and validate it's not the default published
     // one.
-    $titleField = 'title';
+    $titleField = ($entityTypeId == 'media') ? 'name' : 'title';
     $entity->set($titleField, 'Draft title');
     $entity->set('publish_on', strtotime('yesterday'));
     $entity->set('moderation_state', 'draft');

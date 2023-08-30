@@ -1,18 +1,66 @@
+entity.openid_connect_client.list:
+  path: '/admin/config/people/openid-connect'
+  defaults:
+    _entity_list: 'openid_connect_client'
+    _title: 'OpenID Connect clients'
+  requirements:
+    _permission: 'administer openid connect clients'
+
+entity.openid_connect_client.add_form:
+  path: '/admin/config/people/openid-connect/add/{plugin_id}'
+  defaults:
+    _controller: '\Drupal\openid_connect\Controller\OpenIDConnectClientController::add'
+    _title: 'Add OpenID Connect client'
+  requirements:
+    _permission: 'administer openid connect clients'
+
+entity.openid_connect_client.edit_form:
+  path: '/admin/config/people/openid-connect/{openid_connect_client}/edit'
+  defaults:
+    _entity_form: 'openid_connect_client.edit'
+    _title: 'Edit OpenID Connect client'
+  requirements:
+    _permission: 'administer openid connect clients'
+
+entity.openid_connect_client.delete_form:
+  path: '/admin/config/people/openid-connect/{openid_connect_client}/delete'
+  defaults:
+    _entity_form: 'openid_connect_client.delete'
+    _title: 'Delete OpenID Connect client'
+  requirements:
+    _permission: 'administer openid connect clients'
+
+entity.openid_connect_client.enable:
+  path: '/admin/config/people/openid-connect/{openid_connect_client}/enable'
+  defaults:
+    _controller: '\Drupal\openid_connect\Controller\OpenIDConnectClientController::enable'
+    _title: 'Enable an OpenID Connect client'
+  requirements:
+    _permission: 'administer openid connect clients'
+
+entity.openid_connect_client.disable:
+  path: '/admin/config/people/openid-connect/{openid_connect_client}/disable'
+  defaults:
+    _controller: '\Drupal\openid_connect\Controller\OpenIDConnectClientController::disable'
+    _title: 'Disable an OpenID Connect client'
+  requirements:
+    _permission: 'administer openid connect clients'
+
 openid_connect.admin_settings:
-  path: 'admin/config/services/openid-connect'
+  path: '/admin/config/people/openid-connect/settings'
   defaults:
     _form: '\Drupal\openid_connect\Form\OpenIDConnectSettingsForm'
-    _title: 'OpenID Connect'
+    _title: 'OpenID Connect Settings'
   requirements:
     _permission: 'administer openid connect clients'
 
 openid_connect.redirect_controller_redirect:
-  path: '/openid-connect/{client_name}'
+  path: '/openid-connect/{openid_connect_client}'
   defaults:
     _controller: '\Drupal\openid_connect\Controller\OpenIDConnectRedirectController::authenticate'
     _title: 'OpenID Connect redirect page'
   requirements:
-    _custom_access: '\Drupal\openid_connect\Controller\OpenIDConnectRedirectController::access'
+    _custom_access: '\Drupal\openid_connect\Controller\OpenIDConnectRedirectController::accessAuthenticate'
   options:
     _maintenance_access: TRUE
 
@@ -23,3 +71,31 @@ openid_connect.accounts_controller_index:
     _title: 'Connected Accounts'
   requirements:
     _custom_access: '\Drupal\openid_connect\Form\OpenIDConnectAccountsForm::access'
+
+openid_connect.logout:
+  path: '/user/logout'
+  defaults:
+    _controller: '\Drupal\openid_connect\Controller\OpenIDConnectRedirectController::redirectLogout'
+    _title: 'End session'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+  options:
+    no_cache: TRUE
+
+openid_connect.login:
+  path: '/user/login/openid_connect'
+  defaults:
+    _controller: '\Drupal\openid_connect\Controller\OpenIDConnectLoginController::loginForm'
+    _title: 'Log in via OpenID Connect'
+  requirements:
+    _user_is_logged_in: 'FALSE'
+  options:
+    _maintenance_access: TRUE
+
+openid_connect.redirect_controller_redirect_iss:
+  path: '/openid-connect/{openid_connect_client}/initiate'
+  defaults:
+    _controller: '\Drupal\openid_connect\Controller\OpenIDConnectRedirectController::initiate'
+    _title: 'OpenID Connect initiate redirect page'
+  requirements:
+    _custom_access: '\Drupal\openid_connect\Controller\OpenIDConnectRedirectController::accessInitiate'

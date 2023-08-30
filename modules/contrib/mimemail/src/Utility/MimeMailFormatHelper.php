@@ -2,8 +2,9 @@
 
 namespace Drupal\mimemail\Utility;
 
-use Drupal\Component\Utility\Mail;
-use Drupal\Component\Utility\Unicode;
+use Symfony\Component\Mime\Header\MailboxHeader;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Header\UnstructuredHeader;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Mail\MailFormatHelper;
 use Drupal\Core\StreamWrapper\StreamWrapperManager;
@@ -36,18 +37,21 @@ class MimeMailFormatHelper {
    *   MimeMailFormatHelper::mimeMailAddress() accepts addresses in one of
    *   four different formats:
    *   - A text email address, e.g. someone@example.com.
-   *   - An array where the values are each a text email address.
    *   - An associative array to represent one email address, containing keys:
    *     - mail: A text email address, as above.
-   *     - (optional) name: A text name to accompany the email address,
+   *     - name: (optional) A text name to accompany the email address,
    *       e.g. 'John Doe'.
    *   - A fully loaded object implementing \Drupal\user\UserInterface.
+   *   - An array where each value may be one of these four options, including
+   *     this option. Using this option will result in a recursive call to
+   *     MimeMailFormatHelper::mimeMailAddress for each element of this array.
    * @param bool $simplify
    *   Whether to simply the formatted email address. Defaults to FALSE.
    *
-   * @return string|false
-   *   A RFC-2822 formatted email address string, or FALSE if the address
-   *   parameter passed in is not one of the allowed data types.
+   * @return string|array|false
+   *   A RFC-2822 formatted email address string, an array of RFC-2822
+   *   formatted email address strings, or FALSE if the address parameter
+   *   passed in is not one of the allowed data types.
    */
   public static function mimeMailAddress($address, $simplify = FALSE) {
     // It's an array containing 'mail' and/or 'name',
@@ -58,7 +62,8 @@ class MimeMailFormatHelper {
         // Return full RFC2822 format only if we're NOT simplifying AND
         // the account name is NOT empty.
         if (!$simplify && !empty($address['name'])) {
-          return Mail::formatDisplayName($address['name']) . ' <' . $address['mail'] . '>';
+          $mailbox = new MailboxHeader('From', new Address($address['mail'], $address['name']));
+          return $mailbox->getBodyAsString();
         }
         // All other combinations, return a simple email.
         return $address['mail'];
@@ -76,7 +81,8 @@ class MimeMailFormatHelper {
       // Return full RFC2822 format only if we're NOT simplifying AND
       // the account name is NOT empty.
       if (!$simplify && !empty($address->getAccountName())) {
-        return Mail::formatDisplayName($address->getAccountName()) . ' <' . $address->getEmail() . '>';
+        $mailbox = new MailboxHeader('From', new Address($address->getEmail(), $address->getAccountName()));
+        return $mailbox->getBodyAsString();
       }
       // All other combinations, return a simple email.
       return $address->getEmail();
@@ -89,9 +95,10 @@ class MimeMailFormatHelper {
       $pattern = '/(.*?)<(.*?)>/';
       preg_match_all($pattern, $address, $matches);
       // $name is the entire string before the first '<'.
-      $name = isset($matches[1][0]) ? $matches[1][0] : '';
-      // $bare_address is the string between the first '<' and the last '>'.
-      $bare_address = isset($matches[2][0]) ? $matches[2][0] : $address;
+      $name = $matches[1][0] ?? '';
+      // $bare_address is the string between the first '<' and the last '>' or
+      // the entire $address string if '<' and '>' are not present.
+      $bare_address = $matches[2][0] ?? $address;
 
       // If we're simplifying, we just need the bare address.
       if ($simplify) {
@@ -105,7 +112,8 @@ class MimeMailFormatHelper {
         }
         // Put $address into full RFC2822 format only if we're NOT simplifying
         // AND the account name is NOT empty.
-        return Mail::formatDisplayName(trim($name)) . ' <' . $bare_address . '>';
+        $mailbox = new MailboxHeader('From', new Address($bare_address, trim($name)));
+        return $mailbox->getBodyAsString();
       }
     }
 
@@ -129,7 +137,19 @@ class MimeMailFormatHelper {
    * @param string $plaintext
    *   (optional) The plaintext message body.
    * @param array $attachments
-   *   (optional) The files to be attached to the message.
+   *   (optional) The files to be attached to the message. This is an array
+   *   where each element is either:
+   *   - A file entity, or
+   *   - An associative array containing the keys:
+   *     - filepath: Relative Drupal path to an existing file
+   *       (filecontent is NULL).
+   *     - filecontent: The actual content of the file (filepath is NULL).
+   *     - filename: (optional) The filename of the file.
+   *     - filemime: (optional) The MIME type of the file.
+   *     Existing files can be added by path, dynamically-generated files can
+   *     be added by content. If an associative array is provided, either
+   *     'filepath' or 'filecontent' must be set. If both are set, then
+   *     'filepath' takes precedence.
    *
    * @return array
    *   An associative array containing the following elements:
@@ -137,6 +157,8 @@ class MimeMailFormatHelper {
    *   - headers: An array that includes some headers for the mail to be sent.
    */
   public static function mimeMailHtmlBody($body, $subject, $plain = FALSE, $plaintext = NULL, array $attachments = []) {
+    // We always need a plaintext - if it is not provided explicitly then we
+    // create it here by converting the HTML body into plaintext.
     if (empty($plaintext)) {
       // @todo Remove once filter_xss() can handle direct descendant selectors in inline CSS.
       // @see http://drupal.org/node/1116930
@@ -145,10 +167,12 @@ class MimeMailFormatHelper {
       preg_match('|<body.*?</body>|mis', $body, $matches);
       $plaintext = MailFormatHelper::htmlToText($matches[0]);
     }
+
+    // Check to see if we are sending only plaintext.
     if ($plain) {
       // Plain mail without attachment.
       if (empty($attachments)) {
-        $content_type = 'text/plain';
+        // No further work is needed, we can return right away.
         return [
           'body' => $plaintext,
           'headers' => ['Content-Type' => 'text/plain; charset=utf-8'],
@@ -185,6 +209,8 @@ class MimeMailFormatHelper {
         $body
       );
 
+      // Links to local images need to be replaced by cid: references, and
+      // the local image needs to be inlined.
       $mime_parts = static::mimeMailExtractFiles($body);
 
       $content = [$plaintext_part, array_shift($mime_parts)];
@@ -204,13 +230,14 @@ class MimeMailFormatHelper {
       }
     }
 
+    // Any file attachments also need to be inlined into a part.
     if (is_array($attachments) && !empty($attachments)) {
       foreach ($attachments as $a) {
         $a = (object) $a;
-        $path = isset($a->uri) ? $a->uri : (isset($a->filepath) ? $a->filepath : NULL);
-        $content = isset($a->filecontent) ? $a->filecontent : NULL;
-        $name = isset($a->filename) ? $a->filename : NULL;
-        $type = isset($a->filemime) ? $a->filemime : NULL;
+        $path = $a->uri ?? ($a->filepath ?? NULL);
+        $content = $a->filecontent ?? NULL;
+        $name = $a->filename ?? NULL;
+        $type = $a->filemime ?? NULL;
         // Add this attachment to the cumulative manifest being built by
         // mimeMailFile().
         static::mimeMailFile($path, $content, $name, $type, 'attachment');
@@ -224,7 +251,13 @@ class MimeMailFormatHelper {
   }
 
   /**
-   * Extracts links to local images from HTML documents.
+   * Extracts links to local files from HTML documents.
+   *
+   * This method parses the HTML and identifies files that need to be
+   * attached to the email. For example, an href to a local image will not
+   * be usable in the received email - the image needs to be encoded and
+   * attached to the email and the href needs to be modified to point to that
+   * attached image.
    *
    * @param string $html
    *   A string containing the HTML source of the message.
@@ -234,22 +267,25 @@ class MimeMailFormatHelper {
    *   structured like the following:
    *   @code
    *   [
-   *     [
-   *       'name' => document name,
-   *       'content' => html text, local image urls replaced by Content-IDs,
+   *     0 => [
    *       'Content-Type' => 'text/html; charset=utf-8',
+   *       'Content-Transfer-Encoding' => $encoding,
+   *       'content' => Content with HTML text and local image URLs replaced by Content-IDs,
    *     ],
-   *     [
-   *       'name' => file name,
-   *       'file' => reference to local file,
-   *       'Content-ID' => generated Content-ID,
-   *       'Content-Type' => derived using mime_content_type if available, educated guess otherwise,
+   *     1 => [
+   *       'name' => File name,
+   *       'file' => Reference to local file,
+   *       'Content-ID' => Generated Content-ID,
+   *       'Content-Type' => Derived using mime_content_type if available, educated guess otherwise,
    *     ],
    *   ]
    *   @endcode
    */
   public static function mimeMailExtractFiles($html) {
     $pattern = '/(<link[^>]+href=[\'"]?|<object[^>]+codebase=[\'"]?|@import |[\s]src=[\'"]?)([^\'>"]+)([\'"]?)/mis';
+
+    // Replaces all local URLs in the $html with a reference to the inlined
+    // file. Non-local URLs are left untouched.
     $content = preg_replace_callback(
       $pattern,
       function ($matches) {
@@ -272,6 +308,7 @@ class MimeMailFormatHelper {
       $html
     );
 
+    // Now encode the $content.
     $encoding = '8Bit';
     $body = explode("\n", $content);
     foreach ($body as $line) {
@@ -284,12 +321,15 @@ class MimeMailFormatHelper {
       $content = rtrim(chunk_split(base64_encode($content)));
     }
 
+    // We have now transformed straight HTML into an encoded mail part.
     $document[] = [
       'Content-Type' => "text/html; charset=utf-8",
       'Content-Transfer-Encoding' => $encoding,
       'content' => $content,
     ];
 
+    // Recover the manifest of files that we need to inline - each file will
+    // be its own mail part which we append to the $document.
     $files = static::mimeMailFile();
 
     return array_merge($document, $files);
@@ -303,6 +343,10 @@ class MimeMailFormatHelper {
    * accumulate that metadata internally in a static array. Subsequent calls
    * with one of these arguments will add additional metadata to this internal
    * array.
+   *
+   * If this method is called more than once with the same $url or $content
+   * argument, then the duplicate(s) will not be added to the manifest. The
+   * manifest will store the metadata of the last duplicates that was added.
    *
    * Calling this function with no arguments will return everything stored in
    * the internal static array by all previous calls (this is the 'manifest'),
@@ -373,14 +417,17 @@ class MimeMailFormatHelper {
       }
       else {
         $url = static::mimeMailUrl($url, TRUE);
-        // The $url is absolute, we're done here.
         $scheme = StreamWrapperManager::getScheme($url);
-        if ($scheme == 'http' || $scheme == 'https' || preg_match('!mailto:!', $url)) {
+        if ($scheme === 'http' || $scheme === 'https' || $scheme === 'data' || preg_match('/^(mailto):/', $url)) {
+          // If $url holds an absolute URL for web-accessible content, or if it
+          // has a scheme that represents information that is already in-line
+          // (as with the mailto: and data: schemes), then we do not need to
+          // replace $url with a reference and we can just return.
           return $url;
         }
-        // The $url is a non-local URI that needs to be converted to a URL.
         else {
-          $file = $file_system->realpath($url) ? $file_system->realpath($url) : file_create_url($url);
+          // The $url is a local URI that needs to be converted to a URL.
+          $file = $file_system->realpath($url) ?: \Drupal::service('file_url_generator')->generateAbsoluteString($url);
         }
       }
     }
@@ -391,13 +438,13 @@ class MimeMailFormatHelper {
 
     if (isset($file) && (@is_file($file) || $content)) {
       $public_path = $file_config->get('default_scheme') . '://';
-      $no_access = !$current_user->hasPermission('send arbitrary files');
-      $not_in_public_path = mb_strpos($file_system->realpath($file), $file_system->realpath($public_path)) !== 0;
-      if (@is_file($file) && $not_in_public_path && $no_access) {
+      $has_access = $current_user->hasPermission('send arbitrary files');
+      $in_public_path = mb_strpos($file_system->realpath($file), $file_system->realpath($public_path)) === 0;
+      if (@is_file($file) && !$in_public_path && !$has_access) {
         return $url;
       }
 
-      if (!$name) {
+      if (empty($name)) {
         $name = (@is_file($file)) ? basename($file) : 'attachment.dat';
       }
       if (!$type) {
@@ -458,7 +505,9 @@ class MimeMailFormatHelper {
     /** @var \Drupal\Core\Language\LanguageManagerInterface $language_manager */
     $language_manager = \Drupal::languageManager();
 
-    $url = urldecode($url);
+    // This should not be needed. This method should never be passed an encoded
+    // URL.
+    // $url = urldecode($url);
 
     $to_link = $mimemail_config->get('linkonly');
     $is_image = preg_match('!\.(png|gif|jpg|jpeg)!i', $url);
@@ -477,7 +526,7 @@ class MimeMailFormatHelper {
       if ($is_image) {
         if ($to_link) {
           // Exclude images from embedding if needed.
-          $url = file_create_url($url);
+          $url = \Drupal::service('file_url_generator')->generateAbsoluteString($url);
           $url = str_replace(' ', '%20', $url);
         }
         else {
@@ -486,7 +535,6 @@ class MimeMailFormatHelper {
           // @see https://drupal.org/drupal-7.20-release-notes
           $url = preg_replace('/\\?itok=.*$/', '', $url);
         }
-
       }
       return $url;
     }
@@ -518,9 +566,9 @@ class MimeMailFormatHelper {
       }
     }
 
-    parse_str($query, $arr);
+    parse_str($query ?? '', $arr);
     $options = [
-      'query' => !empty($arr) ? $arr : [],
+      'query' => $arr,
       'fragment' => $fragment,
       'absolute' => TRUE,
       'language' => $language,
@@ -621,6 +669,7 @@ class MimeMailFormatHelper {
         }
         $part_body = $part['content'];
         if (isset($part['name'])) {
+          // Content-Type doesn't exist yet here ...
           $part_headers['Content-Type'] .= '; name="' . $part['name'] . '"';
           $part_headers['Content-Disposition'] .= '; filename="' . $part['name'] . '"';
         }
@@ -637,6 +686,7 @@ class MimeMailFormatHelper {
         }
 
         if (isset($part['name'])) {
+          // Content-Type doesn't exist yet here ...
           $part_headers['Content-Type'] .= '; name="' . $part['name'] . '"';
           $part_headers['Content-Disposition'] .= '; filename="' . $part['name'] . '"';
         }
@@ -649,7 +699,7 @@ class MimeMailFormatHelper {
 
       $body .= static::CRLF . "--$boundary" . static::CRLF;
       $body .= static::mimeMailRfcHeaders($part_headers) . static::CRLF;
-      $body .= isset($part_body) ? $part_body : '';
+      $body .= $part_body ?? '';
     }
     $body .= static::CRLF . "--$boundary--" . static::CRLF;
 
@@ -730,9 +780,7 @@ class MimeMailFormatHelper {
       }
       // This may not work. The MTA may rewrite the Return-Path.
       if (!isset($headers['Return-Path']) || $headers['Return-Path'] == $default_from) {
-        if (preg_match('/[a-z\d\-\.\+_]+@(?:[a-z\d\-]+\.)+[a-z\d]{2,4}/i', $from, $matches)) {
-          $headers['Return-Path'] = "<$matches[0]>";
-        }
+        $headers['Return-Path'] = '<' . static::mimeMailAddress($from, TRUE) . '>';
       }
     }
 
@@ -744,7 +792,7 @@ class MimeMailFormatHelper {
     // Run all headers through mime_header_encode() to convert non-ASCII
     // characters to an RFC compliant string, similar to drupal_mail().
     foreach ($headers as $field_name => $field_body) {
-      $headers[$field_name] = Unicode::mimeHeaderEncode($field_body);
+      $headers[$field_name] = (new UnstructuredHeader($field_name, $field_body))->getBodyAsString();
     }
 
     return $headers;

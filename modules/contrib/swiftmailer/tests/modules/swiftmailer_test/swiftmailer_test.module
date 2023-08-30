@@ -3,6 +3,22 @@
 use Drupal\swiftmailer_test\SwiftMailerDrupalStateLogger;
 
 /**
+ * Implements hook_mail().
+ *
+ * Attaches the Carbon copy headers to the message.
+ */
+function swiftmailer_test_mail($key, &$message, $params) {
+  if ($message['module'] === 'swiftmailer_test') {
+    foreach (['Cc', 'Bcc'] as $header) {
+      if (isset($message['params']['headers'][$header])) {
+        $message['headers'][$header] = $message['params']['headers'][$header];
+      }
+    }
+  }
+  $message['body'] = ['Test content'];
+}
+
+/**
  * Alter messages before sending it with SwiftMailer.
  *
  * @see \Drupal\swiftmailer\Plugin\Mail\SwiftMailer::mail

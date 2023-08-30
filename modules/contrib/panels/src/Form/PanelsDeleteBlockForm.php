@@ -18,7 +18,7 @@ class PanelsDeleteBlockForm extends ConfirmFormBase {
   /**
    * The tempstore factory.
    *
-   * @var \Drupal\Core\TempStore\SharedTempStoreFactory $tempstore
+   * @var \Drupal\Core\TempStore\SharedTempStoreFactory
    */
   protected $tempstore;
 

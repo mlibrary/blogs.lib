@@ -11,6 +11,7 @@
     "source": "https://git.drupalcode.org/project/openid_connect"
   },
   "require": {
+    "php": ">=7.1.0",
     "ext-json": "*"
   }
 }

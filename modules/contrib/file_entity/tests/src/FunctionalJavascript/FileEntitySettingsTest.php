@@ -25,7 +25,7 @@ class FileEntitySettingsTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'classy';
+  protected $defaultTheme = 'starterkit_theme';
 
   /**
    * File entity config.
@@ -37,7 +37,7 @@ class FileEntitySettingsTest extends WebDriverTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->config = $this->config('file_entity.settings');
   }
@@ -56,7 +56,7 @@ class FileEntitySettingsTest extends WebDriverTestBase {
     $assert_session->pageTextContains('Field used for the image title attribute: field_image_title_text');
     $assert_session->pageTextContains('Field used for the image title attribute: field_image_title_text');
 
-    $this->drupalPostForm(NULL, [], 'uri_settings_edit');
+    $this->submitForm([], 'uri_settings_edit');
     $assert_session->assertWaitOnAjaxRequest();
     $assert_session->responseContains('fields[uri][settings_edit_form][settings][title]');
     $assert_session->responseContains('fields[uri][settings_edit_form][settings][alt]');
@@ -65,9 +65,9 @@ class FileEntitySettingsTest extends WebDriverTestBase {
       'fields[uri][settings_edit_form][settings][title]' => '_none',
       'fields[uri][settings_edit_form][settings][alt]' => '_none',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Update');
+    $this->submitForm($edit, 'Update');
     $assert_session->assertWaitOnAjaxRequest();
-    $this->drupalPostForm(NULL, [], 'Save');
+    $this->submitForm([], 'Save');
     $assert_session->assertWaitOnAjaxRequest();
     $assert_session->pageTextContains('Title attribute is hidden.');
     $assert_session->pageTextContains('Alt attribute is hidden.');
@@ -78,16 +78,16 @@ class FileEntitySettingsTest extends WebDriverTestBase {
     $page = $this->getSession()->getPage();
     $page->attachFileToField('files[upload]', $this->container->get('file_system')->realpath($test_file[0]->uri));
     $assert_session->assertWaitOnAjaxRequest();
-    $this->drupalPostForm(NULL, [], 'Next');
+    $this->submitForm([], 'Next');
     $assert_session->assertWaitOnAjaxRequest();
     $assert_session->pageTextContains('Destination');
-    $this->drupalPostForm(NULL, [], 'Next');
+    $this->submitForm([], 'Next');
     $edit = [
       'field_image_alt_text[0][value]' => 'Alt text',
       'field_image_title_text[0][value]' => 'Title text',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Save');
-    $assert_session->responseNotContains('alt="Alt text"', 'Alt attribute is hidden.');
-    $assert_session->responseNotContains('title="Title text"', 'Title attribute is hidden.');
+    $this->submitForm($edit, 'Save');
+    $assert_session->responseNotContains('alt="Alt text"');
+    $assert_session->responseNotContains('title="Title text"');
   }
 }

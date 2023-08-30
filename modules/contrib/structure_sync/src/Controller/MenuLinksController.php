@@ -6,6 +6,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\structure_sync\StructureSyncHelper;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
+use Drush\Drush;
 
 /**
  * Controller for syncing menu links.
@@ -74,9 +75,6 @@ class MenuLinksController extends ControllerBase {
         'uuid' => $menuLink->uuid(),
       ];
 
-      if (array_key_exists('drush', $form) && $form['drush'] === TRUE) {
-        drush_log('Exported "' . $menuLink->title->getValue()[0]['value'] . '" of menu "' . $menuLink->menu_name->getValue()[0]['value'] . '"', 'ok');
-      }
       StructureSyncHelper::logMessage('Exported "' . $menuLink->title->value . '" of menu "' . $menuLink->menu_name->value . '"');
     }
 
@@ -232,7 +230,7 @@ class MenuLinksController extends ControllerBase {
     }
 
     if (array_key_exists('drush', $context) && $context['drush'] === TRUE) {
-      drush_log('Deleted menu links that were not in config', 'ok');
+      Drush::logger()->notice('Deleted menu links that were not in config');
     }
     StructureSyncHelper::logMessage('Deleted menu links that were not in config');
   }
@@ -301,8 +299,8 @@ class MenuLinksController extends ControllerBase {
                 'title' => $menuLink['link_title'],
               ],
               'menu_name' => $menuLink['menu_name'],
-              'expanded' => $menuLink['expanded'] === '1' ? TRUE : FALSE,
-              'enabled' => $menuLink['enabled'] === '1' ? TRUE : FALSE,
+              'expanded' => in_array($menuLink['expanded'], ['1', TRUE], TRUE),
+              'enabled' => in_array($menuLink['enabled'], ['1', TRUE], TRUE),
               'parent' => $menuLink['parent'],
               'description' => $menuLink['description'],
               'weight' => $menuLink['weight'],
@@ -321,8 +319,8 @@ class MenuLinksController extends ControllerBase {
                       'uri' => $menuLink['uri'],
                       'title' => $menuLink['link_title'],
                     ])
-                    ->set('expanded', $menuLink['expanded'] === '1' ? TRUE : FALSE)
-                    ->set('enabled', $menuLink['enabled'] === '1' ? TRUE : FALSE)
+                    ->set('expanded', in_array($menuLink['expanded'], ['1', TRUE], TRUE))
+                    ->set('enabled', in_array($menuLink['enabled'], ['1', TRUE], TRUE))
                     ->set('parent', $menuLink['parent'])
                     ->set('description', $menuLink['description'])
                     ->set('weight', $menuLink['weight'])
@@ -340,9 +338,6 @@ class MenuLinksController extends ControllerBase {
             unset($idsLeft[$menuLink['uuid']]);
           }
 
-          if (array_key_exists('drush', $context) && $context['drush'] === TRUE) {
-            drush_log('Imported "' . $menuLink['title'] . '" into ' . $menuLink['menu_name'], 'ok');
-          }
           StructureSyncHelper::logMessage('Imported "' . $menuLink['title'] . '" into ' . $menuLink['menu_name']);
 
           $context['sandbox']['progress']++;
@@ -387,8 +382,8 @@ class MenuLinksController extends ControllerBase {
           'title' => $menuLink['link_title'],
         ],
         'menu_name' => $menuLink['menu_name'],
-        'expanded' => $menuLink['expanded'] === '1' ? TRUE : FALSE,
-        'enabled' => $menuLink['enabled'] === '1' ? TRUE : FALSE,
+        'expanded' => in_array($menuLink['expanded'], ['1', TRUE], TRUE),
+        'enabled' => in_array($menuLink['enabled'], ['1', TRUE], TRUE),
         'parent' => $menuLink['parent'],
         'description' => $menuLink['description'],
         'weight' => $menuLink['weight'],
@@ -396,9 +391,6 @@ class MenuLinksController extends ControllerBase {
         'uuid' => $menuLink['uuid'],
       ])->save();
 
-      if (array_key_exists('drush', $context) && $context['drush'] === TRUE) {
-        drush_log('Imported "' . $menuLink['title'] . '" into "' . $menuLink['menu_name'] . '" menu', 'ok');
-      }
       StructureSyncHelper::logMessage('Imported "' . $menuLink['title'] . '" into "' . $menuLink['menu_name'] . '" menu');
     }
   }
@@ -415,7 +407,7 @@ class MenuLinksController extends ControllerBase {
       ->delete($entities);
 
     if (array_key_exists('drush', $context) && $context['drush'] === TRUE) {
-      drush_log('Deleted all (content) menu links', 'ok');
+      Drush::logger()->notice('Deleted all (content) menu links');
     }
     StructureSyncHelper::logMessage('Deleted all (content) menu links');
   }
@@ -432,8 +424,8 @@ class MenuLinksController extends ControllerBase {
           'title' => $menuLink['link_title'],
         ],
         'menu_name' => $menuLink['menu_name'],
-        'expanded' => $menuLink['expanded'] === '1' ? TRUE : FALSE,
-        'enabled' => $menuLink['enabled'] === '1' ? TRUE : FALSE,
+        'expanded' => in_array($menuLink['expanded'], ['1', TRUE], TRUE),
+        'enabled' => in_array($menuLink['enabled'], ['1', TRUE], TRUE),
         'parent' => $menuLink['parent'],
         'description' => $menuLink['description'],
         'weight' => $menuLink['weight'],
@@ -441,9 +433,6 @@ class MenuLinksController extends ControllerBase {
         'uuid' => $menuLink['uuid'],
       ])->save();
 
-      if (array_key_exists('drush', $context) && $context['drush'] === TRUE) {
-        drush_log('Imported "' . $menuLink['title'] . '" into "' . $menuLink['menu_name'] . '" menu', 'ok');
-      }
       StructureSyncHelper::logMessage('Imported "' . $menuLink['title'] . '" into "' . $menuLink['menu_name'] . '" menu');
     }
   }

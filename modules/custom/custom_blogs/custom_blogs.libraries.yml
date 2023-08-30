@@ -5,7 +5,7 @@ login-return-page-link:
   dependencies:
     - core/drupal
     - core/jquery
-    - core/jquery.once
+    - core/once
 stupid-scheduler-settings-wrapper:
   css:
     base:

@@ -72,7 +72,7 @@ class PasswordlessUserController extends UserController {
           ]);
           $this->messenger()
             ->addMessage($this->t('You have just used your one-time login link.'));
-          $user->pass = sha1(user_password());
+          $user->pass = sha1(\Drupal::service('password_generator')->generate());
           $user->save();
           $route_name = 'user.page';
           $route_parameters = [];

@@ -37,7 +37,7 @@ class MimeMailWebTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create admin user.
@@ -53,13 +53,13 @@ class MimeMailWebTest extends BrowserTestBase {
   /**
    * Tests that spaces in attachment filenames are properly URL-encoded.
    */
-  public function testUrl() {
+  public function testUrl(): void {
     $this->drupalGet('admin/config/system/mimemail');
     $this->submitForm(['linkonly' => TRUE], 'Save configuration');
 
     $url = 'public://' . $this->randomMachineName() . ' ' . $this->randomMachineName() . '.jpg';
     $result = MimeMailFormatHelper::mimeMailUrl($url, TRUE);
-    $expected = str_replace(' ', '%20', file_create_url($url));
+    $expected = str_replace(' ', '%20', \Drupal::service('file_url_generator')->generateAbsoluteString($url));
     $message = 'Stream wrapper converted to web accessible URL for linked image.';
     $this->assertSame($result, $expected, $message);
   }

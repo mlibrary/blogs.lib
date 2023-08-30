@@ -1,7 +1,7 @@
 name: 'Structure Sync'
 description: 'Tool for syncing structural data that is stored as content.'
 core: 8.x
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^8 || ^9 || ^10
 configure: structure_sync.general.form
 dependencies:
   - drupal:taxonomy
@@ -10,7 +10,7 @@ dependencies:
 package: Structure
 type: module
 
-# Information added by Drupal.org packaging script on 2021-02-23
-version: '2.0.2'
+# Information added by Drupal.org packaging script on 2023-04-13
+version: '2.0.5'
 project: 'structure_sync'
-datestamp: 1614096705
+datestamp: 1681378129

@@ -17,7 +17,7 @@ class PageManagerIntegrationTest extends PanelsIPETestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'panels',
     'panels_ipe',
     'page_manager',
@@ -38,7 +38,7 @@ class PageManagerIntegrationTest extends PanelsIPETestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create a user with appropriate permissions to use Panels IPE.

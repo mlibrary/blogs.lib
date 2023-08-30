@@ -64,7 +64,7 @@ class CalendarHeader extends TokenizeAreaPluginBase {
           '#theme' => 'calendar_header',
           '#title' => $header_text,
           '#empty' => $empty,
-          '#granularity' => $argument->getGranularity(),
+          '#granularity' => $argument ? $argument->getGranularity() : NULL,
         ];
       }
       else {

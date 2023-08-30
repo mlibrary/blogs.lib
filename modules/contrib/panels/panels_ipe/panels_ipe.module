@@ -31,7 +31,7 @@ function panels_ipe_help($route_name, RouteMatchInterface $route_match) {
  * actions and potentially override normal Entity CRUD operations.
  */
 function panels_ipe_entity_type_build(array &$entity_types) {
-  /** @var $entity_types \Drupal\Core\Entity\EntityTypeInterface[] */
+  /** @var \Drupal\Core\Entity\EntityTypeInterface[] $entity_types */
   if (isset($entity_types['block_content'])) {
     $entity_types['block_content']->setFormClass('panels_ipe', 'Drupal\panels_ipe\Form\PanelsIPEBlockContentForm');
   }

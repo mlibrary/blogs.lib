@@ -17,11 +17,6 @@ use Drupal\Component\Utility\NestedArray;
 
 /**
  * Implements hook_field_formatter_settings_summary_alter().
- *
- * @param array $summary
- *   An array of summary messages.
- * @param array $context
- *   An associative array.
  */
 function linked_field_field_formatter_settings_summary_alter(array &$summary, array $context) {
   /** @var \Drupal\linked_field\LinkedFieldManager $manager */
@@ -39,7 +34,7 @@ function linked_field_field_formatter_settings_summary_alter(array &$summary, ar
   $linked = $settings['linked'];
   $type = !isset($settings['type']) ? 'custom' : $settings['type'];
   $destination = $settings['destination'];
-  $text = isset($settings['advanced']['text']) ? $settings['advanced']['text'] : '';
+  $text = $settings['advanced']['text'] ?? '';
 
   if (!$linked) {
     return;
@@ -48,7 +43,7 @@ function linked_field_field_formatter_settings_summary_alter(array &$summary, ar
   // Display field name instead of machine-readable name.
   if ($type == 'field') {
     $entity_type = $context['field_definition']->getTargetEntityTypeId();
-    // @TODO: How could we get bundle for base fields?
+    // @todo How could we get bundle for base fields?
     $bundle = $context['field_definition']->getTargetBundle();
     $fields = $manager->getDestinationFields($entity_type, $bundle);
 
@@ -94,17 +89,6 @@ function linked_field_field_formatter_settings_summary_alter(array &$summary, ar
 
 /**
  * Implements hook_field_formatter_third_party_settings_form().
- *
- * @param \Drupal\Core\Field\FormatterInterface $plugin
- *   The instantiated field formatter plugin.
- * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
- *   The field definition.
- * @param string $view_mode
- *   The entity view mode.
- * @param array $form
- *   The (entire) configuration form array.
- * @param \Drupal\Core\Form\FormStateInterface $form_state
- *   The form state.
  */
 function linked_field_field_formatter_third_party_settings_form(FormatterInterface $plugin, FieldDefinitionInterface $field_definition, $view_mode, array $form, FormStateInterface $form_state) {
   /** @var \Drupal\linked_field\LinkedFieldManager $manager */
@@ -146,7 +130,7 @@ function linked_field_field_formatter_third_party_settings_form(FormatterInterfa
   // The target bundle is sometimes null so we grab it from form instead.
   $bundle = $field_definition->getTargetBundle();
   if (!$bundle) {
-    $bundle = isset($form['#bundle']) ? $form['#bundle'] : NULL;
+    $bundle = $form['#bundle'] ?? NULL;
   }
 
   $field_names = [];
@@ -274,14 +258,14 @@ function linked_field_field_formatter_third_party_settings_form(FormatterInterfa
       '#type' => 'textfield',
       '#title' => $info['label'],
       '#description' => $info['description'],
-      '#default_value' => isset($settings['advanced'][$attribute]) ? $settings['advanced'][$attribute] : '',
+      '#default_value' => $settings['advanced'][$attribute] ?? '',
     ];
   }
 
   $element['advanced']['text'] = [
     '#type' => 'textfield',
     '#title' => t('Text'),
-    '#default_value' => isset($settings['advanced']['text']) ? $settings['advanced']['text'] : '',
+    '#default_value' => $settings['advanced']['text'] ?? '',
     '#description' => t('Here you can enter a token which will be used as link text. Note that the actual field output will be overridden.'),
   ];
 
@@ -341,11 +325,6 @@ function linked_field_element_validate($element, FormStateInterface $form_state)
 
 /**
  * Implements hook_entity_display_build_alter().
- *
- * @param array $build
- *   A render array.
- * @param array $context
- *   An associative array.
  */
 function linked_field_entity_display_build_alter(array &$build, array $context) {
   /** @var \Drupal\linked_field\LinkedFieldManager $manager */
@@ -361,13 +340,13 @@ function linked_field_entity_display_build_alter(array &$build, array $context) 
     }
 
     // Normalize the settings.
-    $destination = isset($settings['destination']) ? $settings['destination'] : FALSE;
-    $linked = isset($settings['linked']) ? $settings['linked'] : FALSE;
-    $destination_type = isset($settings['type']) ? $settings['type'] : 'custom';
+    $destination_src = $settings['destination'] ?? FALSE;
+    $linked = $settings['linked'] ?? FALSE;
+    $destination_type = $settings['type'] ?? 'custom';
 
     // If the destination field isn't filled for this field, we shouldn't
     // do anything. Continue to the next field.
-    if (!$destination || !$linked) {
+    if (!$destination_src || !$linked) {
       continue;
     }
 
@@ -379,14 +358,14 @@ function linked_field_entity_display_build_alter(array &$build, array $context) 
     }
 
     foreach (Element::children($element) as $delta) {
-      $destination = $manager->getDestination($destination_type, $destination, $context);
+      $destination = $manager->getDestination($destination_type, $destination_src, $context);
 
       // We need special handling for the token destination type.
       if ($destination_type == 'custom') {
-        $destination = $manager->replaceToken($destination, $replace_tokens, ['clear' => TRUE]);
+        $destination = $manager->replaceToken((is_array($destination) && isset($destination['custom']) ? $destination['custom'] : $destination), $replace_tokens, ['clear' => TRUE]);
         // Try to grab the href attribute if the replaced token is a link.
         preg_match('/<a.* href="([^"]+)".*>/', $destination, $match);
-        $destination = isset($match[1]) ? $match[1] : $destination;
+        $destination = $match[1] ?? $destination;
       }
 
       $attributes = ['href' => ''];

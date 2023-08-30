@@ -1,7 +1,0 @@
-services:
-  image_field_caption.storage:
-    class: Drupal\image_field_caption\ImageCaptionStorage
-    arguments:
-      - '@cache.data'
-      - '@cache_tags.invalidator'
-      - '@database'

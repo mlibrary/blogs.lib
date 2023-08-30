@@ -2,9 +2,8 @@ name: Organic Groups
 description: API to allow associating content with groups.
 package: Organic Groups
 
-core_version_requirement: ^9
+core_version_requirement: ^9 || ^10
 type: module
-php: 7.1
 
 dependencies:
   - drupal:options
@@ -12,7 +11,7 @@ dependencies:
   - drupal:field
   - drupal:user
 
-# Information added by Drupal.org packaging script on 2022-10-05
-version: '8.x-1.0-alpha9'
+# Information added by Drupal.org packaging script on 2022-11-21
+version: '8.x-1.0-alpha10'
 project: 'og'
-datestamp: 1664950094
+datestamp: 1669023308

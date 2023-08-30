@@ -51,8 +51,6 @@ class CaptchaExamplesForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $module = NULL, $challenge = NULL) {
-    module_load_include('inc', 'captcha', 'captcha.admin');
-
     $form = [];
     if ($module && $challenge) {
       // Generate 10 example challenges.
@@ -65,14 +63,17 @@ class CaptchaExamplesForm extends FormBase {
       $form['info'] = [
         '#markup' => $this->t('This page gives an overview of all available challenge types, generated with their current settings.'),
       ];
+      $challenges = [];
+      $this->moduleHandler->invokeAllWith('captcha', function (callable $hook, string $module) use (&$challenges) {
+        if ($challenge = $hook('list')) {
+          $challenges[$module] = $challenge;
+        }
+      });
 
-      $modules_list = $this->moduleHandler->getImplementations('captcha');
-      foreach ($modules_list as $mkey => $module) {
-        $challenges = call_user_func_array($module . '_captcha', ['list']);
-
-        if ($challenges) {
-          foreach ($challenges as $ckey => $challenge) {
-            $form["captcha_{$mkey}_{$ckey}"] = [
+      if ($challenges) {
+        foreach ($challenges as $module => $challenge_list) {
+          foreach ($challenge_list as $ckey => $challenge) {
+            $form["captcha_{$module}_{$ckey}"] = [
               '#type' => 'details',
               '#title' => $this->t('Challenge %challenge by module %module', [
                 '%challenge' => $challenge,

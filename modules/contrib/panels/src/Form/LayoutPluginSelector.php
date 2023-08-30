@@ -63,7 +63,7 @@ class LayoutPluginSelector extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $cached_values = $form_state->getTemporaryValue('wizard');
 
-    /* @var $variant_plugin \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant */
+    /** @var \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant $variant_plugin */
     $variant_plugin = $cached_values['plugin'];
     $form['layout'] = [
       '#title' => $this->t('Layout'),
@@ -94,7 +94,7 @@ class LayoutPluginSelector extends FormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $cached_values = $form_state->getTemporaryValue('wizard');
-    /* @var $variant_plugin \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant */
+    /** @var \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant $variant_plugin */
     $variant_plugin = $cached_values['plugin'];
     // If we're changing the layout, the variant plugin must remain out of date
     // until the layout is fully configured and regions are remapped.
@@ -103,6 +103,8 @@ class LayoutPluginSelector extends FormBase {
         'old_layout' => $variant_plugin->getConfiguration()['layout'],
         'new_layout' => $form_state->getValue('layout'),
       ];
+      $variant_plugin->setLayout($form_state->getValue('layout'), $form_state->getValue('layout_settings') ?: []);
+
       /** @var \Drupal\ctools\Wizard\EntityFormWizardInterface $wizard */
       $wizard = $form_state->getFormObject();
       $next_op = $wizard->getNextOp();
@@ -124,10 +126,10 @@ class LayoutPluginSelector extends FormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $cached_values = $form_state->getTemporaryValue('wizard');
 
-    /* @var $variant_plugin \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant */
+    /** @var \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant $variant_plugin */
     $variant_plugin = $cached_values['plugin'];
 
-    if ((string)$form_state->getValue('op') == $this->t('Change Layout') && $variant_plugin->getConfiguration()['layout'] == $form_state->getValue('layout')) {
+    if ((string) $form_state->getValue('op') == $this->t('Change Layout') && $variant_plugin->getConfiguration()['layout'] == $form_state->getValue('layout')) {
       $form_state->setErrorByName('layout', $this->t('You must select a different layout if you wish to change layouts.'));
     }
     if ($form['update_layout']['#access'] && $variant_plugin->getConfiguration()['layout'] != $form_state->getValue('layout') && $form_state->getValue('op') != $form['update_layout']['#value']) {

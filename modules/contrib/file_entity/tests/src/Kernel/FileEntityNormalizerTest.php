@@ -26,8 +26,7 @@ class FileEntityNormalizerTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = array(
-    'simpletest',
+  protected static $modules = array(
     'field',
     'file',
     'image',
@@ -44,7 +43,7 @@ class FileEntityNormalizerTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
     $this->installEntitySchema('node');
     $this->installEntitySchema('file');
@@ -224,7 +223,7 @@ class FileEntityNormalizerTest extends KernelTestBase {
     $files = $file_system->scanDirectory(DRUPAL_ROOT . '/core/tests/fixtures/files/', '/(html|image|javascript|php|sql)-.*/');
     foreach ($files as $file) {
       unset($files[$file->uri]);
-      $new_path = $file_system->copy($file->uri, PublicStream::basePath());
+      $new_path = $file_system->copy($file->uri, 'public://');
       $file->uri = $new_path;
       $files[$new_path] = $file;
     }

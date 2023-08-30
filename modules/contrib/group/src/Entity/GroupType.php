@@ -160,7 +160,7 @@ class GroupType extends ConfigEntityBundleBase implements GroupTypeInterface {
       $query->condition('internal', FALSE);
     }
 
-    return $query->execute();
+    return $query->accessCheck(FALSE)->execute();
   }
 
   /**

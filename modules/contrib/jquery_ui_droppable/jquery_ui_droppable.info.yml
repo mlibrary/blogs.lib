@@ -2,13 +2,12 @@ name: jQuery UI Droppable
 type: module
 description: 'Provides jQuery UI Droppable library.'
 package: jQuery UI
-core: 8.x
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^9.2 || ^10
 dependencies:
   - jquery_ui:jquery_ui
   - jquery_ui_draggable:jquery_ui_draggable
 
-# Information added by Drupal.org packaging script on 2020-02-19
-version: '8.x-1.2'
+# Information added by Drupal.org packaging script on 2022-11-14
+version: '8.x-1.5'
 project: 'jquery_ui_droppable'
-datestamp: 1582150072
+datestamp: 1668452748

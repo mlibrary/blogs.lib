@@ -4,7 +4,7 @@
  *
  */
 
-(function ($, _, Backbone, Drupal, drupalSettings) {
+(function ($, _, Backbone, once, Drupal, drupalSettings) {
 
   'use strict';
 
@@ -16,7 +16,7 @@
   Drupal.behaviors.panels_ipe = {
     attach: function (context, settings) {
       // Perform initial setup of our app.
-      $('body').once('panels-ipe-init').each(Drupal.panels_ipe.init, [settings]);
+      $(once('panels-ipe-init', 'body')).each(Drupal.panels_ipe.init, [settings]);
 
       // @todo Make every settings-related thing a generic event, or add a
       // panels_ipe event command to Drupal.ajax.
@@ -48,7 +48,7 @@
       // Toggle the preview - We need to do this with drupalSettings as the
       // animation won't work if triggered by a form submit. It must occur after
       // the form is rendered.
-      if (context.className === 'panels-ipe-block-plugin-form flip-container'
+      if (context.id === 'panels-ipe-block-plugin-form-wrapper'
         && settings['panels_ipe']['toggle_preview']) {
         var $form = $('.ipe-block-form');
 
@@ -236,4 +236,4 @@
     settings.panels_ipe.url_root = settings.path.baseUrl + settings.path.pathPrefix + 'admin/panels_ipe/variant/' + panels_display.storage_type + '/' + panels_display.storage_id;
   };
 
-}(jQuery, _, Backbone, Drupal, drupalSettings));
+}(jQuery, _, Backbone, once, Drupal, drupalSettings));

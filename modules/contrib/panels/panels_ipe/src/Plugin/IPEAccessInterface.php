@@ -15,7 +15,7 @@ interface IPEAccessInterface extends PluginInspectionInterface {
    *
    * @param \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant $display
    *
-   * @return boolean
+   * @return bool
    */
   public function applies(PanelsDisplayVariant $display);
 

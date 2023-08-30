@@ -7,7 +7,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 
 /**
- * Interface LinkedFieldManagerInterface.
+ * Linked Field Manager Interface.
  *
  * @package Drupal\linked_field
  */

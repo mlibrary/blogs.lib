@@ -11,9 +11,8 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Entity\TypedData\EntityDataDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Render\BubbleableMetadata;
-use Drupal\Core\Render\Element;
-use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Routing\RouteObjectInterface;
 use Drupal\Core\TypedData\DataReferenceDefinitionInterface;
 use Drupal\Core\Url;
 use Drupal\field\FieldStorageConfigInterface;
@@ -23,8 +22,6 @@ use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
 use Drupal\system\Entity\Menu;
 use Drupal\user\UserInterface;
-use Symfony\Cmf\Component\Routing\RouteObjectInterface;
-use Drupal\Core\TypedData\PrimitiveInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Entity\ContentEntityTypeInterface;
 use Drupal\image\Entity\ImageStyle;
@@ -180,6 +177,11 @@ function token_token_info() {
 
   // Taxonomy term and vocabulary tokens.
   if (\Drupal::moduleHandler()->moduleExists('taxonomy')) {
+    $info['tokens']['term']['source'] = [
+      'name' => t('Translation source term'),
+      'description' => t("The source term for this current term's translation set."),
+      'type' => 'term',
+    ];
     $info['tokens']['term']['edit-url'] = [
       'name' => t('Edit URL'),
       'description' => t("The URL of the taxonomy term's edit page."),
@@ -568,6 +570,7 @@ function token_tokens($type, array $tokens, array $data, array $options, Bubblea
           $count = \Drupal::entityQueryAggregate('node')
             ->aggregate('nid', 'COUNT')
             ->condition('type', $node_type->id())
+            ->accessCheck(TRUE)
             ->execute();
           $replacements[$original] = (int) $count;
           break;
@@ -615,6 +618,11 @@ function token_tokens($type, array $tokens, array $data, array $options, Bubblea
     }
 
     // Chained token relationships.
+    if (($parent_tokens = \Drupal::token()->findWithPrefix($tokens, 'source')) && $source_term = \Drupal::service('entity.repository')->getTranslationFromContext($term, LanguageInterface::LANGCODE_DEFAULT)) {
+      $replacements += \Drupal::token()->generate('term', $parent_tokens, [
+        'term' => $source_term,
+      ], ['langcode' => $source_term->language()->getId()] + $options, $bubbleable_metadata);
+    }
     if (($url_tokens = \Drupal::token()->findWithPrefix($tokens, 'url'))) {
       $replacements += \Drupal::token()->generate('url', $url_tokens, ['url' => $term->toUrl()], $options, $bubbleable_metadata);
     }
@@ -1412,9 +1420,12 @@ function menu_ui_tokens($type, $tokens, array $data, array $options, BubbleableM
           break;
 
         case 'edit-url':
-          $result =  $link->getEditRoute()->setOptions($url_options)->toString(TRUE);
-          $bubbleable_metadata->addCacheableDependency($result);
-          $replacements[$original] = $result->getGeneratedUrl();
+          $route = $link->getEditRoute();
+          if ($route) {
+            $result = $link->getEditRoute()->setOptions($url_options)->toString(TRUE);
+            $bubbleable_metadata->addCacheableDependency($result);
+            $replacements[$original] = $result->getGeneratedUrl();
+          }
           break;
       }
     }
@@ -1702,7 +1713,7 @@ function field_tokens($type, $tokens, array $data, array $options, BubbleableMet
       // For [entity:field_name:0], [entity:field_name:0:value] and
       // [entity:field_name:value] tokens.
       else {
-        list($field_name, $delta) = explode(':', $name, 2);
+        [$field_name, $delta] = explode(':', $name, 2);
         if (!is_numeric($delta)) {
           unset($delta);
         }

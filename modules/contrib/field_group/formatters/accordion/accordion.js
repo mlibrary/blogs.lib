@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Provides the processing logic for accordion.
+ */
+
 (function ($) {
 
   'use strict';
@@ -10,7 +15,7 @@
    */
   Drupal.FieldGroup.Effects.processAccordion = {
     execute: function (context, settings, group_info) {
-      $('div.field-group-accordion-wrapper', context).once('fieldgroup-effects').each(function () {
+      $(once('fieldgroup-effects', 'div.field-group-accordion-wrapper', context)).each(function () {
         var wrapper = $(this);
 
         // Get the index to set active.
@@ -39,7 +44,7 @@
 
           var $firstErrorItem = false;
 
-          // Add required fields mark to any element containing required fields
+          // Add required fields mark to any element containing required fields.
           wrapper.find('div.field-group-accordion-item').each(function (i) {
 
             var $this = $(this);

@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Provides the processing logic for html elements.
+ */
+
 (function ($) {
 
   'use strict';
@@ -11,7 +16,7 @@
   Drupal.FieldGroup.Effects.processHtml_element = {
     execute: function (context, settings, group_info) {
 
-      $('.field-group-html-element', context).once('fieldgroup-effects').each(function () {
+      $(once('fieldgroup-effects', '.field-group-html-element', context)).each(function () {
         var $wrapper = $(this);
 
         if ($wrapper.hasClass('fieldgroup-collapsible')) {
@@ -19,7 +24,7 @@
         }
         else {
 
-          // Add required field markers if needed
+          // Add required field markers if needed.
           if (group_info.settings.show_label && $wrapper.is('.required-fields') && ($wrapper.find('[required]').length > 0 || $wrapper.find('.form-required').length > 0)) {
             $wrapper.find(group_info.settings.label_element + ':first').addClass('form-required');
           }
@@ -27,7 +32,7 @@
 
       });
     },
-    renderCollapsible: function($wrapper) {
+    renderCollapsible: function ($wrapper) {
 
       // Turn the legend into a clickable link, but retain span.field-group-format-toggler
       // for CSS positioning.
@@ -35,7 +40,7 @@
       var $link = $('<a class="field-group-title" href="#"></a>');
       $link.prepend($toggler.contents());
 
-      // Add required field markers if needed
+      // Add required field markers if needed.
       if ($wrapper.is('.required-fields') && ($wrapper.find('[required]').length > 0 || $wrapper.find('.form-required').length > 0)) {
         $link.addClass('form-required');
       }

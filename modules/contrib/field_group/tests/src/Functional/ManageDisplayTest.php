@@ -16,7 +16,7 @@ class ManageDisplayTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['node', 'field_ui', 'field_group'];
+  protected static $modules = ['node', 'field_ui', 'field_group'];
 
   /**
    * Content type id.
@@ -33,7 +33,7 @@ class ManageDisplayTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
 
     // Create test user.
@@ -49,7 +49,10 @@ class ManageDisplayTest extends BrowserTestBase {
 
     // Create content type, with underscores.
     $type_name = 'll4ma_test';
-    $type = $this->drupalCreateContentType(['name' => $type_name, 'type' => $type_name]);
+    $type = $this->drupalCreateContentType([
+      'name' => $type_name,
+      'type' => $type_name,
+    ]);
     $this->type = $type->id();
 
   }
@@ -117,7 +120,10 @@ class ManageDisplayTest extends BrowserTestBase {
 
     $this->drupalGet('admin/structure/types/manage/' . $this->type . '/form-display/' . $group->group_name . '/delete');
     $this->submitForm([], 'Delete');
-    $this->assertSession()->responseContains(t('The group %label has been deleted from the %type content type.', ['%label' => $group->label, '%type' => $this->type]));
+    $this->assertSession()->responseContains(t('The group %label has been deleted from the %type content type.', [
+      '%label' => $group->label,
+      '%type' => $this->type,
+    ]));
 
     // Test that group is not in the $groups array.
     \Drupal::entityTypeManager()
@@ -126,16 +132,14 @@ class ManageDisplayTest extends BrowserTestBase {
     $loaded_group = field_group_load_field_group($group->group_name, 'node', $this->type, 'form', 'default');
     $this->assertNull($loaded_group, 'Group not found after deleting');
 
-    $data = [
-      'format_type' => 'fieldset',
-      'label' => 'testing',
-    ];
-
     $group = $this->createGroup('node', $this->type, 'view', 'default', $data);
 
     $this->drupalGet('admin/structure/types/manage/' . $this->type . '/display/' . $group->group_name . '/delete');
     $this->submitForm([], 'Delete');
-    $this->assertSession()->responseContains(t('The group %label has been deleted from the %type content type.', ['%label' => $group->label, '%type' => $this->type]));
+    $this->assertSession()->responseContains(t('The group %label has been deleted from the %type content type.', [
+      '%label' => $group->label,
+      '%type' => $this->type,
+    ]));
 
     // Test that group is not in the $groups array.
     \Drupal::entityTypeManager()

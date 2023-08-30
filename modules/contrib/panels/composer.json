@@ -26,9 +26,8 @@
   "license": "GPL-2.0+",
   "minimum-stability": "dev",
   "require": {
-    "drupal/core": "^8.8 || ^9",
-    "drupal/ctools": ">=3.0.0",
-    "drupal/jquery_ui_droppable": "^1.2"
+    "drupal/ctools": "^3.12",
+    "drupal/jquery_ui_droppable": "^1.5"
   },
   "require-dev": {
     "drupal/page_manager": "^4"

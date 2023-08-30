@@ -5,57 +5,13 @@
  * Install, update and uninstall functions for the OpenID Connect module.
  */
 
-use \Drupal\Core\Url;
+/* @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
+/* @noinspection PhpUnused */
 
-/**
- * Implements hook_schema().
- */
-function openid_connect_schema() {
-  $schema['openid_connect_authmap'] = [
-    'description' => 'Stores OpenID Connect authentication mapping.',
-    'fields' => [
-      'aid' => [
-        'description' => 'Primary Key: Unique authmap ID.',
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ],
-      'uid' => [
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => "User's {users}.uid.",
-      ],
-      'client_name' => [
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'The client name.',
-      ],
-      'sub' => [
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Unique subject identifier.',
-      ],
-    ],
-    'primary key' => ['aid'],
-    'indexes' => [
-      'uid' => ['uid'],
-      'identifier' => ['client_name', 'sub'],
-    ],
-    'foreign keys' => [
-      'user' => [
-        'table' => 'users',
-        'columns' => ['uid' => 'uid'],
-      ],
-    ],
-  ];
-
-  return $schema;
-}
+use Drupal\Core\Config\Entity\ConfigEntityType;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Url;
+use Drupal\Core\Utility\UpdateException;
 
 /**
  * Implements hook_requirements().
@@ -105,9 +61,7 @@ function openid_connect_update_8101() {
  * Add default config for GitHub provider.
  */
 function openid_connect_update_8102() {
-  $config_factory = \Drupal::configFactory();
-
-  $config = $config_factory->getEditable('openid_connect.settings.github');
+  $config = \Drupal::configFactory()->getEditable('openid_connect.settings.github');
   $config->set('enabled', FALSE);
   $config->set('settings', [
     'client_id' => '',
@@ -120,8 +74,7 @@ function openid_connect_update_8102() {
  * Update the active config with the registration override value.
  */
 function openid_connect_update_8103() {
-  $config_factory = \Drupal::configFactory();
-  $config = $config_factory->getEditable('openid_connect.settings');
+  $config = \Drupal::configFactory()->getEditable('openid_connect.settings');
   $config->set('override_registration_settings', FALSE);
   $config->save(TRUE);
 }
@@ -130,8 +83,7 @@ function openid_connect_update_8103() {
  * Update the active config with the connect existing users value.
  */
 function openid_connect_update_8104() {
-  $config_factory = \Drupal::configFactory();
-  $config = $config_factory->getEditable('openid_connect.settings');
+  $config = \Drupal::configFactory()->getEditable('openid_connect.settings');
   $config->set('connect_existing_users', FALSE);
   $config->save(TRUE);
 }
@@ -157,9 +109,7 @@ function openid_connect_update_8105() {
  * Add default config for Okta provider.
  */
 function openid_connect_update_8106() {
-  $config_factory = \Drupal::configFactory();
-
-  $config = $config_factory->getEditable('openid_connect.settings.okta');
+  $config = \Drupal::configFactory()->getEditable('openid_connect.settings.okta');
   $config->set('enabled', FALSE);
   $config->set('settings', [
     'client_id' => '',
@@ -167,4 +117,213 @@ function openid_connect_update_8106() {
     'okta_domain' => '',
   ]);
   $config->save(TRUE);
+}
+
+/**
+ * Enable externalauth.
+ */
+function openid_connect_update_8198() {
+  \Drupal::service('module_installer')->install(['externalauth']);
+}
+
+/**
+ * Installs the new config entity type openid_connect_client.
+ */
+function openid_connect_update_8199() {
+  $changeList = \Drupal::entityDefinitionUpdateManager()->getChangeList();
+  if (!array_key_exists('openid_connect_client', $changeList)) {
+    return 'Skipped. The new config entity type openid_connect_client is already installed.';
+  }
+  try {
+    \Drupal::entityDefinitionUpdateManager()->installEntityType(new ConfigEntityType([
+      'id' => 'openid_connect_client',
+      'label' => new TranslatableMarkup('OpenID Connect client'),
+      'admin_permission' => "administer openid connect clients",
+      'handlers' => [
+        'list_builder' => 'Drupal\openid_connect\Controller\OpenIDConnectClientListBuilder',
+        'form' => [
+          'add' => 'Drupal\openid_connect\Form\OpenIDConnectClientAddForm',
+          'edit' => 'Drupal\openid_connect\Form\OpenIDConnectClientEditForm',
+          'delete' => 'Drupal\openid_connect\Form\OpenIDConnectClientDeleteForm',
+        ],
+      ],
+      'config_prefix' => 'client',
+      'entity_keys' => [
+        'id' => 'id',
+        'label' => 'label',
+        'status' => 'status',
+      ],
+      'links' => [
+        "edit-form" => "/admin/config/people/openid-connect/{openid_connect_client}/edit",
+        "delete-form" => "/admin/config/people/openid-connect/{openid_connect_client}/delete",
+        "enable" => "/admin/config/people/openid-connect/{openid_connect_client}/enable",
+        "disable" => "/admin/config/people/openid-connect/{openid_connect_client}/disable",
+        "collection" => "/admin/config/people/openid-connect",
+      ],
+      'config_export' => [
+        'id',
+        'label',
+        'plugin',
+        'settings',
+      ],
+    ]));
+  }
+  catch (\Exception $exception) {
+    throw new UpdateException($exception->getMessage());
+  }
+  return 'Installed the new config entity type openid_connect_client.';
+}
+
+/**
+ * Convert client configuration objects to configuration entities.
+ */
+function openid_connect_update_8200() {
+  $definitions = \Drupal::service('plugin.manager.openid_connect_client')->getDefinitions();
+  $entity_storage = \Drupal::entityTypeManager()->getStorage('openid_connect_client');
+
+  foreach ($definitions as $plugin) {
+    $configuration = \Drupal::configFactory()
+      ->getEditable('openid_connect.settings.' . $plugin['id']);
+
+    // Only convert configuration where the client id or secret are not empty.
+    $settings = $configuration->get('settings');
+    if (!empty($settings['client_id']) || !empty($settings['client_secret'])) {
+      // Create new configuration entity.
+      $entity_storage->create([
+        'status' => $configuration->get('enabled'),
+        'id' => $plugin['id'],
+        'label' => $plugin['label']->getUntranslatedString(),
+        'plugin' => $plugin['id'],
+        'settings' => $settings,
+      ])->save();
+    }
+
+    // Delete old configuration object.
+    $configuration->delete();
+  }
+}
+
+/**
+ * Update the active config for installations using generic client.
+ */
+function openid_connect_update_8201() {
+  /** @var \Drupal\openid_connect\OpenIDConnectClientEntityInterface[] $clients */
+  $clients = \Drupal::entityTypeManager()->getStorage('openid_connect_client')->loadByProperties(['plugin' => 'generic']);
+
+  foreach ($clients as $client) {
+    $client->getPlugin()->setConfiguration(['issuer_url' => '']);
+    $client->save();
+  }
+}
+
+/**
+ * Add redirect_login to module settings.
+ */
+function openid_connect_update_8202() {
+  $config = \Drupal::configFactory()->getEditable('openid_connect.settings');
+  $config->set('redirect_login', 'user');
+  $config->save(TRUE);
+}
+
+/**
+ * Enable externalauth.
+ */
+function openid_connect_update_8203() {
+  \Drupal::service('module_installer')->install(['externalauth']);
+}
+
+/**
+ * Move all 'openid_connect_authmap' data to 'authmap'.
+ */
+function openid_connect_update_8204() {
+  $database = \Drupal::database();
+
+  // Get all records and move them to the authmap table.
+  $query = $database->select('openid_connect_authmap', 'a')->fields('a');
+  $authmap_records = $query->execute()->fetchAllAssoc('aid');
+
+  foreach ($authmap_records as $authmap_record) {
+    $database->merge('authmap')
+      ->keys([
+        'uid' => $authmap_record->uid,
+        'provider' => 'openid_connect.' . $authmap_record->client_name,
+      ])
+      ->fields([
+        'authname' => $authmap_record->sub,
+        'data' => 'N;',
+      ])
+      ->execute();
+  }
+}
+
+/**
+ * Drop the 'openid_connect_authmap' table.
+ */
+function openid_connect_update_8205() {
+  \Drupal::database()->schema()->dropTable('openid_connect_authmap');
+}
+
+/**
+ * Installs the new config entity type openid_connect_client.
+ */
+function openid_connect_update_8206() {
+  return openid_connect_update_8199();
+}
+
+/**
+ * Update generic plugins with End Session endpoint and logout redirect URL.
+ */
+function openid_connect_update_8207() {
+  $clients = \Drupal::entityTypeManager()->getStorage('openid_connect_client')->loadByProperties(['plugin' => 'generic']);
+
+  foreach ($clients as $client) {
+    $config = $client->getPlugin()->getConfiguration();
+    if (empty($config['end_session_endpoint'])) {
+      $client->getPlugin()->setConfiguration(['end_session_endpoint' => '']);
+      $client->save();
+    }
+  }
+
+  $config = \Drupal::configFactory()->getEditable('openid_connect.settings');
+  $config->set('redirect_logout', '');
+  $config->save(TRUE);
+}
+
+/**
+ * Update generic plugins with scopes.
+ */
+function openid_connect_update_8208() {
+  $clients = \Drupal::entityTypeManager()->getStorage('openid_connect_client')->loadByProperties(['plugin' => 'generic']);
+
+  foreach ($clients as $client) {
+    $config = $client->getPlugin()->getConfiguration();
+    if (empty($config['scopes'])) {
+      $client->getPlugin()->setConfiguration(['scopes' => ['openid', 'email']]);
+      $client->save();
+    }
+  }
+}
+
+/**
+ * Set default value for end_session_enabled setting.
+ */
+function openid_connect_update_8209() {
+  $config = \Drupal::configFactory()->getEditable('openid_connect.settings');
+  $config->set('end_session_enabled', TRUE);
+  $config->save(TRUE);
+}
+
+/**
+ * Update okta plugins with scopes.
+ */
+function openid_connect_update_8210() {
+  $clients = \Drupal::entityTypeManager()->getStorage('openid_connect_client')->loadByProperties(['plugin' => 'okta']);
+
+  foreach ($clients as $client) {
+    $config = $client->getPlugin()->getConfiguration();
+    if (empty($config['scopes'])) {
+      $client->getPlugin()->setConfiguration(['scopes' => ['openid', 'email']]);
+      $client->save();
+    }
+  }
 }

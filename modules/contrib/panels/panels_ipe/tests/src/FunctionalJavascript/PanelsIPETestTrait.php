@@ -270,8 +270,8 @@ trait PanelsIPETestTrait {
    *   (Optional) Message to pass to assertJsCondition().
    */
   protected function waitUntilVisible($selector, $timeout = 10000, $message = '') {
-    $condition = "jQuery('" . $selector . ":visible').length > 0";
-    $this->assertJsCondition($condition, $timeout, $message);
+    $element = $this->assertSession()->waitForElementVisible('css', $selector, $timeout);
+    $this->assertNotEmpty($element, $message);
   }
 
   /**

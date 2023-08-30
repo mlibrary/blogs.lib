@@ -79,7 +79,7 @@ class MessagesForm extends ConfigFormBase {
 
     $form['html_convert']['format'] = [
       '#type' => 'select',
-      '#title' => t('Text format'),
+      '#title' => $this->t('Text format'),
       '#options' => $formats,
       '#default_value' => $config->get('text_format') ?: filter_fallback_format(),
       '#description' => $this->t('The list of available formats is restricted to those that escape HTML.'),

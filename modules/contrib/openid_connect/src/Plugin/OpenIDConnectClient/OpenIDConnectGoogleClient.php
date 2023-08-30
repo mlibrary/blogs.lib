@@ -20,7 +20,7 @@ class OpenIDConnectGoogleClient extends OpenIDConnectClientBase {
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
     $form = parent::buildConfigurationForm($form, $form_state);
 
     $url = 'https://console.developers.google.com/project/_/apiui/apis/library';
@@ -34,7 +34,7 @@ class OpenIDConnectGoogleClient extends OpenIDConnectClientBase {
   /**
    * {@inheritdoc}
    */
-  public function getEndpoints() {
+  public function getEndpoints(): array {
     // Data from https://accounts.google.com/.well-known/openid-configuration
     return [
       'authorization' => 'https://accounts.google.com/o/oauth2/v2/auth',
@@ -46,7 +46,7 @@ class OpenIDConnectGoogleClient extends OpenIDConnectClientBase {
   /**
    * {@inheritdoc}
    */
-  public function retrieveUserInfo($access_token) {
+  public function retrieveUserInfo(string $access_token = NULL): ?array {
     $userinfo = parent::retrieveUserInfo($access_token);
     if ($userinfo) {
       // For some reason Google returns the URI of the profile picture in a

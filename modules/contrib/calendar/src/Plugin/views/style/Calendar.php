@@ -476,14 +476,30 @@ class Calendar extends StylePluginBase {
    */
   public function validateOptionsForm(&$form, FormStateInterface $form_state) {
     $groupby_times = $form_state->getValue(['style_options', 'groupby_times']);
-    if ($groupby_times == 'custom' && $form_state->isValueEmpty(['style_options', 'groupby_times_custom'])) {
+    $groupby_times_custom_is_empty = $form_state->isValueEmpty([
+      'style_options',
+      'groupby_times_custom',
+    ]);
+    if ($groupby_times == 'custom' && $groupby_times_custom_is_empty) {
       $form_state->setErrorByName('groupby_times_custom', $this->t('Custom groupby times cannot be empty.'));
     }
-    if (!$form_state->isValueEmpty(['style_options', 'theme_style']) && (empty($groupby_times) || !in_array($groupby_times, ['hour', 'half']))) {
+
+    $theme_style_is_empty = $form_state->isValueEmpty([
+      'style_options',
+      'theme_style',
+    ]);
+    $is_hour_half_hour = in_array($groupby_times, ['hour', 'half']);
+    $hour_half_hour_grouping = (empty($groupby_times) || !$is_hour_half_hour);
+    if (!$theme_style_is_empty && $hour_half_hour_grouping) {
       $form_state->setErrorByName('theme_style', $this->t('Overlapping items only work with hour or half hour groupby times.'));
     }
-    if (!$form_state->isValueEmpty(['style_options', 'theme_style']) && !$form_state->isValueEmpty(['style_options', 'group_by_field'])) {
-      $form_state->setErrorByName('theme_style', $this->t('ou cannot use overlapping items and also try to group by a field value.'));
+
+    $groupby_field_is_empty = $form_state->isValueEmpty([
+      'style_options',
+      'group_by_field',
+    ]);
+    if (!$theme_style_is_empty && !$groupby_field_is_empty) {
+      $form_state->setErrorByName('theme_style', $this->t('You cannot use overlapping items and also try to group by a field value.'));
     }
     if ($groupby_times != 'custom') {
       $form_state->setValue(['style_options', 'groupby_times_custom'], NULL);
@@ -521,11 +537,11 @@ class Calendar extends StylePluginBase {
   public function render() {
     // @todo Move to $this->validate()
     if (empty($this->view->rowPlugin) || !$this->hasCalendarRowPlugin()) {
-      debug('\Drupal\calendar\Plugin\views\style\CalendarStyle: The calendar row plugin is required when using the calendar style, but it is missing.');
+      dump('\Drupal\calendar\Plugin\views\style\CalendarStyle: The calendar row plugin is required when using the calendar style, but it is missing.');
       return;
     }
     if (!$argument = CalendarHelper::getDateArgumentHandler($this->view)) {
-      debug('\Drupal\calendar\Plugin\views\style\CalendarStyle: A calendar date argument is required when using the calendar style, to add a date argument in a view, please go to Advanced > Contextual Filters on the views configuration panel.');
+      dump('\Drupal\calendar\Plugin\views\style\CalendarStyle: A calendar date argument is required when using the calendar style, to add a date argument in a view, please go to Advanced > Contextual Filters on the views configuration panel.');
       return;
     }
 
@@ -558,10 +574,11 @@ class Calendar extends StylePluginBase {
     $this->dateInfo->setMinDate($argument->getMinDate());
     $this->dateInfo->setMaxDate($argument->getMaxDate());
     // @todo implement limit
-    //   $this->dateInfo->limit = $argument->limit;
+    // $this->dateInfo->limit = $argument->limit;
     // @todo What if the display doesn't have a route?
     // $this->dateInfo->url = $this->view->getUrl();
-    $this->dateInfo->setForbid(isset($argument->getDateArg()->forbid) ? $argument->getDateArg()->forbid : FALSE);
+    $forbid = $argument->getDateArg()->forbid ?? FALSE;
+    $this->dateInfo->setForbid($forbid);
 
     // Add calendar style information to the view.
     $this->styleInfo->setCalendarPopup($this->displayHandler->getOption('calendar_popup'));
@@ -582,7 +599,8 @@ class Calendar extends StylePluginBase {
     $this->styleInfo->setCustomGroupByField($this->options['groupby_field']);
 
     // @todo make this an option setting.
-    $this->styleInfo->setShowEmptyTimes(!empty($this->options['groupby_times_custom']) ? TRUE : FALSE);
+    $showtimesEmpty = !empty($this->options['groupby_times_custom']) ? TRUE : FALSE;
+    $this->styleInfo->setShowEmptyTimes($showtimesEmpty);
 
     // Set up parameters for the current view that can be used by row plugin.
     $display_timezone = date_timezone_get($this->dateInfo->getMinDate());
@@ -591,10 +609,8 @@ class Calendar extends StylePluginBase {
     // @todo min and max date timezone info shouldn't be stored separately.
     $date = clone($this->dateInfo->getMinDate());
     date_timezone_set($date, $display_timezone);
-    // $this->dateInfo->min_zone_string = date_format($date, DATETIME_DATE_STORAGE_FORMAT);
     $date = clone($this->dateInfo->getMaxDate());
     date_timezone_set($date, $display_timezone);
-    // $this->dateInfo->max_zone_string = date_format($date, DATETIME_DATE_STORAGE_FORMAT);
     // Let views render fields the way it thinks they should look before we
     // start massaging them.
     $this->renderFields($this->view->result);
@@ -694,7 +710,7 @@ class Calendar extends StylePluginBase {
       $month = $this->currentDay->format('n');
       $week = CalendarHelper::dateWeek($current_day_date);
       $first_day = \Drupal::config('system.date')->get('first_day');
-      list($multiday_buckets, $singleday_buckets, $total_rows) = array_values($this->calendarBuildWeek(TRUE));
+      [$multiday_buckets, $singleday_buckets, $total_rows] = array_values($this->calendarBuildWeek(TRUE));
 
       $output = [];
       $final_day = clone($this->currentDay);
@@ -851,7 +867,6 @@ class Calendar extends StylePluginBase {
                     else {
                       $single_days[] = $event['entry'];
                     }
-                    // $single_days .= (isset($event['more_link'])) ? '<div class="calendar-more">' . $event['entry'] . '</div>' : $event['entry'];
                   }
                 }
                 $class = 'single-day';
@@ -1453,7 +1468,7 @@ class Calendar extends StylePluginBase {
     $options = [];
     $view_displays = Views::getApplicableViews('uses_route');
     foreach ($view_displays as $view_display) {
-      list($view_id, $display_id) = $view_display;
+      [$view_id, $display_id] = $view_display;
 
       $view = View::load($view_id);
       $view_exec = $view->getExecutable();

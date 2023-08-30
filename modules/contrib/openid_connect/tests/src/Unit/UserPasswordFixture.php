@@ -15,7 +15,7 @@ use PHPUnit\Framework\MockObject\MockObject;
  * @return string
  *   Mocked password.
  */
-function user_password() {
+function user_password(): string {
   return 'TestPassword123';
 }
 
@@ -26,7 +26,6 @@ function user_password() {
  *   The user account.
  */
 function user_login_finalize(UserInterface $account) {
-  $_SESSION['uid'] = $account->id();
 }
 
 /**
@@ -42,10 +41,6 @@ function user_login_finalize(UserInterface $account) {
  * @return \PHPUnit\Framework\MockObject\MockObject
  *   Return a mock object that mimics the file_save_data.
  */
-function file_save_data(
-  $data,
-  $destination = NULL,
-  $replace = FileSystemInterface::EXISTS_RENAME
-): MockObject {
+function file_save_data(string $data, ?string $destination = NULL, int $replace = FileSystemInterface::EXISTS_RENAME): MockObject {
   return $GLOBALS['oldFileMock'];
 }

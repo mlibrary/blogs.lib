@@ -19,9 +19,8 @@ class PublishedStateConstraintTest extends SchedulerContentModerationBrowserTest
    * @dataProvider dataEntityTypes()
    */
   public function testValidPublishStateTransition($entityTypeId, $bundle) {
-    $this->drupalLogin($this->schedulerUser);
-    $entity = $this->drupalCreateNode([
-      'type' => $bundle,
+    $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
+    $entity = $this->createEntity($entityTypeId, $bundle, [
       'moderation_state' => 'draft',
       'publish_on' => strtotime('tomorrow'),
       'publish_state' => 'published',
@@ -39,9 +38,8 @@ class PublishedStateConstraintTest extends SchedulerContentModerationBrowserTest
    * @dataProvider dataEntityTypes()
    */
   public function testInvalidPublishStateTransition($entityTypeId, $bundle) {
-    $this->drupalLogin($this->schedulerUser);
-    $entity = $this->drupalCreateNode([
-      'type' => $bundle,
+    $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
+    $entity = $this->createEntity($entityTypeId, $bundle, [
       'moderation_state' => 'draft',
       'publish_on' => strtotime('tomorrow'),
       'publish_state' => 'archived',

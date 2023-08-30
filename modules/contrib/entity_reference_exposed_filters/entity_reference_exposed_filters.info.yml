@@ -1,14 +1,12 @@
 name: 'Entity Reference Exposed Filters'
 type: module
 description: 'Entity Reference Nodes displayed as exposed filters with titles in Views'
-# version: VERSION
-core: '8.x'
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^8 || ^9 || ^10
 
 dependencies:
   - drupal:views
 
-# Information added by Drupal.org packaging script on 2020-08-27
-version: '8.x-1.0-alpha3'
+# Information added by Drupal.org packaging script on 2023-05-08
+version: '2.0.0-alpha1'
 project: 'entity_reference_exposed_filters'
-datestamp: 1598545275
+datestamp: 1683541319

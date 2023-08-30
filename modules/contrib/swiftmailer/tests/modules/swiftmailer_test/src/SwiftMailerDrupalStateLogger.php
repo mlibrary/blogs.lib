@@ -11,7 +11,8 @@ class SwiftMailerDrupalStateLogger implements Swift_Events_SendListener {
     $this->add([
       'method' => 'beforeSendPerformed',
       'body' => $evt->getMessage()->getBody(),
-      'subject' => $evt->getMessage()->getSubject()
+      'subject' => $evt->getMessage()->getSubject(),
+      'headers' => $this->getHeadersAsArray($evt->getMessage()),
     ]);
   }
 
@@ -19,8 +20,29 @@ class SwiftMailerDrupalStateLogger implements Swift_Events_SendListener {
     $this->add([
       'method' => 'sendPerformed',
       'body' => $evt->getMessage()->getBody(),
-      'subject' => $evt->getMessage()->getSubject()
+      'subject' => $evt->getMessage()->getSubject(),
+      'headers' => $this->getHeadersAsArray($evt->getMessage()),
     ]);
+  }
+
+  /**
+   * Gathers and returns the headers of the message as an array.
+   *
+   * @param \Swift_Mime_SimpleMessage $m
+   *   The swift message object.
+   *
+   * @return array
+   *   An array of headers and their values.
+   */
+  protected function getHeadersAsArray(\Swift_Mime_SimpleMessage $m) {
+    $return = [];
+    /** @var \Symfony\Component\Mime\Header\AbstractHeader $header */
+    foreach ($m->getHeaders()->getAll() as $header) {
+      if ($header instanceof \Swift_Mime_Header) {
+        $return[$header->getFieldName()] = $header->getFieldBody();
+      }
+    }
+    return $return;
   }
 
   public function add($entry) {

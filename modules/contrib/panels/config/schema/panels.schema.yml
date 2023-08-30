@@ -20,4 +20,3 @@ display_variant.plugin.panels_variant:
     storage_id:
       type: string
       label: Storage Id
-

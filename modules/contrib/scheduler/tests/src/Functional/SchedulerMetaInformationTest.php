@@ -10,39 +10,49 @@ namespace Drupal\Tests\scheduler\Functional;
 class SchedulerMetaInformationTest extends SchedulerBrowserTestBase {
 
   /**
-   * Tests meta-information on scheduled nodes.
+   * Tests meta-information on scheduled entities.
    *
-   * When nodes are scheduled for unpublication, an X-Robots-Tag HTTP header is
-   * sent, alerting crawlers about when an item expires and should be removed
-   * from search results.
+   * When an entity is scheduled for unpublication, an X-Robots-Tag HTTP header
+   * is included, telling crawlers about when an item will expire and should be
+   * removed from search results.
+   *
+   * @dataProvider dataStandardEntityTypes()
    */
-  public function testMetaInformation() {
+  public function testMetaInformation($entityTypeId, $bundle) {
     // Log in.
     $this->drupalLogin($this->schedulerUser);
 
-    // Create a published node without scheduling.
-    $published_node = $this->drupalCreateNode([
-      'type' => $this->type,
-      'status' => TRUE,
-    ]);
-    $this->drupalGet('node/' . $published_node->id());
+    // Create a published entity without scheduling dates.
+    $entity = $this->createEntity($entityTypeId, $bundle, ['status' => TRUE]);
 
     // Since we did not set an unpublish date, there should be no X-Robots-Tag
     // header on the response.
-    $this->assertNull($this->drupalGetHeader('X-Robots-Tag'), 'X-Robots-Tag is not present when no unpublish date is set.');
+    $this->drupalGet($entity->toUrl());
+    $this->assertNull($this->getSession()->getResponseHeader('X-Robots-Tag'), 'X-Robots-Tag should not be present when no unpublish date is set.');
+    // Also check that there is no meta tag.
+    $this->assertSession()->responseNotContains('unavailable_after:');
 
-    // Set a scheduler unpublish date on the node.
+    // Set an unpublish date on the entity.
     $unpublish_date = strtotime('+1 day');
-    $edit = [
-      'unpublish_on[0][value][date]' => $this->dateFormatter->format($unpublish_date, 'custom', 'Y-m-d'),
-      'unpublish_on[0][value][time]' => $this->dateFormatter->format($unpublish_date, 'custom', 'H:i:s'),
-    ];
-    $this->drupalPostForm('node/' . $published_node->id() . '/edit', $edit, 'Save');
+    $entity->set('unpublish_on', $unpublish_date)->save();
 
-    // The node page should now have an X-Robots-Tag header with an
+    // The entity full page view should now have an X-Robots-Tag header with an
     // unavailable_after-directive and RFC850 date- and time-value.
-    $this->drupalGet('node/' . $published_node->id());
+    $this->drupalGet($entity->toUrl());
     $this->assertSession()->responseHeaderEquals('X-Robots-Tag', 'unavailable_after: ' . date(DATE_RFC850, $unpublish_date));
+
+    // Check that the required meta tag is added to the html head section.
+    $this->assertSession()->responseMatches('~meta name=[\'"]robots[\'"] content=[\'"]unavailable_after: ' . date(DATE_RFC850, $unpublish_date) . '[\'"]~');
+
+    // If the entity type has a summary listing page, check that the entity is
+    // shown but the two tags are not present. Only do this for node, to avoid
+    // getting 404 because none of the other entity types have a summary page.
+    if ($entityTypeId == 'node') {
+      $this->drupalGet("$entityTypeId");
+      $this->assertSession()->pageTextContains($entity->label());
+      $this->assertNull($this->getSession()->getResponseHeader('X-Robots-Tag'), 'X-Robots-Tag should not be added when entity is not in "full" view mode.');
+      $this->assertSession()->responseNotContains('unavailable_after:');
+    }
   }
 
 }

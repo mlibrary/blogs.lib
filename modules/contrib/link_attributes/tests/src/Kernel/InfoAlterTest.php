@@ -14,7 +14,7 @@ class InfoAlterTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'link_attributes',
     'link_attributes_test_alterinfo',
@@ -30,14 +30,14 @@ class InfoAlterTest extends KernelTestBase {
     /** @var \Drupal\link_attributes\LinkAttributesManager $linkAttributesManager */
     $linkAttributesManager = $this->container->get('plugin.manager.link_attributes');
     $definition = $linkAttributesManager->getDefinitions();
-    $this->assertTrue($definition['class']['type'] == 'textfield', 'Without altering the plugin definition the class attribute is a textfield.');
+    $this->assertEquals('textfield', $definition['class']['type'], 'Without altering the plugin definition the class attribute is a textfield.');
 
     // Set our flag to alter the plugin definition in
     // link_attributes_test_alterinfo module.
     \Drupal::state()->set('link_attributes_test_alterinfo.hook_link_attributes_plugin_alter', TRUE);
     $linkAttributesManager->clearCachedDefinitions();
     $definition = $linkAttributesManager->getDefinitions();
-    $this->assertTrue($definition['class']['type'] == 'select', 'After altering the plugin definition the class attribute is a select.');
+    $this->assertEquals('select', $definition['class']['type'], 'After altering the plugin definition the class attribute is a select.');
     $this->assertArrayHasKey('button', $definition['class']['options']);
   }
 

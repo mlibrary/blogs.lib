@@ -11,7 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class ConfigForm.
+ * Class Config Form.
  *
  * @package Drupal\linked_field\Form
  */

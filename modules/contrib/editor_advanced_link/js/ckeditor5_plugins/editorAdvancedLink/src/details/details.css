@@ -1,0 +1,10 @@
+.ck.ck-form__details {
+  & > summary {
+    cursor: pointer;
+
+    &:focus-visible {
+       border: var(--ck-focus-ring);
+       box-shadow: var(--ck-focus-outer-shadow), 0 0;
+    }
+  }
+}

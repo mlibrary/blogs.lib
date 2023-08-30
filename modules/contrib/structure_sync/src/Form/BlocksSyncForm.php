@@ -2,6 +2,7 @@
 
 namespace Drupal\structure_sync\Form;
 
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
@@ -78,7 +79,7 @@ class BlocksSyncForm extends ConfigFormBase {
       '#open' => TRUE,
     ];
 
-    $form['export']['blocks'] = [
+    $form['export']['export_blocks'] = [
       '#type' => 'submit',
       '#value' => $this->t('Export custom blocks'),
       '#name' => 'exportBlocks',
@@ -87,8 +88,15 @@ class BlocksSyncForm extends ConfigFormBase {
     ];
 
     $blockList = [];
-    $blocks = $this->entityTypeManager->getStorage('block_content')
-      ->loadMultiple();
+    try {
+      $blocks = $this->entityTypeManager
+        ->getStorage('block_content')
+        ->loadMultiple();
+    }
+    catch (PluginNotFoundException $e) {
+      $blocks = [];
+    }
+
     foreach ($blocks as $block) {
       $blockList[$block->uuid()] = $block->info->getValue()[0]['value'];
     }

@@ -27,28 +27,36 @@ function panels_requirements($phase) {
 }
 
 /**
- * Helper function for updating panels created layouts to layout discovery
+ * Helper function for updating panels created layouts to layout discovery.
  */
 function panels_convert_plugin_ids_to_layout_discovery($layout_id) {
   // For layouts we know about, return what the new ID should be.
   // If we don't recognize the layout ID, return false to not update the config.
-  switch($layout_id) {
+  switch ($layout_id) {
     case 'onecol':
       return 'layout_onecol';
+
     case 'threecol_25_50_25':
       return 'layout_threecol_25_50_25';
+
     case 'threecol_25_50_25_stacked':
       return 'layout_threecol_25_50_25';
+
     case 'threecol_33_34_33':
       return 'layout_threecol_33_34_33';
+
     case 'threecol_33_34_33_stacked':
       return 'layout_threecol_33_34_33';
+
     case 'twocol':
       return 'layout_twocol';
+
     case 'twocol_bricks':
       return 'layout_twocol_bricks';
+
     case 'twocol_stacked':
       return 'layout_twocol';
+
     default:
       return FALSE;
   }

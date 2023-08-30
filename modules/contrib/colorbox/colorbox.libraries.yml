@@ -3,6 +3,7 @@ colorbox:
   version: VERSION
   license:
     name: MIT
+    url: https://github.com/jackmoore/colorbox/blob/master/LICENSE.md
     gpl-compatible: false
   js:
     /libraries/colorbox/jquery.colorbox-min.js: { minified: true }
@@ -17,6 +18,7 @@ colorbox-dev:
   version: VERSION
   license:
     name: MIT
+    url: https://github.com/jackmoore/colorbox/blob/master/LICENSE.md
     gpl-compatible: false
   js:
     /libraries/colorbox/jquery.colorbox.js: { }
@@ -29,6 +31,7 @@ dompurify:
   version: VERSION
   license:
     name: MPL
+    url: https://github.com/cure53/DOMPurify/blob/main/LICENSE
     gpl-compatible: false
   js:
     /libraries/dompurify/dist/purify.min.js: { }

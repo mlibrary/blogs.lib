@@ -282,6 +282,9 @@ class SwiftMailer implements MailInterface, ContainerFactoryPluginInterface {
       // MailManager::doMail). Replicate that behavior here.
       Conversion::swiftmailer_add_mailbox_header($m, 'To', $message['to']);
 
+      // Parse Cc and Bcc headers from the message and the message params.
+      $this->handleCarbonCopy($message, $m);
+
       // Get content type.
       $content_type = $this->getContentType($message);
 
@@ -347,6 +350,28 @@ class SwiftMailer implements MailInterface, ContainerFactoryPluginInterface {
         ['@exception_message' => $e->getMessage(), '@headers' => $headers]);
     }
     return FALSE;
+  }
+
+  /**
+   * Handles the Cc and Bcc headers.
+   *
+   * @param array $message
+   *   The message array.
+   * @param \Swift_Message $m
+   *   The swift message object.
+   */
+  protected function handleCarbonCopy(array $message, Swift_Message $m) {
+    foreach (['Cc', 'Bcc'] as $header) {
+      $copy = [];
+      if (isset($message['headers'][$header]) && is_string($message['headers'][$header])) {
+        $copy = Conversion::swiftmailer_parse_mailboxes($message['headers'][$header]);
+      }
+
+      if (!empty($copy)) {
+        $function = 'set' . $header;
+        $m->$function($copy);
+      }
+    }
   }
 
   /**

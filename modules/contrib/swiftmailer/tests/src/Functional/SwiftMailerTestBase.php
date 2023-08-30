@@ -23,7 +23,7 @@ abstract class SwiftMailerTestBase extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = ['swiftmailer_test', 'swiftmailer', 'mailsystem'];
+  protected static $modules = ['swiftmailer_test', 'swiftmailer', 'mailsystem'];
 
   /**
    * @var \Drupal\swiftmailer_test\SwiftMailerDrupalStateLogger
@@ -33,7 +33,7 @@ abstract class SwiftMailerTestBase extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->config('mailsystem.settings')
       ->set('defaults', [

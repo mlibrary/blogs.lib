@@ -67,7 +67,7 @@ class ViewsBuilderController extends ControllerBase {
           'description' => ['#plain_text' => $builder->getDescription()],
           'add' => [
             '#type' => 'link',
-            '#title' => t('Add'),
+            '#title' => $this->t('Add'),
             '#url' => Url::fromRoute('views_templates.create_from_template',
               [
                 'view_template' => $plugin_id,

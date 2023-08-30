@@ -959,20 +959,22 @@ class CalendarHelper extends DateHelper {
     $route_parameters = [];
     $path = $view->getPath();
     $views_arguments = $view->args;
-    $bits = explode('/', $path);
+    $bits = is_string($path) ? explode('/', $path) : false;
     $arg_counter = 0;
-    foreach ($bits as $pos => $bit) {
-      if ($bit == '%') {
-        // Generate the name of the parameter using the key of the argument
-        // handler.
-        $arg_id = 'arg_' . $arg_counter++;
-        $route_parameters[$arg_id] = array_shift($views_arguments);
-      }
-      elseif (strpos($bit, '%') === 0) {
-        // Use the name defined in the path.
-        $parameter_name = substr($bit, 1);
-        $route_parameters[$parameter_name] = array_shift($views_arguments);
-        $arg_counter++;
+    if ($bits != false) {
+      foreach ($bits as $pos => $bit) {
+        if ($bit == '%') {
+          // Generate the name of the parameter using the key of the argument
+          // handler.
+          $arg_id = 'arg_' . $arg_counter++;
+          $route_parameters[$arg_id] = array_shift($views_arguments);
+        }
+        elseif (strpos($bit, '%') === 0) {
+          // Use the name defined in the path.
+          $parameter_name = substr($bit, 1);
+          $route_parameters[$parameter_name] = array_shift($views_arguments);
+          $arg_counter++;
+        }
       }
     }
     for ($i = $arg_counter; $i < $i + count($args); $i++) {

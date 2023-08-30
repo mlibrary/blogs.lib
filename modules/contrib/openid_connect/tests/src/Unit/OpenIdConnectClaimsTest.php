@@ -105,7 +105,7 @@ class OpenIdConnectClaimsTest extends UnitTestCase {
    * @dataProvider defaultClaimsProvider
    *   The data profiled for the claims test.
    */
-  public function testGetDefaultClaims($key, $scope, $type): void {
+  public function testGetDefaultClaims(string $key, string $scope, string $type): void {
     $claims = $this->openIdConnectClaims->getClaims();
 
     // Ensure the default key exists.
@@ -139,7 +139,7 @@ class OpenIdConnectClaimsTest extends UnitTestCase {
    * @dataProvider defaultClaimsProvider
    *   The data profiled for the claims test.
    */
-  public function testGetOptions($key, $scope, $type): void {
+  public function testGetOptions(string $key, string $scope, string $type): void {
     // Get the options.
     $options = $this->openIdConnectClaims->getOptions();
 
@@ -180,7 +180,7 @@ class OpenIdConnectClaimsTest extends UnitTestCase {
    * @dataProvider defaultClaimsProvider
    *   The data profiled for the claims test.
    */
-  public function testUserInfoMappingScopes($key, $scope, $type): void {
+  public function testUserInfoMappingScopes(string $key, string $scope, string $type): void {
 
     $mappings = self::USERINFO_MAPPINGS;
 

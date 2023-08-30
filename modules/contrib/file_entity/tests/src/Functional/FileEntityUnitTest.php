@@ -3,7 +3,6 @@
 namespace Drupal\Tests\file_entity\Functional;
 
 use Drupal\file\Entity\File;
-use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeExtensionGuesser;
 
 /**
  * Test basic file entity functionality.
@@ -14,7 +13,7 @@ use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeExtensionGuesser;
  */
 class FileEntityUnitTest extends FileEntityTestBase {
 
-  function setUp() {
+  function setUp(): void {
     parent::setUp();
     $this->setUpFiles();
   }
@@ -30,10 +29,10 @@ class FileEntityUnitTest extends FileEntityTestBase {
       'public://test.mkv' => 'video/x-matroska',
       'public://test.webp' => 'image/webp',
     );
-    /** @var MimeTypeExtensionGuesser $guesser */
+    /** @var \Symfony\Component\Mime\MimeTypes $guesser */
     $guesser = $this->container->get('file.mime_type.guesser.extension');
     foreach ($tests as $input => $expected) {
-      $this->assertEqual($expected, $guesser->guess($input));
+      $this->assertEquals($expected, $guesser->guessMimeType($input));
     }
   }
 
@@ -41,9 +40,9 @@ class FileEntityUnitTest extends FileEntityTestBase {
     $file = reset($this->files['text']);
 
     // Test entity ID, revision ID, and bundle.
-    $this->assertEqual($file->id(), $file->fid->value);
-    $this->assertEqual($file->getRevisionId(), NULL);
-    $this->assertEqual($file->bundle(), 'document');
+    $this->assertEquals($file->id(), $file->fid->value);
+    $this->assertEquals($file->getRevisionId(), NULL);
+    $this->assertEquals($file->bundle(), 'document');
 
     // Test the entity URI callback.
     /*$uri = entity_uri('file', $file);
@@ -90,16 +89,8 @@ class FileEntityUnitTest extends FileEntityTestBase {
         $file->hasMetadata('width'),
         'Image dimensions retrieved on file load for an image file.'
       );
-      $this->assertEqual(
-        $file->getMetadata('height'),
-        $files[$file->id()]['height'],
-        'Loaded image height is equal to saved image height.'
-      );
-      $this->assertEqual(
-        $file->getMetadata('width'),
-        $files[$file->id()]['width'],
-        'Loaded image width is equal to saved image width.'
-      );
+      $this->assertEquals($file->getMetadata('height'), $files[$file->id()]['height'], 'Loaded image height is equal to saved image height.');
+      $this->assertEquals($file->getMetadata('width'), $files[$file->id()]['width'], 'Loaded image width is equal to saved image width.');
     }
     foreach (File::loadMultiple($text_fids) as $file) {
       $this->assertFalse(
@@ -120,29 +111,13 @@ class FileEntityUnitTest extends FileEntityTestBase {
     $image->resize($file->getMetadata('width') / 2, $file->getMetadata('height') / 2);
     $image->save();
     $file->save();
-    $this->assertEqual(
-      $file->getMetadata('height'),
-      $files[$file->id()]['height'] / 2,
-      'Image file height updated by file save.'
-    );
-    $this->assertEqual(
-      $file->getMetadata('width'),
-      $files[$file->id()]['width'] / 2,
-      'Image file width updated by file save.'
-    );
+    $this->assertEquals($file->getMetadata('height'), $files[$file->id()]['height'] / 2, 'Image file height updated by file save.');
+    $this->assertEquals($file->getMetadata('width'), $files[$file->id()]['width'] / 2, 'Image file width updated by file save.');
     // Clear the cache and reload the file.
     \Drupal::entityTypeManager()->getStorage('file')->resetCache();
     $file = File::load($file->id());
-    $this->assertEqual(
-      $file->getMetadata('height'),
-      $files[$file->id()]['height'] / 2,
-      'Updated image height retrieved by file load.'
-    );
-    $this->assertEqual(
-      $file->getMetadata('width'),
-      $files[$file->id()]['width'] / 2,
-      'Updated image width retrieved by file load.'
-    );
+    $this->assertEquals($file->getMetadata('height'), $files[$file->id()]['height'] / 2, 'Updated image height retrieved by file load.');
+    $this->assertEquals($file->getMetadata('width'), $files[$file->id()]['width'] / 2, 'Updated image width retrieved by file load.');
 
     //Test hook_file_delete().
     $file->delete();

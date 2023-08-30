@@ -11,7 +11,7 @@ use Drupal\Core\Render\BubbleableMetadata;
  */
 class FileEntityTokenTest extends FileEntityTestBase {
 
-  function setUp() {
+  function setUp(): void {
     parent::setUp();
     $this->setUpFiles();
   }
@@ -49,7 +49,7 @@ class FileEntityTokenTest extends FileEntityTestBase {
         $this->assertTrue(preg_match('/^' . $expected . '$/', $values[$token]), t("Token value for [@type:@token] was '@actual', matching regular expression pattern '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $values[$token], '@expected' => $expected)));
       }
       else {
-        $this->assertIdentical($values[$token], $expected, t("Token value for [@type:@token] was '@actual', expected value '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $values[$token], '@expected' => $expected)));
+        $this->assertSame($values[$token], $expected, t("Token value for [@type:@token] was '@actual', expected value '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $values[$token], '@expected' => $expected)));
       }
     }
 

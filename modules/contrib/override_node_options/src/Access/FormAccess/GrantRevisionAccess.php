@@ -11,7 +11,7 @@ class GrantRevisionAccess implements FormAccessOverrideInterface {
     $form_object = $form_state->getFormObject();
 
     if ($form_object instanceof NodeForm) {
-      /** @var AccountProxyInterface $user */
+      /** @var \Drupal\Core\Session\AccountProxyInterface $user */
       $user = \Drupal::currentUser();
 
       if ($user->hasPermission('administer nodes')) {

@@ -11,7 +11,7 @@ use Drupal\Core\Render\Element;
 trait PanelsIPEBlockRendererTrait {
 
   /**
-   * @var \Drupal\Core\Plugin\Context\ContextHandlerInterface $contextHandler
+   * @var \Drupal\Core\Plugin\Context\ContextHandlerInterface
    */
   protected $contextHandler;
 
@@ -23,7 +23,7 @@ trait PanelsIPEBlockRendererTrait {
    * @param \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant $panels_display
    *   The Panels Display that contains the Block instance.
    *
-   * @return array $build
+   * @return array
    *   The Block render array.
    */
   protected function buildBlockInstance($block_instance, $panels_display) {

@@ -7,6 +7,11 @@ use Drupal\node\Entity\Node;
 /**
  * Tests the Scheduler hook functions implemented by this module.
  *
+ * Increase the allowed array line length. This can be removed when the Thunder
+ * drupal-testing workflow on Github reads a module's own phpcs.xml.dist file.
+ * See https://github.com/thunder/drupal-testing/issues/67
+ * phpcs:set Drupal.Arrays.Array lineLimit 110
+ *
  * @group scheduler_content_moderation_integration
  */
 class HookImplementationTest extends SchedulerContentModerationTestBase {
@@ -28,7 +33,7 @@ class HookImplementationTest extends SchedulerContentModerationTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
 
     // Create a user which has any permission required.
@@ -81,10 +86,10 @@ class HookImplementationTest extends SchedulerContentModerationTestBase {
     $this->workflow->getTypePlugin()->setConfiguration(array_merge_recursive($config, $config_additions));
     $this->workflow->save();
 
-    $result = scheduler_content_moderation_integration_scheduler_hide_publish_on_field([], [], $node);
+    $result = scheduler_content_moderation_integration_scheduler_hide_publish_date([], [], $node);
     $this->assertEquals($expected, $result, sprintf('Hide the publish-on field: Expected %s, Result %s', $expected ? 'Yes' : 'No', $result ? 'Yes' : 'No'));
 
-    $result = scheduler_content_moderation_integration_scheduler_hide_unpublish_on_field([], [], $node);
+    $result = scheduler_content_moderation_integration_scheduler_hide_unpublish_date([], [], $node);
     $this->assertEquals($expected, $result, sprintf('Hide the unpublish-on field: Expected %s, Result %s', $expected ? 'Yes' : 'No', $result ? 'Yes' : 'No'));
   }
 

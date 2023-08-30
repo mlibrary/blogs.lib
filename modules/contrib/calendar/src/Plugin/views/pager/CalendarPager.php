@@ -114,14 +114,14 @@ class CalendarPager extends PagerPluginBase {
       $url = $this->view->getUrl($arg_vals, $this->view->current_display);
     }
     else {
-      $url = Url::fromRoute('<current>', [], [])->toString();
+      $url = Url::fromRoute('<current>', [], []);
     }
 
     if (!empty($input)) {
       $url->setOption('query', $input);
     }
 
-    return $url;
+    return $url->toString();
   }
 
   /**

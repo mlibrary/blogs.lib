@@ -10,13 +10,13 @@ use Drupal\Core\Entity\Plugin\Validation\Constraint\CompositeConstraintBase;
  * @Constraint(
  *   id = "SchedulerPublishOn",
  *   label = @Translation("Scheduler publish on", context = "Validation"),
- *   type = "entity:node"
+ *   type = "entity"
  * )
  */
 class SchedulerPublishOnConstraint extends CompositeConstraintBase {
 
   /**
-   * Message shown when publish_on is not the future.
+   * Message shown when publish_on is not in the future.
    *
    * @var string
    */

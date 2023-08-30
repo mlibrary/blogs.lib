@@ -1,0 +1,13 @@
+{
+    "name": "drupal/editor_advanced_link",
+    "description": "Editor Advanced link",
+    "type": "drupal-module",
+    "require-dev": {
+        "phpro/grumphp": "^2.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "phpro/grumphp": true
+        }
+    }
+}

@@ -55,7 +55,7 @@ class BulkFormTest extends BrowserTestBase {
       'node_bulk_form[0]' => TRUE,
     ];
 
-    $this->drupalPostForm(NULL, $edit, t('Apply to selected items'));
+    $this->submitForm($edit, t('Apply to selected items'));
 
     $this->assertSession()->pageTextContains('Unpublish content was applied to 1 item.');
     $this->assertSession()->pageTextNotContains('No access to execute Unpublish content');

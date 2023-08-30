@@ -5,7 +5,7 @@
  * Hooks provided by Panels.
  */
 
-use \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant;
+use Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant;
 
 /**
  * Allow modules to alter the built Panels output.

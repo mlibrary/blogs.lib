@@ -1,7 +1,0 @@
-name: Custom Turn off mail
-type: module
-description: stupid mail
-package: UM Staff Custom
-
-version: '8.x-1.x-dev'
-core_version_requirement: ^8 || ^9

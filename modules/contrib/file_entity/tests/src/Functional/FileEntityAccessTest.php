@@ -28,7 +28,7 @@ class FileEntityAccessTest extends FileEntityTestBase {
    */
   protected $accessControlHandler;
 
-  function setUp() {
+  function setUp(): void {
     parent::setUp();
     $this->setUpFiles(array('uid' => 0));
     $this->accessControlHandler = $this->container->get('entity_type.manager')->getAccessControlHandler('file');
@@ -48,12 +48,9 @@ class FileEntityAccessTest extends FileEntityTestBase {
   function assertFileEntityAccess($ops, $file, $account) {
     $this->accessControlHandler->resetCache();
     foreach ($ops as $op => $expected) {
-      $this->assertEqual(
-        $expected,
-        $op === 'create' ?
-          $this->accessControlHandler->createAccess($file, $account) :
-          $this->accessControlHandler->access($file, $op, $account)
-      );
+      $this->assertEquals($expected, $op === 'create' ?
+        $this->accessControlHandler->createAccess($file, $account) :
+        $this->accessControlHandler->access($file, $op, $account));
     }
   }
 
@@ -134,11 +131,11 @@ class FileEntityAccessTest extends FileEntityTestBase {
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);
     $this->drupalGet('file/add');
-    $this->assertResponse(403, 'Users without access can not access the file add page');
+    $this->assertSession()->statusCodeEquals(403);
     $web_user = $this->drupalCreateUser(array('create files'));
     $this->drupalLogin($web_user);
     $this->drupalGet('file/add');
-    $this->assertResponse(200, 'Users with access can access the file add page');
+    $this->assertSession()->statusCodeEquals(200);
 
     $file = reset($this->files['text']);
 
@@ -146,11 +143,11 @@ class FileEntityAccessTest extends FileEntityTestBase {
     $web_user = $this->drupalCreateUser(array('view own files'));
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}");
-    $this->assertResponse(403, 'Users without access can not access the file view page');
+    $this->assertSession()->statusCodeEquals(403);
     $web_user = $this->drupalCreateUser(array('view files'));
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}");
-    $this->assertResponse(200, 'Users with access can access the file view page');
+    $this->assertSession()->statusCodeEquals(200);
 
     $url = "file/{$file->id()}/download";
     $web_user = $this->drupalCreateUser(array());
@@ -160,32 +157,32 @@ class FileEntityAccessTest extends FileEntityTestBase {
     $web_user = $this->drupalCreateUser(array('download any document files'));
     $this->drupalLogin($web_user);
     $this->drupalGet($url, array('query' => array('token' => $file->getDownloadToken())));
-    $this->assertResponse(200, 'Users with access can download the file');
+    $this->assertSession()->statusCodeEquals(200);
     $this->drupalGet($url, array('query' => array('token' => 'invalid-token')));
-    $this->assertResponse(403, 'Cannot download file with in invalid token.');
+    $this->assertSession()->statusCodeEquals(403);
     $this->drupalGet($url);
-    $this->assertResponse(403, 'Cannot download file without a token.');
+    $this->assertSession()->statusCodeEquals(403);
     $this->config->set('allow_insecure_download', TRUE)->save();
     $this->drupalGet($url);
-    $this->assertResponse(200, 'Users with access can download the file without a token when allow_insecure_download is set.');
+    $this->assertSession()->statusCodeEquals(200);
 
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}/edit");
-    $this->assertResponse(403, 'Users without access can not access the file edit page');
+    $this->assertSession()->statusCodeEquals(403);
     $web_user = $this->drupalCreateUser(array('edit any document files'));
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}/edit");
-    $this->assertResponse(200, 'Users with access can access the file edit page');
+    $this->assertSession()->statusCodeEquals(200);
 
     $web_user = $this->drupalCreateUser(array());
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}/delete");
-    $this->assertResponse(403, 'Users without access can not access the file delete page');
+    $this->assertSession()->statusCodeEquals(403);
     $web_user = $this->drupalCreateUser(array('delete any document files'));
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}/delete");
-    $this->assertResponse(200, 'Users with access can access the file delete page');
+    $this->assertSession()->statusCodeEquals(200);
   }
 
   /**
@@ -196,7 +193,7 @@ class FileEntityAccessTest extends FileEntityTestBase {
 
     foreach ($this->getPrivateDownloadAccessCases() as $case) {
       /** @var FileInterface $file */
-      $file = file_copy($original_file, 'private://');
+      $file = \Drupal::service('file.repository')->copy($original_file, 'private://');
       $user_name = 'anonymous';
 
       // Create users and login only if non-anonymous.
@@ -217,12 +214,11 @@ class FileEntityAccessTest extends FileEntityTestBase {
         '%uri' => $file->getFileUri(),
       );
       $this->assertTrue(is_file($file->getFileUri()), new FormattableMarkup('File %name owned by %username successfully created at %uri.', $arguments));
-      $url = file_create_url($file->getFileUri());
-      $message_file_info = ' ' . new FormattableMarkup('File %uri was checked.', array('%uri' => $file->getFileUri()));
+      $url = \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri());
 
       // Try to download the file.
       $this->drupalGet($url);
-      $this->assertResponse($case['expect'], $case['message'] . $message_file_info);
+      $this->assertSession()->statusCodeEquals($case['expect']);
 
       // Logout authenticated users.
       if ($authenticated_user) {
@@ -270,7 +266,7 @@ class FileEntityAccessTest extends FileEntityTestBase {
     $image = current($this->files['image']);
 
     // Use a private file to check download access.
-    $image = \file_copy($image, 'private://' . $image->getFilename());
+    $image = \Drupal::service('file.repository')->copy($image, 'private://' . $image->getFilename());
 
     $node = Node::create([
       'title' => 'Title',
@@ -283,12 +279,12 @@ class FileEntityAccessTest extends FileEntityTestBase {
     $node->save();
     $this->drupalGet('node/' . $node->id());
 
-    $this->assertRaw('file/' . $image->id() . '/download', 'Download link available.');
-    $this->assertLink('Download image-test.png');
+    $this->assertSession()->responseContains('file/' . $image->id() . '/download');
+    $this->assertSession()->linkExists('Download image-test.png');
 
     $this->drupalLogout();
     $this->drupalGet('node/' . $node->id());
-    $this->assertText("You don't have access to download this file.", 'No access message displays correctly.');
+    $this->assertSession()->pageTextContains("You don't have access to download this file.");
     $view_display->setComponent('image', [
       'type' => 'file_download_link',
       'settings' => [
@@ -296,7 +292,7 @@ class FileEntityAccessTest extends FileEntityTestBase {
       ],
     ])->save();
     $this->drupalGet('node/' . $node->id());
-    $this->assertText('Another message.', 'No access message updated.');
+    $this->assertSession()->pageTextContains('Another message.');
   }
 
 }

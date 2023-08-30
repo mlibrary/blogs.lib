@@ -109,7 +109,7 @@ class views_plugin_row_file_rss extends RowPluginBase {
     $item_text = '';
 
     $uri = entity_uri('file', $file);
-    $user = user_load($file->uid);
+    $user = \Drupal::service('entity_type.manager')->getStorage('user')->load($file->uid);
     $file->link = url($uri['path'], $uri['options'] + array('absolute' => TRUE));
     $file->rss_namespaces = array();
     $file->rss_elements = array(
@@ -157,7 +157,7 @@ class views_plugin_row_file_rss extends RowPluginBase {
     if ($display_mode != 'title') {
       // We render file contents and force links to be last.
       $build['links']['#weight'] = 1000;
-      $item_text .= drupal_render($build);
+      $item_text .= \Drupal::service('renderer')->render($build);
     }
 
     $item = new stdClass();

@@ -19,7 +19,7 @@ class PanelsConfigSchemaTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['panels', 'block', 'node', 'user'];
+  protected static $modules = ['panels', 'block', 'node', 'user'];
 
   /**
    * @var \Drupal\panels\PanelsDisplayManagerInterface
@@ -29,7 +29,7 @@ class PanelsConfigSchemaTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->panelsManager = \Drupal::service('panels.display_manager');
@@ -55,7 +55,7 @@ class PanelsConfigSchemaTest extends BrowserTestBase {
     // This will throw an exception if it doesn't validate.
     $new_panels_display = $this->panelsManager->importDisplay($config, TRUE);
 
-    $this->assertEqual($panels_display->getConfiguration(), $new_panels_display->getConfiguration());
+    $this->assertEquals($panels_display->getConfiguration(), $new_panels_display->getConfiguration());
   }
 
 }

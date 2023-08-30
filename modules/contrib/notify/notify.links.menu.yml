@@ -1,5 +1,0 @@
-notify.admin_settings:
-  title: 'Notify'
-  description: 'Adjust settings for new content notifications sent by e-mail.'
-  route_name: notify.admin_settings
-  parent: user.admin_index

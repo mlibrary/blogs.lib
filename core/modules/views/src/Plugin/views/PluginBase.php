@@ -342,7 +342,7 @@ abstract class PluginBase extends ComponentPluginBase implements ContainerFactor
   }
 
   /**
-   * Render the given string as a Twig template with Views' tokens.
+   * Replaces Views' tokens in a given string.
    *
    * The resulting string will be sanitized with Xss::filterAdmin.
    *
@@ -360,6 +360,7 @@ abstract class PluginBase extends ComponentPluginBase implements ContainerFactor
     }
 
     $twig_tokens = [];
+
     if (!empty($tokens)) {
       foreach ($tokens as $token => $replacement) {
         // Twig wants a token replacement array stripped of curly-brackets.
@@ -398,15 +399,13 @@ abstract class PluginBase extends ComponentPluginBase implements ContainerFactor
       }
     }
 
-    // Use the unfiltered text for the Twig template, then filter the output.
-    // Otherwise, Xss::filterAdmin could remove valid Twig syntax before the
-    // template is parsed.
+
     $build = [
       '#type' => 'inline_template',
       '#template' => $text,
       '#context' => $twig_tokens,
       '#post_render' => [
-        function ($children) {
+        function ($children, $elements) {
           return Xss::filterAdmin($children);
         },
       ],

@@ -1,11 +1,10 @@
 name: 'Test theme for SwiftMailer'
 type: theme
 description: 'Support theme for testing SwiftMailer'
-base theme: stable
-core: 8.x
-core_version_requirement: ^8 || ^9
+base theme: stable9
+core_version_requirement: ^8 || ^9 || ^10
 
-# Information added by Drupal.org packaging script on 2021-12-10
-version: '8.x-2.2'
+# Information added by Drupal.org packaging script on 2023-01-12
+version: '8.x-2.4'
 project: 'swiftmailer'
-datestamp: 1639141918
+datestamp: 1673559955

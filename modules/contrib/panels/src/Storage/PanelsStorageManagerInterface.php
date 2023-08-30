@@ -30,7 +30,7 @@ interface PanelsStorageManagerInterface {
    * @param string $id
    *   The id within the storage plugin for the requested Panels display.
    *
-   * @return \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant|NULL
+   * @return \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant|null
    *   The Panels display if one exists with this id; NULL otherwise.
    */
   public function load($storage_type, $id);
@@ -59,7 +59,7 @@ interface PanelsStorageManagerInterface {
    *   The id within the storage plugin for the requested Panels display.
    * @param string $op
    *   The operation to perform (ie. create, read, update, delete).
-   * @param \Drupal\Core\Session\AccountInterface|NULL $account
+   * @param \Drupal\Core\Session\AccountInterface|null $account
    *   The user to check access for. If omitted, it'll check the curerntly
    *   logged in user.
    *

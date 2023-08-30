@@ -68,7 +68,7 @@ class LayoutChangeSettings extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $cached_values = $form_state->getTemporaryValue('wizard');
 
-    /* @var $variant_plugin \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant */
+    /** @var \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant $variant_plugin */
     $variant_plugin = $cached_values['plugin'];
 
     $form['old_layout'] = [
@@ -117,7 +117,7 @@ class LayoutChangeSettings extends FormBase {
     /** @var \Drupal\ctools\Wizard\EntityFormWizardInterface $wizard */
     $wizard = $form_state->getFormObject();
     $next_params = $wizard->getNextParameters($cached_values);
-    /* @var $plugin \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant */
+    /** @var \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant $plugin */
     $plugin = $cached_values['plugin'];
     $layout_id = !empty($cached_values['layout_change']['new_layout']) ? $cached_values['layout_change']['new_layout'] : $plugin->getConfiguration()['layout'];
     /** @var \Drupal\Core\Layout\LayoutInterface $layout */
@@ -175,7 +175,7 @@ class LayoutChangeSettings extends FormBase {
    */
   protected function setCachedValues($next_step, PanelsDisplayVariant $plugin, LayoutInterface $layout, $cached_values, $configuration) {
     // The step is modified by various wizards but will end in "regions"
-    if (substr($next_step, 0 -7) == 'regions') {
+    if (substr($next_step, 0 - 7) == 'regions') {
       $cached_values['layout_change']['layout_settings'] = $configuration;
     }
     else {
@@ -191,7 +191,7 @@ class LayoutChangeSettings extends FormBase {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $cached_values = $form_state->getTemporaryValue('wizard');
-    /* @var $plugin \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant */
+    /** @var \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant $plugin */
     $plugin = $cached_values['plugin'];
     $layout_id = !empty($cached_values['layout_change']['new_layout']) ? $cached_values['layout_change']['new_layout'] : $plugin->getConfiguration()['layout'];
     $layout = $this->manager->createInstance($layout_id, []);

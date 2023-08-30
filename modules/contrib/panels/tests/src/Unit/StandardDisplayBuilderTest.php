@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\panels\Unit;
 
+use Prophecy\PhpUnit\ProphecyTrait;
 use Drupal\Core\Block\BlockPluginInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\Context\ContextHandlerInterface;
@@ -17,6 +18,7 @@ use Prophecy\Argument;
  */
 class StandardDisplayBuilderTest extends UnitTestCase {
 
+  use ProphecyTrait;
   /**
    * @var \Drupal\panels\Plugin\DisplayBuilder\StandardDisplayBuilder
    */
@@ -25,21 +27,23 @@ class StandardDisplayBuilderTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
+    parent::setUp();
+
     $context_handler = $this->prophesize(ContextHandlerInterface::class)
       ->reveal();
     $account = $this->prophesize(AccountInterface::class)
       ->reveal();
     $module_handler = $this->prophesize(ModuleHandlerInterface::class)
       ->reveal();
-    $this->builder = new StandardDisplayBuilder(array(), 'standard', array(), $context_handler, $account, $module_handler);
+    $this->builder = new StandardDisplayBuilder([], 'standard', [], $context_handler, $account, $module_handler);
   }
 
   /**
    * @covers ::build
    */
   public function testBuild() {
-    $regions = array();
+    $regions = [];
 
     $block = $this->prophesize(BlockPluginInterface::class);
     $block->access(Argument::type(AccountInterface::class))
@@ -66,9 +70,10 @@ class StandardDisplayBuilderTest extends UnitTestCase {
       ->willReturn(FALSE);
     $regions['sidebar']['baz'] = $block->reveal();
 
-    $regions['footer'] = array();
+    $regions['footer'] = [];
 
     $panels_display = $this->prophesize(PanelsDisplayVariant::class);
+    $panels_display->getRenderedPageTitle()->willReturn('test');
     $panels_display->getRegionAssignments()->willReturn($regions);
     $panels_display->getContexts()->willReturn([]);
     $panels_display->getLayout()->willReturn(NULL);

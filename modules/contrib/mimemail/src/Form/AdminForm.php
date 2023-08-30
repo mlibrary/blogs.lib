@@ -106,7 +106,7 @@ class AdminForm extends ConfigFormBase {
     $form['mimemail']['name'] = [
       '#type'          => 'textfield',
       '#title'         => $this->t('Sender name'),
-      '#default_value' => $config->get('name') ? $config->get('name') : $this->config('system.site')->get('name'),
+      '#default_value' => $config->get('name') ?: $this->config('system.site')->get('name'),
       '#size'          => 60,
       '#maxlength'     => 128,
       '#description'   => $this->t('The name that all site emails will be from when using Mime Mail.'),
@@ -114,7 +114,7 @@ class AdminForm extends ConfigFormBase {
     $form['mimemail']['mail'] = [
       '#type'          => 'email',
       '#title'         => $this->t('Sender email address'),
-      '#default_value' => $config->get('mail') ? $config->get('mail') : $this->config('system.site')->get('mail'),
+      '#default_value' => $config->get('mail') ?: $this->config('system.site')->get('mail'),
       '#size'          => 60,
       '#maxlength'     => 128,
       '#description'   => $this->t('The email address that all site emails will be from when using Mime Mail.'),
@@ -124,7 +124,7 @@ class AdminForm extends ConfigFormBase {
     $theme = $this->themeHandler->getDefault();
     // @todo Searching the path is not what we want - this is how it was done
     // in D7, but that's not how assets should be handled in D8.
-    $mailstyle = drupal_get_path('theme', $theme) . '/mail.css';
+    $mailstyle = \Drupal::service('extension.list.theme')->getPath($theme) . '/mail.css';
     // Disable site style sheets including option if found.
     if (is_file($mailstyle)) {
       $config->set('sitestyle', FALSE);
@@ -185,12 +185,15 @@ class AdminForm extends ConfigFormBase {
     $form['mimemail']['user_plaintext_field'] = [
       '#type' => 'select',
       '#title' => $this->t('Plain text email only field'),
-      '#description' => $this->t('Allows users to specify they only want plain text email. This is done via a boolean field on the user profile. The site administrator must first <a href=":fields">add a boolean field to the user profile</a>, then choose that field here and save this setting. If the value of that field is TRUE for a given user, Mime Mail will only send plain text email to that user.', [
-        ':fields' => Url::fromRoute('entity.user.field_ui_fields')->toString(),
-      ]),
+      '#description' => $this->t('Allows users to specify they only want plain text email. This is done via a boolean field on the user profile. The site administrator must first add a boolean field to the user profile, then choose that field here and save this setting. If the value of that field is TRUE for a given user, Mime Mail will only send plain text email to that user.'),
       '#options' => $fields,
       '#default_value' => $config->get('user_plaintext_field'),
     ];
+    if ($this->moduleHandler->moduleExists('field_ui')) {
+      $form['mimemail']['user_plaintext_field']['#description'] = $this->t('Allows users to specify they only want plain text email. This is done via a boolean field on the user profile. The site administrator must first <a href=":fields">add a boolean field to the user profile</a>, then choose that field here and save this setting. If the value of that field is TRUE for a given user, Mime Mail will only send plain text email to that user.', [
+        ':fields' => Url::fromRoute('entity.user.field_ui_fields')->toString(),
+      ]);
+    }
 
     // Get a list of all formats.
     $formats = filter_formats();
@@ -201,7 +204,7 @@ class AdminForm extends ConfigFormBase {
     $form['mimemail']['format'] = [
       '#type' => 'select',
       '#title' => $this->t('Email format'),
-      '#default_value' => $config->get('format') ? $config->get('format') : filter_fallback_format(),
+      '#default_value' => $config->get('format') ?: filter_fallback_format(),
       '#options' => $format_options,
       '#access' => count($formats) > 1,
       '#attributes' => ['class' => ['filter-list']],
@@ -222,7 +225,7 @@ class AdminForm extends ConfigFormBase {
     $form['mimemail']['advanced']['key'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Message validation string'),
-      '#default_value' => $config->get('advanced.key') ? $config->get('advanced.key') : Crypt::randomBytesBase64(),
+      '#default_value' => $config->get('advanced.key') ?: Crypt::randomBytesBase64(),
       '#required' => TRUE,
       '#description' => $this->t('This string will be used to validate incoming messages. It can be anything, but must be used on both sides of the transfer.'),
     ];

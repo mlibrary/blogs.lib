@@ -191,7 +191,7 @@ class LinkedFieldManager implements LinkedFieldManagerInterface {
     $items = $field_items->getValue();
     $field_definition = $field_items->getFieldDefinition();
     $field_type = $field_definition->getType();
-    // @TODO: We should add support for deltas.
+    // @todo We should add support for deltas.
     $item = $items[0];
     $uri = '';
 
@@ -199,7 +199,7 @@ class LinkedFieldManager implements LinkedFieldManagerInterface {
       $uri = $item['uri'];
     }
     else {
-      $uri = isset($item['value']) ? $item['value'] : '';
+      $uri = $item['value'] ?? '';
     }
 
     return $uri;

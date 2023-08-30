@@ -5,8 +5,10 @@
  * Documentation for OpenID Connect module APIs.
  */
 
+/* @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
 /* @noinspection PhpUnused */
 
+use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\user\UserInterface;
 
 /**
@@ -209,7 +211,7 @@ function hook_openid_connect_post_authorize(UserInterface $account, array $conte
  *   - is_new:           Whether the account was created during authorization.
  */
 function hook_openid_connect_userinfo_claim_alter(&$claim_value, array $context) {
-  // Alter only, when the claim comes from the 'generic' identiy provider and
+  // Alter only, when the claim comes from the 'generic' identity provider and
   // the property is 'telephone'.
   if (
     $context['plugin_id'] != 'generic'
@@ -219,7 +221,7 @@ function hook_openid_connect_userinfo_claim_alter(&$claim_value, array $context)
   }
 
   // Replace international number indicator with double zero.
-  str_replace('+', '00', $claim_value);
+  $claim_value = str_replace('+', '00', $claim_value);
 }
 
 /**
@@ -263,44 +265,18 @@ function hook_openid_connect_userinfo_save(UserInterface $account, array $contex
 }
 
 /**
- * Save userinfo hook.
+ * Alter the redirect response on logout.
  *
- * This hook runs after the claim mappings have been applied by the OpenID
- * Connect module, but before the account will be saved.
- *
- * A popular use case for this hook is mapping additional information like
- * user roles or other complex claims provided by the identity provider, that
- * the OpenID Connect module has no mapping mechanisms for.
- *
- * @param \Drupal\user\UserInterface $account
- *   A user account object.
+ * @param array $response
+ *   The response to alter and client ID.
  * @param array $context
  *   An associative array with context information:
- *   - tokens:         Array of original tokens.
- *   - user_data:      Array of user and session data from the ID token.
- *   - userinfo:       Array of user information from the userinfo endpoint.
- *   - plugin_id:      The plugin identifier.
- *   - sub:            The remote user identifier.
- *   - is_new:         Whether the account was created during authorization.
- *
- * @ingroup openid_connect_api
- * @deprecated in openid_connect:8.x-1.0-beta6 and is removed from openid_connect:8.x-2.0.
- *   Use hook_openid_connect_userinfo_save() instead.
- * @see https://www.drupal.org/project/openid_connect/issues/2912214
+ *   - client:   The client identifier.
  */
-function hook_openid_connect_save_userinfo(UserInterface $account, array $context) {
-}
-
-/**
- * Alter hook to alter the user properties to be skipped for mapping.
- *
- * @param array $properties_to_skip
- *   An array of of properties to skip.
- *
- * @ingroup openid_connect_api
- * @deprecated in openid_connect:8.x-1.0-beta6 and is removed from openid_connect:8.x-2.0.
- *   Use hook_openid_connect_user_properties_ignore_alter() instead.
- * @see https://www.drupal.org/project/openid_connect/issues/2921095
- */
-function hook_openid_connect_user_properties_to_skip_alter(array &$properties_to_skip) {
+function hook_openid_connect_redirect_logout_alter(array &$response, array $context) {
+  if (isset($response['response']) && isset($context['client'])) {
+    if ($response['response'] instanceof TrustedRedirectResponse) {
+      $response['response']->setTrustedTargetUrl($response['response']->getTargetUrl() . '&client=' . $context['client']);
+    }
+  }
 }

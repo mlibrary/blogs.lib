@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\panels\Unit;
 
+use Prophecy\PhpUnit\ProphecyTrait;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -22,6 +23,7 @@ use Prophecy\Argument;
  */
 class PanelsStorageTest extends UnitTestCase {
 
+  use ProphecyTrait;
   /**
    * @var \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant|\Prophecy\Prophecy\ProphecyInterface
    */
@@ -50,7 +52,7 @@ class PanelsStorageTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->panelsDisplay = $this->prophesize(PanelsDisplayVariant::class);

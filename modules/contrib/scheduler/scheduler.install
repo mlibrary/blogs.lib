@@ -71,10 +71,14 @@ function scheduler_requirements($phase) {
 /**
  * Implements hook_install().
  */
-function scheduler_install() {
+function scheduler_install($is_syncing) {
+  if ($is_syncing) {
+    // During config import/sync nothing should be done here.
+    return;
+  }
   // Set cron access key value, as this is now required in SchedulerCronForm.
-  $config = \Drupal::service('config.factory')->getEditable('scheduler.settings');
-  $config->set('lightweight_cron_access_key', substr(md5(rand()), 0, 20))
+  \Drupal::service('config.factory')->getEditable('scheduler.settings')
+    ->set('lightweight_cron_access_key', substr(md5(rand()), 0, 20))
     ->save();
 }
 
@@ -82,8 +86,13 @@ function scheduler_install() {
  * Implements hook_uninstall().
  */
 function scheduler_uninstall() {
-  // Delete the scheduled content view.
-  \Drupal::configFactory()->getEditable('views.view.scheduler_scheduled_content')->delete();
+  // This should not be necessary but incase the entity db tables or config have
+  // got out-of-step with the Scheduler plugins make sure all is up to date so
+  // that uninstalling will run OK. During config sync these updates should not
+  // cause any problem.
+  $scheduler_manager = \Drupal::service('scheduler.manager');
+  $scheduler_manager->entityUpdate();
+  $scheduler_manager->entityRevert();
 }
 
 /**
@@ -125,5 +134,136 @@ function scheduler_update_8102() {
     $display['display_options']['menu']['type'] = 'normal';
     $view->save();
     return t('The "Scheduled" tab is now a "Scheduled content" sub-task under the "Content" tab');
+  }
+}
+
+/**
+ * Add date fields to any newly supported entity types.
+ */
+function scheduler_update_8201() {
+  // If modules that have scheduler plugin support are already installed when
+  // Scheduler is then upgraded to a version which includes the entity plugins,
+  // this update function will add the missing db fields.
+  $scheduler_manager = \Drupal::service('scheduler.manager');
+  if ($result = $scheduler_manager->entityUpdate()) {
+    return t('Added Scheduler date fields to the following entity types: %updated.', [
+      '%updated' => implode(', ', $result),
+    ]);
+  }
+  else {
+    return t('No database fields had to be added.');
+  }
+}
+
+/**
+ * Refresh views for supported entity types.
+ */
+function scheduler_update_8202() {
+  // The scheduled content view needs to be refreshed from source when upgrading
+  // to the entity plugin version of Scheduler. If the media or commerce modules
+  // are already enabled this will also load those new views from source.
+  $scheduler_manager = \Drupal::service('scheduler.manager');
+  if ($result = $scheduler_manager->viewsUpdate(['node', 'media', 'commerce_product'])) {
+    return t('Updated views: %updated.', ['%updated' => implode(', ', $result)]);
+  }
+  else {
+    return t('No views require updating.');
+  }
+}
+
+/**
+ * Update entity fields and scheduled view for Taxonomy Terms.
+ */
+function scheduler_update_8203() {
+  $scheduler_manager = \Drupal::service('scheduler.manager');
+  $output = [];
+  if ($result = $scheduler_manager->entityUpdate()) {
+    $output[] = t('Added Scheduler date fields to the following entity types: %updated.', [
+      '%updated' => implode(', ', $result),
+    ]);
+  }
+  if ($result = $scheduler_manager->viewsUpdate(['taxonomy_term'])) {
+    $output[] = t('Updated views: %updated.', ['%updated' => implode(', ', $result)]);
+  }
+  return $output ? implode('<br>', $output) : t('Nothing requires updating for Taxonomy Terms.');
+}
+
+/**
+ * Update Rules actions and conditions to use 'entity' context.
+ */
+function scheduler_update_8204() {
+  // The entity context names need to be 'entity' for all entity types, not
+  // 'node', 'media', 'commerce_product' or 'taxonomy_term'. This is for PHP8
+  // compatibility, fixing "Unknown named parameter in call_user_func_array()"
+  // See https://www.drupal.org/project/scheduler/issues/3276637
+  $rules = \Drupal::configFactory()->listAll('rules.reaction');
+  $rules_updated = [];
+  foreach ($rules as $config_id) {
+    $rule = \Drupal::configFactory()->getEditable($config_id);
+    $changed = FALSE;
+
+    // The expression array has 'conditions' and 'actions' elements which have
+    // the same structure, so can be fixed using the same loop process.
+    $expression = $rule->get('expression');
+    foreach (['condition_id' => 'conditions', 'action_id' => 'actions'] as $idx => $group) {
+      foreach ($expression[$group][$group] as $key => $cond_act) {
+        if (substr($cond_act[$idx], 0, 10) == 'scheduler_' && !empty($cond_act['context_mapping'])) {
+          foreach ($cond_act['context_mapping'] as $name => $value) {
+            if (in_array($name, ['node', 'media', 'commerce_product', 'taxonomy_term'])) {
+              // Replace the node/media/commerce_product key with 'entity'.
+              unset($expression[$group][$group][$key]['context_mapping'][$name]);
+              $expression[$group][$group][$key]['context_mapping']['entity'] = $value;
+              // Only add the rule label once.
+              $changed ?: $rules_updated[] = $rule->get('label');
+              $changed = TRUE;
+            }
+          }
+        }
+      }
+    }
+
+    // Replace the config value with the updated expression array.
+    if ($changed) {
+      $rule->set('expression', $expression);
+      $rule->save();
+    }
+  }
+
+  $output = empty($rules_updated) ? t('No reaction rules required updating with entity context.') :
+    \Drupal::translation()->formatPlural(count($rules_updated), '1 reaction rule updated with entity context', '@count reaction rules updated with entity context')
+    . '<br>' . implode('<br>', $rules_updated);
+  return $output;
+}
+
+/**
+ * Add date fields to any newly supported entity types, specifically Paragraphs.
+ */
+function scheduler_update_8205() {
+  return scheduler_update_8201();
+}
+
+/**
+ * Remove Scheduler fields and third_party_settings for Paragraph entity types.
+ */
+function scheduler_update_8207() {
+  // update_8206 had a typo, therefore replaced with update_8207.
+  // Check the module is enabled, to avoid 'Unknown entity type' message.
+  if (\Drupal::moduleHandler()->moduleExists('paragraphs') && ($result = \Drupal::service('scheduler.manager')->entityRevert(['paragraph']))) {
+    return t('%updated.', ['%updated' => implode(', ', $result)]);
+  }
+  else {
+    return t('No update required.');
+  }
+}
+
+/**
+ * Show/hide entity form fields to match Scheduling enabled/disabled settings.
+ */
+function scheduler_update_8208() {
+  if ($result = \Drupal::service('scheduler.manager')->resetFormDisplayFields()) {
+    return implode('</li><li>', $result);
+  }
+  else {
+    return t('No update required.');
   }
 }

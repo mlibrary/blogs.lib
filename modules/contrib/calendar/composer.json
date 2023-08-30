@@ -21,7 +21,7 @@
     "source": "https://git.drupalcode.org/project/calendar"
   },
   "require": {
-    "drupal/core": "^8 || ^9",
-    "drupal/views_templates": "^1.1"
+    "drupal/core": "^9.4 || ^10",
+    "drupal/views_templates": "^1.2"
   }
 }

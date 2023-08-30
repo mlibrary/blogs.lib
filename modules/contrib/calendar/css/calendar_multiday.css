@@ -383,7 +383,6 @@ table.calendar-legend tr.even .stripe {
 .calendar-calendar .month-view .full .inner,
 .calendar-calendar .week-view .full .multi-day .inner {
   height: auto;
-  min-height: auto;
 }
 .calendar-calendar .week-view .full .calendar-agenda-hour,
 .calendar-calendar .month-view .full .single-day .inner .view-item {

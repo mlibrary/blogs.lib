@@ -2,18 +2,20 @@
 
 [![Build Status](https://travis-ci.org/jonathan1055/scheduler.svg?branch=8.x-1.x)](https://travis-ci.org/jonathan1055/scheduler)
 
-Scheduler gives content editors the ability to schedule nodes to be published
+Scheduler gives website editors the ability to schedule content to be published
 and unpublished at specified dates and times in the future.
 
-Scheduler provides hooks and events for third-party modules to interact with
-the processing during node edit and during cron publishing and unpublishing.
+Scheduler provides hooks and events for third-party modules to interact with the
+process during content editing and during cron publishing and unpublishing.
 
-For a fuller description of the module, visit the [project page on Drupal.org](https://drupal.org/project/scheduler)
+A plugin system allows support for any Drupal entity type that has the concept
+of a 'published' status. As at Scheduler version 2.0 Node content, Media
+entities, Commerce Products and Taxonomy Terms are supported.
 
 ## Requirements
 
- * Scheduler uses the following Drupal 8 Core components:
-     Actions, Datetime, Field, Node, Text, Filter, User, System, Views.
+ * Scheduler uses the following Drupal 8 Core components: Actions, Datetime,
+   Field, Node, Text, Filter, User, System, Views.
 
  * There are no special requirements outside core.
 
@@ -34,44 +36,65 @@ For a fuller description of the module, visit the [project page on Drupal.org](h
      If you use core Content Moderation then you should also install this
      sub-module, contributed by the folks at [Thunder](https://www.drupal.org/thunder)
 
+ * [Media](https://www.drupal.org/docs/8/core/modules/media):
+     Core media items can be scheduled for publishing and unpublishing.
+
+ * [Commerce](https://www.drupal.org/project/commerce):
+     Commerce products can be scheduled for publishing and unpublishing.
+
+ * [Taxonomy](https://www.drupal.org/docs/8/core/modules/taxonomy):
+     Core taxonomy terms can be scheduled for publishing and unpublishing.
+
 ## Installation
 
  * Install as you would normally install a contributed Drupal module. See:
      https://drupal.org/documentation/install/modules-themes/modules-8
      for further information.
 
+ * The [Scheduler project page on Drupal.org](https://drupal.org/project/scheduler)
+   has information regarding versions and Core compatibility.
+
 ## Configuration
 
  * Configure user permissions via url /admin/people/permissions#module-scheduler
    or Administration » People » Permissions
 
-   - View scheduled content list
+   - "Schedule publishing and unpublishing of {type}"
+
+     Users with this permission can enter dates and times for publishing and/or
+     unpublishing, when editing content of types which are Scheduler-enabled.
+
+   - "View scheduled {type}"
 
      Users can always see their own scheduled content, via a tab on their user
      page. This permissions grants additional authority to see the full list of
      scheduled content by any author, providing the user also has the core
-     permission 'access content overview'.
+     permission 'access content overview' or the equivalent for other entity
+     types.
 
-   - Schedule content publication
-
-     Users with this permission can enter dates and times for publishing and/or
-     unpublishing, when editing nodes of types which are Scheduler-enabled.
-
-   - Administer scheduler
+   - "Administer scheduler"
 
      This permission allows the user to alter all Scheduler settings. It should
      therefore only be given to trusted admin roles.
 
  * Configure the Scheduler global options via /admin/config/content/scheduler
-   or Administration » Configuration » Content Authoring
+   or Administration » Configuration » Content Authoring » Scheduler
 
-   - Basic settings for date format, allowing date only, setting default time.
+   - Basic settings: allow a date only and set a default time.
 
-   - Lightweight Cron, which gives sites admins the granularity to run
-     Scheduler's functions only, on more frequent crontab jobs.
+   - Lightweight Cron: This gives sites admins the granularity to run
+     Scheduler's functions only on more frequent crontab jobs than the full
+     Drupal cron run.
 
- * Configure the Scheduler settings per content type via /admin/structure/types
-     or Administration » Structure » Content Types » Edit
+ * Configure the Scheduler settings per entity type:
+   - Administration » Structure » Content Types » Edit
+   - Administration » Structure » Media Types » Edit
+   - Administration » Commerce » Configuration » Product Types » Edit
+   - Administration » Structure » Taxonomy » Vocabulary » Edit
+
+ * The system status report at /admin/reports/status has a Scheduler Timecheck
+   section, giving details of the server time, default site time and current
+   user time.
 
 ## Troubleshooting
 

@@ -1,14 +1,14 @@
 name: Panels IPE
 type: module
 description: Panels In-place editor.
-core_version_requirement: '^8.8 || ^9'
+core_version_requirement: '^9.2 || ^10'
 package: Panels
 dependencies:
-  - block_content
+  - drupal:block_content
   - jquery_ui_droppable:jquery_ui_droppable
-  - panels
+  - panels:panels
 
-# Information added by Drupal.org packaging script on 2020-04-02
-version: '8.x-4.6'
+# Information added by Drupal.org packaging script on 2022-11-16
+version: '8.x-4.7'
 project: 'panels'
-datestamp: 1585870869
+datestamp: 1668632923

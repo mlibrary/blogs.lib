@@ -41,7 +41,7 @@ class NodeFormTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
 
     $types = NodeType::loadMultiple();
@@ -142,8 +142,8 @@ class NodeFormTest extends BrowserTestBase {
     foreach ([$specific_user, $general_user] as $user) {
       $this->drupalLogin($user);
 
-      $this->drupalPostForm(
-        "node/{$this->node->id()}/edit",
+      $this->drupalGet("node/{$this->node->id()}/edit");
+      $this->submitForm(
         [
           'promote[value]' => TRUE,
           'status[value]' => TRUE,
@@ -186,7 +186,8 @@ class NodeFormTest extends BrowserTestBase {
     foreach ([$specific_user, $general_user] as $user) {
       $this->drupalLogin($user);
 
-      $this->drupalPostForm('node/' . $this->node->id() . '/edit', [
+      $this->drupalGet('node/' . $this->node->id() . '/edit');
+      $this->submitForm([
         'revision' => TRUE,
         'revision_log[0][value]' => '',
       ], t('Save'));
@@ -229,15 +230,17 @@ class NodeFormTest extends BrowserTestBase {
     foreach ([$specific_user, $general_user] as $user) {
       $this->drupalLogin($user);
 
-      $this->drupalPostForm('node/' . $this->node->id() . '/edit', ['uid[0][target_id]' => 'invalid-user'], t('Save'));
+      $this->drupalGet('node/' . $this->node->id() . '/edit');
+
+      $this->submitForm(['uid[0][target_id]' => 'invalid-user'], t('Save'));
 
       $this->assertSession()->pageTextContains('There are no entities matching "invalid-user".');
 
-      $this->drupalPostForm('node/' . $this->node->id() . '/edit', ['created[0][value][date]' => 'invalid-date'], t('Save'));
+      $this->submitForm(['created[0][value][date]' => 'invalid-date'], t('Save'));
 
       $this->assertSession()->pageTextContains('The Authored on date is invalid.');
 
-      $this->drupalPostForm('node/' . $this->node->id() . '/edit', $fields, t('Save'));
+      $this->submitForm($fields, t('Save'));
 
       $this->assertNodeFieldsUpdated($this->node, [
         'created' => $time,

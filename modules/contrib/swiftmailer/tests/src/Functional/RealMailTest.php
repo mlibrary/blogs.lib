@@ -12,7 +12,7 @@ class RealMailTest extends SwiftMailerTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['user', 'contact'];
+  protected static $modules = ['user', 'contact'];
 
   /**
    * Tests user account messages.

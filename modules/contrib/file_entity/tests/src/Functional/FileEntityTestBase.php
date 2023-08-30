@@ -42,7 +42,7 @@ abstract class FileEntityTestBase extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->config = $this->config('file_entity.settings');
   }
@@ -54,7 +54,7 @@ abstract class FileEntityTestBase extends BrowserTestBase {
     // Populate defaults array.
     $defaults += array(
       'uid' => 1,
-      'status' => FILE_STATUS_PERMANENT,
+      'status' => FileInterface::STATUS_PERMANENT,
     );
 
     $types = array('text', 'image');
@@ -186,7 +186,7 @@ abstract class FileEntityTestBase extends BrowserTestBase {
       'filename' => 'Файл для тестирования ' . $this->randomMachineName(),
       'filemime' => 'text/plain',
       'uid' => 1,
-      'status' => FILE_STATUS_PERMANENT,
+      'status' => FileInterface::STATUS_PERMANENT,
       'contents' => "file_put_contents() doesn't seem to appreciate empty strings so let's put in some data.",
       'scheme' => \Drupal::config('system.file')->get('default_scheme'),
     );
@@ -200,7 +200,7 @@ abstract class FileEntityTestBase extends BrowserTestBase {
 
     // Save the file and assert success.
     $result = $file->save();
-    $this->assertIdentical(SAVED_NEW, $result, t('The file was added to the database.'), 'Create test file');
+    $this->assertSame(SAVED_NEW, $result, t('The file was added to the database.'), 'Create test file');
 
     return $file;
   }

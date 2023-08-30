@@ -278,7 +278,7 @@ class PanelsDisplayVariant extends BlockDisplayVariant implements PluginWizardIn
   /**
    * Gets the id of the storage plugin which can save this.
    *
-   * @return string|NULL
+   * @return string|null
    */
   public function getStorageType() {
     return $this->configuration['storage_type'] ?: NULL;
@@ -287,7 +287,7 @@ class PanelsDisplayVariant extends BlockDisplayVariant implements PluginWizardIn
   /**
    * Gets id within the storage plugin for this Panels display.
    *
-   * @return string|NULL
+   * @return string|null
    */
   public function getStorageId() {
     return $this->configuration['storage_id'] ?: NULL;
@@ -298,6 +298,15 @@ class PanelsDisplayVariant extends BlockDisplayVariant implements PluginWizardIn
    */
   public function getRegionNames() {
     return $this->getLayout()->getPluginDefinition()->getRegionLabels();
+  }
+
+  /**
+   * This will provide the rendered the page title with tokens replaced.
+   *
+   * @return string
+   */
+  public function getRenderedPageTitle() {
+    return $this->renderPageTitle($this->getPageTitle());
   }
 
   /**
@@ -327,7 +336,7 @@ class PanelsDisplayVariant extends BlockDisplayVariant implements PluginWizardIn
    */
   public function build() {
     $build = $this->getBuilder()->build($this);
-    $build['#title'] = $this->renderPageTitle($this->configuration['page_title']);
+    $build['#title'] = $this->getRenderedPageTitle();
 
     // Allow other module to alter the built panel.
     $this->moduleHandler->alter('panels_build', $build, $this);
@@ -344,7 +353,7 @@ class PanelsDisplayVariant extends BlockDisplayVariant implements PluginWizardIn
     // label on the page variant entity.
     // $form = parent::buildConfigurationForm($form, $form_state);.
     $plugins = $this->builderManager->getDefinitions();
-    $options = array();
+    $options = [];
     foreach ($plugins as $id => $plugin) {
       $options[$id] = $plugin['label'];
     }
@@ -497,7 +506,7 @@ class PanelsDisplayVariant extends BlockDisplayVariant implements PluginWizardIn
    *   An array with token data values keyed by token type.
    */
   protected function getContextAsTokenData() {
-    $data = array();
+    $data = [];
     foreach ($this->getContexts() as $context) {
       // @todo Simplify this when token and typed data types are unified in
       //   https://drupal.org/node/2163027.

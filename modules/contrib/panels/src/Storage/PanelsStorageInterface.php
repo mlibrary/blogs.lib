@@ -16,7 +16,7 @@ interface PanelsStorageInterface {
    * @param string $id
    *   The id for the Panels display within this storage plugin.
    *
-   * @return \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant|NULL
+   * @return \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant|null
    *   The Panels display if one exists with this id; NULL otherwise.
    */
   public function load($id);

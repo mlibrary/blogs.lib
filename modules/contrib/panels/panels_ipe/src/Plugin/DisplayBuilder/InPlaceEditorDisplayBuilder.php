@@ -3,7 +3,6 @@
 namespace Drupal\panels_ipe\Plugin\DisplayBuilder;
 
 use Drupal\Component\Utility\Html;
-use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Layout\LayoutInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\Context\ContextHandlerInterface;
@@ -98,7 +97,7 @@ class InPlaceEditorDisplayBuilder extends StandardDisplayBuilder {
 
     // Add current block IDs to settings sorted by region.
     foreach ($regions as $region => $blocks) {
-      $settings['regions'][$region]  = [
+      $settings['regions'][$region] = [
         'name' => $region,
         'label' => '',
         'blocks' => [],
@@ -174,7 +173,7 @@ class InPlaceEditorDisplayBuilder extends StandardDisplayBuilder {
       $temp_store_key = $panels_display->getTempStoreId();
       $lock_info = $this->tempStore->getMetadata($temp_store_key);
       if ($lock_info) {
-        if ($lock_info->owner === $this->account->id()) {
+        if ($lock_info->getOwnerId() === $this->account->id()) {
           $variant_config = $this->tempStore->get($temp_store_key);
           unset($variant_config['id']);
           $panels_display->setConfiguration($variant_config);

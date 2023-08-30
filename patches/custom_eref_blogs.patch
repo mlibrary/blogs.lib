@@ -27,8 +27,8 @@ index 84df3fe6..5ee6f761 100644
                return [];
              }
              // Get all the targets (content types etc) that this might hit.
--            $target_bundles = array_keys($field_obj->getSetting('handler_settings')['target_bundles']);
-+            $target_bundles = array_keys($handler_settings['target_bundles']);
+             foreach (array_keys($field_obj->getSetting('handler_settings')['target_bundles']) as $bundle) {
+               $target_bundles[] = $bundle;
+             }
              $bundles_needed[] = $bundle;
- 
-             // Get the options together.
+

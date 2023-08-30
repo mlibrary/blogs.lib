@@ -86,8 +86,7 @@ class AdvancedLinkDialogTest extends BrowserTestBase {
     $this->format->save();
 
     // Prepare browsing session.
-    $session = $this->getSession();
-    $page = $session->getPage();
+    $this->getSession();
 
     // Show the link dialog form.
     $this->drupalGet('editor/dialog/link/eal_format');

@@ -3,6 +3,7 @@
 namespace Drupal\panels\Plugin\DisplayBuilder;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Block\TitleBlockPluginInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -10,11 +11,7 @@ use Drupal\Core\Plugin\Context\ContextHandlerInterface;
 use Drupal\Core\Plugin\ContextAwarePluginInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\ctools\Plugin\PluginWizardInterface;
-use Drupal\panels\Form\LayoutChangeRegions;
-use Drupal\panels\Form\LayoutChangeSettings;
-use Drupal\panels\Form\LayoutPluginSelector;
 use Drupal\panels\Form\PanelsContentForm;
 use Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -44,11 +41,11 @@ class StandardDisplayBuilder extends DisplayBuilderBase implements PluginWizardI
   protected $account;
 
   /**
-    * The module handler.
-    *
-    * @var \Drupal\Core\Extension\ModuleHandlerInterface
-    */
-   protected $moduleHandler;
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
 
   /**
    * Constructs a new PanelsDisplayVariant.
@@ -95,12 +92,14 @@ class StandardDisplayBuilder extends DisplayBuilderBase implements PluginWizardI
    *   The render array representing regions.
    * @param array $contexts
    *   The array of context objects.
+   * @param string $title
+   *   The page title.
    *
    * @return array
    *   An associative array, keyed by region ID, containing the render arrays
    *   representing the content of each region.
    */
-  protected function buildRegions(array $regions, array $contexts) {
+  protected function buildRegions(array $regions, array $contexts, $title = NULL) {
     $build = [];
     foreach ($regions as $region => $blocks) {
       if (!$blocks) {
@@ -116,6 +115,9 @@ class StandardDisplayBuilder extends DisplayBuilderBase implements PluginWizardI
       foreach ($blocks as $block_id => $block) {
         if ($block instanceof ContextAwarePluginInterface) {
           $this->contextHandler->applyContextMapping($block, $contexts);
+        }
+        if ($block instanceof TitleBlockPluginInterface) {
+          $block->setTitle($title);
         }
         if ($block->access($this->account)) {
           $block_render_array = [
@@ -172,8 +174,9 @@ class StandardDisplayBuilder extends DisplayBuilderBase implements PluginWizardI
     $regions = $panels_display->getRegionAssignments();
     $contexts = $panels_display->getContexts();
     $layout = $panels_display->getLayout();
+    $title = $panels_display->getRenderedPageTitle();
 
-    $regions = $this->buildRegions($regions, $contexts);
+    $regions = $this->buildRegions($regions, $contexts, $title);
     if ($layout) {
       $regions = $layout->build($regions);
     }

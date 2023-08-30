@@ -189,7 +189,7 @@ class StructureSyncHelper {
    *   Entity query.
    */
   public static function getEntityQuery($entityType) {
-    return \Drupal::entityQuery($entityType);
+    return \Drupal::entityQuery($entityType)->accessCheck(TRUE);
   }
 
   /**

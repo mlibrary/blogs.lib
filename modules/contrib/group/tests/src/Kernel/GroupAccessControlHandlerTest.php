@@ -27,7 +27,7 @@ class GroupAccessControlHandlerTest extends GroupKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->installConfig(['user']);
     $this->groupType = $this->createGroupType(['id' => 'foo', 'creator_membership' => FALSE]);

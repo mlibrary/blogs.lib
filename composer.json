@@ -62,10 +62,10 @@
         "ckeditor-plugin/link": "^4.8",
         "composer/installers": "^1.9",
         "cweagans/composer-patches": "1.x-dev",
-        "drupal/allowed_formats": "^1.5",
+        "drupal/allowed_formats": "^2.0",
         "drupal/anchor_link": "2.x",
-        "drupal/better_exposed_filters": "^5.0",
-        "drupal/block_class": "^1.3",
+        "drupal/better_exposed_filters": "^6.0",
+        "drupal/block_class": "^2.0",
         "drupal/calendar": "^1.0@alpha",
         "drupal/captcha": "^1.2",
         "drupal/ckeditor_abbreviation": "^2.0",
@@ -76,57 +76,47 @@
         "drupal/content_moderation_notifications": "^3.5",
         "drupal/core": "^9.3",
         "drupal/create_user_permission": "^2.0",
-        "drupal/devel": "^4.1",
+        "drupal/devel": "^5.1",
         "drupal/easy_breadcrumb": "^2.0",
         "drupal/editor_advanced_link": "^2.0",
-        "drupal/entity_reference_exposed_filters": "^1.0@alpha",
+        "drupal/entity_reference_exposed_filters": "^2.0@alpha",
         "drupal/field_group": "^3.2",
         "drupal/file_entity": "^2.0@beta",
         "drupal/force_users_logout": "^2.0",
         "drupal/google_analytics": "^4.0",
         "drupal/group": "^1.4",
-        "drupal/image_field_caption": "^1.1",
-        "drupal/image_resize_filter": "^1.1",
-        "drupal/jquery_ui_accordion": "^1.1",
+        "drupal/image_resize_filter": "^1.x-dev",
+        "drupal/jquery_ui_accordion": "^2.0",
         "drupal/label_help": "^2",
-        "drupal/libraries": "^3",
         "drupal/link_attributes": "^1.11",
         "drupal/linked_field": "^1.3",
-        "drupal/location_migration": "^1.0@beta",
         "drupal/metatag": "^1.22",
-        "drupal/migrate_file_to_media": "^2.0",
-        "drupal/migrate_plus": "^5.2",
-        "drupal/migrate_source_csv": "^3.4",
-        "drupal/migrate_tools": "^5.1",
-        "drupal/migrate_upgrade": "^3.2",
         "drupal/mimemail": "^1.0@alpha",
-        "drupal/notify": "^2.0@alpha",
         "drupal/oembed_providers": "^2.1",
         "drupal/og": "^1.0@alpha",
-        "drupal/openid_connect": "^1.2",
+        "drupal/openid_connect": "^3.0@alpha",
         "drupal/override_node_options": "^2.6",
         "drupal/panels": "^4.6",
         "drupal/panels_ipe": "^4.6",
         "drupal/paragraphs": "^1.15",
-        "drupal/passwordless": "^1.2",
+        "drupal/passwordless": "^2.0@alpha",
         "drupal/pathauto": "^1.8",
         "drupal/r4032login": "^2.1",
         "drupal/redirect": "^1.8",
         "drupal/reroute_email": "^2.1",
-        "drupal/scheduler": "^1.4",
-        "drupal/scheduler_content_moderation_integration": "^1.4",
+        "drupal/scheduler": "^2.0",
+        "drupal/scheduler_content_moderation_integration": "^2.0@beta",
         "drupal/smtp": "^1.2",
         "drupal/structure_sync": "^2.0",
         "drupal/swiftmailer": "^2.2",
         "drupal/twig_tweak": "^3.1",
         "drupal/twig_vardumper": "^3.1",
+        "drupal/upgrade_status": "^4.0",
         "drupal/view_unpublished": "^1.0",
-        "drupal/views_block_filter_block": "^1.2",
         "drupal/views_bulk_operations": "^4.0",
         "drupal/views_contextual_filters_or": "^1.3",
         "drupal/views_field_view": "^1.0@beta",
-        "drupal/views_migration": "^1.1",
-        "drupal/viewsreference": "^1.7",
+        "drupal/viewsreference": "^2.0@beta",
         "drush/drush": "^10.6",
         "furf/jquery-ui-touch-punch": "master",
         "jackmoore/colorbox": "^1.6",
@@ -194,13 +184,13 @@
         "patches": {
           "drupal/core": {
             "https://www.drupal.org/node/2640994": "https://www.drupal.org/files/issues/2022-02-11/drupal-2640994-122-9.3.patch",
-            "https://www.drupal.org/node/2858392": "https://www.drupal.org/files/issues/2018-10-17/2858392-14.patch",
+            "https://www.drupal.org/node/2858392": "https://www.drupal.org/files/issues/2023-05-09/2858392-15.patch",
             "https://www.drupal.org/node/2985168": "https://www.drupal.org/files/issues/2023-01-18/2985168-media-edit-modal-9.5.x-148.patch",
             "make-media-edit-patch-go-to-top": "patches/make-2985168-go-to-top.patch",
             "handle form validation on og_autocomplete": "patches/og_autocomplete_no_error.patch"
           },
           "drupal/openid_connect": {
-            "https://www.drupal.org/node/3011413": "https://www.drupal.org/files/issues/2022-02-14/openid_connect-autologin-3011413-70.patch"
+            "https://www.drupal.org/node/3011413": "https://git.drupalcode.org/project/openid_connect/-/merge_requests/22.patch"
           },
           "drupal/og": {
             "https://github.com/zerolab/og/tree/196-redux": "patches/zerolab-og-196-redux-branch.patch",
@@ -212,15 +202,8 @@
           "drupal/entity_reference_exposed_filters": {
             "a customization for eref to facilitate blogs and og": "patches/custom_eref_blogs.patch"
           },
-          "drupal/migrate_file_to_media": {
-            "custom file to media hack": "patches/hack-file-to-media-migrate.patch"
-          },
           "drupal/easy_breadcrumb": {
             "fix group membership breadcrumbs": "patches/alter-group-breadcrumbs.patch"
-          },
-          "drupal/notify": {
-            "add nodes to message params": "https://www.drupal.org/files/issues/2022-10-26/add-nodes-to-notify.patch",
-            "partial fix for unpublished nodes": "patches/notify-unpublished-scheduled-nodes-fix.patch"
           },
           "drupal/content_moderation_notifications": {
             "https://www.drupal.org/node/3027690": "https://www.drupal.org/files/issues/2021-08-03/content_moderation_notifications-dont_notify_for_same_state-3027690-23.patch"
@@ -230,9 +213,6 @@
           },
           "jackmoore/colorbox": {
             "add aria-label to colorbox": "patches/add-aria-label-to-colorbox.patch"
-          },
-          "drupal/migrate_tools": {
-            "https://www.drupal.org/node/2868762": "https://www.drupal.org/files/issues/2022-02-17/d7_migration_failing_on_d6_migrations-2868762-37.patch"
           }
         }
     },

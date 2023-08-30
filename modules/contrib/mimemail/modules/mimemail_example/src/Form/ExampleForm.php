@@ -7,6 +7,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Mail\MailManagerInterface;
+use Drupal\Core\Url;
 use Drupal\mimemail\Utility\MimeMailFormatHelper;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -89,7 +90,9 @@ class ExampleForm extends FormBase {
     $form['to'] = [
       '#type' => 'textfield',
       '#title' => $this->t('To'),
-      '#description' => $this->t('The email address of the recipient. The formatting of this string must comply with RFC 2822.'),
+      '#description' => $this->t('The email address of the recipient. The formatting of this string must comply with <a href=":url">RFC 2822</a>', [
+        ':url' => Url::fromUri('https://tools.ietf.org/html/rfc2822')->toString(),
+      ]),
       '#default_value' => $this->currentUser()->getEmail(),
       '#required' => TRUE,
     ];
@@ -97,13 +100,17 @@ class ExampleForm extends FormBase {
     $form['from'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Sender name'),
-      '#description' => $this->t("The sender's name. Leave empty to use the site-wide configured name."),
+      '#description' => $this->t('The sender\'s name. Leave empty to use the <a href=":url">Site name</a>.', [
+        ':url' => Url::fromRoute('system.site_information_settings')->toString(),
+      ]),
     ];
 
     $form['from_mail'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Sender email address'),
-      '#description' => $this->t("The sender's email address. Leave empty to use the site-wide configured address."),
+      '#description' => $this->t('The sender\'s email address. Leave empty to use the site <a href=":url">Email address</a>.', [
+        ':url' => Url::fromRoute('system.site_information_settings')->toString(),
+      ]),
     ];
 
     $form['params'] = [
@@ -127,7 +134,7 @@ class ExampleForm extends FormBase {
         'List-unsubscribe' => [
           '#type' => 'textfield',
           '#title' => $this->t('List-unsubscribe'),
-          '#description' => $this->t('An email address and/or a URL which can be used for unsubscription. Values must be enclosed by angle brackets and separated by a comma.'),
+          '#description' => $this->t('An email address and/or a URL that may be used for unsubscription. Values must be enclosed by angle brackets and separated by a comma.'),
         ],
       ],
       'subject' => [
@@ -138,7 +145,9 @@ class ExampleForm extends FormBase {
       'body' => [
         '#type' => 'textarea',
         '#title' => $this->t('HTML message'),
-        '#description' => $this->t("HTML version of the email body. This will be formatted using the text format selected at 'admin/config/system/mimemail'"),
+        '#description' => $this->t('HTML version of the email body. This will be formatted using the email format selected on the <a href=":url">Mime Mail settings page</a>.', [
+          ':url' => Url::fromRoute('mimemail.settings')->toString(),
+        ]),
       ],
       // This form element forces plaintext-only email when there is no HTML
       // content (that is, when the 'body' form element is empty).
@@ -153,11 +162,11 @@ class ExampleForm extends FormBase {
       'plaintext' => [
         '#type' => 'textarea',
         '#title' => $this->t('Plain text message'),
-        '#description' => $this->t('Plain text version of the email body. HTML not allowed.'),
+        '#description' => $this->t('Plain text version of the email body. Any HTML tags entered here will appear as plain text.'),
       ],
       'attachments' => [
-        '#name' => 'files[attachment]',
         '#type' => 'file',
+        '#name' => 'files[attachment]',
         '#title' => $this->t('Choose a file to send as an email attachment'),
       ],
     ];
@@ -182,7 +191,7 @@ class ExampleForm extends FormBase {
     $pattern = '/<(.*?)>/';
     $address = $form_state->getValue('to');
     preg_match_all($pattern, $address, $matches);
-    $address = isset($matches[1][0]) ? $matches[1][0] : $address;
+    $address = $matches[1][0] ?? $address;
     if (!$this->emailValidator->isValid($address)) {
       $form_state->setErrorByName('to', $this->t('That email address is not valid.'));
     }

@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\captcha\Functional;
 
+use Drupal\captcha\Constants\CaptchaConstants;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
@@ -69,7 +70,7 @@ class CaptchaPersistenceTest extends CaptchaWebTestBase {
    */
   public function testPersistenceAlways() {
     // Set up of persistence and CAPTCHAs.
-    $this->setUpPersistence(CAPTCHA_PERSISTENCE_SHOW_ALWAYS);
+    $this->setUpPersistence(CaptchaConstants::CAPTCHA_PERSISTENCE_SHOW_ALWAYS);
 
     // Go to login form and check if there is a CAPTCHA
     // on the login form (look for the title).
@@ -104,7 +105,7 @@ class CaptchaPersistenceTest extends CaptchaWebTestBase {
    */
   public function testPersistencePerFormInstance() {
     // Set up of persistence and CAPTCHAs.
-    $this->setUpPersistence(CAPTCHA_PERSISTENCE_SKIP_ONCE_SUCCESSFUL_PER_FORM_INSTANCE);
+    $this->setUpPersistence(CaptchaConstants::CAPTCHA_PERSISTENCE_SKIP_ONCE_SUCCESSFUL_PER_FORM_INSTANCE);
 
     // Go to login form and check if there is a CAPTCHA on the login form.
     $this->drupalGet('<front>');
@@ -141,7 +142,7 @@ class CaptchaPersistenceTest extends CaptchaWebTestBase {
    */
   public function testPersistencePerFormType() {
     // Set up of persistence and CAPTCHAs.
-    $this->setUpPersistence(CAPTCHA_PERSISTENCE_SKIP_ONCE_SUCCESSFUL_PER_FORM_TYPE);
+    $this->setUpPersistence(CaptchaConstants::CAPTCHA_PERSISTENCE_SKIP_ONCE_SUCCESSFUL_PER_FORM_TYPE);
 
     // Go to login form and check if there is a CAPTCHA on the login form.
     $this->drupalGet('<front>');
@@ -168,7 +169,7 @@ class CaptchaPersistenceTest extends CaptchaWebTestBase {
     $this->assertDifferentCsid($captcha_sid_initial);
 
     // Check another form.
-    /* @var \Drupal\captcha\Entity\CaptchaPoint $captcha_point */
+    /** @var \Drupal\captcha\Entity\CaptchaPoint $captcha_point */
     $captcha_point = \Drupal::entityTypeManager()
       ->getStorage('captcha_point')
       ->load('user_register_form');
@@ -183,7 +184,7 @@ class CaptchaPersistenceTest extends CaptchaWebTestBase {
    */
   public function testPersistenceOnlyOnce() {
     // Set up of persistence and CAPTCHAs.
-    $this->setUpPersistence(CAPTCHA_PERSISTENCE_SKIP_ONCE_SUCCESSFUL);
+    $this->setUpPersistence(CaptchaConstants::CAPTCHA_PERSISTENCE_SKIP_ONCE_SUCCESSFUL);
 
     // Go to login form and check if there is a CAPTCHA on the login form.
     $this->drupalGet('<front>');

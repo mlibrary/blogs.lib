@@ -54,12 +54,7 @@ function template_preprocess_calendar_month(&$vars) {
           }
           $data[] = $cell['link'];
         }
-        if ($view->styleInfo->isMini()) {
-          $month_rows[$weekno][$day]['data'] = \Drupal::service('renderer')->render($data);
-        }
-        else {
-          $month_rows[$weekno][$day]['data'] = '<div class="inner">' . \Drupal::service('renderer')->render($data) . '</div>';
-        }
+        $month_rows[$weekno][$day]['data'] = \Drupal::service('renderer')->render($data);
       }
     }
   }
@@ -742,7 +737,11 @@ function template_preprocess_calendar_stripe_legend(array &$vars) {
   $row_options = $view->display_handler->getOption('row')['options'];
 
   $legend_type = $row_options['colors']['legend'];
-  $display_options = $row_options['colors']['calendar_colors_' . $legend_type];
+  $display_options = [];
+  if (isset($row_options['colors']['calendar_colors_' . $legend_type])) {
+    $display_options = $row_options['colors']['calendar_colors_' . $legend_type];
+  }
+
   $options = [];
   switch ($legend_type) {
 

@@ -54,7 +54,7 @@ function custom_blogs_form_user_form_alter(&$form, FormStateInterface $form_stat
     $form['field_user_title']['#type'] = 'hidden';
   }
   if (empty($form['account']['name']['#default_value'])) {
-    $form['account']['name']['#value'] = user_password();
+    $form['account']['name']['#value'] = \Drupal::service('password_generator')->generate();
   }
   array_unshift($form['#validate'], '_custom_blogs_form_user_register_validate');
 }

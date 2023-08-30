@@ -3,6 +3,7 @@
 namespace Drupal\Tests\captcha\Kernel\Migrate\d7;
 
 use Drupal\captcha\CaptchaPointInterface;
+use Drupal\captcha\Constants\CaptchaConstants;
 use Drupal\captcha\Entity\CaptchaPoint;
 use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
 
@@ -26,15 +27,20 @@ class MigrateCaptchaPointsTest extends MigrateDrupal7TestBase {
   protected $captchaPoints = [
     [
       'form_id' => 'comment_node_article_form',
-      'captcha_type' => 'captcha/Math',
+      'captcha_type' => CaptchaConstants::CAPTCHA_MATH_CAPTCHA_TYPE,
       'status' => TRUE,
     ],
     [
       'form_id' => 'user_pass',
-      'captcha_type' => 'captcha/Math',
+      'captcha_type' => CaptchaConstants::CAPTCHA_MATH_CAPTCHA_TYPE,
       'status' => TRUE,
     ],
   ];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $captchaStorage;
 
   /**
    * {@inheritdoc}
@@ -43,7 +49,7 @@ class MigrateCaptchaPointsTest extends MigrateDrupal7TestBase {
     parent::setUp();
     $this->loadFixture(implode(DIRECTORY_SEPARATOR, [
       DRUPAL_ROOT,
-      drupal_get_path('module', 'captcha'),
+      \Drupal::service('extension.list.module')->getPath('captcha'),
       'tests',
       'fixtures',
       'drupal7.php',
@@ -57,9 +63,6 @@ class MigrateCaptchaPointsTest extends MigrateDrupal7TestBase {
       'd7_captcha_points',
     ];
     $this->executeMigrations($migrations);
-
-    $this->captchaStorage = $this->container->get('entity_type.manager')
-      ->getStorage('captcha_point');
   }
 
   /**

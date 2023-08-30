@@ -3,6 +3,13 @@
   "description": "Extends Drupal file entities to be fieldable and viewable.",
   "type": "drupal-module",
   "license": "GPL-2.0+",
-  "minimum-stability": "dev",
-  "require": { }
+  "require": {
+    "drupal/core": "^9.3 || ^10",
+    "drupal/token": "^1",
+    "php": ">=8.0"
+  },
+  "require-dev": {
+    "drupal/pathauto": "^1",
+    "drupal/hal": " ^9 || ^1 || ^2"
+  }
 }

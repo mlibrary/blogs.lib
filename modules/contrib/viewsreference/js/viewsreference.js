@@ -2,9 +2,9 @@
  * @file
  */
 
-(function ($) {
+(function ($, Drupal) {
 
-  'use strict';
+  "use strict";
 
   /**
    * Handles an autocompleteselect event.
@@ -35,21 +35,24 @@
     jQuery(event.target).trigger('viewsreference-select');
     // Return false to tell jQuery UI that we've filled in the value already.
     return false;
-  };
+  }
 
   Drupal.behaviors.displayMessage = {
     attach: function (context, settings) {
       $(document).ajaxComplete(function (event, request, settings) {
-        $('.field--type-viewsreference .viewsreference-display-id').each(function () {
-          if (!$(this).find('option').length) {
-            var html = '<p class="viewsreference-display-error form-notice color-warning">' + Drupal.t('There is no Display available.  Please select another view or change the field settings.') + '</p>';
-            $(this).parent().remove('.viewsreference-display-error');
-            $('.viewsreference-display-error').remove();
-            $(this).parent().append(html);
+        $('.field--type-viewsreference select.viewsreference-display-id', context).each(function () {
+          $('.viewsreference-display-error', context).remove();
+          var $parent = $(this).parent().hide();
+          if ($(this).find('option').length <= 1) {
+            var $error = $('<p class="viewsreference-display-error form-notice color-warning">There is no display available. Please select another view or change the field settings.</p>');
+            $parent.after($error);
+          }
+          else {
+            $parent.show();
           }
         });
       });
     }
   };
 
-})(jQuery, drupalSettings);
+})(jQuery, Drupal);

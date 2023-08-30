@@ -5,6 +5,11 @@ namespace Drupal\panels_ipe\Form;
 use Drupal\block_content\BlockContentForm;
 use Drupal\Core\Form\FormStateInterface;
 
+/**
+ * Form handler for the panels edit forms.
+ *
+ * @phpstan-ignore-next-line
+ */
 class PanelsIPEBlockContentForm extends BlockContentForm {
 
   /**

@@ -2,10 +2,14 @@
 
 namespace Drupal\calendar\Template;
 
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
+use Drupal\calendar\CalendarEvent;
+
 /**
  * A class providing Calendar Twig extensions.
  */
-class TwigExtension extends \Twig_Extension {
+class TwigExtension extends AbstractExtension {
 
   /**
    * {@inheritdoc}
@@ -19,7 +23,7 @@ class TwigExtension extends \Twig_Extension {
    */
   public function getFilters() {
     return [
-      new \Twig_SimpleFilter('calendar_stripe', [$this, 'getCalendarStripe'], ['is_safe' => ['html']]),
+      new TwigFilter('calendar_stripe', [$this, 'getCalendarStripe'], ['is_safe' => ['html']]),
     ];
   }
 
@@ -27,13 +31,14 @@ class TwigExtension extends \Twig_Extension {
    * Adds a striped background to the passed event.
    *
    * @param \Drupal\calendar\CalendarEvent $event
+   *   Calendar event.
    *
    * @return string
    *   A HTML output string.
    */
-  public function getCalendarStripe($event) {
+  public function getCalendarStripe(CalendarEvent $event) {
     if (empty($event->getStripeHexes()) || (!count($event->getStripeHexes()))) {
-      return;
+      return '';
     }
     $output = '';
     foreach ($event->getStripeLabels() as $k => $stripe_label) {

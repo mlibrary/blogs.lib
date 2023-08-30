@@ -2,6 +2,7 @@
 
 namespace Drupal\captcha\Form;
 
+use Drupal\captcha\Constants\CaptchaConstants;
 use Drupal\captcha\Service\CaptchaService;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -10,6 +11,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Displays the captcha settings form.
@@ -38,6 +40,13 @@ class CaptchaSettingsForm extends ConfigFormBase {
   protected $moduleHandler;
 
   /**
+   * The request object.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
+  protected $requestStack;
+
+  /**
    * Constructs a \Drupal\captcha\Form\CaptchaSettingsForm object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -48,12 +57,15 @@ class CaptchaSettingsForm extends ConfigFormBase {
    *   Module handler.
    * @param \Drupal\captcha\Service\CaptchaService $captcha_service
    *   The captcha service.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
+   *   The request stack object.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, CacheBackendInterface $cache_backend, ModuleHandlerInterface $moduleHandler, CaptchaService $captcha_service) {
+  public function __construct(ConfigFactoryInterface $config_factory, CacheBackendInterface $cache_backend, ModuleHandlerInterface $moduleHandler, CaptchaService $captcha_service, RequestStack $request_stack) {
     parent::__construct($config_factory);
     $this->cacheBackend = $cache_backend;
     $this->moduleHandler = $moduleHandler;
     $this->captchaService = $captcha_service;
+    $this->requestStack = $request_stack;
   }
 
   /**
@@ -64,7 +76,8 @@ class CaptchaSettingsForm extends ConfigFormBase {
       $container->get('config.factory'),
       $container->get('cache.default'),
       $container->get('module_handler'),
-      $container->get('captcha.helper')
+      $container->get('captcha.helper'),
+      $container->get('request_stack')
     );
   }
 
@@ -87,81 +100,97 @@ class CaptchaSettingsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('captcha.settings');
-    module_load_include('inc', 'captcha');
-    module_load_include('inc', 'captcha', 'captcha.admin');
+    $this->moduleHandler->loadInclude('captcha', 'inc');
 
-    // Configuration of which forms to protect, with what challenge.
-    $form['form_protection'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Form protection'),
-      '#description' => $this->t("Select the challenge type you want for each of the listed forms (identified by their so called <em>form_id</em>'s). You can easily add arbitrary forms with the textfield at the bottom of the table or with the help of the option <em>Add CAPTCHA administration links to forms</em> below."),
-      '#open' => TRUE,
-    ];
-
-    $form['form_protection']['default_challenge'] = [
+    $form['default_challenge'] = [
       '#type' => 'select',
       '#title' => $this->t('Default challenge type'),
-      '#description' => $this->t('Select the default challenge type for CAPTCHAs. This can be overridden for each form if desired.'),
+      '#description' => $this->t('Select the default <em>CAPTCHA Point</em> challenge type. This can be overridden for each <em>CAPTCHA Point</em> individually.'),
       '#options' => $this->captchaService->getAvailableChallengeTypes(FALSE),
       '#default_value' => $config->get('default_challenge'),
     ];
 
     // Option for enabling CAPTCHA for all forms.
-    $form['form_protection']['enabled_default'] = [
+    $form['enable_globally'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Default challenge on non-listed forms.'),
-      '#description' => $this->t('Enable CAPTCHA for every form not listed here'),
-      '#default_value' => $config->get('enabled_default'),
+      '#title' => $this->t('Add CAPTCHA challenges on all forms'),
+      '#description' => $this->t('Adds CAPTCHA to all Drupal forms, regardless of the Captcha Points list. Note, that the captcha point <em>default challenge</em> will be used as the challenge type for the created CAPTCHA challenges.'),
+      '#default_value' => $config->get('enable_globally'),
+    ];
+    $form['enable_globally_on_admin_routes'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Additionally add CAPTCHA challenges on admin forms'),
+      '#default_value' => $config->get('enable_globally_on_admin_routes'),
+      '#states' => [
+        'invisible' => [
+          ':input[name="enable_globally"]' => ['checked' => FALSE],
+        ],
+      ],
     ];
     // Field for the CAPTCHA administration mode.
-    $form['form_protection']['administration_mode'] = [
+    $form['administration_mode'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Add CAPTCHA administration links to forms'),
+      '#title' => $this->t('Add CAPTCHA administration information to forms'),
       '#default_value' => $config->get('administration_mode'),
-      '#description' => $this->t('This option makes it easy to manage CAPTCHA settings on forms. When enabled, users with the <em>administer CAPTCHA settings</em> permission will see a fieldset with CAPTCHA administration links on all forms, except on administrative pages.'),
+      '#description' => $this->t('This option makes it easy to manage CAPTCHA settings on forms. When enabled, users with the <em>administer CAPTCHA settings</em> permission will see a fieldset with CAPTCHA administration links and informations on all forms, except on administrative pages.'),
     ];
     // Field for the CAPTCHAs on admin pages.
-    $form['form_protection']['allow_on_admin_pages'] = [
+    $form['administration_mode_on_admin_routes'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Allow CAPTCHAs and CAPTCHA administration links on administrative pages'),
-      '#default_value' => $config->get('allow_on_admin_pages'),
-      '#description' => $this->t("This option makes it possible to add CAPTCHAs to forms on administrative pages. CAPTCHAs are disabled by default on administrative pages (which shouldn't be accessible to untrusted users normally) to avoid the related overhead. In some situations, e.g. in the case of demo sites, it can be useful to allow CAPTCHAs on administrative pages."),
+      '#title' => $this->t('Additionally add administration informations on admin pages'),
+      '#description' => $this->t("Typically this isn't needed. In some situations, e.g. in the case of demo sites, it can be useful to allow CAPTCHAs on administrative pages."),
+      '#default_value' => $config->get('administration_mode_on_admin_routes'),
+      '#states' => [
+        'invisible' => [
+          ':input[name="administration_mode"]' => ['checked' => FALSE],
+        ],
+      ],
+    ];
+
+    // Adding configuration for ip protection.
+    $form['whitelist_ips_settings'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Whitelisted IP Addresses'),
+      '#description' => $this->t('Enter the IP addresses or IP address ranges you wish to whitelist. All CAPTCHA challenges will be skipped for these IP addresses.'),
+      '#open' => !empty($config->get('whitelist_ips')),
+    ];
+
+    $ip_address = $this->requestStack->getCurrentRequest()->getClientIp();
+    $form['whitelist_ips_settings']['whitelist_ips'] = [
+      '#title' => $this->t('IP addresses list'),
+      '#type' => 'textarea',
+      '#required' => FALSE,
+      '#default_value' => $config->get('whitelist_ips'),
+      '#description' => $this->t('Enter one IP-address per row in the format XXX.XXX.XXX.XXX. Alternatively you can also define IP-address ranges per row in the format XXX.XXX.XXX.YYY-XXX.XXX.XXX.ZZZ. No spaces allowed. Your current IP address is %ip_address.', ['%ip_address' => $ip_address]),
     ];
 
     // Button for clearing the CAPTCHA placement cache.
     // Based on Drupal core's "Clear all caches" (performance settings page).
-    $form['form_protection']['placement_caching'] = [
+    $form['placement_caching'] = [
       '#type' => 'item',
       '#title' => $this->t('CAPTCHA placement caching'),
       '#description' => $this->t('For efficiency, the positions of the CAPTCHA elements in each of the configured forms are cached. Most of the time, the structure of a form does not change and it would be a waste to recalculate the positions every time. Occasionally however, the form structure can change (e.g. during site building) and clearing the CAPTCHA placement cache can be required to fix the CAPTCHA placement.'),
     ];
-    $form['form_protection']['placement_caching']['placement_cache_clear'] = [
+    $form['placement_caching']['placement_cache_clear'] = [
       '#type' => 'submit',
       '#value' => $this->t('Clear the CAPTCHA placement cache'),
       '#submit' => ['::clearCaptchaPlacementCacheSubmit'],
     ];
 
-    // Configuration option for adding a CAPTCHA description.
-    $form['add_captcha_description'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Add a description to the CAPTCHA'),
-      '#description' => $this->t('Add a configurable description to explain the purpose of the CAPTCHA to the visitor.'),
-      '#default_value' => $config->get('add_captcha_description'),
+    $form['title'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Challenge title'),
+      '#description' => $this->t('Configure the title for the CAPTCHA form. Leave empty to show no title. Default: "@title_default"', ['@title_default' => $this->t('CAPTCHA')]),
+      '#default_value' => _captcha_get_title(),
+      '#maxlength' => 256,
     ];
+
     $form['description'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Challenge description'),
-      '#description' => $this->t('Configurable description of the CAPTCHA. An empty entry will reset the description to default.'),
+      '#description' => $this->t('Configurable description of the CAPTCHA. Leave empty to show no description. Default: "@description_default"', ['@description_default' => $this->t('This question is for testing whether or not you are a human visitor and to prevent automated spam submissions.')]),
       '#default_value' => _captcha_get_description(),
       '#maxlength' => 256,
-      '#attributes' => ['id' => 'edit-captcha-description-wrapper'],
-      '#states' => [
-        'visible' => [
-          ':input[name="add_captcha_description"]' => [
-            'checked' => TRUE,
-          ],
-        ],
-      ],
     ];
 
     // Field for the wrong captcha response error message.
@@ -180,23 +209,23 @@ class CaptchaSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Default CAPTCHA validation'),
       '#description' => $this->t('Define how the response should be processed by default. Note that the modules that provide the actual challenges can override or ignore this.'),
       '#options' => [
-        CAPTCHA_DEFAULT_VALIDATION_CASE_SENSITIVE => $this->t('Case sensitive validation: the response has to exactly match the solution.'),
-        CAPTCHA_DEFAULT_VALIDATION_CASE_INSENSITIVE => $this->t('Case insensitive validation: lowercase/uppercase errors are ignored.'),
+        CaptchaConstants::CAPTCHA_DEFAULT_VALIDATION_CASE_SENSITIVE => $this->t('Case sensitive validation: the response has to exactly match the solution.'),
+        CaptchaConstants::CAPTCHA_DEFAULT_VALIDATION_CASE_INSENSITIVE => $this->t('Case insensitive validation: lowercase/uppercase errors are ignored.'),
       ],
       '#default_value' => $config->get('default_validation'),
     ];
 
     // Field for CAPTCHA persistence.
-    // TODO for D7: Rethink/simplify the explanation and UI strings.
+    // @todo for D7: Rethink/simplify the explanation and UI strings.
     $form['persistence'] = [
       '#type' => 'radios',
       '#title' => $this->t('Persistence'),
       '#default_value' => $config->get('persistence'),
       '#options' => [
-        CAPTCHA_PERSISTENCE_SHOW_ALWAYS => $this->t('Always add a challenge.'),
-        CAPTCHA_PERSISTENCE_SKIP_ONCE_SUCCESSFUL_PER_FORM_INSTANCE => $this->t('Omit challenges in a multi-step/preview workflow once the user successfully responds to a challenge.'),
-        CAPTCHA_PERSISTENCE_SKIP_ONCE_SUCCESSFUL_PER_FORM_TYPE => $this->t('Omit challenges on a form type once the user successfully responds to a challenge on a form of that type.'),
-        CAPTCHA_PERSISTENCE_SKIP_ONCE_SUCCESSFUL => $this->t('Omit challenges on all forms once the user successfully responds to any challenge on the site.'),
+        CaptchaConstants::CAPTCHA_PERSISTENCE_SHOW_ALWAYS => $this->t('Always add a challenge.'),
+        CaptchaConstants::CAPTCHA_PERSISTENCE_SKIP_ONCE_SUCCESSFUL_PER_FORM_INSTANCE => $this->t('Omit challenges in a multi-step/preview workflow once the user successfully responds to a challenge.'),
+        CaptchaConstants::CAPTCHA_PERSISTENCE_SKIP_ONCE_SUCCESSFUL_PER_FORM_TYPE => $this->t('Omit challenges on a form type once the user successfully responds to a challenge on a form of that type.'),
+        CaptchaConstants::CAPTCHA_PERSISTENCE_SKIP_ONCE_SUCCESSFUL => $this->t('Omit challenges on all forms once the user successfully responds to any challenge on the site.'),
       ],
       '#description' => $this->t('Define if challenges should be omitted during the rest of a session once the user successfully responds to a challenge.'),
     ];
@@ -239,16 +268,69 @@ class CaptchaSettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    // Validating whitelisted ip addresses.
+    $whitelist_ips_value = trim($form_state->getValue('whitelist_ips', ''));
+    if (!empty($whitelist_ips_value)) {
+      $whitelist_ips = captcha_whitelist_ips_parse_values($whitelist_ips_value);
+
+      // Checking single ip addresses.
+      foreach ($whitelist_ips[CaptchaConstants::CAPTCHA_WHITELIST_IP_ADDRESS] as $ip_address) {
+        if (filter_var($ip_address, FILTER_VALIDATE_IP) == FALSE) {
+          $form_state->setErrorByName('whitelist_ips', $this->t('IP address %ip_address is not valid.', ['%ip_address' => $ip_address]));
+        }
+      }
+
+      // Checking ip ranges.
+      foreach ($whitelist_ips[CaptchaConstants::CAPTCHA_WHITELIST_IP_RANGE] as $ip_range) {
+        [$ip_lower, $ip_upper] = explode('-', $ip_range, 2);
+
+        if (filter_var($ip_lower, FILTER_VALIDATE_IP) == FALSE) {
+          $form_state->setErrorByName('whitelist_ips', $this->t('Lower IP address %ip_address in range %ip_range is not valid.', [
+            '%ip_address' => $ip_lower,
+            '%ip_range' => $ip_range,
+          ]));
+        }
+
+        if (filter_var($ip_upper, FILTER_VALIDATE_IP) == FALSE) {
+          $form_state->setErrorByName('whitelist_ips', $this->t('Upper IP address %ip_address in range %ip_range is not valid.', [
+            '%ip_address' => $ip_upper,
+            '%ip_range' => $ip_range,
+          ]));
+        }
+
+        $ip_lower_dec = (float) sprintf("%u", ip2long($ip_lower));
+        $ip_upper_dec = (float) sprintf("%u", ip2long($ip_upper));
+
+        if ($ip_lower_dec == $ip_upper_dec) {
+          $form_state->setErrorByName('whitelist_ips', $this->t('Lower and upper IP addresses should be different. Please correct range %ip_range.', ['%ip_range' => $ip_range]));
+        }
+        elseif ($ip_lower_dec > $ip_upper_dec) {
+          $form_state->setErrorByName('whitelist_ips', $this->t("Lower IP can't be greater than upper IP addresses in range. Please correct range %ip_range.", ['%ip_range' => $ip_range]));
+        }
+      }
+    }
+
+    parent::validateForm($form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = $this->config('captcha.settings');
     $config->set('administration_mode', $form_state->getValue('administration_mode'));
-    $config->set('allow_on_admin_pages', $form_state->getValue('allow_on_admin_pages'));
+    $config->set('administration_mode_on_admin_routes', ($form_state->getValue('administration_mode') && $form_state->getValue('administration_mode_on_admin_routes')));
+    $config->set('enable_globally', $form_state->getValue('enable_globally'));
+    $config->set('enable_globally_on_admin_routes', ($form_state->getValue('enable_globally') && $form_state->getValue('enable_globally_on_admin_routes')));
     $config->set('default_challenge', $form_state->getValue('default_challenge'));
-    $config->set('enabled_default', $form_state->getValue('enabled_default'));
 
-    // CAPTCHA description stuff.
-    $config->set('add_captcha_description', $form_state->getValue('add_captcha_description'));
-    // Save (or reset) the CAPTCHA descriptions.
+    // Whitelisted ip addresses and ranges.
+    $config->set('whitelist_ips', $form_state->getValue('whitelist_ips'));
+
+    // Save the CAPTCHA title:
+    $config->set('title', $form_state->getValue('title'));
+    // Save the CAPTCHA description:
     $config->set('description', $form_state->getValue('description'));
 
     $config->set('wrong_captcha_response_message', $form_state->getValue('wrong_captcha_response_message'));

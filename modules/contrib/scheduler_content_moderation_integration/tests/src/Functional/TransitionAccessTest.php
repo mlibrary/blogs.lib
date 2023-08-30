@@ -17,8 +17,8 @@ class TransitionAccessTest extends SchedulerContentModerationBrowserTestBase {
    * @dataProvider dataEntityTypes()
    */
   public function testTransitionAccess($entityTypeId, $bundle) {
-    $this->drupalLogin($this->schedulerUser);
-    $titleField = 'title';
+    $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
+    $titleField = ($entityTypeId == 'media') ? 'name' : 'title';
 
     // Create an entity and publish it using the "publish" transition.
     $title = $this->randomString();
@@ -29,7 +29,7 @@ class TransitionAccessTest extends SchedulerContentModerationBrowserTestBase {
     $this->drupalGet("$entityTypeId/add/$bundle");
     $this->submitForm($edit, 'Save');
 
-    $entity = $this->drupalGetNodeByTitle($title);
+    $entity = $this->getEntityByTitle($entityTypeId, $title);
     $publish_time = strtotime('+2 days');
 
     // Change entity moderation state to "archived" (using the "archive"
@@ -65,11 +65,11 @@ class TransitionAccessTest extends SchedulerContentModerationBrowserTestBase {
    * @dataProvider dataEntityTypes()
    */
   public function testRestrictedTransitionAccess($entityTypeId, $bundle) {
-    $schedulerUser = $this->schedulerUser;
-    $restrictedUser = $this->restrictedUser;
+    $schedulerUser = $entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser;
+    $restrictedUser = $entityTypeId == 'media' ? $this->restrictedMediaUser : $this->restrictedUser;
 
     // Create a draft as restricted user.
-    $titleField = 'title';
+    $titleField = ($entityTypeId == 'media') ? 'name' : 'title';
     $this->drupalLogin($restrictedUser);
     $title = $this->randomString();
     $edit = [
@@ -79,7 +79,7 @@ class TransitionAccessTest extends SchedulerContentModerationBrowserTestBase {
     $this->drupalGet("$entityTypeId/add/$bundle");
     $this->submitForm($edit, 'Save');
 
-    $entity = $this->drupalGetNodeByTitle($title);
+    $entity = $this->getEntityByTitle($entityTypeId, $title);
     $publish_time = strtotime('+2 days');
     $date_formatter = \Drupal::service('date.formatter');
 
@@ -92,7 +92,7 @@ class TransitionAccessTest extends SchedulerContentModerationBrowserTestBase {
       'publish_state[0]' => 'published',
     ];
     $this->drupalGet("$entityTypeId/{$entity->id()}/edit");
-    $this->assertResponse(200, 'Scheduler user should be able to edit the entity."');
+    $this->assertSession()->statusCodeEquals(200, 'Scheduler user should be able to edit the entity."');
     $this->submitForm($edit, 'Save');
 
     $this->assertSession()
@@ -102,7 +102,7 @@ class TransitionAccessTest extends SchedulerContentModerationBrowserTestBase {
     // editing access should be denied.
     $this->drupalLogin($restrictedUser);
     $this->drupalGet("$entityTypeId/{$entity->id()}/edit");
-    $this->assertResponse(403, 'Restricted user should not be able to edit the entity."');
+    $this->assertSession()->statusCodeEquals(403, 'Restricted user should not be able to edit the entity."');
 
     // Remove scheduling info.
     $this->drupalLogin($schedulerUser);
@@ -118,7 +118,7 @@ class TransitionAccessTest extends SchedulerContentModerationBrowserTestBase {
     // (using 'create_new_draft' transition).
     $this->drupalLogin($restrictedUser);
     $this->drupalGet("$entityTypeId/{$entity->id()}/edit");
-    $this->assertResponse(200, 'Restricted user should be able to edit the entity."');
+    $this->assertSession()->statusCodeEquals(200, 'Restricted user should be able to edit the entity."');
     $this->submitForm([], 'Save');
     $this->assertSession()->pageTextContains(sprintf('%s has been updated.', $entity->label()));
 
@@ -131,7 +131,7 @@ class TransitionAccessTest extends SchedulerContentModerationBrowserTestBase {
       'unpublish_state[0]' => 'archived',
     ];
     $this->drupalGet("$entityTypeId/{$entity->id()}/edit");
-    $this->assertResponse(200, 'Scheduler user should be able to edit the entity."');
+    $this->assertSession()->statusCodeEquals(200, 'Scheduler user should be able to edit the entity."');
     $this->submitForm($edit, 'Save');
 
     $this->assertSession()
@@ -141,7 +141,7 @@ class TransitionAccessTest extends SchedulerContentModerationBrowserTestBase {
     // editing access should be denied.
     $this->drupalLogin($restrictedUser);
     $this->drupalGet("$entityTypeId/{$entity->id()}/edit");
-    $this->assertResponse(403, 'Restricted user should not be able to edit the entity."');
+    $this->assertSession()->statusCodeEquals(403, 'Restricted user should not be able to edit the entity."');
 
     // Remove scheduling info.
     $this->drupalLogin($schedulerUser);
@@ -155,7 +155,7 @@ class TransitionAccessTest extends SchedulerContentModerationBrowserTestBase {
     // Check entity is editable by restricted user when there is no scheduling.
     $this->drupalLogin($restrictedUser);
     $this->drupalGet("$entityTypeId/{$entity->id()}/edit");
-    $this->assertResponse(200, 'Restricted user should be able to edit the entity."');
+    $this->assertSession()->statusCodeEquals(200, 'Restricted user should be able to edit the entity."');
     $this->submitForm([], 'Save');
     $this->assertSession()->pageTextContains(sprintf('%s has been updated.', $entity->label()));
   }

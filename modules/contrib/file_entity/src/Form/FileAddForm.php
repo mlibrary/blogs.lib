@@ -446,7 +446,7 @@ class FileAddForm extends FormBase {
     if ($save) {
       if (StreamWrapperManager::getScheme($file->getFileUri()) != $form_state->get('scheme')) {
         // @TODO: Users should not be allowed to create private files without permission ('view private files')
-        if ($moved_file = file_move($file, $form_state->get('scheme') . '://' . StreamWrapperManager::getTarget($file->getFileUri()), FileSystemInterface::EXISTS_RENAME)) {
+        if ($moved_file = \Drupal::service('file.repository')->move($file, $form_state->get('scheme') . '://' . StreamWrapperManager::getTarget($file->getFileUri()), FileSystemInterface::EXISTS_RENAME)) {
           // Only re-assign the file object if file_move() did not fail.
           $moved_file->setFilename($file->getFilename());
 
@@ -456,7 +456,7 @@ class FileAddForm extends FormBase {
       $file->display = TRUE;
 
       // Change the file from temporary to permanent.
-      $file->status = FILE_STATUS_PERMANENT;
+      $file->setPermanent();
 
       // Save entity
       $file->save();

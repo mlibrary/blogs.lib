@@ -496,6 +496,8 @@ class Calendar extends RowPluginBase {
         // @todo handle timezones
         //   $item_start_date->setTimezone(new dateTimezone($to_zone));
         //   $item_end_date->setTimezone(new dateTimezone($to_zone));
+        $item_start_date->setTimezone(new \DateTimeZone(timezone_name_get($dateInfo->getTimezone())));
+        $item_end_date->setTimezone(new \DateTimeZone(timezone_name_get($dateInfo->getTimezone())));
         $event->setStartDate($item_start_date);
         $event->setEndDate($item_end_date);
         $event->setTimezone(new \DateTimeZone(timezone_name_get($dateInfo->getTimezone())));

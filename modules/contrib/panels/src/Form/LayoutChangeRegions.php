@@ -63,7 +63,7 @@ class LayoutChangeRegions extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $cached_values = $form_state->getTemporaryValue('wizard');
 
-    /* @var $variant_plugin \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant */
+    /** @var \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant $variant_plugin */
     $variant_plugin = $cached_values['plugin'];
 
     $form['#attached']['library'][] = 'block/drupal.block';
@@ -99,9 +99,9 @@ class LayoutChangeRegions extends FormBase {
           $this->t('Region'),
           $this->t('Weight'),
         ],
-        '#attributes' => array(
+        '#attributes' => [
           'id' => 'blocks',
-        ),
+        ],
         '#empty' => $this->t('There are no regions for blocks.'),
       ];
 
@@ -116,7 +116,7 @@ class LayoutChangeRegions extends FormBase {
         }
         $label = $region_definition['label'];
         // Prevent region names clashing with new regions.
-        $region_id = 'old_'.$region;
+        $region_id = 'old_' . $region;
         $new_region = isset($new_regions[$region]) ? $region : '__unassigned__';
         $row['label']['#markup'] = $label;
         $row['id']['#markup'] = $region;

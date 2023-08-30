@@ -22,9 +22,8 @@ class UnpublishedStateConstraintTest extends SchedulerContentModerationBrowserTe
    * @dataProvider dataEntityTypes()
    */
   public function testValidPublishStateToUnPublishStateTransition($entityTypeId, $bundle) {
-    $this->drupalLogin($this->schedulerUser);
-    $entity = $this->drupalCreateNode([
-      'type' => $bundle,
+    $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
+    $entity = $this->createEntity($entityTypeId, $bundle, [
       'moderation_state' => 'draft',
       'publish_on' => strtotime('+2 days'),
       'unpublish_on' => strtotime('+3 days'),
@@ -47,13 +46,12 @@ class UnpublishedStateConstraintTest extends SchedulerContentModerationBrowserTe
    * @dataProvider dataEntityTypes()
    */
   public function testInvalidUnPublishStateTransition($entityTypeId, $bundle) {
-    $this->drupalLogin($this->schedulerUser);
+    $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
 
     // Check cases when a publish_state has been selected and not selected.
     // No publish_on date been entered, so they should fail validation.
     foreach (['', '_none', 'published'] as $publish_state) {
-      $entity = $this->drupalCreateNode([
-        'type' => $bundle,
+      $entity = $this->createEntity($entityTypeId, $bundle, [
         'moderation_state' => 'draft',
         'publish_state' => $publish_state,
         'unpublish_on' => strtotime('+3 days'),
@@ -94,8 +92,7 @@ class UnpublishedStateConstraintTest extends SchedulerContentModerationBrowserTe
     $this->workflow->getTypePlugin()->setConfiguration($config);
     $this->workflow->save();
 
-    $entity = $this->drupalCreateNode([
-      'type' => $bundle,
+    $entity = $this->createEntity($entityTypeId, $bundle, [
       'moderation_state' => 'draft',
       'publish_on' => strtotime('+1 day'),
       'publish_state' => 'published_2',

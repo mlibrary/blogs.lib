@@ -16,7 +16,7 @@ class PublishedStateConstraintTest extends SchedulerContentModerationTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $user = $this->createMock('Drupal\Core\Session\AccountInterface');

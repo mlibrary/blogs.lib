@@ -23,7 +23,7 @@ function swiftmailer_requirements($phase) {
       $requirements['swiftmailer_unsupported'] = [
         'title' => t('Swift Mailer unsupported'),
         'value' => t('The Swift Mailer library is no longer maintained. '),
-        'description' => t('Replacement module: <a href="/project/symfony_mailer">Symfony Mailer</a>'),
+        'description' => t('Replacement module: <a href="https://www.drupal.org/project/symfony_mailer">Symfony Mailer</a>'),
         'severity' => REQUIREMENT_WARNING,
       ];
     }

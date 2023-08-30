@@ -15,9 +15,9 @@ class EventsTest extends SchedulerContentModerationBrowserTestBase {
    * @dataProvider dataEntityTypes()
    */
   public function testEvents($entityTypeId, $bundle) {
-    $this->drupalLogin($this->schedulerUser);
+    $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
     $entityType = $this->entityTypeObject($entityTypeId, $bundle);
-    $titleField = 'title';
+    $titleField = ($entityTypeId == 'media') ? 'name' : 'title';
     $storage = \Drupal::service('entity_type.manager')->getStorage($entityTypeId);
 
     // Set the Scheduler option to publish immediately for a date in the past.
@@ -36,7 +36,7 @@ class EventsTest extends SchedulerContentModerationBrowserTestBase {
     ];
     $this->drupalGet("{$entityTypeId}/add/{$bundle}");
     $this->submitForm($edit, 'Save');
-    $entity = $this->drupalGetNodeByTitle($title);
+    $entity = $this->getEntityByTitle($entityTypeId, $title);
 
     // Check that the entity is immediatly published and the moderation state
     // has been updated to 'published'.

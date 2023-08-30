@@ -104,6 +104,15 @@ abstract class PanelsBlockConfigureFormBase extends FormBase {
   abstract protected function submitText();
 
   /**
+   * Get the plugin block being configured.
+   *
+   * @return \Drupal\Core\Block\BlockPluginInterface
+   */
+  public function getBlock() {
+    return $this->block;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, $tempstore_id = NULL, $machine_name = NULL, $block_id = NULL) {

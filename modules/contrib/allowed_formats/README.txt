@@ -53,8 +53,10 @@ UI.
 MAINTAINERS
 -----------
 
+ * Jordan Thompson (nord102) - https://www.drupal.org/u/nord102
  * Florian Loretan (floretan) - https://www.drupal.org/u/floretan
 
 Supporting organization:
 
+ * Northern Commerce - https://www.drupal.org/northern-commerce
  * Wunder - https://www.drupal.org/wunder-group

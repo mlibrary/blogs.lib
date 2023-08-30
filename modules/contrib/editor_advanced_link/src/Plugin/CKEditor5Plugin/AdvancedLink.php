@@ -112,7 +112,8 @@ class AdvancedLink extends CKEditor5PluginDefault implements CKEditor5PluginConf
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
-    // Match the config schema structure at ckeditor5.plugin.editor_advanced_link_link.
+    // Match the config schema structure at
+    // ckeditor5.plugin.editor_advanced_link_link.
     $form_value = $form_state->getValue('enabled_attributes');
     $config_value = array_values(array_filter($form_value));
     $form_state->setValue('enabled_attributes', $config_value);

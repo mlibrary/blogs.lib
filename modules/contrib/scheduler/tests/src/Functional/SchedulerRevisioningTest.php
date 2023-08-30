@@ -2,7 +2,7 @@
 
 namespace Drupal\Tests\scheduler\Functional;
 
-use Drupal\node\NodeInterface;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Tests revision options when Scheduler publishes or unpublishes content.
@@ -12,148 +12,155 @@ use Drupal\node\NodeInterface;
 class SchedulerRevisioningTest extends SchedulerBrowserTestBase {
 
   /**
-   * Simulates the scheduled (un)publication of a node.
+   * Simulates the scheduled (un)publication of an entity.
    *
-   * @param \Drupal\node\NodeInterface $node
-   *   The node to schedule.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to schedule.
    * @param string $action
-   *   The action to perform: either 'publish' or 'unpublish'. Defaults to
-   *   'publish'.
+   *   The action to perform: either 'publish' or 'unpublish'.
    *
-   * @return \Drupal\node\NodeInterface
-   *   The updated node, after scheduled (un)publication via a cron run.
+   * @return \Drupal\Core\Entity\EntityInterface
+   *   The updated entity, after scheduled (un)publication via a cron run.
    */
-  protected function schedule(NodeInterface $node, $action = 'publish') {
+  protected function scheduleAndRunCron(EntityInterface $entity, string $action) {
     // Simulate scheduling by setting the (un)publication date in the past and
     // running cron.
-    $node->{$action . '_on'} = strtotime('-5 hour', $this->requestTime);
-    $node->save();
+    $entity->{$action . '_on'} = strtotime('-5 hour', $this->requestTime);
+    $entity->save();
     scheduler_cron();
-    $this->nodeStorage->resetCache([$node->id()]);
-    return $this->nodeStorage->load($node->id());
+    $storage = $this->entityStorageObject($entity->getEntityTypeId());
+    $storage->resetCache([$entity->id()]);
+    return $storage->load($entity->id());
   }
 
   /**
-   * Check if the number of revisions for a node matches a given value.
+   * Check if the number of revisions for an entity matches a given value.
    *
-   * @param int $nid
-   *   The node id of the node to check.
-   * @param string $value
-   *   The value with which the number of revisions will be compared.
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to check.
+   * @param int $expected
+   *   The expected number of revisions.
    * @param string $message
    *   The message to display along with the assertion.
    */
-  protected function assertRevisionCount($nid, $value, $message = '') {
+  protected function assertRevisionCount(EntityInterface $entity, int $expected, string $message = '') {
+    if (!$entity->getEntityType()->isRevisionable()) {
+      return;
+    }
     // Because we are not deleting any revisions we can take a short cut and use
     // getLatestRevisionId() which will effectively be the number of revisions.
-    $count = $this->nodeStorage->getLatestRevisionId($nid);
-    $this->assertEquals($value, (int) $count, $message);
-  }
-
-  /**
-   * Check if the latest revision log message of a node matches a given string.
-   *
-   * @param int $nid
-   *   The node id of the node to check.
-   * @param string $value
-   *   The value with which the log message will be compared.
-   * @param string $message
-   *   The message to display along with the assertion.
-   *
-   * @return bool
-   *   TRUE if the assertion succeeded, FALSE otherwise.
-   */
-  protected function assertRevisionLogMessage($nid, $value, $message = '') {
-    // Retrieve the latest revision log message for this node.
-    $log_message = $this->database->select('node_revision', 'r')
-      ->fields('r', ['revision_log'])
-      ->condition('nid', $nid)
-      ->orderBy('vid', 'DESC')
-      ->range(0, 1)
-      ->execute()
-      ->fetchField();
-
-    return $this->assertEquals($value, $log_message, $message);
+    $storage = $this->entityStorageObject($entity->getEntityTypeId());
+    $count = $storage->getLatestRevisionId($entity->id());
+    $this->assertEquals($expected, (int) $count, $message);
   }
 
   /**
    * Tests the creation of new revisions on scheduling.
+   *
+   * This test is still useful for Commerce Products which are not revisionable
+   * because it shows that this entity type can be processed correctly even if
+   * the scheduler revision option is incorrectly set on.
+   *
+   * @dataProvider dataStandardEntityTypes()
    */
-  public function testRevisioning() {
-    // Create a scheduled node that is not automatically revisioned.
-    $created = strtotime('-2 day', $this->requestTime);
-    $settings = [
-      'type' => $this->type,
-      'revision' => 0,
-      'created' => $created,
-    ];
-    $node = $this->drupalCreateNode($settings);
+  public function testNewRevision($entityTypeId, $bundle) {
+    $entityType = $this->entityTypeObject($entityTypeId, $bundle);
 
-    // Ensure nodes with past dates will be scheduled not published immediately.
-    $this->nodetype->setThirdPartySetting('scheduler', 'publish_past_date', 'schedule')->save();
+    // Create a scheduled entity that is not automatically revisioned.
+    $entity = $this->createEntity($entityTypeId, $bundle, ['revision' => 0]);
+    $this->assertRevisionCount($entity, 1, 'The initial revision count is 1 when the entity is created.');
+
+    // Ensure entities with past dates are scheduled not published immediately.
+    $entityType->setThirdPartySetting('scheduler', 'publish_past_date', 'schedule')->save();
 
     // First test scheduled publication with revisioning disabled by default.
-    $node = $this->schedule($node);
-    $this->assertRevisionCount($node->id(), 1, 'No new revision is created by default when a node is published.');
+    $entity = $this->scheduleAndRunCron($entity, 'publish');
+    $this->assertRevisionCount($entity, 1, 'No new revision is created by default when entity is published. Revision count remains at 1.');
 
     // Test scheduled unpublication.
-    $node = $this->schedule($node, 'unpublish');
-    $this->assertRevisionCount($node->id(), 1, 'No new revision is created by default when a node is unpublished.');
+    $entity = $this->scheduleAndRunCron($entity, 'unpublish');
+    $this->assertRevisionCount($entity, 1, 'No new revision is created by default when entity is unpublished. Revision count remains at 1.');
 
     // Enable revisioning.
-    $this->nodetype->setThirdPartySetting('scheduler', 'publish_revision', TRUE)
+    $entityType->setThirdPartySetting('scheduler', 'publish_revision', TRUE)
       ->setThirdPartySetting('scheduler', 'unpublish_revision', TRUE)
       ->save();
 
     // Test scheduled publication with revisioning enabled.
-    $node = $this->schedule($node);
-    $this->assertRevisionCount($node->id(), 2, 'A new revision was created when revisioning is enabled.');
-    $expected_message = sprintf('Published by Scheduler. The scheduled publishing date was %s.',
-    $this->dateFormatter->format(strtotime('-5 hour', $this->requestTime), 'short'));
-    $this->assertRevisionLogMessage($node->id(), $expected_message, 'The correct message was found in the node revision log after scheduled publishing.');
+    $entity = $this->scheduleAndRunCron($entity, 'publish');
+    $this->assertTrue($entity->isPublished(), 'Entity is published after cron.');
+
+    if ($entity->getEntityType()->isRevisionable()) {
+      $this->assertRevisionCount($entity, 2, 'A new revision was created when the entity was published with revisioning enabled.');
+      $expected_message = sprintf('Published by Scheduler. The scheduled publishing date was %s.',
+        $this->dateFormatter->format(strtotime('-5 hour', $this->requestTime), 'short'));
+      $this->assertEquals($entity->getRevisionLogMessage(), $expected_message, 'The correct message was found in the entity revision log after scheduled publishing.');
+    }
 
     // Test scheduled unpublication with revisioning enabled.
-    $node = $this->schedule($node, 'unpublish');
-    $this->assertRevisionCount($node->id(), 3, 'A new revision was created when a node was unpublished with revisioning enabled.');
-    $expected_message = sprintf('Unpublished by Scheduler. The scheduled unpublishing date was %s.',
-    $this->dateFormatter->format(strtotime('-5 hour', $this->requestTime), 'short'));
-    $this->assertRevisionLogMessage($node->id(), $expected_message, 'The correct message was found in the node revision log after scheduled unpublishing.');
+    $entity = $this->scheduleAndRunCron($entity, 'unpublish');
+    $this->assertFalse($entity->isPublished(), 'Entity is unpublished after cron.');
+
+    if ($entity->getEntityType()->isRevisionable()) {
+      $this->assertRevisionCount($entity, 3, 'A new revision was created when the entity was unpublished with revisioning enabled.');
+      $expected_message = sprintf('Unpublished by Scheduler. The scheduled unpublishing date was %s.',
+        $this->dateFormatter->format(strtotime('-5 hour', $this->requestTime), 'short'));
+      $this->assertEquals($entity->getRevisionLogMessage(), $expected_message, 'The correct message was found in the entity revision log after scheduled unpublishing.');
+    }
   }
 
   /**
-   * Tests the 'touch' option to alter the node created date during publishing.
+   * Tests the 'touch' option to alter the created date during publishing.
+   *
+   * @dataProvider dataAlterCreationDate()
    */
-  public function testAlterCreationDate() {
-    // Ensure nodes with past dates will be scheduled not published immediately.
-    $this->nodetype->setThirdPartySetting('scheduler', 'publish_past_date', 'schedule')->save();
+  public function testAlterCreationDate($entityTypeId, $bundle) {
+    // Ensure entities with past dates are scheduled not published immediately.
+    $entityType = $this->entityTypeObject($entityTypeId, $bundle);
+    $entityType->setThirdPartySetting('scheduler', 'publish_past_date', 'schedule')->save();
 
-    // Create a node with a 'created' date two days in the past.
+    // Create an entity with a 'created' date two days in the past.
     $created = strtotime('-2 day', $this->requestTime);
     $settings = [
-      'type' => $this->type,
       'created' => $created,
       'status' => FALSE,
     ];
-    $node = $this->drupalCreateNode($settings);
-    // Show that the node is not published.
-    $this->assertFalse($node->isPublished(), 'The node is not published.');
+    $entity = $this->createEntity($entityTypeId, $bundle, $settings);
 
-    // Schedule the node for publishing and run cron.
-    $node = $this->schedule($node, 'publish');
-    // Get the created date from the node and check that it has not changed.
-    $created_after_cron = $node->created->value;
-    $this->assertTrue($node->isPublished(), 'The node has been published.');
-    $this->assertEquals($created, $created_after_cron, 'The node creation date is not changed by default.');
+    // Show that the entity is not published.
+    $this->assertFalse($entity->isPublished(), 'The entity is not published.');
+
+    // Schedule the entity for publishing and run cron.
+    $entity = $this->scheduleAndRunCron($entity, 'publish');
+    // Get the created date from the entity and check that it has not changed.
+    $created_after_cron = $entity->created->value;
+    $this->assertTrue($entity->isPublished(), 'The entity has been published.');
+    $this->assertEquals($created, $created_after_cron, 'The entity creation date is not changed by default.');
 
     // Set option to change the created date to match the publish_on date.
-    $this->nodetype->setThirdPartySetting('scheduler', 'publish_touch', TRUE)->save();
+    $entityType->setThirdPartySetting('scheduler', 'publish_touch', TRUE)->save();
 
-    // Schedule the node again and run cron.
-    $node = $this->schedule($node, 'publish');
+    // Schedule the entity again and run cron.
+    $entity = $this->scheduleAndRunCron($entity, 'publish');
     // Check that the created date has changed to match the publish_on date.
-    $created_after_cron = $node->created->value;
-    $this->assertEquals(strtotime('-5 hour', $this->requestTime), $created_after_cron, "With 'touch' option set, the node creation date is changed to match the publishing date.");
+    $created_after_cron = $entity->created->value;
+    $this->assertEquals(strtotime('-5 hour', $this->requestTime), $created_after_cron, "With 'touch' option set, the entity creation date is changed to match the publishing date.");
 
+  }
+
+  /**
+   * Provides test data for testAlterCreationDate.
+   *
+   * Taxonomy terms do not have a 'created' date and the therefore the 'touch'
+   * option is not available, and the test should be skipped.
+   *
+   * @return array
+   *   Each array item has the values: [entity type id, bundle id].
+   */
+  public function dataAlterCreationDate() {
+    $data = $this->dataStandardEntityTypes();
+    unset($data['#taxonomy_term']);
+    return $data;
   }
 
 }

@@ -18,6 +18,6 @@ class RegistrationTest extends UserRegistrationTest {
    *
    * @var array
    */
-  public static $modules = ['field_test', 'create_user_permission'];
+  protected static $modules = ['field_test', 'create_user_permission'];
 
 }

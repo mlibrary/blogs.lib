@@ -18,7 +18,7 @@ class LayoutBuilderTest extends SchedulerContentModerationBrowserTestBase {
    *
    * @var array
    */
-  protected static $modules = ['layout_builder'];
+  protected static $modules = ['layout_builder', 'field_ui'];
 
   /**
    * Tests layout builder.

@@ -10,12 +10,17 @@ namespace Drupal\Tests\scheduler_content_moderation_integration\Functional;
 class FormsTest extends SchedulerContentModerationBrowserTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected static $modules = ['field_ui'];
+
+  /**
    * Tests the hook_form_alter functionality.
    *
    * @dataProvider dataFormAlter()
    */
-  public function testFormAlter($entityTypeId, $bundle, $operation) {
-    $this->drupalLogin($this->schedulerUser);
+  public function testEntityFormAlter($entityTypeId, $bundle, $operation) {
+    $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
     $entityType = $this->entityTypeObject($entityTypeId, $bundle);
     /** @var \Drupal\Tests\WebAssert $assert */
     $assert = $this->assertSession();
@@ -24,12 +29,13 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
       $url = "{$entityTypeId}/add/{$bundle}";
     }
     else {
-      $entity = $this->drupalCreateNode(['type' => $bundle]);
+      $entity = $this->createEntity($entityTypeId, $bundle, []);
       $url = "{$entityTypeId}/{$entity->id()}/edit";
     }
 
     // Check both state fields are shown when the entity is enabled by default.
     $this->drupalGet($url);
+    $this->assertSession()->statusCodeEquals(200);
     $assert->ElementExists('xpath', '//select[@id = "edit-publish-state-0"]');
     $assert->ElementExists('xpath', '//select[@id = "edit-unpublish-state-0"]');
 
@@ -64,18 +70,19 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
    * @dataProvider dataFormAlter()
    */
   public function testHideSchedulerFields($entityTypeId, $bundle, $operation) {
-    $this->drupalLogin($this->schedulerUser);
+    $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
 
     if ($operation == 'add') {
       $url = "{$entityTypeId}/add/{$bundle}";
     }
     else {
-      $entity = $this->drupalCreateNode(['type' => $bundle]);
+      $entity = $this->createEntity($entityTypeId, $bundle, []);
       $url = "{$entityTypeId}/{$entity->id()}/edit";
     }
 
     // By default the Scheduler publish_on and unpublish_on fields are shown.
     $this->drupalGet($url);
+    $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->FieldExists('publish_on[0][value][date]');
     $this->assertSession()->FieldExists('publish_state[0]');
     $this->assertSession()->FieldExists('unpublish_on[0][value][date]');
@@ -134,7 +141,7 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
    * @dataProvider dataFormAlter()
    */
   public function testFormAlterWithDeniedAccess($entityTypeId, $bundle, $operation) {
-    $this->drupalLogin($this->schedulerUser);
+    $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
     /** @var \Drupal\Tests\WebAssert $assert */
     $assert = $this->assertSession();
 
@@ -142,13 +149,13 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
       $url = "{$entityTypeId}/add/{$bundle}";
     }
     else {
-      $entity = $this->drupalCreateNode(['type' => $bundle]);
+      $entity = $this->createEntity($entityTypeId, $bundle, []);
       $url = "{$entityTypeId}/{$entity->id()}/edit";
     }
 
     // Check that both state fields are shown by default.
     $this->drupalGet($url);
-    $this->assertResponse(200, "The $operation form is displayed without error");
+    $this->assertSession()->statusCodeEquals(200, "The $operation form is displayed without error");
     $assert->FieldExists('publish_state[0]');
     $assert->FieldExists('unpublish_state[0]');
 
@@ -164,9 +171,88 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
 
     // Check that both state fields are now hidden.
     $this->drupalGet($url);
-    $this->assertResponse(200, "The $operation form is displayed without error");
+    $this->assertSession()->statusCodeEquals(200, "The $operation form is displayed without error");
     $assert->FieldNotExists('publish_state[0]');
     $assert->FieldNotExists('unpublish_state[0]');
+  }
+
+  /**
+   * Helper function to test if a state field is enabled or disabled.
+   *
+   * @param string $field
+   *   The field to test, 'publish-state' or 'unpublish-state'.
+   * @param bool $showing
+   *   The expected status of the field. TRUE = enabled, FALSE = hidden.
+   */
+  public function assertStateField($field, $showing) {
+    /** @var \Drupal\Tests\WebAssert $assert */
+    $assert = $this->assertSession();
+    // The field is enabled if the weight setting exists and is non-zero.
+    $xpath = $assert->buildXPathQuery('//input[@id=:id and not(@value="0")]', [':id' => "edit-fields-{$field}-weight"]);
+    if ($showing) {
+      $assert->elementExists('xpath', $xpath);
+    }
+    else {
+      $assert->elementNotExists('xpath', $xpath);
+    }
+  }
+
+  /**
+   * Tests the hook_form_alter functionality for entity type forms.
+   *
+   * @dataProvider dataEntityTypeFormAlter()
+   */
+  public function testEntityTypeFormAlter($entityTypeId, $bundle, $moderatable) {
+    // Give adminUser the permissions to use the field_ui 'manage form display'
+    // tab for the entity type being tested.
+    $this->addPermissionsToUser($this->adminUser, ["administer {$entityTypeId} form display"]);
+    $this->drupalLogin($this->adminUser);
+
+    $edit_url = $this->adminUrl('bundle_edit', $entityTypeId, $bundle);
+    $form_display_url = $this->adminUrl('bundle_form_display', $entityTypeId, $bundle);
+
+    // 1. Before any editing, check both state fields.
+    $this->drupalGet($form_display_url);
+    $this->assertStateField('publish-state', $moderatable);
+    $this->assertStateField('unpublish-state', $moderatable);
+
+    // 2. Edit the entity type but make no changes, and check both state fields.
+    $this->drupalGet($edit_url);
+    $this->submitForm([], 'Save');
+    $this->drupalGet($form_display_url);
+    $this->assertStateField('publish-state', $moderatable);
+    $this->assertStateField('unpublish-state', $moderatable);
+
+    // 3. Turn off both scheduler settings and check both states are hidden.
+    $this->drupalGet($edit_url);
+    $edit = [
+      'scheduler_publish_enable' => FALSE,
+      'scheduler_unpublish_enable' => FALSE,
+    ];
+    $this->submitForm($edit, 'Save');
+    $this->drupalGet($form_display_url);
+    $this->assertStateField('publish-state', FALSE);
+    $this->assertStateField('unpublish-state', FALSE);
+
+    // 4. Enable for publishing and check the publish state field is shown.
+    $this->drupalGet($edit_url);
+    $edit = [
+      'scheduler_publish_enable' => TRUE,
+    ];
+    $this->submitForm($edit, 'Save');
+    $this->drupalGet($form_display_url);
+    $this->assertStateField('publish-state', $moderatable);
+    $this->assertStateField('unpublish-state', FALSE);
+
+    // 5. Enable for unpublishing and check the unpublish state field is shown.
+    $this->drupalGet($edit_url);
+    $edit = [
+      'scheduler_unpublish_enable' => TRUE,
+    ];
+    $this->submitForm($edit, 'Save');
+    $this->drupalGet($form_display_url);
+    $this->assertStateField('publish-state', $moderatable);
+    $this->assertStateField('unpublish-state', $moderatable);
   }
 
   /**
@@ -181,6 +267,24 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
       $data["{$key}-add"] = array_merge($entity_types, ['add']);
       $data["{$key}-edit"] = array_merge($entity_types, ['edit']);
     }
+    return $data;
+  }
+
+  /**
+   * Provides test data for the entity type form alter test.
+   *
+   * Use the standard moderatable entity types, with an added parameter of TRUE,
+   * then add taxonomy_term (which is non-moderatbale) with parameter FALSE.
+   *
+   * @return array
+   *   Each array item has the values: [entity type id, bundle id, moderatable].
+   */
+  public function dataEntityTypeFormAlter() {
+    $data = [];
+    foreach ($this->dataEntityTypes() as $key => $entity_types) {
+      $data[$key] = array_merge($entity_types, [TRUE]);
+    }
+    $data['#taxonomy_term'] = ['taxonomy_term', 'test_vocab', FALSE];
     return $data;
   }
 

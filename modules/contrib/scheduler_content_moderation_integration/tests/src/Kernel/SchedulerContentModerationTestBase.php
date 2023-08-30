@@ -7,7 +7,7 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\system\Entity\Action;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
-use Drupal\Tests\node\Traits\NodeCreationTrait;
+use Drupal\Tests\scheduler\Traits\SchedulerMediaSetupTrait;
 use Drupal\Tests\scheduler\Traits\SchedulerSetupTrait;
 
 /**
@@ -16,14 +16,8 @@ use Drupal\Tests\scheduler\Traits\SchedulerSetupTrait;
 abstract class SchedulerContentModerationTestBase extends KernelTestBase {
 
   use ContentModerationTestTrait;
+  use SchedulerMediaSetupTrait;
   use SchedulerSetupTrait;
-
-  use NodeCreationTrait {
-    // These two functions are defined in BrowserTestBase but not KernelTestBase
-    // so get them here, as they are very useful.
-    getNodeByTitle as drupalGetNodeByTitle;
-    createNode as drupalCreateNode;
-  }
 
   /**
    * Moderation info service.
@@ -47,9 +41,13 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
     'content_moderation',
     'datetime',
     'field',
+    'file',
     // Filter is needed for CreateNode filter_default_format().
     'filter',
+    // Image is required to allow Media to be installed.
+    'image',
     'language',
+    'media',
     'node',
     'options',
     'scheduler',
@@ -62,7 +60,7 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->installSchema('node', 'node_access');
@@ -71,6 +69,9 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
     $this->installEntitySchema('content_moderation_state');
     $this->installConfig('content_moderation');
     $this->installConfig('filter');
+    $this->installSchema('file', 'file_usage');
+    $this->installEntitySchema('media');
+    $this->installEntitySchema('file');
 
     // Scheduler calls some config entity, instead of installing whole modules
     // default config just create the ones we need..
@@ -79,20 +80,27 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
       'label' => 'Custom long date',
       'pattern' => 'l, F j, Y - H:i',
     ])->save();
-    Action::create([
-      'id' => 'node_publish_action',
-      'label' => 'Custom node_publish_action',
-      'type' => 'node',
-      'plugin' => 'entity:publish_action:node',
-    ])->save();
-    Action::create([
-      'id' => 'node_unpublish_action',
-      'label' => 'Custom node_unpublish_action',
-      'type' => 'node',
-      'plugin' => 'entity:unpublish_action:node',
-    ])->save();
+    foreach (['node', 'media'] as $entityTypedId) {
+      Action::create([
+        'id' => "{$entityTypedId}_publish_action",
+        'label' => "Custom {$entityTypedId} publish action",
+        'type' => $entityTypedId,
+        'plugin' => "entity:publish_action:{$entityTypedId}",
+      ])->save();
+      Action::create([
+        'id' => "{$entityTypedId}_unpublish_action",
+        'label' => "Custom {$entityTypedId} unpublish action",
+        'type' => $entityTypedId,
+        'plugin' => "entity:unpublish_action:{$entityTypedId}",
+      ])->save();
+    }
+
+    // Define mediaStorage for use in SchedulerMediaSetupTrait functions.
+    /** @var MediaStorageInterface $mediaStorage */
+    $this->mediaStorage = $this->container->get('entity_type.manager')->getStorage('media');
 
     $this->configureExampleNodeType();
+    $this->configureExampleMediaType();
     $this->configureEditorialWorkflow();
 
     $this->moderationInfo = \Drupal::service('content_moderation.moderation_information');
@@ -112,16 +120,30 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
   }
 
   /**
+   * Configure example media type.
+   */
+  protected function configureExampleMediaType() {
+    $media_type = $this->createMediaType('audio_file', [
+      'id' => 'soundtrack',
+      'label' => 'Sound track',
+    ]);
+    $media_type->setThirdPartySetting('scheduler', 'publish_enable', TRUE);
+    $media_type->setThirdPartySetting('scheduler', 'unpublish_enable', TRUE);
+    $media_type->save();
+  }
+
+  /**
    * Configures the editorial workflow for the example node type.
    */
   protected function configureEditorialWorkflow() {
     $this->workflow = $this->createEditorialWorkflow();
     $this->workflow->getTypePlugin()->addEntityTypeAndBundle('node', 'example');
+    $this->workflow->getTypePlugin()->addEntityTypeAndBundle('media', 'soundtrack');
     $this->workflow->save();
   }
 
   /**
-   * Test data for supported entity types.
+   * Test data for node and media entity types.
    *
    * @return array
    *   Each array item has the values: [entity type id, bundle id].
@@ -129,6 +151,7 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
   public function dataEntityTypes() {
     $data = [
       '#node' => ['node', 'example'],
+      '#media' => ['media', 'soundtrack'],
     ];
     return $data;
   }

@@ -2,8 +2,8 @@
 
 namespace Drupal\panels;
 
+use Symfony\Contracts\EventDispatcher\Event;
 use Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant;
-use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Event object for events relating to Panels display variants.

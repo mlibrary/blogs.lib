@@ -28,7 +28,7 @@ class AllowedFormatsTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'entity_test',
     'allowed_formats',
     'field_ui',
@@ -52,7 +52,7 @@ class AllowedFormatsTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->adminUser = $this->drupalCreateUser([

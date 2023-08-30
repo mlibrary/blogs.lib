@@ -2,58 +2,37 @@
 
 namespace Drupal\scheduler\Plugin\views\access;
 
-use Drupal\Core\Cache\Cache;
-use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\views\Plugin\views\access\AccessPluginBase;
 use Symfony\Component\Routing\Route;
 
 /**
- * Access plugin that provides access control for Scheduler.
+ * Access plugin that provided access control for Scheduler views.
  *
- * @ingroup views_access_plugins
+ * This access plugin has been replaced by SchedulerRouteAccess, and is no
+ * longer needed. However it has to remain (temporarily) as it is used in the
+ * existing view. Deleting this class causes errors before the view can be
+ * updated via update.php. The content below has been reduced to the minimum
+ * necessary to avoid errors before update.php is run.
  *
  * @ViewsAccess(
  *   id = "scheduler",
- *   title = @Translation("Scheduled content access"),
- *   help = @Translation("All Scheduler users can see their own scheduled content via their user page. In addition, if they have 'view scheduled content' permission they will be able to see all scheduled content by all authors."),
+ *   title = @Translation("Scheduled content access. REDUNDANT, DO NOT USE THIS."),
+ *   help = @Translation("NOT USED"),
  * )
  */
-class Scheduler extends AccessPluginBase implements CacheableDependencyInterface {
+class Scheduler extends AccessPluginBase {
 
   /**
    * {@inheritdoc}
    */
   public function access(AccountInterface $account) {
-    return \Drupal::service('access_checker.scheduler_content')->access($account);
   }
 
   /**
    * {@inheritdoc}
    */
   public function alterRouteDefinition(Route $route) {
-    $route->setRequirement('_access_scheduler_content', 'TRUE');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCacheContexts() {
-    return ['user'];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCacheTags() {
-    return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCacheMaxAge() {
-    return Cache::PERMANENT;
   }
 
 }

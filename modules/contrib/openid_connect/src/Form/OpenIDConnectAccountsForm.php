@@ -3,16 +3,16 @@
 namespace Drupal\openid_connect\Form;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Config\ConfigFactory;
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\Session\AccountProxy;
-use Drupal\openid_connect\OpenIDConnectSession;
-use Drupal\openid_connect\OpenIDConnectAuthmap;
+use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\externalauth\AuthmapInterface;
 use Drupal\openid_connect\OpenIDConnectClaims;
-use Drupal\openid_connect\Plugin\OpenIDConnectClientManager;
+use Drupal\openid_connect\OpenIDConnectSessionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -20,26 +20,33 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @package Drupal\openid_connect\Form
  */
-class OpenIDConnectAccountsForm extends FormBase implements ContainerInjectionInterface {
+class OpenIDConnectAccountsForm extends FormBase {
 
   /**
-   * Drupal\Core\Session\AccountProxy definition.
+   * The entity type manager.
    *
-   * @var \Drupal\Core\Session\AccountProxy
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * Drupal\Core\Session\AccountProxyInterface definition.
+   *
+   * @var \Drupal\Core\Session\AccountProxyInterface
    */
   protected $currentUser;
 
   /**
    * The OpenID Connect session service.
    *
-   * @var \Drupal\openid_connect\OpenIDConnectSession
+   * @var \Drupal\openid_connect\OpenIDConnectSessionInterface
    */
   protected $session;
 
   /**
    * The OpenID Connect authmap service.
    *
-   * @var \Drupal\openid_connect\OpenIDConnectAuthmap
+   * @var \Drupal\externalauth\AuthmapInterface
    */
   protected $authmap;
 
@@ -51,80 +58,59 @@ class OpenIDConnectAccountsForm extends FormBase implements ContainerInjectionIn
   protected $claims;
 
   /**
-   * The OpenID Connect client plugin manager.
-   *
-   * @var \Drupal\openid_connect\Plugin\OpenIDConnectClientManager
-   */
-  protected $pluginManager;
-
-  /**
-   * Drupal\Core\Config\ConfigFactory definition.
-   *
-   * @var \Drupal\Core\Config\ConfigFactory
-   */
-  protected $configFactory;
-
-  /**
    * The constructor.
    *
-   * @param \Drupal\Core\Session\AccountProxy $current_user
+   * @param \Drupal\Core\Config\ConfigFactory $config_factory
+   *   The config factory.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\Core\Session\AccountProxyInterface $current_user
    *   The current user account.
-   * @param \Drupal\openid_connect\OpenIDConnectSession $session
-   *   The OpenID Connect service.
-   * @param \Drupal\openid_connect\OpenIDConnectAuthmap $authmap
+   * @param \Drupal\externalauth\AuthmapInterface $authmap
    *   The authmap storage.
    * @param \Drupal\openid_connect\OpenIDConnectClaims $claims
    *   The OpenID Connect claims.
-   * @param \Drupal\openid_connect\Plugin\OpenIDConnectClientManager $plugin_manager
-   *   The OpenID Connect client manager.
-   * @param \Drupal\Core\Config\ConfigFactory $config_factory
-   *   The config factory.
+   * @param \Drupal\openid_connect\OpenIDConnectSessionInterface $session
+   *   The OpenID Connect session service.
    */
-  public function __construct(
-    AccountProxy $current_user,
-    OpenIDConnectSession $session,
-    OpenIDConnectAuthmap $authmap,
-    OpenIDConnectClaims $claims,
-    OpenIDConnectClientManager $plugin_manager,
-    ConfigFactory $config_factory
-  ) {
-
+  public function __construct(ConfigFactory $config_factory, EntityTypeManagerInterface $entity_type_manager, AccountProxyInterface $current_user, AuthmapInterface $authmap, OpenIDConnectClaims $claims, OpenIDConnectSessionInterface $session) {
+    $this->setConfigFactory($config_factory);
+    $this->entityTypeManager = $entity_type_manager;
     $this->currentUser = $current_user;
-    $this->session = $session;
     $this->authmap = $authmap;
     $this->claims = $claims;
-    $this->pluginManager = $plugin_manager;
-    $this->configFactory = $config_factory;
+    $this->session = $session;
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container): OpenIDConnectAccountsForm {
     return new static(
+      $container->get('config.factory'),
+      $container->get('entity_type.manager'),
       $container->get('current_user'),
-      $container->get('openid_connect.session'),
-      $container->get('openid_connect.authmap'),
+      $container->get('externalauth.authmap'),
       $container->get('openid_connect.claims'),
-      $container->get('plugin.manager.openid_connect_client'),
-      $container->get('config.factory')
+      $container->get('openid_connect.session')
     );
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'openid_connect_accounts_form';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, AccountInterface $user = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, AccountInterface $user = NULL): array {
     $form_state->set('account', $user);
 
-    $clients = $this->pluginManager->getDefinitions();
+    /** @var \Drupal\openid_connect\OpenIDConnectClientEntityInterface[] $clients */
+    $clients = $this->entityTypeManager->getStorage('openid_connect_client')->loadByProperties(['status' => TRUE]);
 
     $form['help'] = [
       '#prefix' => '<p class="description">',
@@ -139,43 +125,38 @@ class OpenIDConnectAccountsForm extends FormBase implements ContainerInjectionIn
       $form['help']['#markup'] = $this->t('You can connect your account with these external providers.');
     }
 
-    $connected_accounts = $this->authmap->getConnectedAccounts($user);
+    $connected_accounts = $this->authmap->getAll($user->id());
 
     foreach ($clients as $client) {
-      $enabled = $this->configFactory
-        ->getEditable('openid_connect.settings.' . $client['id'])
-        ->get('enabled');
-      if (!$enabled) {
-        continue;
-      }
+      $id = $client->id();
+      $label = $client->label();
 
-      $form[$client['id']] = [
+      $form[$id] = [
         '#type' => 'fieldset',
-        '#title' => $this->t('Provider: @title', ['@title' => $client['label']]),
+        '#title' => $this->t('Provider: @title', ['@title' => $label]),
       ];
-      $fieldset = &$form[$client['id']];
-      $connected = isset($connected_accounts[$client['id']]);
+      $fieldset = &$form[$id];
+      $connected = isset($connected_accounts['openid_connect.' . $id]);
       $fieldset['status'] = [
         '#type' => 'item',
         '#title' => $this->t('Status'),
-        '#markup' => $this->t('Not connected'),
       ];
       if ($connected) {
         $fieldset['status']['#markup'] = $this->t('Connected as %sub', [
-          '%sub' => $connected_accounts[$client['id']],
+          '%sub' => $connected_accounts['openid_connect.' . $id],
         ]);
-        $fieldset['openid_connect_client_' . $client['id'] . '_disconnect'] = [
+        $fieldset['openid_connect_client_' . $id . '_disconnect'] = [
           '#type' => 'submit',
-          '#value' => $this->t('Disconnect from @client_title', ['@client_title' => $client['label']]),
-          '#name' => 'disconnect__' . $client['id'],
+          '#value' => $this->t('Disconnect from @client_title', ['@client_title' => $label]),
+          '#name' => 'disconnect__' . $id,
         ];
       }
       else {
         $fieldset['status']['#markup'] = $this->t('Not connected');
-        $fieldset['openid_connect_client_' . $client['id'] . '_connect'] = [
+        $fieldset['openid_connect_client_' . $id . '_connect'] = [
           '#type' => 'submit',
-          '#value' => $this->t('Connect with @client_title', ['@client_title' => $client['label']]),
-          '#name' => 'connect__' . $client['id'],
+          '#value' => $this->t('Connect with @client_title', ['@client_title' => $label]),
+          '#name' => 'connect__' . $id,
           '#access' => $this->currentUser->id() == $user->id(),
         ];
       }
@@ -187,34 +168,31 @@ class OpenIDConnectAccountsForm extends FormBase implements ContainerInjectionIn
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    list($op, $client_name) = explode('__', $form_state->getTriggeringElement()['#name'], 2);
-
-    if ($op === 'disconnect') {
-      $this->authmap->deleteAssociation($form_state->get('account')->id(), $client_name);
-      $client = $this->pluginManager->getDefinition($client_name);
-      $this->messenger()->addMessage($this->t('Account successfully disconnected from @client.', ['@client' => $client['label']]));
-      return;
-    }
-
     if ($this->currentUser->id() !== $form_state->get('account')->id()) {
       $this->messenger()->addError($this->t("You cannot connect another user's account."));
       return;
     }
 
-    $this->session->saveDestination();
+    [$op, $client_name] = explode('__', $form_state->getTriggeringElement()['#name'], 2);
+    /** @var \Drupal\openid_connect\OpenIDConnectClientEntityInterface $client */
+    $client = $this->entityTypeManager->getStorage('openid_connect_client')->loadByProperties(['id' => $client_name])[$client_name];
 
-    $configuration = $this->config('openid_connect.settings.' . $client_name)
-      ->get('settings');
-    /** @var \Drupal\openid_connect\Plugin\OpenIDConnectClientInterface $client */
-    $client = $this->pluginManager->createInstance(
-      $client_name,
-      $configuration
-    );
-    $scopes = $this->claims->getScopes($client);
-    $_SESSION['openid_connect_op'] = $op;
-    $_SESSION['openid_connect_connect_uid'] = $this->currentUser->id();
-    $response = $client->authorize($scopes, $form_state);
-    $form_state->setResponse($response);
+    switch ($op) {
+      case 'disconnect':
+        $this->authmap->delete($form_state->get('account')->id(), 'openid_connect.' . $client_name);
+        $this->messenger()->addMessage($this->t('Account successfully disconnected from @client.', ['@client' => $client->label()]));
+        break;
+
+      case 'connect':
+        $this->session->saveDestination();
+
+        $plugin = $client->getPlugin();
+        $scopes = $this->claims->getScopes($plugin);
+        $this->session->saveOp('connect', $this->currentUser->id());
+        $response = $plugin->authorize($scopes);
+        $form_state->setResponse($response);
+        break;
+    }
   }
 
   /**
@@ -226,7 +204,7 @@ class OpenIDConnectAccountsForm extends FormBase implements ContainerInjectionIn
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function access(AccountInterface $user) {
+  public function access(AccountInterface $user): AccessResultInterface {
     if ($this->currentUser->hasPermission('administer users')) {
       return AccessResult::allowed();
     }

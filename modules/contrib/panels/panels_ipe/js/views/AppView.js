@@ -326,7 +326,7 @@
       // @todo When configurable categories are in, determine this from the
       // passed-in settings.
       this.tabsView.tabViews['manage_content'].autoClick = '[data-plugin-id="block_content:' + uuid + '"]';
-      this.tabsView.tabViews['manage_content'].activeCategory = 'Custom';
+      this.tabsView.tabViews['manage_content'].activeCategory = Drupal.t('Custom');
 
       this.tabsView.tabViews['manage_content'].render();
     },

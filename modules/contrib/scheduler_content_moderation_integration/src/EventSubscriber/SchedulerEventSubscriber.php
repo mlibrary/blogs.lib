@@ -2,6 +2,7 @@
 
 namespace Drupal\scheduler_content_moderation_integration\EventSubscriber;
 
+use Drupal\scheduler\Event\SchedulerMediaEvents;
 use Drupal\scheduler\SchedulerEvent;
 use Drupal\scheduler\SchedulerEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -21,9 +22,9 @@ class SchedulerEventSubscriber implements EventSubscriberInterface {
    */
   public function publishImmediately(SchedulerEvent $event) {
     /** @var Drupal\Core\Entity\EntityInterface $entity */
-    $entity = $event->getNode();
+    $entity = $event->getEntity();
     $entity->set('moderation_state', $entity->publish_state->getValue());
-    $event->setNode($entity);
+    $event->setEntity($entity);
   }
 
   /**
@@ -33,6 +34,7 @@ class SchedulerEventSubscriber implements EventSubscriberInterface {
     // The values in the arrays give the function names above. The same function
     // can be used for all supported entity types.
     $events[SchedulerEvents::PUBLISH_IMMEDIATELY][] = ['publishImmediately'];
+    $events[SchedulerMediaEvents::PUBLISH_IMMEDIATELY][] = ['publishImmediately'];
     return $events;
   }
 

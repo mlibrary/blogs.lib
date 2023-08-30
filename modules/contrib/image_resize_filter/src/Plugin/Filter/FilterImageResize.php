@@ -141,7 +141,7 @@ class FilterImageResize extends FilterBase implements ContainerFactoryPluginInte
           $image['destination'] = $this->systemFileConfig->get('default_scheme') . '://' . $local_file_path;
         }
         else {
-          $image['destination'] = file_default_scheme() . '://' . $local_file_path;
+          $image['destination'] = \Drupal::config('system.file')->get('default_scheme') . '://' . $local_file_path;
         }
       }
       // Destination and local path are the same if we're just adding attributes.
@@ -155,7 +155,7 @@ class FilterImageResize extends FilterBase implements ContainerFactoryPluginInte
           $local_file_dir = $this->streamWrapperManager->getTarget($path_info['dirname']);
         }
         else {
-          $local_file_dir = file_uri_target($path_info['dirname']);
+          $local_file_dir = \Drupal::service('stream_wrapper_manager')->getTarget($path_info['dirname']);
         }
         $local_file_path = 'resize/' . ($local_file_dir ? $local_file_dir . '/' : '') . $path_info['filename'] . '-' . $image['expected_size']['width'] . 'x' . $image['expected_size']['height'] . '.' . $path_info['extension'];
         $image['destination'] = $path_info['scheme'] . '://' . $local_file_path;

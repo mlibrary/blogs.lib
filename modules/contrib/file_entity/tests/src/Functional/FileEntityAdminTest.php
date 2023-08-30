@@ -41,7 +41,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
     // Add the tasks and actions blocks.
     $this->drupalPlaceBlock('local_actions_block');
@@ -85,7 +85,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
 
     // Test that the default sort by file_managed.created DESC fires properly.
     $files_query = array();
-    foreach (\Drupal::entityQuery('file')->sort('created', 'DESC')->execute() as $fid) {
+    foreach (\Drupal::entityQuery('file')->sort('created', 'DESC')->accessCheck(FALSE)->execute() as $fid) {
       $files_query[] = FileEntity::load($fid)->label();
     }
 
@@ -96,12 +96,12 @@ class FileEntityAdminTest extends FileEntityTestBase {
     foreach ($list as $entry) {
       $entries[] = trim((string) $entry->getText());
     }
-    $this->assertEqual($files_query, $entries, 'Files are sorted in the view according to the default query.');
+    $this->assertEquals($files_query, $entries, 'Files are sorted in the view according to the default query.');
 
     // Compare the rendered HTML node list to a query for the files ordered by
     // filename to account for possible database-dependent sort order.
     $files_query = array();
-    foreach (\Drupal::entityQuery('file')->sort('filename')->execute() as $fid) {
+    foreach (\Drupal::entityQuery('file')->sort('filename')->accessCheck(FALSE)->execute() as $fid) {
       $files_query[] = FileEntity::load($fid)->label();
     }
 
@@ -111,7 +111,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
     foreach ($list as $entry) {
       $entries[] = trim((string) $entry->getText());
     }
-    $this->assertEqual($files_query, $entries, 'Files are sorted in the view the same as they are in the query.');
+    $this->assertEquals($files_query, $entries, 'Files are sorted in the view the same as they are in the query.');
   }
 
   /**
@@ -144,14 +144,14 @@ class FileEntityAdminTest extends FileEntityTestBase {
 
     // Verify view, edit, and delete links for any file.
     $this->drupalGet('admin/content/files');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $i = 0;
     foreach ($files as $file) {
-      $this->assertLinkByHref('file/' . $file->id());
-      $this->assertLinkByHref('file/' . $file->id() . '/edit');
-      $this->assertLinkByHref('file/' . $file->id() . '/delete');
+      $this->assertSession()->linkByHrefExists('file/' . $file->id());
+      $this->assertSession()->linkByHrefExists('file/' . $file->id() . '/edit');
+      $this->assertSession()->linkByHrefExists('file/' . $file->id() . '/delete');
       // Verify tableselect.
-      $this->assertFieldByName("bulk_form[$i]", NULL, 'Bulk form checkbox found.');
+      $this->assertSession()->fieldExists("bulk_form[$i]");
     }
 
     // Verify no operation links beside download are displayed for regular
@@ -159,16 +159,16 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->drupalLogout();
     $this->drupalLogin($this->userBasic);
     $this->drupalGet('admin/content/files');
-    $this->assertResponse(200);
-    $this->assertLinkByHref('file/' . $files['public_image']->id());
-    $this->assertLinkByHref('file/' . $files['public_document']->id());
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->linkByHrefExists('file/' . $files['public_image']->id());
+    $this->assertSession()->linkByHrefExists('file/' . $files['public_document']->id());
     // Download access of public files is always allowed.
-    $this->assertLinkByHref('file/' . $files['public_document']->id() . '/download');
-    $this->assertLinkByHref('file/' . $files['public_document']->id() . '/download');
-    $this->assertNoLinkByHref('file/' . $files['public_image']->id() . '/edit');
-    $this->assertNoLinkByHref('file/' . $files['public_image']->id() . '/delete');
-    $this->assertNoLinkByHref('file/' . $files['public_document']->id() . '/edit');
-    $this->assertNoLinkByHref('file/' . $files['public_document']->id() . '/delete');
+    $this->assertSession()->linkByHrefExists('file/' . $files['public_document']->id() . '/download');
+    $this->assertSession()->linkByHrefExists('file/' . $files['public_document']->id() . '/download');
+    $this->assertSession()->linkByHrefNotExists('file/' . $files['public_image']->id() . '/edit');
+    $this->assertSession()->linkByHrefNotExists('file/' . $files['public_image']->id() . '/delete');
+    $this->assertSession()->linkByHrefNotExists('file/' . $files['public_document']->id() . '/edit');
+    $this->assertSession()->linkByHrefNotExists('file/' . $files['public_document']->id() . '/delete');
 
     // Verify no tableselect.
     // @todo Drupal 8 always shows bulk selection, test specific actions
@@ -179,56 +179,56 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->drupalLogout();
     $this->drupalLogin($this->userViewOwn);
     $this->drupalGet('admin/content/files');
-    $this->assertResponse(200);
-    $this->assertLinkByHref($files['private_document']->toUrl()->toString());
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->linkByHrefExists($files['private_document']->toUrl()->toString());
     // Verify no operation links are displayed.
     $this->drupalGet($files['private_document']->toUrl('edit-form'));
-    $this->assertResponse(403, 'User doesn\'t have permission to edit files');
+    $this->assertSession()->statusCodeEquals(403);
     $this->drupalGet($files['private_document']->toUrl('delete-form'));
-    $this->assertResponse(403, 'User doesn\'t have permission to delete files');
+    $this->assertSession()->statusCodeEquals(403);
 
     // Verify user cannot see private file of other users.
-    $this->assertNoLinkByHref($files['private_image']->toUrl()->toString());
-    $this->assertNoLinkByHref($files['private_image']->toUrl('edit-form')->toString());
-    $this->assertNoLinkByHref($files['private_image']->toUrl('delete-form')->toString());
-    $this->assertNoLinkByHref($files['private_image']->downloadUrl()->toString());
+    $this->assertSession()->linkByHrefNotExists($files['private_image']->toUrl()->toString());
+    $this->assertSession()->linkByHrefNotExists($files['private_image']->toUrl('edit-form')->toString());
+    $this->assertSession()->linkByHrefNotExists($files['private_image']->toUrl('delete-form')->toString());
+    $this->assertSession()->linkByHrefNotExists($files['private_image']->downloadUrl()->toString());
 
     // Verify no tableselect.
-    $this->assertNoFieldByName('bulk_form[' . $files['private_document']->id() . ']', '', 'No bulk form checkbox found.');
+    $this->assertSession()->fieldNotExists('bulk_form[' . $files['private_document']->id() . ']');
 
     // Verify private file is displayed with permission.
     $this->drupalLogout();
     $this->drupalLogin($this->userViewPrivate);
     $this->drupalGet('admin/content/files');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
 
     // Verify user can see private file of other users.
-    $this->assertLinkByHref('file/' . $files['private_document']->id());
-    $this->assertLinkByHref('file/' . $files['private_image']->id());
+    $this->assertSession()->linkByHrefExists('file/' . $files['private_document']->id());
+    $this->assertSession()->linkByHrefExists('file/' . $files['private_image']->id());
 
     // Verify operation links are displayed for users with appropriate
     // permission.
     $this->drupalLogout();
     $this->drupalLogin($this->userEditDelete);
     $this->drupalGet('admin/content/files');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     foreach ($files as $file) {
-      $this->assertLinkByHref('file/' . $file->id());
-      $this->assertLinkByHref('file/' . $file->id() . '/edit');
-      $this->assertLinkByHref('file/' . $file->id() . '/delete');
-      $this->assertLinkByHref('file/' . $file->id() . '/delete');
+      $this->assertSession()->linkByHrefExists('file/' . $file->id());
+      $this->assertSession()->linkByHrefExists('file/' . $file->id() . '/edit');
+      $this->assertSession()->linkByHrefExists('file/' . $file->id() . '/delete');
+      $this->assertSession()->linkByHrefExists('file/' . $file->id() . '/delete');
     }
 
     // Verify file access can be bypassed.
     $this->drupalLogout();
     $this->drupalLogin($this->userAdmin);
     $this->drupalGet('admin/content/files');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     foreach ($files as $file) {
-      $this->assertLinkByHref('file/' . $file->id());
-      $this->assertLinkByHref('file/' . $file->id() . '/edit');
-      $this->assertLinkByHref('file/' . $file->id() . '/delete');
-      $this->assertLinkByHref('file/' . $file->id() . '/download');
+      $this->assertSession()->linkByHrefExists('file/' . $file->id());
+      $this->assertSession()->linkByHrefExists('file/' . $file->id() . '/edit');
+      $this->assertSession()->linkByHrefExists('file/' . $file->id() . '/delete');
+      $this->assertSession()->linkByHrefExists('file/' . $file->id() . '/download');
     }
   }
 
@@ -241,13 +241,13 @@ class FileEntityAdminTest extends FileEntityTestBase {
 
     // Test single operations.
     $this->drupalGet('admin/content/files');
-    $this->assertLinkByHref('file/1/delete');
-    $this->assertLinkByHref('file/2/delete');
+    $this->assertSession()->linkByHrefExists('file/1/delete');
+    $this->assertSession()->linkByHrefExists('file/2/delete');
     $this->drupalGet('file/1/delete');
-    $this->assertTitle(t('Are you sure you want to delete the file @filename? | Drupal', array('@filename' => FileEntity::load(1)->label())));
-    $this->drupalPostForm(NULL, array(), 'Delete');
-    $this->assertNoLinkByHref('file/1/delete');
-    $this->assertLinkByHref('file/2/delete');
+    $this->assertSession()->titleEquals((string) t('Are you sure you want to delete the file @filename? | Drupal', array('@filename' => FileEntity::load(1)->label())));
+    $this->submitForm(array(), 'Delete');
+    $this->assertSession()->linkByHrefNotExists('file/1/delete');
+    $this->assertSession()->linkByHrefExists('file/2/delete');
 
     // Test bulk status change.
     // The "first" file now has id 2, but bulk form fields start counting at 0.
@@ -263,7 +263,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
       'bulk_form[1]' => 1,
       'bulk_form[2]' => 1,
     );
-    $this->drupalPostForm(NULL, $edit, 'Apply to selected items');
+    $this->submitForm($edit, 'Apply to selected items');
 
     \Drupal::entityTypeManager()->getStorage('file')->resetCache();
     $this->assertFalse(FileEntity::load(2)->isPermanent());
@@ -277,7 +277,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
       'bulk_form[0]' => 1,
       'bulk_form[1]' => 1,
     );
-    $this->drupalPostForm(NULL, $edit, 'Apply to selected items');
+    $this->submitForm($edit, 'Apply to selected items');
 
     \Drupal::entityTypeManager()->getStorage('file')->resetCache();
     $this->assertTrue(FileEntity::load(2)->isPermanent());
@@ -292,10 +292,10 @@ class FileEntityAdminTest extends FileEntityTestBase {
       'bulk_form[0]' => 1,
       'bulk_form[1]' => 1,
     );
-    $this->drupalPostForm(NULL, $edit, 'Apply to selected items');
-    $this->assertTitle(t('Are you sure you want to delete these files? | Drupal'));
-    $this->assertLink('Cancel');
-    $this->drupalPostForm(NULL, array(), 'Delete');
+    $this->submitForm($edit, 'Apply to selected items');
+    $this->assertSession()->titleEquals('Are you sure you want to delete these files? | Drupal');
+    $this->assertSession()->linkExists('Cancel');
+    $this->submitForm(array(), 'Delete');
 
     \Drupal::entityTypeManager()->getStorage('file')->resetCache();
     $this->assertNull(FileEntity::load(2), 'File 2 is deleted.');
@@ -315,12 +315,12 @@ class FileEntityAdminTest extends FileEntityTestBase {
 
     // Check the usage links on the file overview.
     $this->drupalGet('admin/content/files');
-    $this->assertLink('0 places');
-    $this->assertNoLink('1 place');
+    $this->assertSession()->linkExists('0 places');
+    $this->assertSession()->linkNotExists('1 place');
 
     // Check the usage view.
     $this->clickLink('0 places');
-    $this->assertText('This file is not currently used.');
+    $this->assertSession()->pageTextContains('This file is not currently used.');
 
     // Attach a file field to article nodes.
     $content_type = $this->drupalCreateContentType();
@@ -353,16 +353,16 @@ class FileEntityAdminTest extends FileEntityTestBase {
 
     // Check that the usage link is updated.
     $this->drupalGet('admin/content/files');
-    $this->assertLink('1 place');
+    $this->assertSession()->linkExists('1 place');
 
     // Check that the using node shows up on the usage view.
     $this->clickLink('1 place');
-    $this->assertLink('An article that uses a file');
+    $this->assertSession()->linkExists('An article that uses a file');
 
     // Check local tasks.
     $this->clickLink('View');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     $this->clickLink('Usage');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
   }
 }

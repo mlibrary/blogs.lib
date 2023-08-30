@@ -1,5 +1,6 @@
 <?php
 
+use Drupal\Core\Render\Element;
 /**
  * @file
  * Extends Drupal file entities to be fieldable and viewable.
@@ -248,7 +249,7 @@ function template_preprocess_file(&$variables) {
 
   // Helpful $content variable for templates.
   $variables += array('content' => array());
-  foreach (\Drupal\Core\Render\Element::children($variables['elements']) as $key) {
+  foreach (Element::children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
   }
 
@@ -359,6 +360,10 @@ function file_entity_match_mimetypes($needle, $haystack) {
 
   foreach ($haystack as $mimetype) {
     foreach ($needle as $search) {
+      if (is_null($search) || is_null($mimetype)) {
+        // Passing null to parameter of type string is deprecated.
+        continue;
+      }
       if (fnmatch($search, $mimetype) || fnmatch($mimetype, $search)) {
         return TRUE;
       }
@@ -480,7 +485,7 @@ function file_uri_to_object($uri, $use_existing = TRUE) {
     $file = File::create(array(
       'uid' => \Drupal::currentUser()->id(),
       'uri' => $uri,
-      'status' => FILE_STATUS_PERMANENT,
+      'status' => FileInterface::STATUS_PERMANENT,
     ));
   }
 

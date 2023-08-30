@@ -62,7 +62,7 @@ class PanelsDisplayManager implements PanelsDisplayManagerInterface {
     $definition = $this->typedConfigManager->getDefinition($this->configName);
     $data_definition = $this->typedConfigManager->buildDataDefinition($definition, $config);
     $this->schema = $this->typedConfigManager->create($data_definition, $config);
-    $errors = array();
+    $errors = [];
     foreach ($config as $key => $value) {
       $errors = array_merge($errors, $this->checkValue($key, $value));
     }

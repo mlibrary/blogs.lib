@@ -2,3 +2,15 @@ entity.user.openid_connect_accounts:
   route_name: openid_connect.accounts_controller_index
   base_route: entity.user.canonical
   title: Connected Accounts
+
+entity.openid_connect_client.list:
+  title: 'Clients'
+  description: 'Configure OpenID Connect clients.'
+  route_name: entity.openid_connect_client.list
+  base_route: entity.openid_connect_client.list
+
+openid_connect.admin_settings:
+  title: 'Settings'
+  description: 'Configure OpenID Connect login and user settings.'
+  route_name: openid_connect.admin_settings
+  base_route: entity.openid_connect_client.list

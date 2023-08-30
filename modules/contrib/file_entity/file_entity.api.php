@@ -43,7 +43,7 @@ function hook_file_download_headers_alter(array &$headers, $file) {
 function hook_file_transfer($uri, array $headers) {
   // Redirect a download for an S3 file to the actual location.
   if (StreamWrapperManager::getScheme($uri) == 's3') {
-    $url = file_create_url($uri);
+    $url = \Drupal::service('file_url_generator')->generateAbsoluteString($uri);
     drupal_goto($url);
   }
 }

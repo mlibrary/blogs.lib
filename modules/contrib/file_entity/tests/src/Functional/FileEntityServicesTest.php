@@ -8,6 +8,7 @@ use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file\Entity\File;
+use Drupal\file\FileInterface;
 use Drupal\node\Entity\Node;
 use Drupal\rest\Entity\RestResourceConfig;
 use GuzzleHttp\Exception\ClientException;
@@ -77,7 +78,7 @@ class FileEntityServicesTest extends FileEntityTestBase {
     // Create a file.
     $file_uri = 'public://' . $this->randomMachineName() . '.txt';
     file_put_contents($file_uri, 'This is some file contents');
-    $file = File::create(array('uri' => $file_uri, 'status' => FILE_STATUS_PERMANENT, 'uid' => 1));
+    $file = File::create(array('uri' => $file_uri, 'status' => FileInterface::STATUS_PERMANENT, 'uid' => 1));
     $file->save();
 
     // Create a node with a file.

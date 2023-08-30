@@ -3,23 +3,31 @@
 /**
  * @file
  * Hook implementations for the Scheduler Extras test module.
+ *
+ * This module is used in SchedulerDefaultTimeTest to check that the default
+ * time is set correctly when the time element of the datetime input is hidden.
  */
 
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Implements hook_form_FORM_ID_alter() for node_form().
+ * Implements hook_form_alter().
  */
-function scheduler_extras_form_node_form_alter(&$form, FormStateInterface $form_state) {
-  // This is used in SchedulerDefaultTimeTest to check that the default time is
-  // set correctly even when the time elememt of the datetime input is hidden.
-  $type = $form_state->getFormObject()->getEntity()->type->entity->get('type');
-  if ($type == 'hidden_time') {
-    if (isset($form['publish_on'])) {
-      $form['publish_on']['widget'][0]['value']['#date_time_element'] = 'none';
-    }
-    if (isset($form['unpublish_on'])) {
-      $form['unpublish_on']['widget'][0]['value']['#date_time_element'] = 'none';
-    }
+function scheduler_extras_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Only continue if the form is for adding the standard test entity types.
+  if (!in_array($form_id, [
+    'node_testpage_form',
+    'media_test_video_add_form',
+    'commerce_product_test_product_add_form',
+    'taxonomy_term_test_vocab_form',
+  ])) {
+    return;
+  }
+  // Hide the time element when the scheduler field exists.
+  if (isset($form['publish_on'])) {
+    $form['publish_on']['widget'][0]['value']['#date_time_element'] = 'none';
+  }
+  if (isset($form['unpublish_on'])) {
+    $form['unpublish_on']['widget'][0]['value']['#date_time_element'] = 'none';
   }
 }

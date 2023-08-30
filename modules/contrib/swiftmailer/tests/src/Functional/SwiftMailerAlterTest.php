@@ -11,7 +11,7 @@ use Drupal\swiftmailer_test\SwiftMailerDrupalStateLogger;
  */
 class SwiftMailerAlterTest extends SwiftMailerTestBase {
 
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->config('mailsystem.settings')
       ->set('modules.swiftmailer_test.none', [

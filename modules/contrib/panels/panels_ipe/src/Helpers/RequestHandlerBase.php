@@ -62,7 +62,7 @@ abstract class RequestHandlerBase implements RequestHandlerInterface {
    *
    * @throws \Drupal\panels_ipe\Exception\EmptyRequestContentException
    */
-  protected abstract function handle(PanelsDisplayVariant $panels_display, $decoded_request, $save_to_temp_store = FALSE);
+  abstract protected function handle(PanelsDisplayVariant $panels_display, $decoded_request, $save_to_temp_store = FALSE);
 
   /**
    * Attempts to decode the incoming request's content as JSON.

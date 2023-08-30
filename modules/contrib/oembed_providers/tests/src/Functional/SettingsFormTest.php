@@ -91,7 +91,7 @@ class SettingsFormTest extends BrowserTestBase {
     $page = $this->getSession()->getPage();
 
     // Set dummy value in cache, so it can be deleted on form submission.
-    \Drupal::cache()->set('oembed_providers:oembed_providers', 'test value', REQUEST_TIME + (86400));
+    \Drupal::cache()->set('oembed_providers:oembed_providers', 'test value', \Drupal::time()->getRequestTime() + (86400));
 
     $this->drupalLogin($this->adminUser);
     $this->drupalGet('/admin/config/media/oembed-providers');
@@ -136,6 +136,14 @@ class SettingsFormTest extends BrowserTestBase {
     $page->pressButton('Save configuration');
 
     $assert_session->pageTextContains('The oEmbed Providers URL field is required.');
+
+    // Test provider key-value clear.
+    \Drupal::service('keyvalue')->get('media')->set('oembed_providers', 'test value');
+
+    $this->drupalGet('/admin/config/media/oembed-providers');
+
+    $page->pressButton('Clear Provider Cache');
+    $this->assertNull(\Drupal::service('keyvalue')->get('media')->get('oembed_providers'));
   }
 
 }

@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * @file
+ * Installation file for SCMI module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function scheduler_content_moderation_integration_install() {
+  // When this module is installed the publish and unpublish state fields are
+  // hidden by default. If Scheduler has already been in use before SCMI is
+  // installed then some entity types may be enabled for Scheduling. Those
+  // fields need to be displayed in the form.
+  _scheduler_content_moderation_integration_reset_form_display();
+}
+
+/**
+ * Add publish state and unpublish state fields to newly supported entity types.
+ */
+function scheduler_content_moderation_integration_update_9001() {
+  $output = _scheduler_content_moderation_integration_add_fields();
+  return $output ? implode('</li><li>', $output) : t('No update required.');
+}
+
+/**
+ * Hide form fields for entity types that are not enabled for Scheduler.
+ */
+function scheduler_content_moderation_integration_update_9002() {
+  $output = _scheduler_content_moderation_integration_reset_form_display();
+  return $output ? implode('</li><li>', $output) : t('No update required.');
+}
+
+/**
+ * Remove publish and unpublish state fields from non-moderatable entity types.
+ */
+function scheduler_content_moderation_integration_update_9003() {
+  $output = _scheduler_content_moderation_integration_remove_fields();
+  return $output ? implode('</li><li>', $output) : t('No update required.');
+}

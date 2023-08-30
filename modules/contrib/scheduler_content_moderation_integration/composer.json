@@ -5,7 +5,7 @@
   "license": "GPL-2.0-or-later",
   "minimum-stability": "dev",
   "require": {
-    "drupal/core": "^8.7.7 || ^9",
-    "drupal/scheduler": "^1.1"
+    "drupal/core": "^8.7.7 || ^9 || ^10",
+    "drupal/scheduler": "^2"
   }
 }

@@ -47,12 +47,6 @@ class MimeMail extends PhpMail implements ContainerFactoryPluginInterface {
   /**
    * MimeMail plugin constructor.
    *
-   * @param array $configuration
-   *   A configuration array containing information about the plugin instance.
-   * @param string $plugin_id
-   *   The plugin ID for the plugin instance.
-   * @param mixed $plugin_definition
-   *   The plugin implementation definition.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The configuration factory service.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
@@ -62,7 +56,7 @@ class MimeMail extends PhpMail implements ContainerFactoryPluginInterface {
    * @param \Drupal\Core\Render\RendererInterface $renderer
    *   The renderer service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigFactoryInterface $config_factory, ModuleHandlerInterface $module_handler, EmailValidatorInterface $email_validator, RendererInterface $renderer) {
+  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandlerInterface $module_handler, EmailValidatorInterface $email_validator, RendererInterface $renderer) {
     // Bypass parent constructor because the parent statically initializes
     // $this->configFactory (defined in the parent) instead of injecting it.
     $this->configFactory = $config_factory;
@@ -76,9 +70,6 @@ class MimeMail extends PhpMail implements ContainerFactoryPluginInterface {
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
       $container->get('config.factory'),
       $container->get('module_handler'),
       $container->get('email.validator'),
@@ -98,7 +89,7 @@ class MimeMail extends PhpMail implements ContainerFactoryPluginInterface {
       if (!$format = $this->configFactory->get('mimemail.settings')->get('format')) {
         $format = filter_fallback_format();
       }
-      $langcode = isset($message['langcode']) ? $message['langcode'] : '';
+      $langcode = $message['langcode'] ?? '';
       $message['body'] = check_markup($message['body'], $format, $langcode);
     }
 
@@ -112,28 +103,35 @@ class MimeMail extends PhpMail implements ContainerFactoryPluginInterface {
    *
    * @param array $message
    *   An array containing the message data. The optional parameters are:
-   *   - plain: Whether to send the message as plaintext only or HTML. If
-   *     this evaluates to TRUE the message will be sent as plaintext.
-   *   - plaintext: Optional plaintext portion of a multipart email.
-   *   - attachments: An array of arrays which describe one or more attachments.
-   *     Existing files can be added by path, dynamically-generated files can be
-   *     added by content. The internal array contains the following elements:
-   *      - filepath: Relative Drupal path to an existing file
-   *        (filecontent is NULL).
-   *      - filecontent: The actual content of the file (filepath is NULL).
-   *      - filename: The filename of the file.
-   *      - filemime: The MIME type of the file.
-   *      The array of arrays looks something like this:
-   *      Array
-   *      (
-   *        [0] => Array
-   *        (
-   *         [filepath] => '/sites/default/files/attachment.txt'
-   *         [filecontent] => 'My attachment.'
-   *         [filename] => 'attachment.txt'
-   *         [filemime] => 'text/plain'
-   *        )
-   *      )
+   *   - plain: (optional) Whether to send the message as plaintext only or
+   *     HTML. If this evaluates to TRUE the message will be sent as plaintext.
+   *   - plaintext: (optional) Plaintext portion of a multipart email.
+   *   - attachments: (optional) An array where each element is an array that
+   *     describes an attachment. Existing files may be added by path while
+   *     dynamically-generated files may be added by content. Each internal
+   *     array contains the following elements:
+   *     - filepath: Relative Drupal path to an existing file
+   *       (filecontent is NULL).
+   *     - filecontent: The actual content of the file (filepath is NULL).
+   *     - filename: (optional) The filename of the file.
+   *     - filemime: (optional) The MIME type of the file.
+   *     The array of arrays looks something like this:
+   *     @code
+   *     [
+   *       0 => [
+   *         'filepath' => '/sites/default/files/attachment.txt',
+   *         'filecontent' => NULL,
+   *         'filename' => 'attachment1.txt',
+   *         'filemime' => 'text/plain',
+   *       ],
+   *       1 => [
+   *         'filepath' => NULL,
+   *         'filecontent' => 'This is the contents of my second attachment.',
+   *         'filename' => 'attachment2.txt',
+   *         'filemime' => 'text/plain',
+   *       ],
+   *     ]
+   *     @endcode
    *
    * @return array
    *   All details of the message.
@@ -146,16 +144,16 @@ class MimeMail extends PhpMail implements ContainerFactoryPluginInterface {
     $subject = $message['subject'];
     $body = $message['body'];
 
-    $headers = isset($message['params']['headers']) ? $message['params']['headers'] : [];
-    $plain = isset($message['params']['plain']) ? $message['params']['plain'] : NULL;
-    $plaintext = isset($message['params']['plaintext']) ? $message['params']['plaintext'] : NULL;
-    $attachments = isset($message['params']['attachments']) ? $message['params']['attachments'] : [];
+    $headers = $message['params']['headers'] ?? [];
+    $plain = $message['params']['plain'] ?? NULL;
+    $plaintext = $message['params']['plaintext'] ?? NULL;
+    $attachments = $message['params']['attachments'] ?? [];
 
     $site_name = $this->configFactory->get('system.site')->get('name');
     $site_mail = $this->configFactory->get('system.site')->get('mail');
     $simple_address = $this->configFactory->get('mimemail.settings')->get('simple_address');
 
-    // Override site mails default sender.
+    // Override site mail's default sender.
     if ((empty($from) || $from == $site_mail)) {
       $mimemail_name = $this->configFactory->get('mimemail.settings')->get('name');
       $mimemail_mail = $this->configFactory->get('mimemail.settings')->get('mail');
@@ -174,7 +172,7 @@ class MimeMail extends PhpMail implements ContainerFactoryPluginInterface {
       if (is_string($to) && $this->emailValidator->isValid($to)) {
         $user_plaintext_field = $this->configFactory->get('mimemail.settings')->get('user_plaintext_field');
         if (is_object($account = user_load_by_mail($to)) && $account->hasField($user_plaintext_field)) {
-          /* @var boolean $plain */
+          /** @var boolean $plain */
           $plain = $account->{$user_plaintext_field}->value;
           // Might as well pass the user object to the address function.
           $to = $account;
@@ -182,7 +180,9 @@ class MimeMail extends PhpMail implements ContainerFactoryPluginInterface {
       }
     }
 
-    // Removing newline character introduced by _drupal_wrap_mail_line().
+    // MailFormatHelper::htmlToText() removes \r and adds \n both directly and
+    // within the utility method MailFormatHelper::wrapMailLine(). Subject
+    // headers can't contain \n characters, so we remove those here.
     $subject = str_replace(["\n"], '', trim(MailFormatHelper::htmlToText($subject)));
 
     $body = [
@@ -195,11 +195,6 @@ class MimeMail extends PhpMail implements ContainerFactoryPluginInterface {
     ];
 
     $body = $this->renderer->renderPlain($body);
-
-    /*foreach (module_implements('mail_post_process') as $module) {
-      $function = $module . '_mail_post_process';
-      $function($body, $key);
-    }*/
 
     $plain = $plain || $this->configFactory->get('mimemail.settings')->get('textonly');
     $from = MimeMailFormatHelper::mimeMailAddress($from);

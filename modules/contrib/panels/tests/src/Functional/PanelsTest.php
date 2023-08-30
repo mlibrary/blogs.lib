@@ -15,7 +15,7 @@ class PanelsTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'classy';
+  protected $defaultTheme = 'stark';
 
   /**
    * {@inheritdoc}
@@ -25,21 +25,18 @@ class PanelsTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['block', 'page_manager', 'page_manager_ui', 'panels_test'];
+  protected static $modules = ['block', 'page_manager', 'page_manager_ui', 'panels_test'];
 
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->drupalPlaceBlock('local_tasks_block');
     $this->drupalPlaceBlock('local_actions_block');
     $this->drupalPlaceBlock('system_branding_block');
     $this->drupalPlaceBlock('page_title_block');
-
-    \Drupal::service('theme_installer')->install(['bartik', 'classy']);
-    $this->config('system.theme')->set('admin', 'classy')->save();
 
     $this->drupalLogin($this->drupalCreateUser(['administer pages', 'access administration pages', 'view the administration theme']));
   }
@@ -56,26 +53,26 @@ class PanelsTest extends BrowserTestBase {
       'path' => 'testing',
       'variant_plugin_id' => 'panels_variant',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Next');
+    $this->submitForm($edit, 'Next');
 
     // Add variant with a layout that has settings.
     $edit = [
       'page_variant_label' => 'Default',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Next');
+    $this->submitForm($edit, 'Next');
 
     // Choose a layout.
     $edit = [
       'layout' => 'layout_example_test',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Next');
+    $this->submitForm($edit, 'Next');
 
     // Update the layout's settings.
-    $this->assertFieldByName('layout_settings_wrapper[layout_settings][setting_1]', 'Default');
+    $this->assertSession()->fieldValueEquals('layout_settings_wrapper[layout_settings][setting_1]', 'Default');
     $edit = [
       'layout_settings_wrapper[layout_settings][setting_1]' => 'Abracadabra',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Next');
+    $this->submitForm($edit, 'Next');
 
     // Add a block.
     $this->clickLink('Add new block');
@@ -83,16 +80,16 @@ class PanelsTest extends BrowserTestBase {
     $edit = [
       'region' => 'top',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Add block');
+    $this->submitForm($edit, 'Add block');
 
     // Finish the page add wizard.
-    $this->drupalPostForm(NULL, [], 'Finish');
+    $this->submitForm([], 'Finish');
 
     // View the page and make sure the setting is present.
     $this->drupalGet('testing');
-    $this->assertText('Blah:');
-    $this->assertText('Abracadabra');
-    $this->assertText('Powered by Drupal');
+    $this->assertSession()->pageTextContains('Blah:');
+    $this->assertSession()->pageTextContains('Abracadabra');
+    $this->assertSession()->pageTextContains('Powered by Drupal');
   }
 
   /**
@@ -112,19 +109,19 @@ class PanelsTest extends BrowserTestBase {
       'path' => 'testing',
       'variant_plugin_id' => 'panels_variant',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Next');
+    $this->submitForm($edit, 'Next');
 
     // Use default variant settings.
     $edit = [
       'page_variant_label' => 'Default',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Next');
+    $this->submitForm($edit, 'Next');
 
     // Choose a simple layout.
     $edit = [
       'layout' => 'layout_onecol',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Next');
+    $this->submitForm($edit, 'Next');
 
     // In Drupal 8.8 and later, the layout may have settings of its own. If
     // that's the case, submit the layout settings form without any changes.
@@ -137,13 +134,13 @@ class PanelsTest extends BrowserTestBase {
     $edit = [
       'page_title' => '[user:name]',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Finish');
+    $this->submitForm($edit, 'Finish');
 
     // View the page and make sure the page title is valid.
     $this->drupalGet('testing');
     // We expect "'" to be escaped only once, which is why we're doing a raw
     // assertion here.
-    $this->assertRaw('<h1 class="page-title">My User&#039;s Name</h1>');
+    $this->assertSession()->responseContains('<h1>My User&#039;s Name</h1>');
   }
 
 }

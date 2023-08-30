@@ -11,9 +11,6 @@ inquisitive admins:
  - A block for masquerading as other users (useful for testing)
  - A mail-system class which redirects outbound email to files
  - Drush commands such as `fn-hook`, `fn-event`, `token`, `uuid`, and `devel-services`
- - *Webprofiler*. Adds a debug bar at bottom of all pages with tons of useful
- information like a query list, cache hit/miss data, memory profiling, page
- speed, php info, session info, etc.
  - *Devel Generate*. Bulk creates nodes, users, comment, taxonomy, media, menus for development. Has
  Drush integration.
 
@@ -46,9 +43,10 @@ for more info.
 #### Version Compatibility
 | Devel version | Drupal core | PHP  | Drush |
 |---------------|-------------|------|-------|
-| 4.x           | 8.9+, 9, 10 | 7.2+ | 9+    |
+| 5.x           | 9,10        | 7.4+ | 11+   |
+| 4.x           | 8.9+,9      | 7.2+ | 9+    |
 | 8.x-2.x       | 8.x         | 7.0+ | 8+    |
 
 #### Maintainers
 
-See https://gitlab.com/groups/drupaladmins/devel/-/group_members. Note that the webprofiler module seeks a new co-maintainer.
+See https://gitlab.com/groups/drupaladmins/devel/-/group_members.

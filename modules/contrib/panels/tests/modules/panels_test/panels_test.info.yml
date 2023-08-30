@@ -1,13 +1,13 @@
 type: module
 name: Panels Test
 description: 'Required for Panels simpletests only.'
-core_version_requirement: '^8.8 || ^9'
+core_version_requirement: '^9.2 || ^10'
 dependencies:
-  - page_manager
-  - panels
-  - layout_discovery
+  - page_manager:page_manager
+  - panels:panels
+  - drupal:layout_discovery
 
-# Information added by Drupal.org packaging script on 2020-04-02
-version: '8.x-4.6'
+# Information added by Drupal.org packaging script on 2022-11-16
+version: '8.x-4.7'
 project: 'panels'
-datestamp: 1585870869
+datestamp: 1668632923

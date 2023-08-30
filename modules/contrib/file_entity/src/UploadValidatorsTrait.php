@@ -32,7 +32,7 @@ trait UploadValidatorsTrait {
 
     // Cap the upload size according to the system or user defined limit.
     $max_filesize = Environment::getUploadMaxSize();
-    $user_max_filesize = Bytes::toInt(\Drupal::config('file_entity.settings')
+    $user_max_filesize = Bytes::toNumber(\Drupal::config('file_entity.settings')
       ->get('max_filesize'));
 
     // If the user defined a size limit, use the smaller of the two.
@@ -41,7 +41,7 @@ trait UploadValidatorsTrait {
     }
 
     if (!empty($options['max_filesize']) && $options['max_filesize'] < $max_filesize) {
-      $max_filesize = Bytes::toInt($options['max_filesize']);
+      $max_filesize = Bytes::toNumber($options['max_filesize']);
     }
 
     // There is always a file size limit due to the PHP server limit.

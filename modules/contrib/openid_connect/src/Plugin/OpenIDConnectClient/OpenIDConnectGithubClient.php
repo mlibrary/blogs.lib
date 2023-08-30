@@ -2,8 +2,10 @@
 
 namespace Drupal\openid_connect\Plugin\OpenIDConnectClient;
 
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\openid_connect\Plugin\OpenIDConnectClientBase;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * GitHub OpenID Connect client.
@@ -37,7 +39,7 @@ class OpenIDConnectGithubClient extends OpenIDConnectClientBase {
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
     $form = parent::buildConfigurationForm($form, $form_state);
 
     $url = 'https://github.com/settings/developers';
@@ -51,7 +53,7 @@ class OpenIDConnectGithubClient extends OpenIDConnectClientBase {
   /**
    * {@inheritdoc}
    */
-  public function getEndpoints() {
+  public function getEndpoints(): array {
     return [
       'authorization' => 'https://github.com/login/oauth/authorize',
       'token' => 'https://github.com/login/oauth/access_token',
@@ -62,7 +64,7 @@ class OpenIDConnectGithubClient extends OpenIDConnectClientBase {
   /**
    * {@inheritdoc}
    */
-  public function authorize($scope = 'openid email') {
+  public function authorize(string $scope = 'openid email', array $additional_params = []): Response {
     // Use GitHub specific authorisations.
     return parent::authorize('user:email');
   }
@@ -70,14 +72,7 @@ class OpenIDConnectGithubClient extends OpenIDConnectClientBase {
   /**
    * {@inheritdoc}
    */
-  public function decodeIdToken($id_token) {
-    return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function retrieveUserInfo($access_token) {
+  public function retrieveUserInfo(string $access_token): ?array {
     $request_options = [
       'headers' => [
         'Authorization' => 'token ' . $access_token,
@@ -90,7 +85,7 @@ class OpenIDConnectGithubClient extends OpenIDConnectClientBase {
     try {
       $claims = [];
       $response = $client->get($endpoints['userinfo'], $request_options);
-      $response_data = json_decode((string) $response->getBody(), TRUE);
+      $response_data = Json::decode((string) $response->getBody());
 
       foreach ($this->userInfoMapping as $claim => $key) {
         if (array_key_exists($key, $response_data)) {
@@ -113,7 +108,7 @@ class OpenIDConnectGithubClient extends OpenIDConnectClientBase {
       // find out the user's email address(es).
       if (empty($claims['email'])) {
         $email_response = $client->get($endpoints['userinfo'] . '/emails', $request_options);
-        $email_response_data = json_decode((string) $email_response->getBody(), TRUE);
+        $email_response_data = Json::decode((string) $email_response->getBody());
 
         foreach ($email_response_data as $email) {
           // See https://developer.github.com/v3/users/emails/
@@ -134,8 +129,8 @@ class OpenIDConnectGithubClient extends OpenIDConnectClientBase {
       ];
       $this->loggerFactory->get('openid_connect_' . $this->pluginId)
         ->error('@message. Details: @error_message', $variables);
-      return FALSE;
     }
+    return NULL;
   }
 
 }

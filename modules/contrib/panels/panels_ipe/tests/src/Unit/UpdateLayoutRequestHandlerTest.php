@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
  */
 class UpdateLayoutRequestHandlerTest extends RequestHandlerTestBase {
 
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
     $this->sut = new UpdateLayoutRequestHandler($this->moduleHandler, $this->panelsStore, $this->tempStore);
   }
@@ -34,9 +34,7 @@ class UpdateLayoutRequestHandlerTest extends RequestHandlerTestBase {
   }
 
   private function setPanelsDisplayExpectations() {
-    $block = $this->getMockBuilder(BlockBase::class)
-      ->disableOriginalConstructor()
-      ->getMock();
+    $block = $this->createMock(BlockBase::class);
     $block->expects($this->exactly(4))->method('setConfigurationValue');
     $block->expects($this->exactly(2))
       ->method('getConfiguration')

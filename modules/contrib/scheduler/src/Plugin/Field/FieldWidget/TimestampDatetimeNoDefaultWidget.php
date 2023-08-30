@@ -29,7 +29,7 @@ class TimestampDatetimeNoDefaultWidget extends TimestampDatetimeWidget {
     $element = parent::formElement($items, $delta, $element, $form, $form_state);
     // The default description "Format: html-date html-time. Leave blank to use
     // the time of form submission" is inherited from TimestampDatetimeWidget,
-    // but this is entirely replaced in scheduler_form_node_form_alter().
+    // but this is entirely replaced in _scheduler_entity_form_alter().
     // However this widget is generic and may be used elsewhere, so provide
     // an accurate #description here.
     $element['value']['#description'] = $this->t('Leave blank for no date.');

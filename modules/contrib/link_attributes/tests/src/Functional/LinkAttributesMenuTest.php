@@ -18,7 +18,7 @@ class LinkAttributesMenuTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'link_attributes',
     'menu_ui',
     'menu_link_content',
@@ -33,7 +33,7 @@ class LinkAttributesMenuTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->placeBlock('system_menu_block:footer');
   }
@@ -65,6 +65,7 @@ class LinkAttributesMenuTest extends BrowserTestBase {
 
     // Load the menu link, make sure that the classes were stored as an array.
     $id = \Drupal::entityQuery('menu_link_content')
+      ->accessCheck(FALSE)
       ->condition('title', 'A menu link')
       ->execute();
 

@@ -29,7 +29,7 @@ trait CachedValuesGetterTrait {
    * @return mixed
    */
   protected function getCachedValues(SharedTempStoreFactory $tempstore, $tempstore_id, $machine_name) {
-    $machine_name = explode('--', $machine_name);
+    $machine_name = explode('--', $machine_name ?? '');
     $cached_values = $tempstore->get($tempstore_id)->get($machine_name[0]);
     // PageManager specific handling. If $machine_name[1] is set, it's the
     // page variant ID.

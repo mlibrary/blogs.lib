@@ -70,19 +70,19 @@ class FileEntityFileTypeClassificationTest extends BrowserTestBase {
     // Existing files have yet to be classified and should have an undefined
     // file type.
     $file_type = $this->getFileType($text_file);
-    $this->assertEqual($file_type['type'], 'undefined', t('The text file has an undefined file type.'));
+    $this->assertEquals($file_type['type'], 'undefined', t('The text file has an undefined file type.'));
     $file_type = $this->getFileType($image_file);
-    $this->assertEqual($file_type['type'], 'undefined', t('The image file has an undefined file type.'));
+    $this->assertEquals($file_type['type'], 'undefined', t('The image file has an undefined file type.'));
 
     // When editing files before cron has run the bundle should have been
     // updated.
     $account = $this->drupalCreateUser(['bypass file access']);
     $this->drupalLogin($account);
-    $this->assertNotEqual($image_file->bundle(), 'image', 'The image file does not have correct bundle before loading it.');
+    $this->assertNotEquals($image_file->bundle(), 'image', 'The image file does not have correct bundle before loading it.');
     $this->drupalGet('file/' . $image_file->id() . '/edit');
-    $this->drupalPostForm(NULL, [], t('Save'));
+    $this->submitForm([], t('Save'));
     $image_file = File::load($image_file->id());
-    $this->assertEqual($image_file->bundle(), 'image', 'The image file has correct bundle after load.');
+    $this->assertEquals($image_file->bundle(), 'image', 'The image file has correct bundle after load.');
 
     // The classification queue is processed during cron runs. Run cron to
     // trigger the classification process.
@@ -92,17 +92,17 @@ class FileEntityFileTypeClassificationTest extends BrowserTestBase {
     // MIME type is assigned to a file type. Check to see if each file was
     // assigned a proper file type.
     $file_type = $this->getFileType($text_file);
-    $this->assertEqual($file_type['type'], 'document', t('The text file was properly assigned the Document file type.'));
+    $this->assertEquals($file_type['type'], 'document', t('The text file was properly assigned the Document file type.'));
     $file_type = $this->getFileType($image_file);
-    $this->assertEqual($file_type['type'], 'image', t('The image file was properly assigned the Image file type.'));
+    $this->assertEquals($file_type['type'], 'image', t('The image file was properly assigned the Image file type.'));
 
     // Uninstall the file_entity module and ensure that cron can run and files
     // can still be loaded.
     \Drupal::service('module_installer')->uninstall(['file_entity']);
-    $this->assertEqual([], \Drupal::entityDefinitionUpdateManager()->getChangeList());
+    $this->assertEquals([], \Drupal::entityDefinitionUpdateManager()->getChangeList());
 
     $image_file = File::load($image_file->id());
-    $this->assertEqual(get_class($image_file), File::class);
+    $this->assertEquals(get_class($image_file), File::class);
     $this->cronRun();
     Views::viewsData()->getAll();
   }

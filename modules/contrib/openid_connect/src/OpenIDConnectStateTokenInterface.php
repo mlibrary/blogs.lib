@@ -14,13 +14,8 @@ interface OpenIDConnectStateTokenInterface {
    *
    * @return string
    *   A state token that later can be validated to prevent request forgery.
-   *
-   * @deprecated in openid_connect:8.x-1.0-rc2 and is removed from openid_connect:8.x-2.0.
-   *   Instead of the static OpenIDConnectStateToken::create, use the non-static
-   *   \Drupal::service('openid_connect.state_token')->create() instead.
-   * @see https://www.drupal.org/project/openid_connect/issues/3055847
    */
-  public static function create();
+  public function generateToken(): string;
 
   /**
    * Confirms anti-forgery state token.
@@ -31,12 +26,7 @@ interface OpenIDConnectStateTokenInterface {
    * @return bool
    *   Whether the state token matches the previously created one that is stored
    *   in the session.
-   *
-   * @deprecated in openid_connect:8.x-1.0-rc2 and is removed from openid_connect:8.x-2.0.
-   *   Instead of the static OpenIDConnectStateToken::confirm use the non-static
-   *   \Drupal::service('openid_connect.state_token')->confirm() instead.
-   * @see https://www.drupal.org/project/openid_connect/issues/3055847
    */
-  public static function confirm($state_token);
+  public function confirm(string $state_token): bool;
 
 }

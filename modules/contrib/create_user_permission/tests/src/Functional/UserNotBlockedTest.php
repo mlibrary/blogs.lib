@@ -3,6 +3,7 @@
 namespace Drupal\Tests\create_user_permission\Functional;
 
 use Drupal\Tests\BrowserTestBase;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Test that newly created users can be created, unblocked.
@@ -10,6 +11,7 @@ use Drupal\Tests\BrowserTestBase;
  * @group create_user_permission
  */
 class UserNotBlockedTest extends BrowserTestBase {
+  use StringTranslationTrait;
 
   /**
    * {@inheritdoc}
@@ -42,12 +44,13 @@ class UserNotBlockedTest extends BrowserTestBase {
       $this->drupalGet('admin/people/create');
       $testmail = 'testuser1@example.com';
       $password = 'testpassword';
-      $this->drupalPostForm('admin/people/create', [
+      $this->drupalGet('admin/people/create');
+      $this->submitForm([
         'mail' => $testmail,
         'name' => $testmail,
         'pass[pass1]' => $password,
         'pass[pass2]' => $password,
-      ], t('Create new account'));
+      ], $this->t('Create new account'));
       /** @var \Drupal\user\Entity\User $user */
       $user = user_load_by_mail($testmail);
       $this->assertFalse($user->isBlocked());

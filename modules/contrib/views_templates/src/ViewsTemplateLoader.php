@@ -19,7 +19,7 @@ class ViewsTemplateLoader implements ViewsTemplateLoaderInterface {
 
     $template_id = $builder->getViewTemplateId();
     if (!isset($templates[$template_id])) {
-      $dir = drupal_get_path('module', $builder->getDefinitionValue('provider')) . '/views_templates';
+      $dir = \Drupal::service('extension.list.module')->getPath($builder->getDefinitionValue('provider')) . '/views_templates';
       if (is_dir($dir)) {
 
         $file_path = $dir . '/' . $builder->getViewTemplateId() . '.yml';

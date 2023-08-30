@@ -28,7 +28,7 @@ class ResizeImageTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = ['filter', 'file', 'image_resize_filter', 'node', 'comment'];
+  protected static $modules = ['filter', 'file', 'image_resize_filter', 'node', 'comment'];
 
   /**
    * An authenticated user.
@@ -38,7 +38,7 @@ class ResizeImageTest extends BrowserTestBase {
   protected $webUser;
 
 
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Setup Filtered HTML text format.
@@ -82,7 +82,7 @@ class ResizeImageTest extends BrowserTestBase {
       'uuid' => 'thisisauuid',
     ]);
     $file->save();
-    $relative_path = file_url_transform_relative(file_create_url($uri));
+    $relative_path = \Drupal::service('file_url_generator')->generateString($uri);
     $images['inline-image'] = '<img alt="This is a description" data-entity-type="file" data-entity-uuid="' . $file->uuid() . '" height="50" src="' . $relative_path . '" width="44">';
     $comment = [];
     foreach ($images as $key => $img) {
@@ -91,11 +91,12 @@ class ResizeImageTest extends BrowserTestBase {
     $edit = array(
       'comment_body[0][value]' => implode("\n", $comment),
     );
-    $this->drupalPostForm('node/' . $this->node->id(), $edit, t('Save'));
+    $this->drupalGet('node/' . $this->node->id());
+    $this->submitForm($edit, t('Save'));
     $expected = 'public://resize/' . $image->name . '-44x50.png';
-    $expected_relative_path = file_url_transform_relative(file_create_url($expected));
-    $this->assertNoRaw($relative_path, 'The original image is gone.');
-    $this->assertRaw($expected_relative_path, 'The resize version was found.');
+    $expected_relative_path = \Drupal::service('file_url_generator')->generateString($expected);
+    $this->assertSession()->responseNotContains($relative_path);
+    $this->assertSession()->responseContains($expected_relative_path);
     $this->assertTrue(file_exists($expected), 'The resize file exists.');
   }
 

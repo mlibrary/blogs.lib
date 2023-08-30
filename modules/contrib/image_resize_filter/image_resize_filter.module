@@ -320,7 +320,7 @@ function image_resize_filter_pathinfo($uri) {
  *   Settings for the input filter.
  */
 function image_resize_filter_image_tag($image = NULL, $settings = NULL) {
-  $src = file_create_url($image['destination']);
+  $src = \Drupal::service('file_url_generator')->generateAbsoluteString($image['destination']);
 
   // Strip the http:// from the path if the original did not include it.
   if (!preg_match('/^http[s]?:\/\/' . preg_quote($_SERVER['HTTP_HOST']) . '/', $image['original'])) {

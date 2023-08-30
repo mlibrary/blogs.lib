@@ -195,7 +195,7 @@ abstract class ViewsDuplicateBuilderBase extends ViewsBuilderBase implements Vie
         $this->replaceTemplateKeyAndValues($value, $replace_values, $options);
       }
       foreach ($replace_values as $replace_key => $replace_value) {
-        if (!is_array($value)) {
+        if (!is_array($value) && $replace_value !== NULL) {
           if (is_string($value)) {
             if (stripos($value, $replace_key) !== FALSE) {
               $value = str_replace($replace_key, $replace_value, $value);
@@ -206,9 +206,9 @@ abstract class ViewsDuplicateBuilderBase extends ViewsBuilderBase implements Vie
           }
         }
         if (stripos($key, $replace_key) !== FALSE) {
-          $new_key = str_replace($replace_key, $replace_value, $key);
           // NULL is used in replace value to remove keys from template.
           if ($replace_value !== NULL) {
+            $new_key = str_replace($replace_key, $replace_value, $key);
             $template_elements[$new_key] = $value;
           }
           unset($template_elements[$key]);

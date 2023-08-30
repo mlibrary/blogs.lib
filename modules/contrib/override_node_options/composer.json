@@ -11,7 +11,7 @@
   ],
   "minimum-stability": "dev",
   "require": {
-    "drupal/core": "^8 || ^9"
+    "drupal/core": "^9 || ^10"
   },
   "prefer-stable": true
 }

@@ -1,6 +1,7 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { Plugin } from 'ckeditor5/src/core';
-import EditorAdvancedLinkEditing from "./editoradvancedlinkediting";
-import EditorAdvancedLinkUi from "./editoradvancedlinkui";
+import EditorAdvancedLinkEditing from './editoradvancedlinkediting';
+import EditorAdvancedLinkUi from './editoradvancedlinkui';
 
 class EditorAdvancedLink extends Plugin {
   /**

@@ -5,7 +5,7 @@
  * Hooks specific to the Panels IPE module.
  */
 
-use \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant;
+use Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant;
 
 /**
  * @addtogroup hooks

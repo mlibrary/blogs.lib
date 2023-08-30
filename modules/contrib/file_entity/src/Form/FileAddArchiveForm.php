@@ -7,6 +7,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\Entity\File;
+use Drupal\file\FileInterface;
 use Drupal\file_entity\UploadValidatorsTrait;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Messenger\MessengerInterface;
@@ -132,7 +133,7 @@ class FileAddArchiveForm extends FormBase {
             $file = File::create([
               'uri' => $file->uri,
               'filename' => $file->filename,
-              'status' => FILE_STATUS_PERMANENT,
+              'status' => FileInterface::STATUS_PERMANENT,
             ]);
             $file->save();
           }

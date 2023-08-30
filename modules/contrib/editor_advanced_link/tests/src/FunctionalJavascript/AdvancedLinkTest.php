@@ -99,11 +99,15 @@ class AdvancedLinkTest extends WebDriverTestBase {
     ]));
   }
 
+  /**
+   * Data provider for the test method.
+   */
   public function providerTest(): array {
     return [
       '<a aria-label>' => [
         'attribute_name' => 'aria-label',
         'input label' => 'ARIA label',
+        'is_grouped' => TRUE,
       ],
       '<a title>' => [
         'attribute_name' => 'title',
@@ -112,18 +116,22 @@ class AdvancedLinkTest extends WebDriverTestBase {
       '<a class>' => [
         'attribute_name' => 'class',
         'input label' => 'CSS classes',
+        'is_grouped' => TRUE,
       ],
       '<a id>' => [
         'attribute_name' => 'id',
         'input label' => 'ID',
+        'is_grouped' => TRUE,
       ],
       '<a rel>' => [
         'attribute_name' => 'rel',
         'input label' => 'Link relationship',
+        'is_grouped' => TRUE,
       ],
       '<a target="_blank">' => [
         'attribute_name' => 'target',
         'input label' => 'Open in new window',
+        'is_grouped' => TRUE,
         'is button' => TRUE,
       ],
     ];
@@ -134,7 +142,7 @@ class AdvancedLinkTest extends WebDriverTestBase {
    *
    * @dataProvider providerTest
    */
-  public function test(string $attribute_name, string $expected_input_label, bool $is_button = FALSE) {
+  public function test(string $attribute_name, string $expected_input_label, bool $is_grouped = FALSE, bool $is_button = FALSE) {
     // Update text format and editor to allow editing of this attribute through
     // the AdvancedLink plugin.
     $editor = Editor::load('test_format');
@@ -172,11 +180,21 @@ class AdvancedLinkTest extends WebDriverTestBase {
     $this->assertVisibleBalloon('.ck-link-actions');
     $this->getBalloonButton('Edit link')->click();
     $balloon = $this->assertVisibleBalloon('.ck-link-form');
+
+    $field_parent = $balloon;
+    if ($is_grouped) {
+      $field_parent = $balloon->find('css', '.ck-form__details');
+      $this->assertNotEmpty($field_parent, 'Group has been found');
+      // Open the group.
+      $field_parent->click();
+      $this->assertTrue($field_parent->hasAttribute('open'), 'Group is open');
+    }
+
     if (!$is_button) {
-      $this->assertTrue($balloon->hasField($expected_input_label));
+      $this->assertTrue($field_parent->hasField($expected_input_label), 'Field has been found');
     }
     else {
-      $this->assertTrue($balloon->hasButton($expected_input_label));
+      $this->assertTrue($field_parent->hasButton($expected_input_label), 'Button has been found');
     }
     // Two inputs: 1 for the link URL, 1 for the attribute editable through
     // AdvancedLink.
@@ -184,10 +202,10 @@ class AdvancedLinkTest extends WebDriverTestBase {
 
     // Confirm we can set the attribute using AdvancedLink's UI.
     if (!$is_button) {
-      $balloon->fillField($expected_input_label, 'foobarbaz');
+      $field_parent->fillField($expected_input_label, 'foobarbaz');
     }
     else {
-      $balloon->pressButton($expected_input_label);
+      $field_parent->pressButton($expected_input_label);
     }
     $balloon->submit();
     $this->assertStringContainsString($attribute_name, $this->getEditorDataAsHtmlString());

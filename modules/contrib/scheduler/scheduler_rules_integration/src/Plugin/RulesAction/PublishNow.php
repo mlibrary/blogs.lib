@@ -2,35 +2,30 @@
 
 namespace Drupal\scheduler_rules_integration\Plugin\RulesAction;
 
-use Drupal\rules\Core\RulesActionBase;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
- * Provides a 'Publish the node immediately' action.
+ * Provides a 'Publish immediately' action.
  *
  * @RulesAction(
- *   id = "scheduler_publish_now_action",
- *   label = @Translation("Publish the content immediately"),
- *   category = @Translation("Scheduler"),
- *   context_definitions = {
- *     "node" = @ContextDefinition("entity:node",
- *       label = @Translation("Node"),
- *       description = @Translation("The node to be published now"),
- *     ),
- *   }
+ *   id = "scheduler_publish_now",
+ *   deriver = "Drupal\scheduler_rules_integration\Plugin\RulesAction\SchedulerRulesActionDeriver"
  * )
  */
-class PublishNow extends RulesActionBase {
+class PublishNow extends SchedulerRulesActionBase {
 
   /**
-   * Set the node status to Published.
+   * Set the entity status to Published.
    *
-   * This action should really be provided by Rules or by Core, but it is not
-   * yet done (as of Aug 2016). Scheduler users need this action so we provide
-   * it here. It could be removed later when Rules or Core includes it.
+   * This action is provided by the Rules Module but only for node content, not
+   * Media. There is also a problem with recursion in the Rules action due to
+   * autoSaveContext(). Hence better for Scheduler to provide this action.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity to be published.
    */
-  public function doExecute() {
-    $node = $this->getContextValue('node');
-    $node->setPublished();
+  public function doExecute(EntityInterface $entity) {
+    $entity->setPublished();
   }
 
 }

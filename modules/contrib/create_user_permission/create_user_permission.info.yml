@@ -1,10 +1,11 @@
-name: Create user permission
-description: Provides a permission to "create users", instead of having to "administer users"
-core: 8.x
-core_version_requirement: '^8 || ^9'
+name: Create User Permission
+description: Provides a permission to "create users", instead of having to "administer users".
+core_version_requirement: '^8 || ^9 || ^10'
 type: module
+dependencies:
+  - drupal:user
 
-# Information added by Drupal.org packaging script on 2020-07-03
-version: '2.0.0'
+# Information added by Drupal.org packaging script on 2023-07-20
+version: '2.0.1'
 project: 'create_user_permission'
-datestamp: 1593785458
+datestamp: 1689851184

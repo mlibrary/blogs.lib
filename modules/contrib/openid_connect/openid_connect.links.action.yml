@@ -1,0 +1,4 @@
+entity.openid_connect_client.add_form_links:
+  deriver: 'Drupal\openid_connect\Plugin\Derivative\OpenIDConnectAddLinks'
+  appears_on:
+    - entity.openid_connect_client.list

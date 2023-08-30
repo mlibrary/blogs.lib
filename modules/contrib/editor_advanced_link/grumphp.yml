@@ -1,0 +1,7 @@
+grumphp:
+  tasks:
+    git_blacklist:
+      keywords:
+        - "eval("
+      triggered_by:
+        - js

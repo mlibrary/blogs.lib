@@ -2,13 +2,13 @@ name: 'Mime Mail Example'
 type: module
 description: 'Example of how to use the Mime Mail module.'
 package: Example modules
-core_version_requirement: ^8.8 || ^9
+core_version_requirement: ^9.3 || ^10
 dependencies:
   - mimemail:mimemail
 
 configure: mimemail_example.example
 
-# Information added by Drupal.org packaging script on 2021-12-05
-version: '8.x-1.0-alpha4'
+# Information added by Drupal.org packaging script on 2023-03-23
+version: '8.x-1.0-alpha5'
 project: 'mimemail'
-datestamp: 1638738306
+datestamp: 1679607105

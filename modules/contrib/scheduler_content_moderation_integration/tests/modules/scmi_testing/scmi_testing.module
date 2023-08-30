@@ -15,6 +15,8 @@ function scmi_testing_form_alter(&$form, FormStateInterface $form_state, $form_i
   if (!in_array($form_id, [
     'node_page_form',
     'node_page_edit_form',
+    'media_soundtrack_add_form',
+    'media_soundtrack_edit_form',
   ])) {
     return;
   }

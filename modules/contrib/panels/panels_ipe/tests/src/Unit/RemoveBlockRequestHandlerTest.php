@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
  */
 class RemoveBlockRequestHandlerTest extends RequestHandlerTestBase {
 
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
     $this->sut = new RemoveBlockRequestHandler($this->moduleHandler, $this->panelsStore, $this->tempStore);
   }

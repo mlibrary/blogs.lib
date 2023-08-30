@@ -3,8 +3,8 @@
 namespace Drupal\Tests\mimemail\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\mimemail\Utility\MimeMailFormatHelper;
+use Drupal\Tests\user\Traits\UserCreationTrait;
 
 /**
  * Tests that Mime Mail utility functions work properly.
@@ -50,7 +50,7 @@ class MimeMailFormatHelperTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     // Sets up an anonymous and two authenticated users.
     $this->adminUser = $this->setUpCurrentUser([
@@ -75,9 +75,9 @@ class MimeMailFormatHelperTest extends KernelTestBase {
    *     - (optional) name: A text name to accompany the email address,
    *       e.g. 'John Doe'.
    *   - A fully loaded object implementing \Drupal\user\UserInterface.
-   * @param string $result
+   * @param string|array $result
    *   Email address after formatting.
-   * @param string $simplified_result
+   * @param string|array $simplified_result
    *   Simplified email address after formatting.
    *
    * @dataProvider providerAddress
@@ -85,7 +85,7 @@ class MimeMailFormatHelperTest extends KernelTestBase {
    * @dataProvider providerAssociativeAddressArray
    * @covers ::mimeMailAddress
    */
-  public function testAddress($address, $result, $simplified_result) {
+  public function testAddress($address, $result, $simplified_result): void {
     // Test not simplified.
     $formatted = MimeMailFormatHelper::mimeMailAddress($address, $simplify = FALSE);
     $this->assertSame($result, $formatted);
@@ -99,14 +99,18 @@ class MimeMailFormatHelperTest extends KernelTestBase {
    * Provides test data for testAddress().
    *
    * Tests addresses provided as text email addresses, e.g. someone@example.com.
+   *
+   * @return array<string, array<int, string>>
+   *   An array of test case data, where each array element contains an array
+   *   of three items corresponding to the three input parameters needed for
+   *   each case:
+   *   - address: Email address to test.
+   *   - result: Expected return value from
+   *     MimeMailFormatHelper::mimeMailAddress($address, $simplify = FALSE).
+   *   - simplified_result: Expected return value from
+   *     MimeMailFormatHelper::mimeMailAddress($address, $simplify = TRUE).
    */
-  public function providerAddress() {
-    // Format of each element is:
-    // - address: Email address to test.
-    // - result: Expected return value from
-    //   MimeMailFormatHelper::mimeMailAddress($address, $simplify = FALSE).
-    // - simplified_result: Expected return value from
-    //   MimeMailFormatHelper::mimeMailAddress($address, $simplify = TRUE).
+  public function providerAddress(): array {
     $addresses = [
       'Encoded display-name' => [
         '=?utf-8?Q?Drupal=20Supporters?= <support@association.drupal.org>',
@@ -120,7 +124,7 @@ class MimeMailFormatHelperTest extends KernelTestBase {
       ],
       'UTF-8 display-name' => [
         '山田太郎 <taro@example.com>',
-        '=?UTF-8?B?5bGx55Sw5aSq6YOO?= <taro@example.com>',
+        '=?utf-8?Q?=E5=B1=B1=E7=94=B0=E5=A4=AA=E9=83=8E?= <taro@example.com>',
         'taro@example.com',
       ],
       'No display-name' => [
@@ -142,14 +146,17 @@ class MimeMailFormatHelperTest extends KernelTestBase {
    * Provides test data for testAddress().
    *
    * Tests addresses provided as an array of text email addresses.
+   *
+   * @return array<string, array<int, string>>
+   *   An array of test case data, where each array element contains an array
+   *   of three items corresponding to the three input parameters needed for
+   *   - address: Array of email addresses to test.
+   *   - result: Expected return value from
+   *     MimeMailFormatHelper::mimeMailAddress($address, $simplify = FALSE).
+   *   - simplified_result: Expected return value from
+   *     MimeMailFormatHelper::mimeMailAddress($address, $simplify = TRUE).
    */
-  public function providerArrayOfAddresses() {
-    // Format of each element is:
-    // - address: Array of email addresses to test.
-    // - result: Expected return value from
-    //   MimeMailFormatHelper::mimeMailAddress($address, $simplify = FALSE).
-    // - simplified_result: Expected return value from
-    //   MimeMailFormatHelper::mimeMailAddress($address, $simplify = TRUE).
+  public function providerArrayOfAddresses(): array {
     $addresses = [
       'Array of address strings' => [
         [
@@ -162,7 +169,7 @@ class MimeMailFormatHelperTest extends KernelTestBase {
         [
           '=?utf-8?Q?Drupal=20Supporters?= <support@association.drupal.org>',
           '"Acme Industries, Inc." <no-reply@acme.example.com>',
-          '=?UTF-8?B?5bGx55Sw5aSq6YOO?= <taro@example.com>',
+          '=?utf-8?Q?=E5=B1=B1=E7=94=B0=E5=A4=AA=E9=83=8E?= <taro@example.com>',
           'bethe@example.com',
           '<subscriber@example.com>',
         ],
@@ -186,14 +193,20 @@ class MimeMailFormatHelperTest extends KernelTestBase {
    * - mail: A text email address, as above.
    * - (optional) name: A text name to accompany the email address,
    *   e.g. 'John Doe'.
+   *
+   * @return array<string, array<int, string>>
+   *   An array of test case data, where each array element contains an array
+   *   of three items corresponding to the three input parameters needed for
+   *   - address: Associative array of addresses, with 'mail' and 'name' keys:
+   *     - mail: A text email address, as above.
+   *     - (optional) name: A text name to accompany the email address,
+   *       e.g. 'John Doe'.
+   *   - result: Expected return value from
+   *     MimeMailFormatHelper::mimeMailAddress($address, $simplify = FALSE).
+   *   - simplified_result: Expected return value from
+   *     MimeMailFormatHelper::mimeMailAddress($address, $simplify = TRUE).
    */
-  public function providerAssociativeAddressArray() {
-    // Format of each element is:
-    // - address: Associative array of addresses, with 'mail' and 'name' keys.
-    // - result: Expected return value from
-    //   MimeMailFormatHelper::mimeMailAddress($address, $simplify = FALSE).
-    // - simplified_result: Expected return value from
-    //   MimeMailFormatHelper::mimeMailAddress($address, $simplify = TRUE).
+  public function providerAssociativeAddressArray(): array {
     $addresses = [
       'Encoded display-name in array' => [
         ['name' => '=?utf-8?Q?Drupal=20Supporters?=', 'mail' => 'support@association.drupal.org'],
@@ -207,7 +220,7 @@ class MimeMailFormatHelperTest extends KernelTestBase {
       ],
       'UTF-8 display-name in array' => [
         ['name' => '山田太郎', 'mail' => 'taro@example.com'],
-        '=?UTF-8?B?5bGx55Sw5aSq6YOO?= <taro@example.com>',
+        '=?utf-8?Q?=E5=B1=B1=E7=94=B0=E5=A4=AA=E9=83=8E?= <taro@example.com>',
         'taro@example.com',
       ],
       'No display-name' => [
@@ -230,7 +243,7 @@ class MimeMailFormatHelperTest extends KernelTestBase {
    *
    * @covers ::mimeMailAddress
    */
-  public function testAddressUserObject() {
+  public function testAddressUserObject(): void {
     // Format of each element is:
     // - address: Instance of a User object containing an email field.
     // - result: Expected return value from
@@ -279,7 +292,7 @@ class MimeMailFormatHelperTest extends KernelTestBase {
    * @dataProvider providerTestUrl
    * @covers ::mimeMailUrl
    */
-  public function testUrl($url, $absolute, $expected) {
+  public function testUrl(string $url, bool $absolute, string $expected): void {
     $result = MimeMailFormatHelper::mimeMailUrl($url, $absolute);
     $this->assertSame($expected, $result);
   }
@@ -287,7 +300,7 @@ class MimeMailFormatHelperTest extends KernelTestBase {
   /**
    * Provides test data for testUrl().
    */
-  public function providerTestUrl() {
+  public function providerTestUrl(): array {
     // Format of each element is:
     // - url: URL to test.
     // - absolute: Whether the URL is absolute.
@@ -304,9 +317,19 @@ class MimeMailFormatHelperTest extends KernelTestBase {
         '/sites/default/files/styles/thumbnail/public/image.jpg',
       ],
       'Space in the filename of the attachment left intact.' => [
-        $expected = 'public://' . $this->randomMachineName() . ' ' . $this->randomMachineName() . '.' . $this->randomMachineName(3),
+        $url = 'public://' . $this->randomMachineName() . ' ' . $this->randomMachineName() . '.' . $this->randomMachineName(3),
         TRUE,
-        $expected,
+        $expected = $url,
+      ],
+      'URL-encoded spaces in the filename of the attachment left intact.' => [
+        $url = 'public://' . $this->randomMachineName() . '+' . $this->randomMachineName() . '.' . $this->randomMachineName(3),
+        TRUE,
+        $expected = $url,
+      ],
+      'Base64 encoded image using data: scheme' => [
+        $url = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIyLjEuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAyMTYwIDI4ODAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDIxNjAgMjg4MDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiNGRkZGRkY7fQo8L3N0eWxlPgo8ZyBpZD0iTGl2ZWxsb18yXzFfIj4KCTxnIGlkPSJMaXZlbGxvXzEtMl8xXyI+CgkJPHBhdGggY2xhc3M9InN0MCIgZD0iTTExODYsMTA4MC41Yy0zNi0zNi03NC4yLTc0LjYtMTA4LjEtMTEzLjFjLTMxLjcsMzYtNjUuMiw2OC44LTk4LjcsMTAyLjNjLTguMSw4LTE0LjcsMTcuNC0xOS41LDI3LjcKCQkJYy03LjQsMTYuMi05LjgsMzQuMy02LjgsNTEuOWMwLDEuOCwwLDMuNiwwLDUuNGMzLjEsOS43LDcuNywxOC44LDEzLjcsMjdjMSwxLjQsMS44LDIuOCwyLjUsNC4zYzIyLDI3LjQsNzQuMiw3Ny44LDEwMy40LDEwNS45CgkJCWwxNzMsMTgwLjJsNTEuOSw1NC44YzQyLjgsNDQuNCw4MS40LDkyLjYsMTE1LjMsMTQ0LjFsMCwwYzQuMSw3LjEsMTAuNiwxMi4zLDE4LjQsMTQuOGgzLjZjOC40LTEuNCwxNS4zLTcuNCwxOC0xNS41bDAsMAoJCQljMTEuMi0zNi4yLDE2LjktNzMuOCwxNi45LTExMS43Yy0xLTg3LjctMjguOC0xNzIuOS03OS42LTI0NC4zYy01OS45LTgzLjctMTI3LjktMTYxLjItMjAzLjItMjMxLjNMMTE4NiwxMDgwLjV6Ii8+CgkJPHBhdGggY2xhc3M9InN0MCIgZD0iTTEyMzQuMywxNjYwLjdjLTQyLjktNTIuMy04NC4zLTEwMC4yLTE0OS41LTE2OS43Yy01NS4xLDYzLjEtMTA1LjYsMTExLjctMTQ3LjQsMTYxLjEKCQkJYy03My42LDc5LjctNjguNywyMDMuOSwxMSwyNzcuNWM3OS43LDczLjYsMjAzLjksNjguNywyNzcuNS0xMWM2Mi41LTY3LjYsNjkuNi0xNjkuNiwxNy4xLTI0NS4zCgkJCUMxMjQwLjQsMTY2OC44LDEyMzcuNSwxNjY0LjYsMTIzNC4zLDE2NjAuN3oiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNOTc5LjksMTQwNS41YzQuOC01LjUsNC44LTEzLjYsMC0xOS4xbC0xMjcuMi0xMzAuMWwtMjcuNC0yNS45Yy0yMiwyNS42LTQyLjYsNTIuNC02MS42LDgwLjQKCQkJYy0zMC44LDQ0LjQtNTMuNyw5My44LTY3LjcsMTQ1LjlsMCwwYy0xNS4zLDYwLTEzLjksMTIzLjEsNC4zLDE4Mi4zbDIuNSw1LjRjMy4yLDYuNCw2LjgsMTIuNSwxMC44LDE4LjRsMCwwCgkJCWMwLDAsMTQuOCwyMy44LDI3LjcsMjQuOWg0LjdjNC40LTEsOC00LjEsOS43LTguM2MxMi0yNS4yLDI3LTQ4LjcsNDQuNy03MC4zbDQ2LjUtNTYuNmwwLDBMOTc5LjksMTQwNS41eiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMDgyLjYsMzYzLjRDNDg3LjMsMzYzLjIsNC42LDg0NS42LDQuNCwxNDQwLjhzNDgyLjIsMTA3OCwxMDc3LjQsMTA3OC4yCgkJCWM1OTUuMywwLjIsMTA3OC00ODIuMiwxMDc4LjItMTA3Ny40YzAtMC4xLDAtMC4yLDAtMC40QzIxNjAsODQ2LjEsMTY3Ny43LDM2My42LDEwODIuNiwzNjMuNHogTTEwNzYuNCwyMTI0LjgKCQkJYy0zMTMuMi0wLjgtNTY2LjgtMjU0LjctNTY3LjItNTY3LjljMC0yNjYuMywxNzcuNy00NDMuNiwzMzQtNjAwLjNjMTA0LjUtMTA0LjUsMjA0LjMtMjA0LDIzMy45LTMxNgoJCQljMjkuNSwxMTIuMSwxMjkuNCwyMTEuNSwyMzMuOSwzMTZjMTU2LjgsMTU2LjgsMzM0LDMzNCwzMzQsNjAwLjNDMTY0NC43LDE4NzAuNiwxMzkwLjIsMjEyNC44LDEwNzYuNCwyMTI0Ljh6Ii8+Cgk8L2c+CjwvZz4KPC9zdmc+Cg==",
+        TRUE,
+        $expected = $url,
       ],
     ];
   }
@@ -323,7 +346,7 @@ class MimeMailFormatHelperTest extends KernelTestBase {
    * @dataProvider providerRfcHeaders
    * @covers ::mimeMailRfcHeaders
    */
-  public function testRfcHeaders(array $headers, $expected) {
+  public function testRfcHeaders(array $headers, string $expected): void {
     $actual = MimeMailFormatHelper::mimeMailRfcHeaders($headers);
     $this->assertSame($expected, $actual);
   }
@@ -331,7 +354,7 @@ class MimeMailFormatHelperTest extends KernelTestBase {
   /**
    * Provides test data for testRfcHeaders().
    */
-  public function providerRfcHeaders() {
+  public function providerRfcHeaders(): array {
     // Format of each element is:
     // - headers: An associative array of header fields to test. Each element
     //   is keyed by the header field name, which the array value being the
@@ -433,7 +456,7 @@ class MimeMailFormatHelperTest extends KernelTestBase {
    *
    * @covers ::mimeMailHeaders
    */
-  public function testHeaders() {
+  public function testHeaders(): void {
     $chars = ['-', '.', '+', '_'];
     $name = $this->randomString();
     $local = $this->randomMachineName() . $chars[array_rand($chars)] . $this->randomMachineName();

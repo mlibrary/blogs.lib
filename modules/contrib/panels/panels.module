@@ -1,7 +1,8 @@
 <?php
 
 /**
- * @file panels.module
+ * @file
+ * panels.module
  *
  * Core functionality for the Panels engine.
  */
@@ -13,9 +14,12 @@ use Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant;
 
 define('PANELS_REQUIRED_CTOOLS_API', '2.0-alpha');
 
-define('PANELS_TITLE_FIXED', 0); // Hide title use to be true/false. So false remains old behavior.
-define('PANELS_TITLE_NONE', 1); // And true meant no title.
-define('PANELS_TITLE_PANE', 2); // And this is the new behavior, where the title field will pick from a pane.
+// Hide title use to be true/false. So false remains old behavior.
+define('PANELS_TITLE_FIXED', 0);
+// And true meant no title.
+define('PANELS_TITLE_NONE', 1);
+// And this is the new behavior, where the title field will pick from a pane.
+define('PANELS_TITLE_PANE', 2);
 
 // --------------------------------------------------------------------------
 // Page Manager integration
@@ -45,20 +49,20 @@ function panels_page_variant_create(PageVariantInterface $page_variant) {
  */
 function panels_layout_alter(&$definitions) {
   $core_layouts = ['layout_onecol', 'layout_twocol', 'layout_twocol_bricks', 'layout_threecol_25_50_25', 'layout_threecol_33_34_33'];
-  foreach($definitions as $layout_name => $layout) {
+  $panels_path = \Drupal::service('extension.list.module')->getPath('panels');
+  foreach ($definitions as $layout_name => $layout) {
     // Verify that the layout definition is a LayoutDefinition
     if (!($definitions[$layout_name] instanceof LayoutDefinition)) {
       continue;
     }
     if (in_array($layout_name, $core_layouts) && empty($definitions[$layout_name]->getIcon())) {
-      $definitions[$layout_name]->setIconPath(drupal_get_path('module', 'panels') . '/layouts/'.$layout_name.'/'.$layout_name.'.png');
+      $definitions[$layout_name]->setIconPath($panels_path . '/layouts/' . $layout_name . '/' . $layout_name . '.png');
     }
     if (empty($definitions[$layout_name]->getIcon())) {
-      $definitions[$layout_name]->setIconPath(drupal_get_path('module', 'panels') . '/layouts/no-layout-preview.png');
+      $definitions[$layout_name]->setIconPath($panels_path . '/layouts/no-layout-preview.png');
     }
   }
 }
-
 
 /**
  * Implements hook_ENTITY_TYPE_presave().
@@ -100,7 +104,7 @@ function panels_form_page_manager_add_variant_form_alter(array &$form, FormState
  */
 function panels_form_page_manager_add_variant_form_submit(array &$form, FormStateInterface $form_state) {
   $cached_values = $form_state->getTemporaryValue('wizard');
-  /** @var $page_variant \Drupal\page_manager\Entity\PageVariant */
+  /** @var \Drupal\page_manager\Entity\PageVariant $page_variant */
   $page_variant = $cached_values['page_variant'];
   $plugin = $page_variant->getVariantPlugin();
   if ($plugin instanceof PanelsDisplayVariant) {

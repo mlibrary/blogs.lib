@@ -142,8 +142,9 @@ class FileAudioFormatter extends FileFormatterBase implements ContainerFactoryPl
     foreach ($this->getEntitiesToView($items, $langcode) as $delta => $file) {
       if ($file->getMimeTypeType() == 'audio') {
         $source_attributes = new Attribute();
-        $source_attributes->setAttribute('src', file_create_url($file->getFileUri()));
-        $source_attributes->setAttribute('type', $file->getMimeType());
+        $source_attributes
+          ->setAttribute('src', $file->createFileUrl())
+          ->setAttribute('type', $file->getMimeType());
         if ($multiple_file_behavior == 'tags') {
           $source_files[] = array(array('file' => $file, 'source_attributes' => $source_attributes));
         }

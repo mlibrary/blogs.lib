@@ -78,6 +78,7 @@ function file_entity_install() {
   // Queue all files to be classified during cron runs using the Queue API.
   $queue = \Drupal::queue('file_entity_type_determine');
   $ids = \Drupal::entityQuery('file')
+    ->accessCheck(FALSE)
     ->execute();
   foreach ($ids as $id) {
     $queue->createItem($id);
@@ -87,12 +88,6 @@ function file_entity_install() {
   // has been processed.
   if ($queue->numberOfItems()) {
     \Drupal::messenger()->addMessage(t('Existing files must be classified according to the currently defined file types. These files have been queued for processing and will have their file type determined during cron runs.'));
-  }
-
-  // Disable the core files view.
-  if ($view = View::load('files')) {
-    $view->set('status', FALSE);
-    $view->save();
   }
 }
 
@@ -118,6 +113,12 @@ function file_entity_uninstall() {
   $keys['bundle'] = '';
   $entity_type->set('entity_keys', $keys);
   \Drupal::entityDefinitionUpdateManager()->updateEntityType($entity_type);
+
+  // Enable the core files view.
+  if ($view = View::load('files')) {
+    $view->set('status', TRUE);
+    $view->save();
+  }
 }
 
 /**

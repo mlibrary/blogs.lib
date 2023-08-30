@@ -37,16 +37,19 @@ for further information.
 
 ## Configuration
 
-Install as usual then:
-
-- go to the "Text formats and editor" admin page
-  (admin/config/content/formats)
-- configure your text format
-  - if the "Limit allowed HTML tags and correct faulty HTML" filter is disabled
+- Install and enable the module.
+- Go to the "Text formats and editor" admin page
+  (admin/config/content/formats).
+- If you are using CKEditor 5, click the "Advanced links" tab. There you will
+  see a list of attributes provided by this module that you can enable. For
+  example, "ARIA label", "ID", and "Open in new window."
+- If you are using CKEditor 4, configure your text format.
+  - If the "Limit allowed HTML tags and correct faulty HTML" filter is disabled
     you don't have anything to do with this text format
   - else, add the `title`, `class`, `id`, `target` and/or the `rel` attributes
     to the "allowed HTML tags" field (only those whitelisted will show up in
     the dialog)
+
 
 ## Recommended modules
 
