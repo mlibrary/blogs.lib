@@ -363,9 +363,7 @@ class MediaLibraryWidget extends WidgetBase implements TrustedCallbackInterface 
       ];
     }
     else {
-      // @todo Use a <button> link here, and delete
-      // seven_preprocess_fieldset__media_library_widget(), when
-      // https://www.drupal.org/project/drupal/issues/2999549 lands.
+      // @todo Use a <button> link here.
       $multiple_items = count($referenced_entities) > 1;
       $element['#field_prefix']['weight_toggle'] = [
         '#type' => 'html_tag',
@@ -496,12 +494,11 @@ class MediaLibraryWidget extends WidgetBase implements TrustedCallbackInterface 
           '#limit_validation_errors' => $limit_validation_errors,
         ],
         'edit_button' => [
-          '#type' => 'button',
+          '#type' => 'submit',
           '#value' => $this->t('Edit'),
           '#weight' => -5,
           '#access' => $media_item->access('update'),
           '#attributes' => [
-            'type' => 'button',
             'class' => ['edit-media', 'use-ajax'],
             'href' => $media_item->toUrl('edit-form', ['query' => $state->all()])->toString(),
             'data-dialog-type' => 'modal',

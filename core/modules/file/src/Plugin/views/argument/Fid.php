@@ -13,4 +13,5 @@ use Drupal\views\Plugin\views\argument\EntityArgument;
  * @ViewsArgument("file_fid")
  */
 class Fid extends EntityArgument implements ContainerFactoryPluginInterface {
+
 }

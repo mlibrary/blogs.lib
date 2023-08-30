@@ -29,7 +29,7 @@ class AbbreviationCKEditorButton extends CKEditorPluginBase {
   public function getButtons() {
     // Make sure that the path to the image matches the file structure of
     // the CKEditor plugin you are implementing.
-    $path = drupal_get_path('module', 'ckeditor_abbreviation') . '/js/plugins/abbr';
+    $path = $this->getModulePath('ckeditor_abbreviation') . '/js/plugins/abbr';
     return [
       'abbr' => [
         'label' => $this->t('Abbreviation ckeditor button'),
@@ -44,7 +44,7 @@ class AbbreviationCKEditorButton extends CKEditorPluginBase {
   public function getFile() {
     // Make sure that the path to the plugin.js matches the file structure of
     // the CKEditor plugin you are implementing.
-    return drupal_get_path('module', 'ckeditor_abbreviation') . '/js/plugins/abbr/plugin.js';
+    return $this->getModulePath('ckeditor_abbreviation') . '/js/plugins/abbr/plugin.js';
   }
 
   /**

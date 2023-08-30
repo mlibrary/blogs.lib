@@ -10,4 +10,5 @@ use Drupal\views\Plugin\views\argument\EntityArgument;
  * @ViewsArgument("node_nid")
  */
 class Nid extends EntityArgument {
+
 }

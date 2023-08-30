@@ -39,8 +39,7 @@ views.argument.numeric:
     not:
       type: boolean
       label: 'Exclude'
-
-views.argument.entity_id:
++views.argument.entity_id:
   type: views.argument.numeric
   label: 'Entity ID'
 
@@ -51,7 +50,6 @@ views.argument.entity_target_id:
     target_entity_type_id:
       type: string
       label: 'Target entity type ID'
-
 views.argument.string:
   type: views_argument
   label: 'String'

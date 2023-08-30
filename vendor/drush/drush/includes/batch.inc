@@ -52,11 +52,6 @@ class DrushBatchContext extends ArrayObject {
 /**
  * Process a Drupal batch by spawning multiple Drush processes.
  *
- * This function will include the correct batch engine for the current
- * major version of Drupal, and will make use of the drush_backend_invoke
- * system to spawn multiple worker threads to handle the processing of
- * the current batch, while keeping track of available memory.
- *
  * The batch system will process as many batch sets as possible until
  * the entire batch has been completed or 60% of the available memory
  * has been used.
@@ -158,6 +153,11 @@ function _drush_backend_batch_process($command = 'batch-process', $args = [], $o
       $finished = !$process->isSuccessful() || (isset($result['drush_batch_process_finished']) && $result['drush_batch_process_finished'] === TRUE);
     }
   }
+
+  // An attempt to clear the batch is performed in "_drush_batch_finished",
+  // however when that is run in a separate process, static cache changes need
+  // to be replayed.
+  $batch = NULL;
 
   return $result;
 }

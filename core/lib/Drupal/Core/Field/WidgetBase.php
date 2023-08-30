@@ -119,10 +119,6 @@ abstract class WidgetBase extends PluginSettingsBase implements WidgetInterface,
       'items' => $items,
       'default' => $this->isDefaultValueWidget($form_state),
     ];
-    \Drupal::moduleHandler()->alterDeprecated('Deprecated in drupal:9.2.0 and is removed from drupal:10.0.0. Use hook_field_widget_complete_form_alter or hook_field_widget_complete_WIDGET_TYPE_form_alter instead. See https://www.drupal.org/node/3180429.', [
-      'field_widget_multivalue_form',
-      'field_widget_multivalue_' . $this->getPluginId() . '_form',
-    ], $elements, $form_state, $context);
 
     // Populate the 'array_parents' information in $form_state->get('field')
     // after the form is built, so that we catch changes in the form structure
@@ -361,7 +357,6 @@ abstract class WidgetBase extends PluginSettingsBase implements WidgetInterface,
         'delta' => $delta,
         'default' => $this->isDefaultValueWidget($form_state),
       ];
-      \Drupal::moduleHandler()->alterDeprecated('Deprecated in drupal:9.2.0 and is removed from drupal:10.0.0. Use hook_field_widget_single_element_form_alter or hook_field_widget_single_element_WIDGET_TYPE_form_alter instead. See https://www.drupal.org/node/3180429.', ['field_widget_form', 'field_widget_' . $this->getPluginId() . '_form'], $element, $form_state, $context);
       \Drupal::moduleHandler()->alter(['field_widget_single_element_form', 'field_widget_single_element_' . $this->getPluginId() . '_form'], $element, $form_state, $context);
     }
 
@@ -432,7 +427,7 @@ abstract class WidgetBase extends PluginSettingsBase implements WidgetInterface,
       $element_path = implode('][', $element['#parents']);
       if ($reported_errors = $form_state->getErrors()) {
         foreach (array_keys($reported_errors) as $error_path) {
-          if (strpos($error_path, $element_path) === 0) {
+          if (str_starts_with($error_path, $element_path)) {
             return;
           }
         }

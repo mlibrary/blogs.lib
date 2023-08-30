@@ -12,4 +12,5 @@ use Drupal\views\Plugin\views\argument\EntityArgument;
  * @ViewsArgument("user_uid")
  */
 class Uid extends EntityArgument {
+
 }

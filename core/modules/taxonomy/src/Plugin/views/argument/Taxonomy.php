@@ -13,4 +13,5 @@ use Drupal\views\Plugin\views\argument\EntityArgument;
  * @ViewsArgument("taxonomy")
  */
 class Taxonomy extends EntityArgument implements ContainerFactoryPluginInterface {
+
 }

@@ -12,4 +12,5 @@ use Drupal\views\Plugin\views\argument\EntityArgument;
  * @ViewsArgument("vocabulary_vid")
  */
 class VocabularyVid extends EntityArgument {
+
 }

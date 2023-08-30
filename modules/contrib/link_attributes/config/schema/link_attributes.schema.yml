@@ -13,3 +13,6 @@ field.widget.settings.link_attributes:
       sequence:
         type: boolean
         label: 'Enabled'
+    widget_default_open:
+      type: string
+      label: 'Widget expand behavior'
