@@ -328,7 +328,7 @@ class EREFNodeTitles extends ManyToOne implements PluginInspectionInterface, Con
       // Run through the bundles.
       foreach (array_keys($all_bundles) as $bundle) {
         foreach ($this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle) as $field_definition) {
-          if (in_array($field_definition->getType(), ['entity_reference', 'og_standard_reference']) && $field_definition->getName() == $relationship_field_name) {
+          if ($field_definition->getType() == 'entity_reference' && $field_definition->getName() == $relationship_field_name) {
             if ($field_definition->getName() == 'uid') {
               continue;
             }
@@ -344,12 +344,7 @@ class EREFNodeTitles extends ManyToOne implements PluginInspectionInterface, Con
               $target_entity_type_id = $target_entity_type_id[1];
             }
             // Filter out entity reference views.
-            $handler_settings = $field_obj->getSetting('handler_settings');
-            if ($relationship_field_name == 'og_audience') {
-              $handler_settings['view'] = [];
-              $handler_settings['target_bundles']['blog'] = 'blog';
-            }
-            if ($handler_settings && !empty($handler_settings['view'])) {
+            if (($handler_settings = $field_obj->getSetting('handler_settings')) && !empty($handler_settings['view'])) {
               \Drupal::messenger()->addError($this->t('This is targeting a field filtered by a view. Cannot get bundle.'), 'error');
               \Drupal::messenger()->addError($this->t('Please use a field filtered by content type only.'), 'error');
               return [];
