@@ -1,8 +1,8 @@
 diff --git a/modules/contrib/entity_reference_exposed_filters/src/Plugin/views/filter/EREFNodeTitles.php b/modules/contrib/entity_reference_exposed_filters/src/Plugin/views/filter/EREFNodeTitles.php
-index 84df3fe6..5ee6f761 100644
+index 8f0e213b5..004037339 100644
 --- a/modules/contrib/entity_reference_exposed_filters/src/Plugin/views/filter/EREFNodeTitles.php
 +++ b/modules/contrib/entity_reference_exposed_filters/src/Plugin/views/filter/EREFNodeTitles.php
-@@ -312,7 +312,7 @@ public function generateOptions() {
+@@ -328,7 +328,7 @@ public function generateOptions() {
        // Run through the bundles.
        foreach (array_keys($all_bundles) as $bundle) {
          foreach ($this->entityFieldManager->getFieldDefinitions($entity_type_id, $bundle) as $field_definition) {
@@ -11,7 +11,7 @@ index 84df3fe6..5ee6f761 100644
              if ($field_definition->getName() == 'uid') {
                continue;
              }
-@@ -328,13 +328,18 @@ public function generateOptions() {
+@@ -344,13 +344,18 @@ public function generateOptions() {
                $target_entity_type_id = $target_entity_type_id[1];
              }
              // Filter out entity reference views.
@@ -27,8 +27,8 @@ index 84df3fe6..5ee6f761 100644
                return [];
              }
              // Get all the targets (content types etc) that this might hit.
-             foreach (array_keys($field_obj->getSetting('handler_settings')['target_bundles']) as $bundle) {
+-            foreach (array_keys($field_obj->getSetting('handler_settings')['target_bundles']) as $bundle) {
++            foreach (array_keys($handler_settings['target_bundles']) as $bundle) {
                $target_bundles[] = $bundle;
              }
              $bundles_needed[] = $bundle;
-

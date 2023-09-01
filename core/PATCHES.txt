@@ -6,15 +6,11 @@ Source: https://www.drupal.org/files/issues/2022-12-03/2640994-148.patch
 
 
 https://www.drupal.org/node/2858392
-Source: https://www.drupal.org/files/issues/2023-05-09/2858392-15.patch
+Source: patches/2858392-34.patch
 
 
 https://www.drupal.org/node/2985168
 Source: https://www.drupal.org/files/issues/2023-01-24/2985168-media-edit-modal-10.1.x-153.patch
-
-
-make-media-edit-patch-go-to-top
-Source: patches/make-2985168-go-to-top.patch
 
 
 handle form validation on og_autocomplete

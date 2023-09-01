@@ -1,5 +1,6 @@
---- modules/views/src/Plugin/views/PluginBase.php	(date 1683632752239)
-+++ modules/views/src/Plugin/views/PluginBase.php	(date 1683632752239)
+diff --git a/core/modules/views/src/Plugin/views/PluginBase.php b/core/modules/views/src/Plugin/views/PluginBase.php
+--- a/core/modules/views/src/Plugin/views/PluginBase.php	(date 1683632752239)
++++ b/core/modules/views/src/Plugin/views/PluginBase.php	(date 1683632752239)
 @@ -355,75 +355,67 @@
     */
    protected function viewsTokenReplace($text, $tokens) {
@@ -11,13 +12,13 @@
 -    if (empty($tokens)) {
 -      return Xss::filterAdmin($text);
 -    }
- 
+
      $twig_tokens = [];
 -    foreach ($tokens as $token => $replacement) {
 -      // Twig wants a token replacement array stripped of curly-brackets.
 -      // Some Views tokens come with curly-braces, others do not.
 -      // @todo: https://www.drupal.org/node/2544392
--      if (strpos($token, '{{') !== FALSE) {
+-      if (str_contains($token, '{{')) {
 -        // Twig wants a token replacement array stripped of curly-brackets.
 -        $token = trim(str_replace(['{{', '}}'], '', $token));
 -      }
@@ -31,11 +32,11 @@
 +          // Twig wants a token replacement array stripped of curly-brackets.
 +          $token = trim(str_replace(['{{', '}}'], '', $token));
 +        }
- 
+
 -      // Check for arrays in Twig tokens. Internally these are passed as
 -      // dot-delimited strings, but need to be turned into associative arrays
 -      // for parsing.
--      if (strpos($token, '.') === FALSE) {
+-      if (!str_contains($token, '.')) {
 -        // We need to validate tokens are valid Twig variables. Twig uses the
 -        // same variable naming rules as PHP.
 -        // @see http://php.net/manual/language.variables.basics.php
@@ -59,7 +60,7 @@
 +        // Check for arrays in Twig tokens. Internally these are passed as
 +        // dot-delimited strings, but need to be turned into associative arrays
 +        // for parsing.
-+        if (strpos($token, '.') === FALSE) {
++        if (strpos($token, '.')) {
 +          // We need to validate tokens are valid Twig variables. Twig uses the
 +          // same variable naming rules as PHP.
 +          // @see http://php.net/manual/language.variables.basics.php
@@ -83,12 +84,12 @@
 +        }
        }
      }
- 
+
 -    if ($twig_tokens) {
 -      // Use the unfiltered text for the Twig template, then filter the output.
 -      // Otherwise, Xss::filterAdmin could remove valid Twig syntax before the
 -      // template is parsed.
- 
+
 -      $build = [
 -        '#type' => 'inline_template',
 -        '#template' => $text,
@@ -109,7 +110,7 @@
 +        },
 +      ],
 +    ];
- 
+
 -      // Currently you cannot attach assets to tokens with
 -      // Renderer::renderPlain(). This may be unnecessarily limiting. Consider
 -      // using Renderer::executeInRenderContext() instead.
@@ -125,5 +126,5 @@
 +    // @todo: https://www.drupal.org/node/2566621
 +    return (string) $this->getRenderer()->renderPlain($build);
    }
- 
+
    /**

@@ -303,17 +303,17 @@
         },
         {
             "name": "composer/semver",
-            "version": "3.3.2",
-            "version_normalized": "3.3.2.0",
+            "version": "3.4.0",
+            "version_normalized": "3.4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/semver.git",
-                "reference": "3953f23262f2bff1919fc82183ad9acb13ff62c9"
+                "reference": "35e8d0af4486141bc745f23a29cc2091eb624a32"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/semver/zipball/3953f23262f2bff1919fc82183ad9acb13ff62c9",
-                "reference": "3953f23262f2bff1919fc82183ad9acb13ff62c9",
+                "url": "https://api.github.com/repos/composer/semver/zipball/35e8d0af4486141bc745f23a29cc2091eb624a32",
+                "reference": "35e8d0af4486141bc745f23a29cc2091eb624a32",
                 "shasum": ""
             },
             "require": {
@@ -323,7 +323,7 @@
                 "phpstan/phpstan": "^1.4",
                 "symfony/phpunit-bridge": "^4.2 || ^5"
             },
-            "time": "2022-04-01T19:23:25+00:00",
+            "time": "2023-08-31T09:50:34+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -365,9 +365,9 @@
                 "versioning"
             ],
             "support": {
-                "irc": "irc://irc.freenode.org/composer",
+                "irc": "ircs://irc.libera.chat:6697/composer",
                 "issues": "https://github.com/composer/semver/issues",
-                "source": "https://github.com/composer/semver/tree/3.3.2"
+                "source": "https://github.com/composer/semver/tree/3.4.0"
             },
             "funding": [
                 {
@@ -2281,6 +2281,19 @@
             "install-path": "../../modules/contrib/colorbox"
         },
         {
+            "name": "drupal/condition_query",
+            "version": "1.4",
+            "version_normalized": "1.4.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mlibrary/condition_query.git",
+                "reference": "8.x-1.x"
+            },
+            "type": "drupal-module",
+            "installation-source": "source",
+            "install-path": "../../modules/contrib/condition_query"
+        },
+        {
             "name": "drupal/config_devel",
             "version": "1.9.0",
             "version_normalized": "1.9.0.0",
@@ -2526,6 +2539,7 @@
                 },
                 "patches_applied": {
                     "https://www.drupal.org/node/2640994": "https://www.drupal.org/files/issues/2022-12-03/2640994-148.patch",
+                    "https://www.drupal.org/node/2858392": "patches/2858392-34.patch",
                     "https://www.drupal.org/node/2985168": "https://www.drupal.org/files/issues/2023-01-24/2985168-media-edit-modal-10.1.x-153.patch",
                     "handle form validation on og_autocomplete": "patches/og_autocomplete_no_error.patch"
                 }
@@ -4673,7 +4687,7 @@
                     }
                 },
                 "patches_applied": {
-                    "https://www.drupal.org/node/3011413": "https://git.drupalcode.org/project/openid_connect/-/merge_requests/22.patch"
+                    "https://www.drupal.org/node/3011413": "https://www.drupal.org/files/issues/2023-06-05/openid_connect-autologin-3011413-94.patch"
                 }
             },
             "installation-source": "dist",

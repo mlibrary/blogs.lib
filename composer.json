@@ -44,6 +44,26 @@
             }
           }
         },
+        "drupal": {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8",
+            "exclude": [
+                "drupal/condition_query"
+            ]
+        },
+        "drupal/condition_query": {
+            "type": "package",
+            "package": {
+                "name": "drupal/condition_query",
+                "version": "1.4",
+                "type": "drupal-module",
+                "source": {
+                    "type": "git",
+                    "url": "https://github.com/mlibrary/condition_query.git",
+                    "reference": "8.x-1.x"
+                }
+            }
+        },
         "jquery_ui_touch_punch": {
           "type": "package",
           "package": {
@@ -70,6 +90,7 @@
         "drupal/captcha": "^1.2",
         "drupal/ckeditor_abbreviation": "^3.0",
         "drupal/colorbox": "^2.0",
+        "drupal/condition_query": "1.4",
         "drupal/config_devel": "^1.8",
         "drupal/content_moderation_notifications": "^3.5",
         "drupal/core": "^10.1",
@@ -187,13 +208,12 @@
         "patches": {
           "drupal/core": {
             "https://www.drupal.org/node/2640994": "https://www.drupal.org/files/issues/2022-12-03/2640994-148.patch",
-            "https://www.drupal.org/node/2858392": "https://www.drupal.org/files/issues/2023-05-09/2858392-15.patch",
+            "https://www.drupal.org/node/2858392": "patches/2858392-34.patch",
             "https://www.drupal.org/node/2985168": "https://www.drupal.org/files/issues/2023-01-24/2985168-media-edit-modal-10.1.x-153.patch",
-            "make-media-edit-patch-go-to-top": "patches/make-2985168-go-to-top.patch",
             "handle form validation on og_autocomplete": "patches/og_autocomplete_no_error.patch"
           },
           "drupal/openid_connect": {
-            "https://www.drupal.org/node/3011413": "https://git.drupalcode.org/project/openid_connect/-/merge_requests/22.patch"
+            "https://www.drupal.org/node/3011413": "https://www.drupal.org/files/issues/2023-06-05/openid_connect-autologin-3011413-94.patch"
           },
           "drupal/og": {
             "https://github.com/zerolab/og/tree/196-redux": "patches/zerolab-og-196-redux-branch.patch",
