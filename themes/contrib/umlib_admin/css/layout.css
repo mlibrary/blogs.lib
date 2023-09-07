@@ -1,0 +1,37 @@
+/* User menu layout */
+
+.region-header > .menu--account h2 {
+  display: none;
+}
+
+.region-header > .menu--account > ul.menu > li {
+  display: inline;
+  list-style: none;
+  padding: 0 .5rem;
+}
+
+/* Responsive layout for website header and footer */
+
+@media (max-width: 745px) {
+  .site-name a {
+    padding-top: 1rem;
+  }
+
+  .region-header > .menu--account > ul.menu {
+    margin-left: 0;
+    padding-left: 0;
+    margin-top: 1rem;
+    }
+
+  .region-header > .menu--account > ul.menu > li  {
+      margin-left: 0;
+      padding-left: 0;
+    }
+
+    .footer__content h2 {
+      padding-top: 0;
+    }
+  }
+
+
+  

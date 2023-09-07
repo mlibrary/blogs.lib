@@ -2420,17 +2420,17 @@
         },
         {
             "name": "drupal/core",
-            "version": "10.1.2",
-            "version_normalized": "10.1.2.0",
+            "version": "10.1.3",
+            "version_normalized": "10.1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core.git",
-                "reference": "949779f2244b955bdd6946c8af5dee8054501fe6"
+                "reference": "0943d60970670a7f7c18ee24a800b3b87aac4641"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core/zipball/949779f2244b955bdd6946c8af5dee8054501fe6",
-                "reference": "949779f2244b955bdd6946c8af5dee8054501fe6",
+                "url": "https://api.github.com/repos/drupal/core/zipball/0943d60970670a7f7c18ee24a800b3b87aac4641",
+                "reference": "0943d60970670a7f7c18ee24a800b3b87aac4641",
                 "shasum": ""
             },
             "require": {
@@ -2507,7 +2507,7 @@
             "suggest": {
                 "ext-zip": "Needed to extend the plugin.manager.archiver service capability with the handling of files in the ZIP format."
             },
-            "time": "2023-08-02T10:10:11+00:00",
+            "time": "2023-09-07T15:19:51+00:00",
             "type": "drupal-core",
             "extra": {
                 "drupal-scaffold": {
@@ -2539,7 +2539,6 @@
                 },
                 "patches_applied": {
                     "https://www.drupal.org/node/2640994": "https://www.drupal.org/files/issues/2022-12-03/2640994-148.patch",
-                    "https://www.drupal.org/node/2858392": "patches/2858392-34.patch",
                     "https://www.drupal.org/node/2985168": "https://www.drupal.org/files/issues/2023-01-24/2985168-media-edit-modal-10.1.x-153.patch",
                     "handle form validation on og_autocomplete": "patches/og_autocomplete_no_error.patch"
                 }
@@ -2583,7 +2582,7 @@
             ],
             "description": "Drupal is an open source content management platform powering millions of websites and applications.",
             "support": {
-                "source": "https://github.com/drupal/core/tree/10.1.2"
+                "source": "https://github.com/drupal/core/tree/10.1.3"
             },
             "install-path": "../../core"
         },
@@ -4937,18 +4936,18 @@
         },
         {
             "name": "drupal/paragraphs",
-            "version": "1.15.0",
-            "version_normalized": "1.15.0.0",
+            "version": "1.16.0",
+            "version_normalized": "1.16.0.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/paragraphs.git",
-                "reference": "8.x-1.15"
+                "reference": "8.x-1.16"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/paragraphs-8.x-1.15.zip",
-                "reference": "8.x-1.15",
-                "shasum": "2ed2d3199553010fa1c500181bbebe676e9e60c1"
+                "url": "https://ftp.drupal.org/files/projects/paragraphs-8.x-1.16.zip",
+                "reference": "8.x-1.16",
+                "shasum": "48f60810fd8086a52d56e84af8b212cce7a270e8"
             },
             "require": {
                 "drupal/core": "^9.3 || ^10",
@@ -4972,14 +4971,13 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-1.15",
-                    "datestamp": "1661440897",
+                    "version": "8.x-1.16",
+                    "datestamp": "1694007797",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
                     }
-                },
-                "patches_applied": []
+                }
             },
             "installation-source": "dist",
             "notification-url": "https://packages.drupal.org/8/downloads",
@@ -7776,6 +7774,32 @@
             "install-path": "../mglaman/phpstan-drupal"
         },
         {
+            "name": "mlibrary/umlib_admin",
+            "version": "1.0",
+            "version_normalized": "1.0.0.0",
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/mlibrary/umlib_admin/archive/refs/heads/main.zip",
+                "reference": "main"
+            },
+            "type": "drupal-theme",
+            "installation-source": "dist",
+            "install-path": "../../themes/contrib/umlib_admin"
+        },
+        {
+            "name": "mlibrary/umlib_base",
+            "version": "1.0",
+            "version_normalized": "1.0.0.0",
+            "dist": {
+                "type": "zip",
+                "url": "https://github.com/mlibrary/umlib_base/archive/refs/heads/main.zip",
+                "reference": "main"
+            },
+            "type": "drupal-theme",
+            "installation-source": "dist",
+            "install-path": "../../themes/contrib/umlib_base"
+        },
+        {
             "name": "nikic/php-parser",
             "version": "v4.17.1",
             "version_normalized": "4.17.1.0",
@@ -8394,17 +8418,17 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.10.32",
-            "version_normalized": "1.10.32.0",
+            "version": "1.10.33",
+            "version_normalized": "1.10.33.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "c47e47d3ab03137c0e121e77c4d2cb58672f6d44"
+                "reference": "03b1cf9f814ba0863c4e9affea49a4d1ed9a2ed1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/c47e47d3ab03137c0e121e77c4d2cb58672f6d44",
-                "reference": "c47e47d3ab03137c0e121e77c4d2cb58672f6d44",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/03b1cf9f814ba0863c4e9affea49a4d1ed9a2ed1",
+                "reference": "03b1cf9f814ba0863c4e9affea49a4d1ed9a2ed1",
                 "shasum": ""
             },
             "require": {
@@ -8413,7 +8437,7 @@
             "conflict": {
                 "phpstan/phpstan-shim": "*"
             },
-            "time": "2023-08-24T21:54:50+00:00",
+            "time": "2023-09-04T12:20:53+00:00",
             "bin": [
                 "phpstan",
                 "phpstan.phar"

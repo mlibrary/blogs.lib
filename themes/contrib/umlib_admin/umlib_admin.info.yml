@@ -1,0 +1,18 @@
+name: UM Library Admin Theme
+type: theme
+description: 'An admin theme for UM Library based on Claro.'
+core_version_requirement: ^9 || ^10
+libraries:
+  - umlib_admin/global-styling
+  - umlib_admin/global-scripts
+base theme: claro
+screenshot: um-library-admin-theme.png
+regions:
+  header: 'Header'
+  pre_content: 'Pre-content'
+  breadcrumb: Breadcrumb
+  highlighted: Highlighted
+  help: Help
+  content: Content
+  footer_top: 'Footer Top'
+  footer_bottom: 'Footer Bottom'

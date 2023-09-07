@@ -4,9 +4,35 @@
     "type": "project",
     "license": "GPL-2.0-or-later",
     "repositories": {
+        "umlib_base-theme": {
+            "type": "package",
+            "package": {
+                "name": "mlibrary/umlib_base",
+                "version": "1.0",
+                "type": "drupal-theme",
+                "dist": {
+                    "type": "zip",
+                    "url": "https://github.com/mlibrary/umlib_base/archive/refs/heads/main.zip",
+                    "reference": "main"
+                }
+            }
+        },
         "drupal": {
             "type": "composer",
             "url": "https://packages.drupal.org/8"
+        },
+        "umlib_admin-theme": {
+            "type": "package",
+            "package": {
+                "name": "mlibrary/umlib_admin",
+                "version": "1.0",
+                "type": "drupal-theme",
+                "dist": {
+                    "type": "zip",
+                    "url": "https://github.com/mlibrary/umlib_admin/archive/refs/heads/main.zip",
+                    "reference": "main"
+                }
+            }
         },
         "fakeobjects": {
           "type": "package",
@@ -99,6 +125,8 @@
         "drupal/easy_breadcrumb": "^2.0",
         "drupal/editor_advanced_link": "^2.0",
         "drupal/entity_reference_exposed_filters": "^2.0@alpha",
+        "drupal/entity_reference_revisions": "^1.10",
+        "drupal/externalauth": "^2.0.3",
         "drupal/field_group": "^3.2",
         "drupal/file_entity": "^2.0@beta",
         "drupal/force_users_logout": "^2.0",
@@ -131,6 +159,7 @@
         "drupal/smtp": "^1.2",
         "drupal/structure_sync": "^2.0.5",
         "drupal/swiftmailer": "^2.4",
+        "drupal/token": "^1.12",
         "drupal/twig_tweak": "^3.1",
         "drupal/twig_vardumper": "^3.1",
         "drupal/upgrade_status": "^4.0",
@@ -142,10 +171,9 @@
         "drush/drush": "^11.0",
         "furf/jquery-ui-touch-punch": "master",
         "jackmoore/colorbox": "^1.6",
+        "mlibrary/umlib_admin": "^1.0",
+        "mlibrary/umlib_base": "^1.0",
         "oomphinc/composer-installers-extender": "^2.0",
-        "drupal/entity_reference_revisions": "^1.10",
-        "drupal/externalauth": "^2.0.3",
-        "drupal/token": "^1.12",
         "wikimedia/composer-merge-plugin": "^2.0"
     },
     "conflict": {
@@ -208,7 +236,6 @@
         "patches": {
           "drupal/core": {
             "https://www.drupal.org/node/2640994": "https://www.drupal.org/files/issues/2022-12-03/2640994-148.patch",
-            "https://www.drupal.org/node/2858392": "patches/2858392-34.patch",
             "https://www.drupal.org/node/2985168": "https://www.drupal.org/files/issues/2023-01-24/2985168-media-edit-modal-10.1.x-153.patch",
             "handle form validation on og_autocomplete": "patches/og_autocomplete_no_error.patch"
           },
