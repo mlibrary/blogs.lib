@@ -360,11 +360,9 @@ abstract class PluginBase extends ComponentPluginBase implements ContainerFactor
       // No need to run filterAdmin on an empty string.
       return '';
     }
-    if (empty($tokens)) {
-      return Xss::filterAdmin($text);
-    }
 
     $twig_tokens = [];
+    if (!empty($tokens)) {
     foreach ($tokens as $token => $replacement) {
       // Twig wants a token replacement array stripped of curly-brackets.
       // Some Views tokens come with curly-braces, others do not.
@@ -400,11 +398,7 @@ abstract class PluginBase extends ComponentPluginBase implements ContainerFactor
         $twig_tokens[$top] += $token_array;
       }
     }
-
-    if ($twig_tokens) {
-      // Use the unfiltered text for the Twig template, then filter the output.
-      // Otherwise, Xss::filterAdmin could remove valid Twig syntax before the
-      // template is parsed.
+    }
 
       $build = [
         '#type' => 'inline_template',
@@ -422,10 +416,6 @@ abstract class PluginBase extends ComponentPluginBase implements ContainerFactor
       // using Renderer::executeInRenderContext() instead.
       // @todo: https://www.drupal.org/node/2566621
       return (string) $this->getRenderer()->renderPlain($build);
-    }
-    else {
-      return Xss::filterAdmin($text);
-    }
   }
 
   /**

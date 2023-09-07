@@ -236,6 +236,7 @@
         "patches": {
           "drupal/core": {
             "https://www.drupal.org/node/2640994": "https://www.drupal.org/files/issues/2022-12-03/2640994-148.patch",
+            "https://www.drupal.org/node/2858392": "https://www.drupal.org/files/issues/2023-09-07/2858392-34.patch",
             "https://www.drupal.org/node/2985168": "https://www.drupal.org/files/issues/2023-01-24/2985168-media-edit-modal-10.1.x-153.patch",
             "handle form validation on og_autocomplete": "patches/og_autocomplete_no_error.patch"
           },
