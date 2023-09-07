@@ -1,4 +1,4 @@
-(function ($, Drupal) {
+(function ($, Drupal, once) {
 
   'use strict';
 
@@ -7,19 +7,18 @@
       var current_page = location.pathname,
       login_page = '/user/login',
       signup_page = '/blogs-signup';
-
       if (login_page != current_page) {
         if (signup_page == current_page) {
           current_page = location.search.replace("?destination=", "");
         }
-        $(context).find("a[href='" + login_page + "']").once('login-processed-link').each(function () {
+        $(once('login-processed-link',$(context).find("a[href='" + login_page + "']"))).each(function () {
           $(this).attr('href', $(this).attr('href') + '?destination=' + current_page);
         });
       }
 
     }
   }
-})(jQuery, Drupal);
+})(jQuery, Drupal, once);
 
 var role = document.getElementById("view-roles-target-id-table-column");
 if (role) {
