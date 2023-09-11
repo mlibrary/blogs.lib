@@ -26,6 +26,10 @@ function custom_openid_openid_connect_pre_authorize($account, array $context) {
 //    if (in_array($uname,['YOUR_USERNAME_HERE']) && strpos($_SERVER['HTTP_USER_AGENT'], 'Chrome')) {
 //      return user_load_by_name('USER_YOU_WANT_TO_BE_HERE');
 //    }
+// IF YOU WANT TO ACT AS A NEW USER, go to hook_openid_connect_userinfo_alter below and add
+// if ($uname == 'YOUR_USERNAME_HERE') { $uname = 'USER_YOU_WANT_TO_BE_HERE'; }
+// above
+// $userinfo['name'] = $uname;
   }
   if ((is_bool($account) || !$account) && $uname) {
     $account = user_load_by_name($uname);
