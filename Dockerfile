@@ -2,7 +2,7 @@
 #FROM drupal:9-apache
 
 # from https://www.drupal.org/docs/system-requirements/php-requirements
-FROM php:7.4-apache-bullseye
+FROM php:8.1.18-apache-bullseye
 
 # install the PHP extensions we need
 RUN set -eux; \
@@ -64,7 +64,7 @@ RUN { \
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/
 
 # https://www.drupal.org/node/3060/release
-ENV DRUPAL_VERSION 9.3.12
+ENV DRUPAL_VERSION 9.5.8
 
 
 WORKDIR /opt/drupal/web
