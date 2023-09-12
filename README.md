@@ -84,10 +84,10 @@ sudo tar -zxvf files.tar.gz -C sites/default && sudo chown -R www-data sites/def
 
 4.  **Rebuild docker with latest stuff.**
 
-Remove all associated volumes, images and containers. Download the latest. Note that you may have names other than blogslib_drupal_1 and blogslib_database_1.
+Remove all associated volumes, images and containers. Download the latest. Note that you may have names other than blogslib-drupal-1 and blogslib-database-1.
 
 ```sh
-sudo docker rm -f blogslib_database_1 && sudo docker rm -f blogslib_drupal_1 && sudo docker volume rm -f blogslib_database && sudo docker image rm -f mariadb:latest && sudo docker image rm -f blogslib_drupal:latest && sudo docker-compose build --no-cache && sudo docker-compose up -d --force-recreate
+sudo docker rm -f blogslib-database-1 && sudo docker rm -f blogslib-drupal-1 && sudo docker volume rm -f blogslib_database && sudo docker image rm -f mariadb:latest && sudo docker image rm -f blogslib_drupal:latest && sudo docker-compose build --no-cache && sudo docker-compose up -d --force-recreate
 ```
 
 5.  **Import the openid config for development. (NOTE: you need to wait for database to start up. Should go green.)**
