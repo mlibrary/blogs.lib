@@ -49,16 +49,14 @@ sudo docker-compose build && sudo docker-compose up -d
 6. **Set files permissions to apache**
 
 ```sh
-sudo docker exec -it blogslib_drupal_1 chown -R www-data sites/default/files
+sudo docker exec -it blogslib-drupal-1 chown -R www-data sites/default/files
 ```
 
 7.  **Import the openid config for development.**
 
-NOTE: you may get errors about other config but should be fine.
-If you get the error "[ERROR] Command "config:import:single", is not a valid command name." wait a minute. Container is not yet functional.
-
 ```sh
-sudo docker exec -it blogslib_drupal_1 drupal config:import:single --file=openid_connect.settings.generic.yml
+tar -zxf config-yml.tar.gz
+sudo docker exec -it blogslib-drupal-1 drush config-import --partial --source=config-yml/ 
 ```
 
 8.  **Open the site. (NOTE: Takes a minute for mariadb to load up.)**
@@ -95,7 +93,8 @@ sudo docker rm -f blogslib_database_1 && sudo docker rm -f blogslib_drupal_1 && 
 5.  **Import the openid config for development. (NOTE: you need to wait for database to start up. Should go green.)**
 
 ```sh
-sudo docker exec -it blogslib_drupal_1 drupal config:import:single --file=openid_connect.settings.generic.yml
+tar -zxf config-yml.tar.gz
+sudo docker exec -it blogslib-drupal-1 drush config-import --partial --source=config-yml/
 ```
 
 ## Other handy commands
@@ -103,5 +102,11 @@ sudo docker exec -it blogslib_drupal_1 drupal config:import:single --file=openid
 **Update composer**
 
 ```sh
-sudo docker exec -it blogslib_drupal_1 composer update
+sudo docker exec -it blogslib-drupal-1 composer update
+```
+
+**Run drush commands (status in example, but can be anything)**
+
+```sh
+sudo docker exec -it blogslib-drupal-1 drush status
 ```
