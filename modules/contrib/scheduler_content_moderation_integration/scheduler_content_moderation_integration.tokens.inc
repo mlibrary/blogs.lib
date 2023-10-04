@@ -45,7 +45,7 @@ function scheduler_content_moderation_integration_tokens($type, $tokens, array $
       foreach ($tokens as $name => $original) {
         switch ($name) {
           case 'scheduled-moderation-publish-state':
-            if ($node->hasField('publish_state')) {
+            if ($node->hasField('publish_state') && !$node->get('publish_state')->isEmpty()) {
               $value = $node->get('publish_state')->first()->getValue()['value'];
               if (isset($states[$value])) {
                 $replacements[$original] = $states[$value]->label();
@@ -54,7 +54,7 @@ function scheduler_content_moderation_integration_tokens($type, $tokens, array $
             break;
 
           case 'scheduled-moderation-unpublish-state':
-            if ($node->hasField('unpublish_state')) {
+            if ($node->hasField('unpublish_state') && !$node->get('unpublish_state')->isEmpty()) {
               $value = $node->get('unpublish_state')->first()->getValue()['value'];
               if (isset($states[$value])) {
                 $replacements[$original] = $states[$value]->label();

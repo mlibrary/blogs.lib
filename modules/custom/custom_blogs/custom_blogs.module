@@ -39,6 +39,15 @@ function custom_blogs_form_alter(&$form, FormStateInterface $form_state, $form_i
       }
     }
     $form['publish_state']['#type'] = 'hidden';
+    $form['#validate'][] = '_custom_blogs_form_validate';
+  }
+}
+
+function _custom_blogs_form_validate(&$form, FormStateInterface $form_state) {
+  // If someone selects published and has a scheduled date in the future, ends up in limbo.
+  $user_input = $form_state->getValues();
+  if (!empty($user_input['publish_on'][0]['value']) && $user_input['moderation_state'][0]['value'] == 'published') {
+    $form_state->setValue(['publish_on', '0', 'value'], '');
   }
 }
 

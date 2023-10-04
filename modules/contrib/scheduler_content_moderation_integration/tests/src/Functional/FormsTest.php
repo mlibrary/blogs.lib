@@ -188,7 +188,7 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
     /** @var \Drupal\Tests\WebAssert $assert */
     $assert = $this->assertSession();
     // The field is enabled if the weight setting exists and is non-zero.
-    $xpath = $assert->buildXPathQuery('//input[@id=:id and not(@value="0")]', [':id' => "edit-fields-{$field}-weight"]);
+    $xpath = $this->assertSession()->buildXPathQuery('//input[@id=:id and not(@value="0")]', [':id' => "edit-fields-{$field}-weight"]);
     if ($showing) {
       $assert->elementExists('xpath', $xpath);
     }

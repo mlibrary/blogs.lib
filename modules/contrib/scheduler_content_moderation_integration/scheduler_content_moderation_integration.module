@@ -214,15 +214,19 @@ function _scheduler_content_moderation_integration_reset_form_display() {
     $content_entity_type = \Drupal::entityTypeManager()->getDefinition($entityTypeId);
     $can_moderate = $moderation_information->canModerateEntitiesOfEntityType($content_entity_type);
 
+    $all_display_modes = array_keys($display_repository->getFormModes($entityTypeId));
+    $all_display_modes[] = $display_repository::DEFAULT_DISPLAY_MODE;
+    $supported_display_modes = $plugin->entityFormDisplayModes();
+
     $bundles = $plugin->getTypes();
     foreach ($bundles as $bundle_id => $bundle) {
-      $all_display_modes = array_keys($display_repository->getFormModes($bundle_id));
-      $all_display_modes[] = $display_repository::DEFAULT_DISPLAY_MODE;
-      $supported_display_modes = $scheduler_manager->getPlugin($entityTypeId)
-        ->entityFormDisplayModes();
-
       foreach ($all_display_modes as $display_mode) {
         $form_display = $display_repository->getFormDisplay($entityTypeId, $bundle_id, $display_mode);
+        // If the form display is new and not saved yet, do nothing with it.
+        // @see https://www.drupal.org/i/3359796
+        if ($form_display->isNew()) {
+          continue;
+        }
         $third_party = $bundle->getThirdPartySettings('scheduler');
 
         if (($third_party['publish_enable'] ?? 0) && in_array($display_mode, $supported_display_modes) && $can_moderate) {

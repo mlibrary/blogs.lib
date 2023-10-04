@@ -1,7 +1,7 @@
 build:
   assessment:
     validate_codebase:
-      phplint: {  }
+      phplint: {}
       container_composer:
         options: ' install --prefer-dist --no-suggest --no-progress --no-interaction'
         halt-on-fail: true
@@ -17,7 +17,7 @@ build:
       container_command:
         commands:
           # Get latest dev of Scheduler
-          - "cd ${SOURCE_DIR} && sudo -u www-data composer require drupal/scheduler:2.x-dev"
+          - 'cd ${SOURCE_DIR} && sudo -u www-data composer require drupal/scheduler:2.x-dev'
       run_tests.standard:
         types: 'Simpletest,PHPUnit-Unit,PHPUnit-Kernel,PHPUnit-Functional'
         testgroups: '--all'
