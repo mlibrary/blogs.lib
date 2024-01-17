@@ -73,7 +73,7 @@ class File extends Constraint
     protected $maxSize;
 
     /**
-     * @param array<string, string|string[]>|string[]|string $extensions
+     * @param array<string|string[]>|string $extensions
      */
     public function __construct(
         array $options = null,
@@ -130,6 +130,9 @@ class File extends Constraint
         }
     }
 
+    /**
+     * @return void
+     */
     public function __set(string $option, mixed $value)
     {
         if ('maxSize' === $option) {

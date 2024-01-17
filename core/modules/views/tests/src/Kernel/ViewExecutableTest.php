@@ -28,6 +28,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Tests the ViewExecutable class.
  *
  * @group views
+ * @group #slow
  * @see \Drupal\views\ViewExecutable
  */
 class ViewExecutableTest extends ViewsKernelTestBase {
