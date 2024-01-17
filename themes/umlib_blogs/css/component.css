@@ -301,8 +301,7 @@ ul.blog-tag-list {
 .blog-post-content h3, 
 .blog-post-content h4, 
 .blog-post-content h5 {
-  padding-top: 2rem;
-  padding-bottom: 1rem;
+  margin-top: 2rem;
 }
 
 /** This breaks the URL in a blog post **/

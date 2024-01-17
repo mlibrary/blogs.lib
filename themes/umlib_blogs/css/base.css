@@ -7,6 +7,7 @@
   border-left: none;
   padding-bottom: 0;
   padding-left: 0;
+  line-height: 1.25;
 }
 
 @media screen and (max-width: 620px)  {
@@ -22,6 +23,7 @@
   border-left: solid 4px var(--color-teal-400);
   padding-bottom: 0;
   padding-left: 1rem;
+  line-height: 1.25;
 }
 
 #blog-post-page h1 {
@@ -31,6 +33,7 @@
   border-left: solid 4px var(--color-teal-400);
   padding-bottom: 0;
   padding-left: 1rem;
+  line-height: 1.25;
 }
 
 #page-404 h1,
@@ -43,6 +46,7 @@
   border-left: solid 4px var(--color-teal-400);
   padding-bottom: 0;
   padding-left: 1rem;
+  line-height: 1.25;
 }
 
 
