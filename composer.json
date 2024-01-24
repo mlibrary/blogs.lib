@@ -159,6 +159,7 @@
         "drupal/smtp": "^1.2",
         "drupal/structure_sync": "^2.0.5",
         "drupal/swiftmailer": "^2.4",
+        "drupal/symfony_mailer_lite": "^1.0",
         "drupal/token": "^1.12",
         "drupal/twig_tweak": "^3.1",
         "drupal/twig_vardumper": "^3.1",
@@ -260,7 +261,8 @@
             "https://www.drupal.org/node/3027690": "https://www.drupal.org/files/issues/2021-08-03/content_moderation_notifications-dont_notify_for_same_state-3027690-23.patch"
           },
           "drupal/reroute_email": {
-            "fix error": "patches/reroute_email-fix.patch"
+            "fix error": "patches/reroute_email-fix.patch",
+            "fix header in body for symfony mailer lite": "patches/fix-reroute-email-for-symfony-mailer.patch"
           },
           "jackmoore/colorbox": {
             "add aria-label to colorbox": "patches/add-aria-label-to-colorbox.patch"

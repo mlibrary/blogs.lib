@@ -23,7 +23,7 @@ class TestEmailFormTest extends RerouteEmailBrowserTestBase {
    * @throws \Behat\Mink\Exception\ResponseTextException
    * @throws \Behat\Mink\Exception\ExpectationException
    *
-   * @dataProvider testFormValuesProvider
+   * @dataProvider formValuesProvider
    */
   public function testFormTestEmail($enabled, $allowlisted, $post, $rerouted): void {
 
@@ -43,9 +43,9 @@ class TestEmailFormTest extends RerouteEmailBrowserTestBase {
   }
 
   /**
-   * Data provider for ::testFormTestEmail().
+   * Data provider for ::formValuesProvider().
    */
-  public function testFormValuesProvider(): array {
+  public function formValuesProvider(): array {
 
     // All fields are set correctly.
     $data[] = [

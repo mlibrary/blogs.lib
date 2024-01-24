@@ -123,7 +123,7 @@ function reroute_email_mail_alter(&$message) {
     $message_lines[] = '-----------------------';
     $message_lines[] = '';
 
-    $msg = implode(PHP_EOL, $message_lines);
+    $msg = implode('<br>', $message_lines);
 
     // Prepend explanation message to the body of the email. This must be
     // handled differently depending on whether the body came in as a
@@ -133,7 +133,7 @@ function reroute_email_mail_alter(&$message) {
       $message['body'] = $msg . $message['body'];
     }
     elseif (isset($message['body'])) {
-      array_unshift($message['body'], $msg);
+      array_unshift($message['body'], t($msg));
     }
     else {
       $message['body'] = $msg;
@@ -152,7 +152,7 @@ function reroute_email_mail_alter(&$message) {
 
   // Extensive params keys cause OOM error when outputting the value.
   // But we need to keep 'params' (e.g. attachments).
-  $params = $message['params'];
+  $params = $message['params'] ?? [];
   unset($message['params']);
 
   // Simplify subject to avoid OOM error in the variable output.

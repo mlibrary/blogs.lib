@@ -5296,34 +5296,35 @@
         },
         {
             "name": "drupal/reroute_email",
-            "version": "2.2.0",
-            "version_normalized": "2.2.0.0",
+            "version": "2.2.1",
+            "version_normalized": "2.2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/reroute_email.git",
-                "reference": "2.2.0"
+                "reference": "2.2.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/reroute_email-2.2.0.zip",
-                "reference": "2.2.0",
-                "shasum": "e6513f840b228c863f3021f00288eb75e8c40320"
+                "url": "https://ftp.drupal.org/files/projects/reroute_email-2.2.1.zip",
+                "reference": "2.2.1",
+                "shasum": "4dd10cf981fb184cf075399a52dd24cfb2c2605e"
             },
             "require": {
-                "drupal/core": "^9 || ^10"
+                "drupal/core": "^9.4 || ^10"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "2.2.0",
-                    "datestamp": "1670926026",
+                    "version": "2.2.1",
+                    "datestamp": "1696270478",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
                     }
                 },
                 "patches_applied": {
-                    "fix error": "patches/reroute_email-fix.patch"
+                    "fix error": "patches/reroute_email-fix.patch",
+                    "fix header in body for symfony mailer lite": "patches/fix-reroute-email-for-symfony-mailer.patch"
                 }
             },
             "installation-source": "dist",
@@ -5747,6 +5748,57 @@
                 "source": "https://git.drupalcode.org/project/swiftmailer"
             },
             "install-path": "../../modules/contrib/swiftmailer"
+        },
+        {
+            "name": "drupal/symfony_mailer_lite",
+            "version": "1.0.2",
+            "version_normalized": "1.0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/symfony_mailer_lite.git",
+                "reference": "1.0.2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/symfony_mailer_lite-1.0.2.zip",
+                "reference": "1.0.2",
+                "shasum": "2082098fd83e504aa70f84a2977cfe0af1148909"
+            },
+            "require": {
+                "drupal/core": "^9 || ^10",
+                "drupal/mailsystem": "^4.4",
+                "html2text/html2text": "^4.0.1",
+                "symfony/mailer": "^5.3 || ^6.0",
+                "tijsverkoyen/css-to-inline-styles": "^2.2"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "1.0.2",
+                    "datestamp": "1705613851",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "installation-source": "dist",
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "zengenuity",
+                    "homepage": "https://www.drupal.org/user/326925"
+                }
+            ],
+            "description": "Drupal Symfony Mailer Lite",
+            "homepage": "https://www.drupal.org/project/symfony_mailer_lite",
+            "support": {
+                "source": "https://git.drupalcode.org/project/symfony_mailer_lite"
+            },
+            "install-path": "../../modules/contrib/symfony_mailer_lite"
         },
         {
             "name": "drupal/token",
@@ -10119,6 +10171,89 @@
                 }
             ],
             "install-path": "../symfony/http-kernel"
+        },
+        {
+            "name": "symfony/mailer",
+            "version": "v6.4.2",
+            "version_normalized": "6.4.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/mailer.git",
+                "reference": "6da89e5c9202f129717a770a03183fb140720168"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/mailer/zipball/6da89e5c9202f129717a770a03183fb140720168",
+                "reference": "6da89e5c9202f129717a770a03183fb140720168",
+                "shasum": ""
+            },
+            "require": {
+                "egulias/email-validator": "^2.1.10|^3|^4",
+                "php": ">=8.1",
+                "psr/event-dispatcher": "^1",
+                "psr/log": "^1|^2|^3",
+                "symfony/event-dispatcher": "^5.4|^6.0|^7.0",
+                "symfony/mime": "^6.2|^7.0",
+                "symfony/service-contracts": "^2.5|^3"
+            },
+            "conflict": {
+                "symfony/http-client-contracts": "<2.5",
+                "symfony/http-kernel": "<5.4",
+                "symfony/messenger": "<6.2",
+                "symfony/mime": "<6.2",
+                "symfony/twig-bridge": "<6.2.1"
+            },
+            "require-dev": {
+                "symfony/console": "^5.4|^6.0|^7.0",
+                "symfony/http-client": "^5.4|^6.0|^7.0",
+                "symfony/messenger": "^6.2|^7.0",
+                "symfony/twig-bridge": "^6.2|^7.0"
+            },
+            "time": "2023-12-19T09:12:31+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Mailer\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Helps sending emails",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/mailer/tree/v6.4.2"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "install-path": "../symfony/mailer"
         },
         {
             "name": "symfony/mime",

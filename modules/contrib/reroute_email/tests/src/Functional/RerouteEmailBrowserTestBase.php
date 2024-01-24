@@ -141,7 +141,7 @@ abstract class RerouteEmailBrowserTestBase extends BrowserTestBase {
     // Submit Reroute Email Settings form and check if it was successful.
     $this->drupalGet('admin/config/development/reroute_email');
     $this->submitForm($post_values, $this->t('Save configuration'));
-    $this->assertSession()->pageTextContains(t('The configuration options have been saved.'));
+    $this->assertSession()->pageTextContains($this->t('The configuration options have been saved.'));
 
     // Rebuild config values after form submit.
     $this->rerouteConfig = $this->config('reroute_email.settings');

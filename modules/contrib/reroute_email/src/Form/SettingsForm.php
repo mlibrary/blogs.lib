@@ -2,16 +2,16 @@
 
 namespace Drupal\reroute_email\Form;
 
+use Drupal\Component\Utility\EmailValidatorInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Component\Utility\EmailValidatorInterface;
 use Drupal\Core\Security\TrustedCallbackInterface;
+use Drupal\reroute_email\Constants\RerouteEmailConstants;
 use Drupal\user\RoleStorageInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\reroute_email\Constants\RerouteEmailConstants;
 
 /**
  * Implements a settings form for Reroute Email configuration.
@@ -282,7 +282,7 @@ class SettingsForm extends ConfigFormBase implements TrustedCallbackInterface {
    *   The updated render array.
    */
   public static function textareaRowsValue(array $element): array {
-    $size = substr_count($element['#default_value'] ?? '', PHP_EOL) + 1;
+    $size = mb_substr_count($element['#default_value'] ?? '', PHP_EOL) + 1;
     if ($size > $element['#rows']) {
       $element['#rows'] = min($size, 10);
     }

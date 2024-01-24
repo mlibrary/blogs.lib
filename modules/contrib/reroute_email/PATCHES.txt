@@ -5,3 +5,7 @@ fix error
 Source: patches/reroute_email-fix.patch
 
 
+fix header in body for symfony mailer lite
+Source: patches/fix-reroute-email-for-symfony-mailer.patch
+
+

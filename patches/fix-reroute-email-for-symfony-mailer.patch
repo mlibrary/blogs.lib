@@ -1,0 +1,22 @@
+diff --git a/modules/contrib/reroute_email/reroute_email.module b/modules/contrib/reroute_email/reroute_email.module
+index 15f496268..58f6d55bb 100644
+--- a/modules/contrib/reroute_email/reroute_email.module
++++ b/modules/contrib/reroute_email/reroute_email.module
+@@ -123,7 +123,7 @@ function reroute_email_mail_alter(&$message) {
+     $message_lines[] = '-----------------------';
+     $message_lines[] = '';
+ 
+-    $msg = implode(PHP_EOL, $message_lines);
++    $msg = implode('<br>', $message_lines);
+ 
+     // Prepend explanation message to the body of the email. This must be
+     // handled differently depending on whether the body came in as a
+@@ -133,7 +133,7 @@ function reroute_email_mail_alter(&$message) {
+       $message['body'] = $msg . $message['body'];
+     }
+     elseif (isset($message['body'])) {
+-      array_unshift($message['body'], $msg);
++      array_unshift($message['body'], t($msg));
+     }
+     else {
+       $message['body'] = $msg;
