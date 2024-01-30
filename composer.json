@@ -158,7 +158,6 @@
         "drupal/scheduler_content_moderation_integration": "^2.0@beta",
         "drupal/smtp": "^1.2",
         "drupal/structure_sync": "^2.0.5",
-        "drupal/swiftmailer": "^2.4",
         "drupal/symfony_mailer_lite": "^1.0",
         "drupal/token": "^1.12",
         "drupal/twig_tweak": "^3.1",
