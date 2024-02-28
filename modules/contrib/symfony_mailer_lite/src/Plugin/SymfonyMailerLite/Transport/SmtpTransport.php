@@ -123,7 +123,7 @@ class SmtpTransport extends TransportBase {
     $form['advanced_options']['ping_threshold'] = [
       '#type' => 'number',
       '#title' => $this->t('Ping threshold'),
-      '#default_value' => $this->configuration['query']['restart_threshold_sleep'],
+      '#default_value' => $this->configuration['query']['ping_threshold'],
       '#description' => $this->t('The minimum number of seconds between two messages required to ping the server.'),
       '#min' => 0,
     ];

@@ -6,7 +6,7 @@ core_version_requirement: ^9 || ^10
 dependencies:
   - mailsystem:mailsystem
 
-# Information added by Drupal.org packaging script on 2024-01-18
-version: '1.0.2'
+# Information added by Drupal.org packaging script on 2024-02-28
+version: '1.0.6'
 project: 'symfony_mailer_lite'
-datestamp: 1705613854
+datestamp: 1709127276

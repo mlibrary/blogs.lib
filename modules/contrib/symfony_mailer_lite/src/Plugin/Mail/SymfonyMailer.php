@@ -265,6 +265,7 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
         $email->subject($message['subject']);
       }
       $headers_to_skip = $this->headersToSkip();
+      $this->normalizeHeaders($message);
       if (!empty($message['headers']) && is_array($message['headers'])) {
         foreach ($message['headers'] as $header_key => $header_value) {
           if (empty($header_key) || in_array($header_key, $headers_to_skip, FALSE)) {
@@ -304,8 +305,10 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
         }
       }
 
-      $to = $this->parseMailboxes($message['to']);
-      $email->to(...$to);
+      if (!empty($message['to'])) {
+        $to = $this->parseMailboxes($message['to']);
+        $email->to(...$to);
+      }
       if (!empty($message['headers']['From'])) {
         $email->from($message['headers']['From']);
       }
@@ -650,6 +653,11 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
         }
       }
 
+      // Let modules add CSS when calling MailManager::mail().
+      if (!empty($message['params']['css']) && is_string($message['params']['css'])) {
+        $css .= $message['params']['css'];
+      }
+
       if ($css) {
         $message['body'] = $this->cssInliner->convert($message['body'], $css);
       }
@@ -668,6 +676,33 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
       'From',
       'To',
     ];
+  }
+
+  /**
+   * @param $key
+   * @return string
+   */
+  protected function normalizeHeaderKey($key) : string {
+    // Headers are case-insensitive, but we want to normalize them as camel case
+    // so we can match them to determine the correct type of header for
+    // Symfony Mailer.
+    return ucwords(strtolower($key), '-');
+  }
+
+  /**
+   * Normalize the case in header keys.
+   *
+   * @param array &$message
+   *   A message array holding all relevant details for the message.
+   */
+  protected function normalizeHeaders(array &$message): void {
+    if (!empty($message['headers']) && is_array($message['headers'])) {
+      foreach ($message['headers'] as $header_key => $header_value) {
+        unset($message['headers'][$header_key]);
+        $header_key = $this->normalizeHeaderKey($header_key);
+        $message['headers'][$header_key] = $header_value ?: NULL;
+      }
+    }
   }
 
   protected function isMultipart(array $message) : bool {
@@ -693,7 +728,7 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
   }
 
   protected function isIdHeader($key, $value) : bool {
-    return $key === 'Message-ID';
+    return $key === 'Message-Id';
   }
 
   protected function isMailboxHeader($key, $value) : bool {
@@ -708,7 +743,7 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
       'To',
       'Cc',
       'Bcc',
-      'Reply-to',
+      'Reply-To',
     ]);
   }
 
@@ -728,7 +763,7 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
 
   protected function parseMailboxes($value) : array {
     $addresses = [];
-    foreach (explode(',', $value) as $part) {
+    foreach (preg_split('/(?!\B"[^"]*),(?![^"]*"\B)/', $value) as $part) {
       $address = $this->parseMailbox($part);
       if ($address !== NULL) {
         $addresses[] = $address;

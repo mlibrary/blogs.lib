@@ -63,8 +63,9 @@ class TestEmailForm extends FormBase {
     $form['recipient'] = [
       '#title' => $this->t('Recipient'),
       '#type' => 'textfield',
+      '#required' => TRUE,
       '#default_value' => $this->currentUser()->getEmail(),
-      '#description' => $this->t('Recipient email address. Leave blank to send to yourself.'),
+      '#description' => $this->t('Recipient email address.'),
     ];
 
     $form['actions']['#type'] = 'actions';

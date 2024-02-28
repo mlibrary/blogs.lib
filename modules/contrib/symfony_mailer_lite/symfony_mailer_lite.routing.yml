@@ -35,6 +35,7 @@ entity.symfony_mailer_lite_transport.set_default:
   defaults:
     _controller: '\Drupal\symfony_mailer_lite\Controller\TransportController::setAsDefault'
   requirements:
+    _csrf_token: 'TRUE'
     _permission: 'administer symfony_mailer_lite configuration'
 
 symfony_mailer_lite.message_settings:

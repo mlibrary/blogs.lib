@@ -10,7 +10,9 @@ services:
   # Mailer.
   symfony_mailer_lite.transports_factory:
     class: Drupal\symfony_mailer_lite\TransportsFactory
-    arguments: [ '@config.factory', '@entity_type.manager' ]
+    arguments: [ '@config.factory', '@entity_type.manager', '@event_dispatcher' ]
+    tags:
+      - { name: service_collector, tag: symfony_mailer_lite.transport_factory, call: addTransportFactory }
     public: false
 
   symfony_mailer_lite.transports:

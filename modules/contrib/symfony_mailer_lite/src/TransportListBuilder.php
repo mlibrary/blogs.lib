@@ -77,11 +77,8 @@ class TransportListBuilder extends ConfigEntityListBuilder {
   public function getDefaultOperations(EntityInterface $entity) {
     $operations = parent::getDefaultOperations($entity);
 
-    // Prevent the default transport being deleted.
-    if ($entity->isDefault()) {
-      unset($operations['delete']);
-    }
-    else {
+    // Add op to set default to all non-default transports.
+    if (!$entity->isDefault()) {
       $operations['default'] = [
         'title' => $this->t('Set as default'),
         'url' => Url::fromRoute('entity.symfony_mailer_lite_transport.set_default', [

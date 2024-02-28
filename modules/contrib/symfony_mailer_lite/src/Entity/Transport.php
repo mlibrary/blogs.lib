@@ -19,7 +19,8 @@ use Drupal\symfony_mailer_lite\TransportInterface;
  *       "edit" = "Drupal\symfony_mailer_lite\Form\TransportForm",
  *       "add" = "Drupal\symfony_mailer_lite\Form\TransportAddForm",
  *       "delete" = "Drupal\Core\Entity\EntityDeleteForm"
- *     }
+ *     },
+ *     "access" = "Drupal\symfony_mailer_lite\TransportAccessControlHandler",
  *   },
  *   admin_permission = "administer symfony_mailer_lite configuration",
  *   entity_keys = {
