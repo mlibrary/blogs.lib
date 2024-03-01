@@ -13,6 +13,10 @@ https://www.drupal.org/node/2985168
 Source: https://www.drupal.org/files/issues/2023-01-24/2985168-media-edit-modal-10.1.x-153.patch
 
 
+https://www.drupal.org/node/3075527
+Source: https://www.drupal.org/files/issues/2023-10-05/3075527-47-disable.patch
+
+
 handle form validation on og_autocomplete
 Source: patches/og_autocomplete_no_error.patch
 

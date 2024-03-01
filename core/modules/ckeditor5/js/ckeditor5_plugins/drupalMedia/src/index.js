@@ -3,9 +3,6 @@
 
 import DrupalMedia from './drupalmedia';
 
-// cspell:ignore drupallinkmedia
-import DrupalLinkMedia from './drupallinkmedia/drupallinkmedia';
-
 // cspell:ignore drupalelementstyle
 import DrupalElementStyle from './drupalelementstyle';
 
@@ -24,7 +21,6 @@ export default {
   MediaImageTextAlternative,
   MediaImageTextAlternativeEditing,
   MediaImageTextAlternativeUi,
-  DrupalLinkMedia,
   DrupalMediaCaption,
   DrupalElementStyle,
 };

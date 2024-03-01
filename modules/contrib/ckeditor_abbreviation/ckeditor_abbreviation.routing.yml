@@ -1,7 +1,0 @@
-ckeditor_abbreviation.abbreviation_dialog:
-  path: '/ckeditor-abbreviation/dialog/abbreviation/{editor}'
-  defaults:
-    _form: '\Drupal\ckeditor_abbreviation\Form\CkeditorAbbreviationDialog'
-    _title: 'Add abbreviation'
-  requirements:
-    _entity_access: 'editor.use'

@@ -34,30 +34,6 @@
                 }
             }
         },
-        "fakeobjects": {
-          "type": "package",
-          "package": {
-            "name": "ckeditor-plugin/fakeobjects",
-            "version": "4.8.0",
-            "type": "drupal-library",
-            "dist": {
-              "url": "https://download.ckeditor.com/fakeobjects/releases/fakeobjects_4.14.1.zip",
-              "type": "zip"
-            }
-          }
-        },
-        "link": {
-          "type": "package",
-          "package": {
-            "name": "ckeditor-plugin/link",
-            "version": "4.8.0",
-            "type": "drupal-library",
-            "dist": {
-              "url": "https://download.ckeditor.com/link/releases/link_4.14.1.zip",
-              "type": "zip"
-            }
-          }
-        },
         "colorbox": {
           "type": "package",
           "package": {
@@ -104,17 +80,13 @@
         }
     },
     "require": {
-        "ckeditor-plugin/fakeobjects": "^4.8",
-        "ckeditor-plugin/link": "^4.8",
         "composer/installers": "^1.9",
         "cweagans/composer-patches": "1.x-dev",
-        "drupal/allowed_formats": "^2.0",
-        "drupal/anchor_link": "2.x",
+        "drupal/allowed_formats": "3.x",
         "drupal/better_exposed_filters": "^6.0.3",
         "drupal/block_class": "^2.0",
         "drupal/calendar": "^1.0@beta",
         "drupal/captcha": "^1.2",
-        "drupal/ckeditor_abbreviation": "^3.0",
         "drupal/colorbox": "^2.0",
         "drupal/condition_query": "1.4",
         "drupal/config_devel": "^1.8",
@@ -238,6 +210,7 @@
             "https://www.drupal.org/node/2640994": "https://www.drupal.org/files/issues/2022-12-03/2640994-148.patch",
             "https://www.drupal.org/node/2858392": "https://www.drupal.org/files/issues/2023-09-07/2858392-34.patch",
             "https://www.drupal.org/node/2985168": "https://www.drupal.org/files/issues/2023-01-24/2985168-media-edit-modal-10.1.x-153.patch",
+            "https://www.drupal.org/node/3075527": "https://www.drupal.org/files/issues/2023-10-05/3075527-47-disable.patch",
             "handle form validation on og_autocomplete": "patches/og_autocomplete_no_error.patch"
           },
           "drupal/openid_connect": {

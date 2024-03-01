@@ -358,22 +358,6 @@ ckeditor5_linkImage:
         - ckeditor5_link
         - ckeditor5_image
 
-ckeditor5_linkMedia:
-  ckeditor5:
-    plugins:
-      - drupalMedia.DrupalLinkMedia
-    config:
-      # Append the "Link" button to the media balloon toolbar.
-      drupalMedia:
-        toolbar: [drupalLinkMedia]
-  drupal:
-    label: Linked Media
-    elements: false
-    conditions:
-      plugins:
-        - ckeditor5_link
-        - media_media
-
 ckeditor5_list:
   ckeditor5:
     plugins:
