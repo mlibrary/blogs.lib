@@ -611,11 +611,13 @@ function custom_blogs_views_post_render(ViewExecutable $view, array &$output, Ca
       $title = $blog->getTitle();
       $view->setTitle('Posts in ' . $title);
     }
-    else {
+    else if (is_numeric($view->args[0])) {
       $blog_id = $view->args[0];
       $blog = Node::load($blog_id);
-      $title = $blog->getTitle();
-      $view->setTitle('Posts in ' . $title);
+      if (is_object($blog) && method_exists($blog, 'getTitle')) {
+        $title = $blog->getTitle();
+        $view->setTitle('Posts in ' . $title);
+      }
     }
   }
 }
