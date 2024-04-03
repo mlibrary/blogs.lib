@@ -140,7 +140,7 @@
         "drupal/views_contextual_filters_or": "^1.4",
         "drupal/views_field_view": "1.0-beta5",
         "drupal/viewsreference": "2.0-beta6",
-        "drush/drush": "^11.0",
+        "drush/drush": "^12.0",
         "furf/jquery-ui-touch-punch": "master",
         "jackmoore/colorbox": "^1.6",
         "mlibrary/umlib_admin": "^1.0",
