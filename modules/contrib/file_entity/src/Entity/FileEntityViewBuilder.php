@@ -25,7 +25,7 @@ class FileEntityViewBuilder extends EntityViewBuilder {
     // support cache invalidations on those, we pick the first cache tag from
     // the references and add that.
     // @todo Make this available as a method?
-    foreach (\Drupal::service('file.usage')->listUsage($entity) as $module => $module_references) {
+    foreach (\Drupal::service('file.usage')->listUsage($entity) as $module_references) {
       foreach ($module_references as $type => $ids) {
         if (\Drupal::entityTypeManager()->hasDefinition($type)) {
           $build['#cache']['tags'] = Cache::mergeTags($build['#cache']['tags'], array($type . ':' . key($ids)));

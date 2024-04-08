@@ -50,7 +50,7 @@ class FileEntityTypeTest extends FileEntityTestBase {
    */
   public function testTypeWithCandidates() {
     // Create multiple file types with the same mime types.
-    $types = array(
+    array(
       'image1' => $this->createFileType(array('id' => 'image1', 'label' => 'Image 1')),
       'image2' => $this->createFileType(array('id' => 'image2', 'label' => 'Image 2')),
     );

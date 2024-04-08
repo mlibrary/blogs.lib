@@ -496,9 +496,10 @@ class MediaLibraryWidget extends WidgetBase implements TrustedCallbackInterface 
         'edit_button' => [
           '#type' => 'submit',
           '#value' => $this->t('Edit'),
-          '#weight' => -5,
+          '#weight' => 1,
           '#access' => $media_item->access('update'),
           '#attributes' => [
+            'aria-label' => $media_item->access('view label') ? $this->t('Edit @label', ['@label' => $media_item->label()]) : $this->t('Edit media'),
             'class' => ['edit-media', 'use-ajax'],
             'href' => $media_item->toUrl('edit-form', ['query' => $state->all()])->toString(),
             'data-dialog-type' => 'modal',
@@ -543,9 +544,6 @@ class MediaLibraryWidget extends WidgetBase implements TrustedCallbackInterface 
           'type' => 'throbber',
           'message' => $this->t('Opening media library.'),
         ],
-        // The AJAX system automatically moves focus to the first tabbable
-        // element of the modal, so we need to disable refocus on the button.
-        'disable-refocus' => TRUE,
       ],
       // Allow the media library to be opened even if there are form errors.
       '#limit_validation_errors' => [],
@@ -648,7 +646,7 @@ class MediaLibraryWidget extends WidgetBase implements TrustedCallbackInterface 
   protected function getNoMediaTypesAvailableMessage() {
     $entity_type_id = $this->fieldDefinition->getTargetEntityTypeId();
 
-    $default_message = $this->t('There are no allowed media types configured for this field. Please contact the site administrator.');
+    $default_message = $this->t('There are no allowed media types configured for this field. Contact the site administrator.');
 
     // Show the default message if the user does not have the permissions to
     // configure the fields for the entity type.
@@ -944,8 +942,8 @@ class MediaLibraryWidget extends WidgetBase implements TrustedCallbackInterface 
    */
   protected static function getNewMediaItems(array $element, FormStateInterface $form_state) {
     // Get the new media IDs passed to our hidden button. We need to use the
-    // actual user input, since when #limit_validation_errors is used, the
-    // unvalidated user input is not added to the form state.
+    // actual user input, since when #limit_validation_errors is used, any
+    // non validated user input is not added to the form state.
     // @see FormValidator::handleErrorsWithLimitedValidation()
     $values = $form_state->getUserInput();
     $path = $element['#parents'];
@@ -980,7 +978,7 @@ class MediaLibraryWidget extends WidgetBase implements TrustedCallbackInterface 
     // Default to using the current selection if the form is new.
     $path = $element['#parents'];
     // We need to use the actual user input, since when #limit_validation_errors
-    // is used, the unvalidated user input is not added to the form state.
+    // is used, the non validated user input is not added to the form state.
     // @see FormValidator::handleErrorsWithLimitedValidation()
     $values = NestedArray::getValue($form_state->getUserInput(), $path);
     $selection = $values['selection'] ?? [];

@@ -23,7 +23,7 @@ class FileEntityFileTypeClassificationTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = array('file');
+  protected static $modules = ['file'];
 
   /**
    * {@inheritdoc}

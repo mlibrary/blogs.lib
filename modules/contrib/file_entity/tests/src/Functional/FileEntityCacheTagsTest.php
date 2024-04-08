@@ -22,7 +22,7 @@ class FileEntityCacheTagsTest extends FileEntityTestBase {
   /**
    * @var array
    */
-  public static $modules = array('node', 'views');
+  protected static $modules = ['node', 'views'];
 
   protected $adminUser;
 

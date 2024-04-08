@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\Entity;
 
 use Drupal\Core\Access\AccessResult;
@@ -101,7 +103,7 @@ class EntityUnitTest extends UnitTestCase {
       ->method('getListCacheTags')
       ->willReturn([$this->entityTypeId . '_list']);
 
-    $this->entityTypeManager = $this->getMockForAbstractClass(EntityTypeManagerInterface::class);
+    $this->entityTypeManager = $this->createMock(EntityTypeManagerInterface::class);
     $this->entityTypeManager->expects($this->any())
       ->method('getDefinition')
       ->with($this->entityTypeId)
@@ -253,7 +255,7 @@ class EntityUnitTest extends UnitTestCase {
 
     $class_name = get_class($this->entity);
 
-    $entity_type_repository = $this->getMockForAbstractClass(EntityTypeRepositoryInterface::class);
+    $entity_type_repository = $this->createMock(EntityTypeRepositoryInterface::class);
     $entity_type_repository->expects($this->once())
       ->method('getEntityTypeFromClass')
       ->with($class_name)
@@ -287,7 +289,7 @@ class EntityUnitTest extends UnitTestCase {
 
     $class_name = get_class($this->entity);
 
-    $entity_type_repository = $this->getMockForAbstractClass(EntityTypeRepositoryInterface::class);
+    $entity_type_repository = $this->createMock(EntityTypeRepositoryInterface::class);
     $entity_type_repository->expects($this->once())
       ->method('getEntityTypeFromClass')
       ->with($class_name)
@@ -319,7 +321,7 @@ class EntityUnitTest extends UnitTestCase {
 
     $class_name = get_class($this->entity);
 
-    $entity_type_repository = $this->getMockForAbstractClass(EntityTypeRepositoryInterface::class);
+    $entity_type_repository = $this->createMock(EntityTypeRepositoryInterface::class);
     $entity_type_repository->expects($this->once())
       ->method('getEntityTypeFromClass')
       ->with($class_name)

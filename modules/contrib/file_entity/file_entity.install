@@ -198,3 +198,12 @@ function file_entity_update_8005() {
     \Drupal::entityDefinitionUpdateManager()->updateEntityType($entity_type);
   }
 }
+
+/**
+ *
+ */
+function file_entity_update_8201() {
+  // Due to reverting 2655844, need to go forward from here, cannot go backwards.
+}
+
+

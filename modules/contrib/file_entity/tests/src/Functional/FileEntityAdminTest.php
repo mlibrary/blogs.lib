@@ -36,7 +36,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
    *
    * @var array
    */
-  public static $modules = ['block'];
+  protected static $modules = ['block'];
 
   /**
    * {@inheritdoc}

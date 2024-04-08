@@ -26,11 +26,11 @@ class FileEntityServicesTest extends FileEntityTestBase {
    *
    * @var string[]
    */
-  public static $modules = array(
+  protected static $modules = [
     'node',
     'hal',
     'rest'
-  );
+  ];
 
   /**
    * Tests that a file field is correctly handled with REST.

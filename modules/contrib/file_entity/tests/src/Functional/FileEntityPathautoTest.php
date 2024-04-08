@@ -21,7 +21,7 @@ class FileEntityPathautoTest extends FileEntityTestBase {
    *
    * @var array
    */
-  public static $modules = array('pathauto');
+  protected static $modules = ['pathauto'];
 
   /**
    * Tests Pathauto support.
@@ -35,7 +35,7 @@ class FileEntityPathautoTest extends FileEntityTestBase {
     ]);
     $pattern->save();
 
-    $file = $this->createFileEntity(['filename' => 'example.png']);
+    $this->createFileEntity(['filename' => 'example.png']);
 
     $this->assertPathAliasExists('/files/examplepng', NULL, NULL, 'file alias exists');
   }

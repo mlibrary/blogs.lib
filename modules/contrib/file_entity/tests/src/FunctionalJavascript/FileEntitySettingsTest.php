@@ -20,7 +20,7 @@ class FileEntitySettingsTest extends WebDriverTestBase {
    *
    * @var array
    */
-  public static $modules = ['file_entity', 'field_ui'];
+  protected static $modules = ['file_entity', 'field_ui'];
 
   /**
    * {@inheritdoc}
@@ -68,7 +68,6 @@ class FileEntitySettingsTest extends WebDriverTestBase {
     $this->submitForm($edit, 'Update');
     $assert_session->assertWaitOnAjaxRequest();
     $this->submitForm([], 'Save');
-    $assert_session->assertWaitOnAjaxRequest();
     $assert_session->pageTextContains('Title attribute is hidden.');
     $assert_session->pageTextContains('Alt attribute is hidden.');
 
@@ -79,7 +78,6 @@ class FileEntitySettingsTest extends WebDriverTestBase {
     $page->attachFileToField('files[upload]', $this->container->get('file_system')->realpath($test_file[0]->uri));
     $assert_session->assertWaitOnAjaxRequest();
     $this->submitForm([], 'Next');
-    $assert_session->assertWaitOnAjaxRequest();
     $assert_session->pageTextContains('Destination');
     $this->submitForm([], 'Next');
     $edit = [

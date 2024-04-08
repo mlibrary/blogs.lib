@@ -19,7 +19,7 @@ class FileEntityAccessTest extends FileEntityTestBase {
    *
    * @var array
    */
-  public static $modules = ['node'];
+  protected static $modules = ['node'];
 
   /**
    * The File Entity access controller.

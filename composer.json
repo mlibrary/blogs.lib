@@ -91,7 +91,7 @@
         "drupal/condition_query": "1.4",
         "drupal/config_devel": "^1.8",
         "drupal/content_moderation_notifications": "^3.5",
-        "drupal/core": "^10.1",
+        "drupal/core": "^10.2",
         "drupal/create_user_permission": "^2.0",
         "drupal/devel": "^5.1",
         "drupal/easy_breadcrumb": "^2.0",
@@ -209,7 +209,7 @@
           "drupal/core": {
             "https://www.drupal.org/node/2640994": "https://www.drupal.org/files/issues/2022-12-03/2640994-148.patch",
             "https://www.drupal.org/node/2858392": "https://www.drupal.org/files/issues/2023-09-07/2858392-34.patch",
-            "https://www.drupal.org/node/2985168": "https://www.drupal.org/files/issues/2023-01-24/2985168-media-edit-modal-10.1.x-153.patch",
+            "https://www.drupal.org/node/2985168": "https://www.drupal.org/files/issues/2023-12-18/2985168-172.patch",
             "https://www.drupal.org/node/3075527": "https://www.drupal.org/files/issues/2023-10-05/3075527-47-disable.patch",
             "handle form validation on og_autocomplete": "patches/og_autocomplete_no_error.patch"
           },

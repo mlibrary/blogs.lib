@@ -20,7 +20,7 @@ abstract class FileEntityTestBase extends BrowserTestBase {
   /**
    * @var array
    */
-  public static $modules = array('file_entity');
+  protected static $modules = ['file_entity'];
 
   /**
    * File entity config.

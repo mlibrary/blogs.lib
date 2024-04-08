@@ -14,7 +14,7 @@ class FileEntityEditTest extends FileEntityTestBase {
   protected $web_user;
   protected $admin_user;
 
-  public static $modules = ['block'];
+  protected static $modules = ['block'];
 
   function setUp(): void {
     parent::setUp();

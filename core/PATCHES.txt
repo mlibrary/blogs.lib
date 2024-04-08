@@ -10,7 +10,7 @@ Source: https://www.drupal.org/files/issues/2023-09-07/2858392-34.patch
 
 
 https://www.drupal.org/node/2985168
-Source: https://www.drupal.org/files/issues/2023-01-24/2985168-media-edit-modal-10.1.x-153.patch
+Source: https://www.drupal.org/files/issues/2023-12-18/2985168-172.patch
 
 
 https://www.drupal.org/node/3075527

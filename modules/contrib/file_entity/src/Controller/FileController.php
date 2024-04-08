@@ -124,17 +124,19 @@ class FileController extends ControllerBase {
     $form = $this->formBuilder()->buildForm($form_object, $form_state);
     $dialog_selector = '#file-entity-inline-edit-' . $file->id();
 
+    // Setup ajax response.
+    $response = new AjaxResponse();
+
     // Return a response, depending on whether it's successfully submitted.
     if (!$form_state->isExecuted()) {
       // Return the form as a modal dialog.
       $form['#attached']['library'][] = 'core/drupal.dialog.ajax';
       $title = $this->t('Edit file @file', ['@file' => $file->label()]);
-      $response = AjaxResponse::create()->addCommand(new OpenDialogCommand($dialog_selector, $title, $form, ['width' => 800]));
-      return $response;
+      return $response->addCommand(new OpenDialogCommand($dialog_selector, $title, $form, ['width' => 800]));
     }
     else {
       // Return command for closing the modal.
-      return AjaxResponse::create()->addCommand(new CloseDialogCommand($dialog_selector));
+      return $response->addCommand(new CloseDialogCommand($dialog_selector));
     }
   }
 }

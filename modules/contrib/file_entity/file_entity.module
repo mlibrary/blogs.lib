@@ -409,7 +409,7 @@ function file_entity_entity_storage_load($entities, $entity_type) {
       if ($field_definition->getSetting('target_type') == 'file' && $field_definition->getType() != 'image') {
         $field_name = $field_definition->getName();
         if (!empty($entity->{$field_name})) {
-          foreach ($entity->$field_name as $delta => $item) {
+          foreach ($entity->$field_name as $item) {
             // If alt and title text is not specified, fall back to alt and
             // title text on the file.
             if (!empty($item->target_id) && (empty($item->alt) || empty($item->title))) {
@@ -512,4 +512,14 @@ function file_entity_preprocess_image_formatter(&$variables) {
       $variables['image']["#$key"] = $variables['item']->entity->getMetadata($key);
     }
   }
+}
+
+/**
+ * Implements hook_entity_bundle_info().
+ */
+function file_entity_entity_bundle_info() {
+  // Define the undefined bundle for validation to work when the type is not
+  // yet known.
+  $bundles['file']['undefined']['label'] = t('Unknown');
+  return $bundles;
 }

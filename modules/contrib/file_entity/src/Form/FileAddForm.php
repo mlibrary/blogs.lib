@@ -237,7 +237,7 @@ class FileAddForm extends FormBase {
     $candidates = array();
     foreach ($types as $type) {
 
-      if ($has_access = $this->entityTypeManager->getAccessControlHandler('file')
+      if ($this->entityTypeManager->getAccessControlHandler('file')
         ->createAccess($type)
       ) {
         $candidates[$type] = FileType::load($type)->label();

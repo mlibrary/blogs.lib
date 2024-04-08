@@ -15,15 +15,15 @@ file_entity.type.*:
       type: sequence
       label: 'MIME types'
       sequence:
-        - type: string
-          label: 'MIME type'
+        type: string
+        label: 'MIME type'
 
 file_entity.settings:
   type: config_object
   label: 'File Entity settings'
   mapping:
     max_filesize:
-      type: integer
+      type: string
       label: 'Maximum upload size'
     default_allowed_extensions:
       type: string

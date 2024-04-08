@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\Form;
 
 use Drupal\Core\Form\ConfigFormBaseTrait;
@@ -43,26 +45,26 @@ class ConfigFormBaseTraitTest extends UnitTestCase {
    * @covers ::config
    */
   public function testConfigFactoryException() {
-    $trait = $this->getMockForTrait('Drupal\Core\Form\ConfigFormBaseTrait');
-    $config_method = new \ReflectionMethod($trait, 'config');
+    $testObject = new ConfiguredTrait();
 
     // There is no config factory available this should result in an exception.
     $this->expectException(\LogicException::class);
     $this->expectExceptionMessage('No config factory available for ConfigFormBaseTrait');
-    $config_method->invoke($trait, 'editable.config');
+    $config_method = new \ReflectionMethod($testObject, 'config');
+    $config_method->invoke($testObject, 'editable.config');
   }
 
   /**
    * @covers ::config
    */
   public function testConfigFactoryExceptionInvalidProperty() {
-    $trait = $this->getMockForTrait('Drupal\Core\Form\ConfigFormBaseTrait');
-    $config_method = new \ReflectionMethod($trait, 'config');
+    $testObject = new ConfiguredTrait();
 
     // There is no config factory available this should result in an exception.
     $this->expectException(\LogicException::class);
     $this->expectExceptionMessage('No config factory available for ConfigFormBaseTrait');
-    $config_method->invoke($trait, 'editable.config');
+    $config_method = new \ReflectionMethod($testObject, 'config');
+    $config_method->invoke($testObject, 'editable.config');
   }
 
 }

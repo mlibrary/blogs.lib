@@ -16,7 +16,7 @@ use Drupal\file_entity\Entity\FileType;
  */
 class FileEntityCreationTest extends FileEntityTestBase {
 
-  public static $modules = array('views');
+  protected static $modules = ['views'];
 
   /**
    * {@inheritdoc}

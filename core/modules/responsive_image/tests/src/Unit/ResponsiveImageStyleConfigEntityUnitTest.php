@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\responsive_image\Unit;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -84,7 +86,7 @@ class ResponsiveImageStyleConfigEntityUnitTest extends UnitTestCase {
       ->with('image_style')
       ->willReturn($storage);
 
-    $entity_type_repository = $this->getMockForAbstractClass(EntityTypeRepositoryInterface::class);
+    $entity_type_repository = $this->createMock(EntityTypeRepositoryInterface::class);
     $entity_type_repository->expects($this->any())
       ->method('getEntityTypeFromClass')
       ->with('Drupal\image\Entity\ImageStyle')

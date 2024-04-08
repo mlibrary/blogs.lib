@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\Core\Test;
 
 use Drupal\Core\Database\Database;
@@ -34,7 +36,11 @@ class TestSetupTraitTest extends UnitTestCase {
 
     // Create a mock for testing the trait and set a few properties that are
     // used to avoid unnecessary set up.
-    $test_setup = $this->getMockForTrait(TestSetupTrait::class);
+    $test_setup = new class() {
+
+      use TestSetupTrait;
+
+    };
 
     $reflection = new \ReflectionClass($test_setup);
     $reflection->getProperty('databasePrefix')->setValue($test_setup, 'testDbPrefix');
