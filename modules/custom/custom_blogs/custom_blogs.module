@@ -105,7 +105,7 @@ function _get_mcommunity_user($name) {
       $ldap_resource,
       "ou=People,dc=umich,dc=edu",
       "(uid=".$name.")",
-      ['entityid','displayName','title','mail','givenname','sn','umichtitle',]
+      ['entityid','displayName','title','mail','givenname','umichdisplaysn','umichtitle',]
     );
     $ldap_entries = ldap_get_entries($ldap_resource, $ldap_result);
     if ($ldap_entries['count'] != 0) {
@@ -155,8 +155,8 @@ function custom_blogs_user_presave($user) {
   $user_name = $user->getAccountName();
   if (strpos($user_name, '@') === FALSE) {
     $user_data = _get_mcommunity_user($user_name);
-    if (!empty($user_data['sn'])) {
-      $user->get('field_user_last')->setValue([['value' => $user_data['sn']]]);
+    if (!empty($user_data['umichdisplaysn'])) {
+      $user->get('field_user_last')->setValue([['value' => $user_data['umichdisplaysn']]]);
     }
     if (!empty($user_data['givenname'])) {
       $user->get('field_user_first')->setValue([['value' => $user_data['givenname']]]);
@@ -164,8 +164,8 @@ function custom_blogs_user_presave($user) {
     if (!empty(trim($user_data['displayname']))) {
       $user->get('field_user_display')->setValue([['value' => $user_data['displayname']]]);
     }
-    else if (!empty($user_data['sn']) && !empty($user_data['givenname'])) {
-      $user->get('field_user_display')->setValue([['value' => $user_data['givenname'].' '.$user_data['sn']]]);
+    else if (!empty($user_data['umichdisplaysn']) && !empty($user_data['givenname'])) {
+      $user->get('field_user_display')->setValue([['value' => $user_data['givenname'].' '.$user_data['umichdisplaysn']]]);
     }
     if (!empty($user_data['umichtitle'])) {
       $user->get('field_user_title')->setValue([['value' => $user_data['umichtitle']]]);
