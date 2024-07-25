@@ -34,6 +34,12 @@ function custom_uml_blogs_mail_mail_alter(&$message) {
     foreach ($memberships as $membership) {
       $bcc .= $membership->getOwner()->getEmail() . ',';
     }
+    $subject = str_replace('[node:og_audience:entity:title]: [node:title]', $group_node->getTitle().': '.$node->getTitle(), $message['params']['subject']);
+    \Drupal::logger('custom_uml_blogs_mail')->notice('Meessage %subject sent to %bcc',
+    [
+      '%subject' => $subject,
+      '%bcc' => $bcc,
+    ]);
     $message['bcc'] = rtrim($bcc, ',');
     $message['headers']['Bcc'] = $message['bcc'];
     \Drupal::messenger()->addMessage('All subscribers of ' . $group_node->getTitle() . ' have been sent a notification email.');
