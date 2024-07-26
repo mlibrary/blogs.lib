@@ -491,6 +491,27 @@ function custom_blogs_views_pre_render(ViewExecutable $view) {
     $view->field['name']->options['settings']['link_to_entity'] = 0;
     $view->field['roles_target_id']->options['settings']['link_to_entity'] = 0;
   }
+  if ($view->id() == 'my_non_subscriptions') {
+    $s_view = \Drupal::entityTypeManager()
+      ->getStorage('view')
+      ->load('get_membership_ids')
+      ->getExecutable();
+    $s_view->initDisplay();
+    $s_view->setDisplay('default');
+    $s_view->setArguments([\Drupal::currentUser()->id()]);
+    $s_view->execute();
+    $s_result = [];
+    foreach ($s_view->result as $id => $value) {
+      $s_result[] = $value->_entity->getGroupId();
+    }
+    $nids = [];
+    foreach ($view->result as $id => $value) {
+      $nid = $value->_entity->id();
+      if (in_array($nid, $s_result)) {
+        unset($view->result[$id]);
+      }
+    }
+  }
   if ($view->id() == 'blogs_filtered_by_membership' && $view->current_display == 'entity_reference_1') {
     //arg[0] is loggedin user. pass to get memberships.
     //don't do anything if user is og administrator.
