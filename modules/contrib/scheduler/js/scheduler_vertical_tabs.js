@@ -4,42 +4,53 @@
  */
 
 (function ($) {
-
-  'use strict';
-
   /**
    * Provide summary information for vertical tabs.
    */
   Drupal.behaviors.scheduler_settings = {
-    attach: function (context) {
+    attach(context) {
+      // Provide summary when editing an entity. This is only applicable to
+      // themes that provide vertical tabs or modal details blocks with a
+      // summary area, such as Bartik or Claro. It does nothing in Stark.
+      $('details#edit-scheduler-settings', context).drupalSetSummary(
+        function (context) {
+          const publishOn = document.querySelector(
+            '#edit-publish-on-0-value-date',
+          );
+          const unpublishOn = document.querySelector(
+            '#edit-unpublish-on-0-value-date',
+          );
+          const values = [];
+          if (publishOn?.value) {
+            values.push(Drupal.t('Scheduled for publishing'));
+          }
+          if (unpublishOn?.value) {
+            values.push(Drupal.t('Scheduled for unpublishing'));
+          }
+          if (!values.length) {
+            values.push(Drupal.t('Not scheduled'));
+          }
+          return values.join('<br/>');
+        },
+      );
 
-      // Provide summary when editing a node.
-      $('details#edit-scheduler-settings', context).drupalSetSummary(function (context) {
-        var vals = [];
-        if ($('#edit-publish-on-0-value-date').val()) {
-          vals.push(Drupal.t('Scheduled for publishing'));
-        }
-        if ($('#edit-unpublish-on-0-value-date').val()) {
-          vals.push(Drupal.t('Scheduled for unpublishing'));
-        }
-        if (!vals.length) {
-          vals.push(Drupal.t('Not scheduled'));
-        }
-        return vals.join('<br/>');
-      });
-
-      // Provide summary during content type configuration.
+      // Provide summary during entity type configuration.
       $('#edit-scheduler', context).drupalSetSummary(function (context) {
-        var vals = [];
-        if ($('#edit-scheduler-publish-enable', context).is(':checked')) {
-          vals.push(Drupal.t('Publishing enabled'));
+        const publishingEnabled = document.querySelector(
+          '#edit-scheduler-publish-enable',
+        );
+        const unpublishingEnabled = document.querySelector(
+          '#edit-scheduler-unpublish-enable',
+        );
+        const values = [];
+        if (publishingEnabled.matches(':checked')) {
+          values.push(Drupal.t('Publishing enabled'));
         }
-        if ($('#edit-scheduler-unpublish-enable', context).is(':checked')) {
-          vals.push(Drupal.t('Unpublishing enabled'));
+        if (unpublishingEnabled.matches(':checked')) {
+          values.push(Drupal.t('Unpublishing enabled'));
         }
-        return vals.join('<br/>');
+        return values.join('<br/>');
       });
-    }
+    },
   };
-
 })(jQuery);

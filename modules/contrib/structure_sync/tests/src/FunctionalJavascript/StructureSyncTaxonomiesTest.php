@@ -81,7 +81,8 @@ class StructureSyncTaxonomiesTest extends WebDriverTestBase {
     ])->save();
 
     $this->click('#edit-import-taxonomies-safe');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    // Wait for the import batch to complete so the buttons are visible again.
+    $this->assertSession()->waitForElementVisible('css', '#edit-import-taxonomies-full');
 
     // Deleted menu item should be imported.
     $tigGasTerms = $this->taxonomyTermStorage->loadByProperties(['name' => 'Argon']);
@@ -93,7 +94,8 @@ class StructureSyncTaxonomiesTest extends WebDriverTestBase {
 
     // Trying full.
     $this->click('#edit-import-taxonomies-full');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    // Wait for the import batch to complete so the buttons are visible again.
+    $this->assertSession()->waitForElementVisible('css', '#edit-import-taxonomies-full');
 
     // "Tig gas" should be correctly imported.
     $tigGasTaxonomies = $this->taxonomyTermStorage->loadByProperties(['name' => 'Argon']);

@@ -13,8 +13,8 @@
   <rule ref="DrupalPractice"/>
 
   <!-- Check these file extensions -->
-  <!-- .md and .yml are not processed by phpcs -->
-  <arg name="extensions" value="php,module,inc,install,css"/>
+  <!-- .yml files are not processed by phpcs -->
+  <arg name="extensions" value="php,module,inc,install,css,md"/>
 
   <!-- Use 's' to print the full sniff name in the report. -->
   <arg value="s"/>

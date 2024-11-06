@@ -62,6 +62,7 @@ trait LinkWithAttributesWidgetTrait {
       '#tree' => TRUE,
       '#open' => $open,
     ];
+    $required = FALSE;
     $plugin_definitions = $this->linkAttributesManager->getDefinitions();
     foreach (array_keys(array_filter($this->getSetting('enabled_attributes'))) as $attribute) {
       if (isset($plugin_definitions[$attribute])) {
@@ -82,8 +83,12 @@ trait LinkWithAttributesWidgetTrait {
         if (isset($default_value)) {
           $element['options']['attributes'][$attribute]['#default_value'] = $default_value;
         }
+        $required = $required || !empty($element['options']['attributes'][$attribute]['#required']);
       }
     }
+    // Open the widget by default if there is a required attribute.
+    $element['options']['attributes']['#open'] = $element['options']['attributes']['#open'] || $required;
+
     return $element;
   }
 

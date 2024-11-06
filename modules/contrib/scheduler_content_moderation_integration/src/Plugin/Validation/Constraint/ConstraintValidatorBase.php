@@ -17,20 +17,6 @@ use Symfony\Component\Validator\ConstraintValidator;
 abstract class ConstraintValidatorBase extends ConstraintValidator implements ContainerInjectionInterface {
 
   /**
-   * The content moderation information service.
-   *
-   * @var \Drupal\content_moderation\ModerationInformationInterface
-   */
-  protected $moderationInformation;
-
-  /**
-   * The current user.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $account;
-
-  /**
    * SchedulerModerationConstraintValidator constructor.
    *
    * @param \Drupal\content_moderation\ModerationInformationInterface $moderationInformation
@@ -39,11 +25,9 @@ abstract class ConstraintValidatorBase extends ConstraintValidator implements Co
    *   The current user.
    */
   public function __construct(
-    ModerationInformationInterface $moderationInformation,
-    AccountInterface $account
+    protected ModerationInformationInterface $moderationInformation,
+    protected AccountInterface $account,
   ) {
-    $this->moderationInformation = $moderationInformation;
-    $this->account = $account;
   }
 
   /**

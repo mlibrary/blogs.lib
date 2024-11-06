@@ -26,18 +26,17 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class SchedulerModerationWidget extends OptionsSelectWidget implements ContainerFactoryPluginInterface {
 
   /**
-   * The moderation information service.
-   *
-   * @var \Drupal\content_moderation\ModerationInformationInterface
-   */
-  protected $moderationInformation;
-
-  /**
    * {@inheritdoc}
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, ModerationInformationInterface $moderation_information) {
+  public function __construct(
+    $plugin_id,
+    $plugin_definition,
+    FieldDefinitionInterface $field_definition,
+    array $settings,
+    array $third_party_settings,
+    protected ModerationInformationInterface $moderationInformation,
+  ) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
-    $this->moderationInformation = $moderation_information;
   }
 
   /**
@@ -50,7 +49,7 @@ class SchedulerModerationWidget extends OptionsSelectWidget implements Container
   /**
    * {@inheritdoc}
    */
-  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
+  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state): array {
     $element = parent::formElement($items, $delta, $element, $form, $form_state);
 
     // @todo Can this conditional ever be false? There is no test coverage for
@@ -79,7 +78,7 @@ class SchedulerModerationWidget extends OptionsSelectWidget implements Container
   /**
    * {@inheritdoc}
    */
-  public static function validateElement(array $element, FormStateInterface $form_state) {
+  public static function validateElement(array $element, FormStateInterface $form_state): void {
     if (is_array($element['#value'])) {
       $value = current($element['#value']);
     }
@@ -94,10 +93,11 @@ class SchedulerModerationWidget extends OptionsSelectWidget implements Container
   /**
    * {@inheritdoc}
    */
-  public static function isApplicable(FieldDefinitionInterface $field_definition) {
+  public static function isApplicable(FieldDefinitionInterface $field_definition): bool {
     if ($field_definition->getFieldStorageDefinition()->getProvider() === 'scheduler_content_moderation_integration') {
       return TRUE;
     }
+    return FALSE;
   }
 
 }

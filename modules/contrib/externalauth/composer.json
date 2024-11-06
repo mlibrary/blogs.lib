@@ -5,9 +5,6 @@
     "homepage": "https://drupal.org/project/externalauth",
     "license": "GPL-2.0-or-later",
     "minimum-stability": "dev",
-    "require": {
-        "drupal/core": "^9 || ^10"
-    },
     "authors": [
         {
             "name": "Sven Decabooter",

@@ -23,6 +23,6 @@ class PublishStateConstraint extends Constraint {
    *
    * @var string
    */
-  public $invalidTransitionMessage = 'The scheduled publishing state of %publish_state is not a valid transition from the current moderation state of %content_state for this content.';
+  public string $invalidTransitionMessage = 'The scheduled publishing state of %publish_state is not a valid transition from the current moderation state of %content_state for this content.';
 
 }

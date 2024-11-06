@@ -72,9 +72,9 @@ class SchedulerDevelGenerateTest extends SchedulerBrowserTestBase {
       // Define the minimum and maximum times that we expect the scheduled dates
       // to be within. REQUEST_TIME remains static for the duration of this test
       // but even though devel_generate also uses uses REQUEST_TIME this will
-      // slowly creep forward during sucessive calls. Tests can fail incorrectly
-      // for this reason, hence the best approximation is to use time() when
-      // calculating the upper end of the range.
+      // slowly creep forward during successive calls. Tests can fail
+      // incorrectly for this reason, hence the best approximation is to use
+      // time() when calculating the upper end of the range.
       $min = $this->requestTime - $time_range;
       $max = time() + $time_range;
 
@@ -179,9 +179,9 @@ class SchedulerDevelGenerateTest extends SchedulerBrowserTestBase {
    *   Each array item has the values:
    *     [entity type id, enable for Scheduler TRUE/FALSE].
    */
-  public function dataDevelGenerate() {
-    $types = $this->dataStandardEntityTypes();
-    // Remove commerce_product, becuase Devel Generate does not cover products.
+  public static function dataDevelGenerate() {
+    $types = self::dataStandardEntityTypes();
+    // Remove commerce_product, because Devel Generate does not cover products.
     unset($types['#commerce_product']);
     $data = [];
     // For each entity type, add a row for enabled TRUE and enabled FALSE.

@@ -35,7 +35,8 @@ final class ExtensionMetadataDeprecationAnalyzer {
         // Manually add on info file incompatibility to results. Reading
         // .info.yml files directly, not from extension discovery because that
         // is cached.
-        $info = Yaml::decode(file_get_contents($info_file)) ?: [];
+        $file_contents = file_get_contents($info_file);
+        $info = Yaml::decode($file_contents) ?: [];
         if (!empty($info['package']) && $info['package'] == 'Testing' && !strpos($info_file, '/upgrade_status_test')) {
           // If this info file was for a testing project other than our own
           // testing projects, ignore it.
@@ -46,32 +47,34 @@ final class ExtensionMetadataDeprecationAnalyzer {
         // Check for missing base theme key.
         if ($info['type'] === 'theme') {
           if (!isset($info['base theme'])) {
-            $deprecations[] = new DeprecationMessage("The now required 'base theme' key is missing. See https://www.drupal.org/node/3066038.", $error_path, 0);
+            $deprecations[] = new DeprecationMessage("The now required 'base theme' key is missing. See https://www.drupal.org/node/3066038.", $error_path, 1, 'ExtensionMetadataDeprecationAnalyzer');
           }
         }
 
         if (!isset($info['core_version_requirement'])) {
-          $deprecations[] = new DeprecationMessage("Add core_version_requirement: ^9 || ^10 to designate that the extension is compatible with Drupal 10. See https://drupal.org/node/3070687.", $error_path, 0);
+          $deprecations[] = new DeprecationMessage("Add core_version_requirement to designate which Drupal versions is the extension compatible with. See https://drupal.org/node/3070687.", $error_path, 1, 'ExtensionMetadataDeprecationAnalyzer');
         }
         elseif (!ProjectCollector::isCompatibleWithNextMajorDrupal($info['core_version_requirement'])) {
-          $deprecations[] = new DeprecationMessage("Value of core_version_requirement: {$info['core_version_requirement']} is not compatible with the next major version of Drupal core. See https://drupal.org/node/3070687.", $error_path, 0);
+          $line = $this->findKeyLine('core_version_requirement:', $file_contents);
+          $deprecations[] = new DeprecationMessage("Value of core_version_requirement: {$info['core_version_requirement']} is not compatible with the next major version of Drupal core. See https://drupal.org/node/3070687.", $error_path, $line, 'ExtensionMetadataDeprecationAnalyzer');
         }
 
         // @todo
         //   Change values to ExtensionLifecycle class constants once at least
         //   Drupal 9.3 is required.
         if (!empty($info['lifecycle'])) {
+          $line = $this->findKeyLine('lifecycle:', $file_contents);
           $link = !empty($info['lifecycle_link']) ? $info['lifecycle_link'] : 'https://www.drupal.org/node/3215042';
           if ($info['lifecycle'] == 'deprecated') {
-            $deprecations[] = new DeprecationMessage("This extension is deprecated. Don't use it. See $link.", $error_path, 0);
+            $deprecations[] = new DeprecationMessage("This extension is deprecated. Don't use it. See $link.", $error_path, $line, 'ExtensionMetadataDeprecationAnalyzer');
           }
           elseif ($info['lifecycle'] == 'obsolete') {
-            $deprecations[] = new DeprecationMessage("This extension is obsolete. Obsolete extensions are usually uninstalled automatically when not needed anymore. You only need to do something about this if the uninstallation was unsuccesful. See $link.", $error_path, 0);
+            $deprecations[] = new DeprecationMessage("This extension is obsolete. Obsolete extensions are usually uninstalled automatically when not needed anymore. You only need to do something about this if the uninstallation was unsuccessful. See $link.", $error_path, $line, 'ExtensionMetadataDeprecationAnalyzer');
           }
         }
 
       } catch (InvalidDataTypeException $e) {
-        $deprecations[] = new DeprecationMessage('Parse error. ' . $e->getMessage(), $error_path, 0);
+        $deprecations[] = new DeprecationMessage('Parse error. ' . $e->getMessage(), $error_path, 1, 'ExtensionMetadataDeprecationAnalyzer');
       }
 
       // No need to check info files for PHP 8 compatibility information because
@@ -84,13 +87,13 @@ final class ExtensionMetadataDeprecationAnalyzer {
       $error_path = $extension->getPath() . '/composer.json';
       $composer_json = json_decode(file_get_contents($project_dir . '/composer.json'));
       if (empty($composer_json) || !is_object($composer_json)) {
-        $deprecations[] = new DeprecationMessage("Parse error in composer.json. Having a composer.json is not a requirement in general, but if there is one, it should be valid. See https://drupal.org/node/2514612.", $error_path, 0);
+        $deprecations[] = new DeprecationMessage("Parse error in composer.json. Having a composer.json is not a requirement in general, but if there is one, it should be valid. See https://drupal.org/node/2514612.", $error_path, 1, 'ExtensionMetadataDeprecationAnalyzer');
       }
       elseif (!empty($composer_json->require->{'drupal/core'}) && !projectCollector::isCompatibleWithNextMajorDrupal($composer_json->require->{'drupal/core'})) {
-        $deprecations[] = new DeprecationMessage("The drupal/core requirement is not compatible with the next major version of Drupal. Either remove it or update it to be compatible. See https://drupal.org/node/2514612#s-drupal-9-compatibility.", $error_path, 0);
+        $deprecations[] = new DeprecationMessage("The drupal/core requirement is not compatible with the next major version of Drupal. Either remove it or update it to be compatible. See https://www.drupal.org/docs/develop/using-composer/add-a-composerjson-file#core-compatibility.", $error_path, 1, 'ExtensionMetadataDeprecationAnalyzer');
       }
-      elseif ((projectCollector::getDrupalCoreMajorVersion() > 8) && !empty($composer_json->require->{'php'}) && !projectCollector::isCompatibleWithPHP8($composer_json->require->{'php'})) {
-        $deprecations[] = new DeprecationMessage("The PHP requirement is not compatible with PHP 8. Once the codebase is actually compatible, either remove this limitation or update it to be compatible.", $error_path, 0);
+      elseif (!empty($composer_json->require->{'php'}) && !projectCollector::isCompatibleWithPHP($composer_json->require->{'php'}, '8.1.0')) {
+        $deprecations[] = new DeprecationMessage("The PHP requirement is not compatible with PHP 8.1. Once the codebase is actually compatible, either remove this limitation or update it to be compatible.", $error_path, 1, 'ExtensionMetadataDeprecationAnalyzer');
       }
     }
     return $deprecations;
@@ -119,6 +122,26 @@ final class ExtensionMetadataDeprecationAnalyzer {
       $files = array_merge($files, $this->getSubExtensionInfoFiles($dir));
     }
     return $files;
+  }
+
+  /**
+   * Finds the line that contains the substring.
+   * 
+   * @param string $substring
+   *   The string to find.
+   * @param string $file_contents
+   *   String contents of a file.
+   * @return
+   *   Line number if found, 1 otherwise.
+   */
+  private function findKeyLine($substring, $file_contents) {
+    $lines = explode("\n", $file_contents);
+    foreach ($lines as $num => $line) {
+      if (strpos($line, $substring) !== FALSE) {
+        return $num + 1;
+      }
+    }
+    return 1;
   }
 
 }

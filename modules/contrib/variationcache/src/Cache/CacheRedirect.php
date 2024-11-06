@@ -2,32 +2,21 @@
 
 namespace Drupal\variationcache\Cache;
 
-use Drupal\Core\Cache\CacheableDependencyInterface;
-use Drupal\Core\Cache\CacheableDependencyTrait;
-
 /**
- * Defines a value object to represent a cache redirect with.
+ * @file
+ * Contains a class alias to keep old code functioning now that this module has
+ * been integrated into Drupal 10.2 and higher. If you are running on this core
+ * version, you should simply uninstall this module and update code that used to
+ * use this module to point to the core classes directly.
  *
- * @see \Drupal\variationcache\Cache\VariationCache::get()
- * @see \Drupal\variationcache\Cache\VariationCache::set()
- *
- * @internal
+ * This is an extra precaution on top of the class_alias calls in the module
+ * file because, sometimes, the variation_cache_factory service is already
+ * instantiated while the container is being built (e.g. in an event subscriber)
+ * and the module file hasn't been loaded yet at that point.
  */
-class CacheRedirect implements CacheableDependencyInterface {
-
-  use CacheableDependencyTrait;
-
-  /**
-   * Constructs a CacheRedirect object.
-   *
-   * @param \Drupal\Core\Cache\CacheableDependencyInterface $cacheability
-   *   The cacheability to redirect to.
-   *
-   * @see \Drupal\variationcache\Cache\VariationCache::createRedirectedCacheId()
-   */
-  public function __construct(CacheableDependencyInterface $cacheability) {
-    // Cache redirects only care about cache contexts.
-    $this->cacheContexts = $cacheability->getCacheContexts();
-  }
-
+if (!class_exists('\Drupal\Core\Cache\CacheRedirect')) {
+  @class_alias('\Drupal\variationcache\Old\Cache\CacheRedirect', '\Drupal\variationcache\Cache\CacheRedirect');
+}
+else {
+  @class_alias('\Drupal\Core\Cache\CacheRedirect', '\Drupal\variationcache\Cache\CacheRedirect');
 }

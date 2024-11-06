@@ -54,6 +54,7 @@ class UrlIsValidTest extends UnitTestCase {
       '127.0.0.1:8085/*',
       '[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]/path/*',
       '[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:8085/path/*',
+      'example.com/asset/*#*',
     ];
     return $this
       ->dataEnhanceWithScheme($urls);
@@ -91,6 +92,7 @@ class UrlIsValidTest extends UnitTestCase {
       'sub.*.example.com',
       '*.com',
       '*.com/path/*',
+      'user:pass@example.com/asset/*',
     ];
     return $this
       ->dataEnhanceWithScheme($data);

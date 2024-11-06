@@ -23,7 +23,7 @@ class CaptchaPersistenceTest extends CaptchaWebTestBase {
   private function setUpPersistence($persistence) {
     $this->drupalLogin($this->adminUser);
     // Set persistence.
-    $edit = ['persistence' => $persistence];
+    $edit = ['persistence' => (string) $persistence];
     $this->drupalGet(self::CAPTCHA_ADMIN_PATH);
     $this->submitForm($edit, 'Save configuration');
     // Log admin out.
@@ -84,7 +84,7 @@ class CaptchaPersistenceTest extends CaptchaWebTestBase {
       'pass' => 'bazlaz',
       'captcha_response' => 'Test 123',
     ];
-    $this->submitForm($edit, $this->t('Log in'), self::LOGIN_HTML_FORM_ID);
+    $this->submitForm($edit, 'Log in', self::LOGIN_HTML_FORM_ID);
     // Check that there was no error message for the CAPTCHA.
     $this->assertCaptchaResponseAccepted();
 
@@ -94,7 +94,7 @@ class CaptchaPersistenceTest extends CaptchaWebTestBase {
     $this->assertPreservedCsid($captcha_sid_initial);
 
     // Post from again.
-    $this->submitForm($edit, $this->t('Log in'), self::LOGIN_HTML_FORM_ID);
+    $this->submitForm($edit, 'Log in', self::LOGIN_HTML_FORM_ID);
     // Check that there was no error message for the CAPTCHA.
     $this->assertCaptchaResponseAccepted();
     $this->assertPreservedCsid($captcha_sid_initial);
@@ -118,7 +118,7 @@ class CaptchaPersistenceTest extends CaptchaWebTestBase {
       'pass' => 'bazlaz',
       'captcha_response' => 'Test 123',
     ];
-    $this->submitForm($edit, $this->t('Log in'), self::LOGIN_HTML_FORM_ID);
+    $this->submitForm($edit, 'Log in', self::LOGIN_HTML_FORM_ID);
     // Check that there was no error message for the CAPTCHA.
     $this->assertCaptchaResponseAccepted();
     // There shouldn't be a CAPTCHA on the new form.
@@ -155,7 +155,7 @@ class CaptchaPersistenceTest extends CaptchaWebTestBase {
       'pass' => 'bazlaz',
       'captcha_response' => 'Test 123',
     ];
-    $this->submitForm($edit, $this->t('Log in'), self::LOGIN_HTML_FORM_ID);
+    $this->submitForm($edit, 'Log in', self::LOGIN_HTML_FORM_ID);
     // Check that there was no error message for the CAPTCHA.
     $this->assertCaptchaResponseAccepted();
     // There shouldn't be a CAPTCHA on the new form.
@@ -197,7 +197,7 @@ class CaptchaPersistenceTest extends CaptchaWebTestBase {
       'pass' => 'bazlaz',
       'captcha_response' => 'Test 123',
     ];
-    $this->submitForm($edit, $this->t('Log in'), self::LOGIN_HTML_FORM_ID);
+    $this->submitForm($edit, 'Log in', self::LOGIN_HTML_FORM_ID);
     // Check that there was no error message for the CAPTCHA.
     $this->assertCaptchaResponseAccepted();
     // There shouldn't be a CAPTCHA on the new form.

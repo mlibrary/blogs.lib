@@ -187,7 +187,7 @@ class SchedulerHooksLegacyTest extends SchedulerBrowserTestBase {
    * Covers hook_scheduler_allow_publishing()
    *
    * This hook can allow or deny the publishing of individual nodes. This test
-   * uses the customised content type which has checkboxes 'Approved for
+   * uses the customized content type which has checkboxes 'Approved for
    * publication' and 'Approved for unpublication'.
    */
   public function testAllowedPublishing() {
@@ -234,11 +234,11 @@ class SchedulerHooksLegacyTest extends SchedulerBrowserTestBase {
     $node = $this->createUnapprovedNode('publish_on');
     $this->assertFalse($node->isPublished(), "New unapproved '{$node->label()}' with a date in the past should not be published immediately after saving.");
 
-    // Check that the node can be approved and published programatically.
+    // Check that the node can be approved and published programmatically.
     $this->approveNode($node->id(), 'field_approved_publishing');
     $this->nodeStorage->resetCache([$node->id()]);
     $node = $this->nodeStorage->load($node->id());
-    $this->assertTrue($node->isPublished(), "New approved '{$node->label()}' with a date in the past should be published immediately when created programatically.");
+    $this->assertTrue($node->isPublished(), "New approved '{$node->label()}' with a date in the past should be published immediately when created programmatically.");
 
     // Check that a node can be approved and published via edit form.
     $node = $this->createUnapprovedNode('publish_on');

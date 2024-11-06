@@ -16,6 +16,6 @@
     "source": "https://git.drupalcode.org/project/views_templates"
   },
   "require": {
-    "drupal/core": "^9.3 || ^10"
+    "drupal/core": "^10.1 || ^11"
   }
 }

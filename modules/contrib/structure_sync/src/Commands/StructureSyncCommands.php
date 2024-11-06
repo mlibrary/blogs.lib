@@ -2,11 +2,11 @@
 
 namespace Drupal\structure_sync\Commands;
 
-use Drush\Commands\DrushCommands;
 use Drupal\structure_sync\StructureSyncHelper;
+use Drush\Commands\DrushCommands;
 
 /**
- * A Drush commandfile.
+ * A Drush command file.
  *
  * In addition to this file, you need a drush.services.yml
  * in root of your module, and a composer.json file that provides the name
@@ -19,7 +19,7 @@ use Drupal\structure_sync\StructureSyncHelper;
 class StructureSyncCommands extends DrushCommands {
 
   /**
-   * Export the taxonomies
+   * Export the taxonomies.
    *
    * @validate-module-enabled structure_sync
    *
@@ -36,7 +36,7 @@ class StructureSyncCommands extends DrushCommands {
   }
 
   /**
-   * Import the taxonomies
+   * Import the taxonomies.
    *
    * @validate-module-enabled structure_sync
    *
@@ -48,7 +48,7 @@ class StructureSyncCommands extends DrushCommands {
   public function importTaxonomies($options = ['choice' => NULL]) {
     $this->output()->writeln('Importing taxonomies...');
 
-   $choices = [
+    $choices = [
       'full' => 'Full',
       'safe' => 'Safe',
       'force' => 'Force',
@@ -74,7 +74,7 @@ class StructureSyncCommands extends DrushCommands {
   }
 
   /**
-   * Export blocks
+   * Export blocks.
    *
    * @validate-module-enabled structure_sync
    *
@@ -90,7 +90,7 @@ class StructureSyncCommands extends DrushCommands {
   }
 
   /**
-   * Import blocks
+   * Import blocks.
    *
    * @validate-module-enabled structure_sync
    *
@@ -102,7 +102,7 @@ class StructureSyncCommands extends DrushCommands {
   public function importBlocks($options = ['choice' => NULL]) {
     $this->output()->writeln('Importing blocks...');
 
-   $choices = [
+    $choices = [
       'full' => 'Full',
       'safe' => 'Safe',
       'force' => 'Force',
@@ -128,7 +128,7 @@ class StructureSyncCommands extends DrushCommands {
   }
 
   /**
-   * Export menu links
+   * Export menu links.
    *
    * @validate-module-enabled structure_sync
    *
@@ -144,7 +144,7 @@ class StructureSyncCommands extends DrushCommands {
   }
 
   /**
-   * Import menu links
+   * Import menu links.
    *
    * @validate-module-enabled structure_sync
    *
@@ -157,7 +157,7 @@ class StructureSyncCommands extends DrushCommands {
 
     $this->output()->writeln('Importing menu links...');
 
-   $choices = [
+    $choices = [
       'full' => 'Full',
       'safe' => 'Safe',
       'force' => 'Force',
@@ -183,7 +183,7 @@ class StructureSyncCommands extends DrushCommands {
   }
 
   /**
-   * Import menu links, Taxonomy and Blocks
+   * Import menu links, Taxonomy and Blocks.
    *
    * @validate-module-enabled structure_sync
    *
@@ -199,7 +199,7 @@ class StructureSyncCommands extends DrushCommands {
   }
 
   /**
-   * Export menu links, Taxonomy and Blocks
+   * Export menu links, Taxonomy and Blocks.
    *
    * @validate-module-enabled structure_sync
    *

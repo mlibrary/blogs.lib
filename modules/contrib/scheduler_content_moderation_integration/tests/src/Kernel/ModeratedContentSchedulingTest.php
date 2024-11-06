@@ -16,6 +16,7 @@ class ModeratedContentSchedulingTest extends SchedulerContentModerationTestBase 
    */
   public function testPublishStateSchedule($entityTypeId, $bundle) {
     $titleField = ($entityTypeId == 'media') ? 'name' : 'title';
+    /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
     $storage = \Drupal::service('entity_type.manager')->getStorage($entityTypeId);
 
     $entity = $this->createEntity($entityTypeId, $bundle, [

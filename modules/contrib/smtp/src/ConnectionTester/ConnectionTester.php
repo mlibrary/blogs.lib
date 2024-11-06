@@ -74,6 +74,7 @@ class ConnectionTester {
    * The SMTP ConnectionTester constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactory $config_factory
+   *   The drupal config factory.
    * @param \Psr\Log\LoggerInterface $logger
    *   The logger channel.
    * @param \Drupal\Core\Mail\MailManagerInterface $mail_manager
@@ -92,6 +93,9 @@ class ConnectionTester {
     $this->phpMailer = new PHPMailer(TRUE);
   }
 
+  /**
+   * Set the PHPMailer Library class.
+   */
   public function setMailer(PHPMailer $mailer) {
     $this->phpMailer = $mailer;
   }
@@ -108,8 +112,9 @@ class ConnectionTester {
 
     $smtp_enabled = $this->smtpConfig->get('smtp_on');
     // Check to see if MailSystem is enabled and is using SMTPMailSystem.
+    // @phpstan-ignore-line
     if (\Drupal::moduleHandler()->moduleExists('mailsystem')) {
-      $mailsystem_defaults = $this->configFactory->get('mailsystem.settings')->get('defaults');
+      $mailsystem_defaults = (array) $this->configFactory->get('mailsystem.settings')->get('defaults');
       $smtp_enabled = in_array('SMTPMailSystem', $mailsystem_defaults);
     }
 

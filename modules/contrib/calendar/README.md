@@ -31,11 +31,11 @@ updates, a D8 version of the date module or stand-alone D8 modules.
 
 Calendars are very time-consuming to process, so caching is recommended.
 You can set up caching options for your calendar in the Advanced section
-of the View settings. Even setting a lifetime of 1 hour will provide some 
-benefits if you can live with a calendar that is 1 hour out of date. 
-Set the lifetime to the longest value possible. You will need to clear 
-the caches manually or using custom code if the content of the calendar 
-changes before the cache lifetime expires. 
+of the View settings. Even setting a lifetime of 1 hour will provide some
+benefits if you can live with a calendar that is 1 hour out of date.
+Set the lifetime to the longest value possible. You will need to clear
+the caches manually or using custom code if the content of the calendar
+changes before the cache lifetime expires.
 
 The recommended settings for time-based caching are:
 // @todo Update for 8.x Views cache settings

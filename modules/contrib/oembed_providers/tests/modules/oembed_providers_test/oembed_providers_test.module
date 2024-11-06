@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @file
+ * Tests the execution of hook_oembed_providers_alter().
+ */
 
 /**
  * Implements hook_oembed_providers_alter().

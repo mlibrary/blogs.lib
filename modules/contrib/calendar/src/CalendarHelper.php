@@ -4,12 +4,12 @@ namespace Drupal\calendar;
 
 use Drupal\Core\Datetime\DateHelper;
 use Drupal\Core\Url;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\views\Plugin\views\argument\ArgumentPluginBase;
+use Drupal\views\Plugin\views\argument\Date as ViewsDateArg;
 use Drupal\views\Plugin\views\filter\Broken;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Views;
-use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
-use Drupal\views\Plugin\views\argument\Date as ViewsDateArg;
 
 /**
  * Defines Gregorian Calendar date values.
@@ -445,7 +445,10 @@ class CalendarHelper extends DateHelper {
 
       // If we don't have a filter handler, we don't need to do anything more.
       $filterHandler = Views::handlerManager('filter');
-      $handler = $filterHandler->getHandler(['table' => $table_name, 'field' => $field_name]);
+      $handler = $filterHandler->getHandler([
+        'table' => $table_name,
+        'field' => $field_name,
+      ]);
       if ($handler instanceof Broken) {
         continue;
       }
@@ -959,9 +962,9 @@ class CalendarHelper extends DateHelper {
     $route_parameters = [];
     $path = $view->getPath();
     $views_arguments = $view->args;
-    $bits = is_string($path) ? explode('/', $path) : false;
+    $bits = is_string($path) ? explode('/', $path) : FALSE;
     $arg_counter = 0;
-    if ($bits != false) {
+    if ($bits != FALSE) {
       foreach ($bits as $pos => $bit) {
         if ($bit == '%') {
           // Generate the name of the parameter using the key of the argument

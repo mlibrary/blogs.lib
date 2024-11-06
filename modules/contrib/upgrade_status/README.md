@@ -1,46 +1,44 @@
-CONTENTS OF THIS FILE
----------------------
- 
- * Introduction
- * Installation
- * Configuration
- * Maintainers
+# Upgrade Status
 
-INTRODUCTION
-------------
+Review Drupal major upgrade readiness of the environment and components of the site.
 
-This module scans the code of installed contributed and custom projects on the
-site, and reports any deprecated code that must be replaced before the next
-major version. Available project updates are also suggested to keep your site
-up to date as projects will resolve deprecation errors over time.
+The module provides the following key features:
 
- * For a full description of the module, visit the project page:
-   https://www.drupal.org/project/upgrade_status
+- Checks if you are using a version of Drupal that supports an upgrade.
+- Checks if your system meets the next major version's system requirements.
+- Integrates with the Update Status core module to inform you to update your contributed projects. Projects can be compatible with multiple major Drupal versions, so most projects can be updated on your existing site before doing the core major update.
+- Runs phpstan checks and a whole set of other checks to find any compatibility issues with the next Drupal major version that may remain.
+- Integrates with drush for command line usage and to plug into CI systems.
 
- * To submit bug reports and feature suggestions, or to track changes:
-   https://www.drupal.org/project/issues/upgrade_status
+For a full description of the module, visit the
+[project page](https://www.drupal.org/project/upgrade_status).
 
-INSTALLATION
-------------
+Submit bug reports and feature suggestions, or track changes in the
+[issue queue](https://www.drupal.org/project/issues/upgrade_status).
 
-You must use composer to install all the required third party dependencies,
-for example composer require "drupal/upgrade_status:^2.0", then normally install
-the module in Drupal.
+## Requirements
+
+This module requires no modules outside of Drupal core.
+
+## Installation
+
+You must use Composer to install all the required third party dependencies,
+for example `composer require drupal/upgrade_status` then install as you would
+normally install a contributed Drupal module. For further information, see:
+[Installing Drupal Modules](https://www.drupal.org/docs/extending-drupal/installing-drupal-modules).
 
 While the module takes an effort to categorize projects properly, installing
-Composer Deploy (https://www.drupal.org/project/composer_deploy) or
-Git Deploy (https://www.drupal.org/project/git_deploy) as appropriate to your
+[Composer Deploy](https://www.drupal.org/project/composer_deploy) or
+[Git Deploy](https://www.drupal.org/project/git_deploy) as appropriate to your
 Drupal setup is suggested to identify custom vs. contributed projects more
 accurately and gather version information leading to useful available update
 information.
 
-CONFIGURATION
--------------
+## Configuration
 
-There are no configuration options. Go to Administration » Reports »
-Upgrade status to use the module.
+There are no configuration options. Go to Administration » Reports » Upgrade
+status to use the module.
 
-MAINTAINERS
------------
+## Maintainers
 
- * Gábor Hojtsy - https://www.drupal.org/user/4166
+- Gábor Hojtsy - [Gábor Hojtsy](https://www.drupal.org/u/g%C3%A1bor-hojtsy)

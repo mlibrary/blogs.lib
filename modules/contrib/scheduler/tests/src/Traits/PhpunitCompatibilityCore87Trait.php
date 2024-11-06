@@ -11,7 +11,7 @@ namespace Drupal\Tests\scheduler\Traits;
 
 if (!method_exists('Drupal\Tests\BrowserTestBase', 'assertStringContainsString')) {
   /**
-   * Forwards compatibility trait with the required missig methods.
+   * Forwards compatibility trait with the required missing methods.
    */
   trait PhpunitCompatibilityCore87Trait {
 

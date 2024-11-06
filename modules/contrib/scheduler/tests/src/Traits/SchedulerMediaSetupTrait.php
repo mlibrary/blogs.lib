@@ -98,7 +98,7 @@ trait SchedulerMediaSetupTrait {
     /** @var MediaStorageInterface $mediaStorage */
     $this->mediaStorage = $this->container->get('entity_type.manager')->getStorage('media');
 
-    // Add extra permisssions to the role assigned to the adminUser.
+    // Add extra permissions to the role assigned to the adminUser.
     $this->addPermissionsToUser($this->adminUser, [
       'create ' . $this->mediaTypeName . ' media',
       'edit any ' . $this->mediaTypeName . ' media',
@@ -113,7 +113,7 @@ trait SchedulerMediaSetupTrait {
       'view scheduled media',
     ]);
 
-    // Add extra permisssions to the role assigned to the schedulerUser.
+    // Add extra permissions to the role assigned to the schedulerUser.
     $this->addPermissionsToUser($this->schedulerUser, [
       'create ' . $this->mediaTypeName . ' media',
       'edit own ' . $this->mediaTypeName . ' media',
@@ -133,10 +133,10 @@ trait SchedulerMediaSetupTrait {
 
     // Set the media file attachments to be optional not required, to simplify
     // editing and saving media entities.
-    $configFactory->getEditable('field.field.media.test_video.field_media_video_file')
+    $configFactory->getEditable("field.field.media.{$this->mediaTypeName}.field_media_video_file")
       ->set('required', FALSE)
       ->save(TRUE);
-    $configFactory->getEditable('field.field.media.test_audio_not_enabled.field_media_audio_file')
+    $configFactory->getEditable("field.field.media.{$this->nonSchedulerMediaTypeName}.field_media_audio_file")
       ->set('required', FALSE)
       ->save(TRUE);
   }

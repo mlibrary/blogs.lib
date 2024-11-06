@@ -44,7 +44,7 @@ function _scheduler_api_test_get_entities($entityTypeId) {
       break;
 
     default:
-      throw new \Exception("Entity type id '{$entityTypeId}' is unrecognised in _scheduler_api_test_get_entities().");
+      throw new \Exception("Entity type id '{$entityTypeId}' is unrecognized in _scheduler_api_test_get_entities().");
   }
   return $results;
 }

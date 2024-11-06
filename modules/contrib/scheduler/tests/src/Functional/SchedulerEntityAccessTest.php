@@ -88,14 +88,15 @@ class SchedulerEntityAccessTest extends SchedulerBrowserTestBase {
    * @return array
    *   Each row has values: [entity type id, bundle id, field name, status].
    */
-  public function dataEntityAccess() {
+  public static function dataEntityAccess() {
     // This test is only applicable to node entity types because the other
     // entity types do not have a hook access grant system.
     // @todo Investigate how scheduler_access_test module can be expanded to
     // deny access to other entity types using a different method.
+    $types = self::dataStandardEntityTypes();
     $data = [
-      '#node-1' => ['node', $this->type, 'publish_on', FALSE],
-      '#node-2' => ['node', $this->type, 'unpublish_on', TRUE],
+      '#node-1' => array_merge($types['#node'], ['publish_on', FALSE]),
+      '#node-2' => array_merge($types['#node'], ['unpublish_on', TRUE]),
     ];
     return $data;
   }

@@ -3,3 +3,5 @@ upgrade_status.admin:
   css:
     theme:
       css/upgrade_status.admin.theme.css: {}
+  dependencies:
+    - core/drupal.dialog.ajax

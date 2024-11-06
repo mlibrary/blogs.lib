@@ -48,6 +48,13 @@ structure_sync_menu_item:
       type: string
     uuid:
       type: string
+    options:
+      type: sequence
+      label: 'Link options'
+      # Ignore the type of the items in the sequence, since we're not sure what
+      # they could be: integer, mapping, sequence, string, etc...
+      sequence:
+        type: ignore
 
 # Define a data type for taxonomies captured by structure_sync.
 structure_sync_taxonomy:

@@ -3,14 +3,35 @@
 namespace Drupal\scheduler\Access;
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Routing\Access\AccessInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\scheduler\SchedulerManager;
 use Drupal\user\Entity\User;
 
 /**
- * Sets access for specific scheduler views routes.
+ * Sets access for scheduler views routes on the user page.
  */
-class SchedulerRouteAccess {
+class SchedulerRouteAccess implements AccessInterface {
+
+  /**
+   * The scheduler manager.
+   *
+   * @var \Drupal\scheduler\SchedulerManager
+   */
+  protected $schedulerManager;
+
+  /**
+   * Constructs a new SchedulerRouteAccess object.
+   *
+   * The scheduler.access_check service specifies the required argument.
+   *
+   * @param \Drupal\scheduler\SchedulerManager $scheduler_manager
+   *   The scheduler manager.
+   */
+  public function __construct(SchedulerManager $scheduler_manager) {
+    $this->schedulerManager = $scheduler_manager;
+  }
 
   /**
    * Provides custom access checks for the scheduled views on the user page.
@@ -26,6 +47,9 @@ class SchedulerRouteAccess {
    *   The currently logged in account.
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The current route match.
+   *
+   * @return \Drupal\Core\Access\AccessResult
+   *   The access result.
    */
   public function access(AccountInterface $account, RouteMatchInterface $route_match) {
     $user_being_viewed = $route_match->getParameter('user');
@@ -33,10 +57,9 @@ class SchedulerRouteAccess {
 
     // getUserPageViewRoutes() returns an array of user page view routes, keyed
     // on the entity id. Use this to get the entity id.
-    $scheduler_manager = \Drupal::service('scheduler.manager');
-    $entityTypeId = array_search($route_match->getRouteName(), $scheduler_manager->getUserPageViewRoutes());
-    $viewing_permission_name = $scheduler_manager->permissionName($entityTypeId, 'view');
-    $scheduling_permission_name = $scheduler_manager->permissionName($entityTypeId, 'schedule');
+    $entityTypeId = array_search($route_match->getRouteName(), $this->schedulerManager->getUserPageViewRoutes());
+    $viewing_permission_name = $this->schedulerManager->permissionName($entityTypeId, 'view');
+    $scheduling_permission_name = $this->schedulerManager->permissionName($entityTypeId, 'schedule');
 
     if ($viewing_own_page && ($account->hasPermission($viewing_permission_name) || $account->hasPermission($scheduling_permission_name))) {
       return AccessResult::allowed();

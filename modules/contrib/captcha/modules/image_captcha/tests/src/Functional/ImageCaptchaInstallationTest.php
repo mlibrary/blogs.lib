@@ -56,6 +56,10 @@ class ImageCaptchaInstallationTest extends BrowserTestBase {
    * Tests if installing the module, won't break the site.
    */
   public function testInstallation() {
+    // Remove when dropping support for Drupal 10.3 and below.
+    $installed = version_compare(\Drupal::VERSION, '10.3', '>=') ? 'installed' : 'enabled';
+    $install = version_compare(\Drupal::VERSION, '10.3', '>=') ? 'install' : 'enable';
+
     $session = $this->assertSession();
     $page = $this->getSession()->getPage();
     // As simply adding the module to the $modules array only installs required
@@ -66,12 +70,12 @@ class ImageCaptchaInstallationTest extends BrowserTestBase {
     $page->pressButton('edit-submit');
     // Also install required modules:
     $session->statusCodeEquals(200);
-    $session->pageTextContains('Some required modules must be enabled');
-    $session->pageTextContains('You must enable the CAPTCHA module to install Image CAPTCHA.');
+    $session->pageTextContains('Some required modules must be ' . $installed);
+    $session->pageTextContains('You must ' . $install . ' the CAPTCHA module to install Image CAPTCHA.');
     // Continue:
     $page->pressButton('edit-submit');
     $session->statusCodeEquals(200);
-    $session->pageTextContains('2 modules have been enabled: Image CAPTCHA, CAPTCHA');
+    $session->pageTextContains('2 modules have been ' . $installed . ': Image CAPTCHA, CAPTCHA');
     // Go to front page and see if the site isn't broken:
     $this->drupalGet('<front>');
     // Ensure the status code is success:
@@ -84,6 +88,10 @@ class ImageCaptchaInstallationTest extends BrowserTestBase {
    * Tests if uninstalling the module, won't break the site.
    */
   public function testUninstallation() {
+    // Remove when dropping support for Drupal 10.3 and below.
+    $installed = version_compare(\Drupal::VERSION, '10.3', '>=') ? 'installed' : 'enabled';
+    $install = version_compare(\Drupal::VERSION, '10.3', '>=') ? 'install' : 'enable';
+
     $session = $this->assertSession();
     $page = $this->getSession()->getPage();
     // Installation process:
@@ -92,12 +100,12 @@ class ImageCaptchaInstallationTest extends BrowserTestBase {
     $page->pressButton('edit-submit');
     // Also install required modules:
     $session->statusCodeEquals(200);
-    $session->pageTextContains('Some required modules must be enabled');
-    $session->pageTextContains('You must enable the CAPTCHA module to install Image CAPTCHA.');
+    $session->pageTextContains('Some required modules must be ' . $installed);
+    $session->pageTextContains('You must ' . $install . ' the CAPTCHA module to install Image CAPTCHA.');
     // Continue:
     $page->pressButton('edit-submit');
     $session->statusCodeEquals(200);
-    $session->pageTextContains('2 modules have been enabled: Image CAPTCHA, CAPTCHA');
+    $session->pageTextContains('2 modules have been ' . $installed . ': Image CAPTCHA, CAPTCHA');
     // Go to uninstallation page an uninstall image_captcha:
     $this->drupalGet('/admin/modules/uninstall');
     $session->statusCodeEquals(200);

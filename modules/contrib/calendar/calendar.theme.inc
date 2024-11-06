@@ -8,9 +8,9 @@
 use Drupal\calendar\CalendarHelper;
 use Drupal\Component\Datetime\DateTimePlus;
 use Drupal\Core\Datetime\Entity\DateFormat;
-use Drupal\views\Views;
 use Drupal\Core\Link;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+use Drupal\views\Views;
 
 /**
  * Display a month view.
@@ -168,7 +168,8 @@ function template_preprocess_calendar_day(&$vars) {
 
   // If we're not grouping by time, move all items into the 'all day' array.
   if (empty($view->styleInfo->getGroupByTimes())) {
-    // Items are already grouped into times, so we need to process each time-group.
+    // Items are already grouped into times, so we need to
+    // process each time-group.
     foreach ($rows['items'] as $time => $items) {
       foreach ($items as $item) {
         $rows['all_day'][] = $item;
@@ -564,11 +565,12 @@ function template_preprocess_calendar_week(&$vars) {
 }
 
 /**
- * Implementation of hook_preprocess_calendar_item().
+ * Implements hook_preprocess_calendar_item().
  */
 function template_preprocess_calendar_item(&$vars) {
   // At the last possible minute we fix the values in rendered_fields so it
-  // contains the correct rendered content for the type of item and item display.
+  // contains the correct rendered content for the type of item and item
+  // display.
   /** @var \Drupal\calendar\CalendarEvent $item */
   $item = $vars['item'];
 
@@ -730,7 +732,7 @@ function template_preprocess_calendar_stripe_legend(array &$vars) {
     return '';
   }
 
-  list($view_name, $display_id) = explode(':', $view);
+  [$view_name, $display_id] = explode(':', $view);
 
   $view = Views::getView($view_name);
   $view->setDisplay($display_id);
@@ -834,7 +836,13 @@ function _calc_indents(array &$overlapped_items, $start, $end, &$item, $depth = 
       if ($start >= $entry['start'] && $start < $entry['end']) {
 
         // We overlap, create an overlapping entry.
-        $entry['children'][] = ['item' => &$item, 'depth' => $depth + 1, 'start' => $start, 'end' => $end, 'children' => []];
+        $entry['children'][] = [
+          'item' => &$item,
+          'depth' => $depth + 1,
+          'start' => $start,
+          'end' => $end,
+          'children' => [],
+        ];
         if (is_object($entry['item'])) {
           $max_depth = max($entry['item']->max_depth, $depth + 1);
           $entry['item']->indent = _calc_indent($depth, $max_depth);
@@ -859,8 +867,8 @@ function _calc_indents(array &$overlapped_items, $start, $end, &$item, $depth = 
       }
     }
 
-    // If there are items at this depth, but no overlap, then return no overlap and pop
-    // out of this depth.
+    // If there are items at this depth, but no overlap, then return
+    // no overlap and pop out of this depth.
     if ($depth > 0) {
       return ['overlap' => FALSE, 'max_depth' => 0];
     }
@@ -869,10 +877,22 @@ function _calc_indents(array &$overlapped_items, $start, $end, &$item, $depth = 
   // No overlap at any depth, reset the array of overlaps.
   if ($depth == 0) {
     reset($overlapped_items);
-    $overlapped_items[0] = ['item' => &$item, 'depth' => $depth, 'start' => $start, 'end' => $end, 'children' => []];
+    $overlapped_items[0] = [
+      'item' => &$item,
+      'depth' => $depth,
+      'start' => $start,
+      'end' => $end,
+      'children' => [],
+    ];
   }
   else {
-    $overlapped_items[] = ['item' => &$item, 'depth' => $depth, 'start' => $start, 'end' => $end, 'children' => []];
+    $overlapped_items[] = [
+      'item' => &$item,
+      'depth' => $depth,
+      'start' => $start,
+      'end' => $end,
+      'children' => [],
+    ];
   }
 
   if (is_object($item)) {

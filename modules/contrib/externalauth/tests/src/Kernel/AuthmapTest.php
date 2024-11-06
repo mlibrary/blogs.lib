@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\externalauth\Kernel;
 
+use Drupal\externalauth\Authmap;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\user\Entity\User;
 
@@ -17,14 +18,14 @@ class AuthmapTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['system', 'user', 'field', 'externalauth'];
+  protected static $modules = ['system', 'user', 'field', 'externalauth'];
 
   /**
    * The Authmap service.
    *
    * @var \Drupal\externalauth\Authmap
    */
-  protected $authmap;
+  protected Authmap $authmap;
 
   /**
    * {@inheritdoc}
@@ -50,8 +51,14 @@ class AuthmapTest extends KernelTestBase {
 
     // Set up fake external IDs for this user.
     $external_ids = [
-      'provider1' => ['authname' => $this->randomMachineName(), 'data' => $this->randomMachineName()],
-      'provider2' => ['authname' => $this->randomMachineName(), 'data' => $this->randomMachineName()],
+      'provider1' => [
+        'authname' => $this->randomMachineName(),
+        'data' => $this->randomMachineName(),
+      ],
+      'provider2' => [
+        'authname' => $this->randomMachineName(),
+        'data' => $this->randomMachineName(),
+      ],
     ];
 
     // Test save() method.

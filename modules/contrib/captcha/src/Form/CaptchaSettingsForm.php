@@ -3,15 +3,10 @@
 namespace Drupal\captcha\Form;
 
 use Drupal\captcha\Constants\CaptchaConstants;
-use Drupal\captcha\Service\CaptchaService;
-use Drupal\Core\Cache\CacheBackendInterface;
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Displays the captcha settings form.
@@ -47,38 +42,16 @@ class CaptchaSettingsForm extends ConfigFormBase {
   protected $requestStack;
 
   /**
-   * Constructs a \Drupal\captcha\Form\CaptchaSettingsForm object.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The factory for configuration objects.
-   * @param \Drupal\Core\Cache\CacheBackendInterface $cache_backend
-   *   Cache backend instance to use.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
-   *   Module handler.
-   * @param \Drupal\captcha\Service\CaptchaService $captcha_service
-   *   The captcha service.
-   * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
-   *   The request stack object.
-   */
-  public function __construct(ConfigFactoryInterface $config_factory, CacheBackendInterface $cache_backend, ModuleHandlerInterface $moduleHandler, CaptchaService $captcha_service, RequestStack $request_stack) {
-    parent::__construct($config_factory);
-    $this->cacheBackend = $cache_backend;
-    $this->moduleHandler = $moduleHandler;
-    $this->captchaService = $captcha_service;
-    $this->requestStack = $request_stack;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('cache.default'),
-      $container->get('module_handler'),
-      $container->get('captcha.helper'),
-      $container->get('request_stack')
-    );
+    $instance = parent::create($container);
+    $instance->cacheBackend = $container->get('cache.default');
+    $instance->moduleHandler = $container->get('module_handler');
+    $instance->captchaService = $container->get('captcha.helper');
+    $instance->requestStack = $container->get('request_stack');
+
+    return $instance;
   }
 
   /**
@@ -339,7 +312,6 @@ class CaptchaSettingsForm extends ConfigFormBase {
     $config->set('enable_stats', $form_state->getValue('enable_stats'));
     $config->set('log_wrong_responses', $form_state->getValue('log_wrong_responses'));
     $config->save();
-    $this->messenger()->addStatus($this->t('The CAPTCHA settings have been saved.'));
 
     parent::submitForm($form, $form_state);
   }

@@ -29,6 +29,8 @@ class SchedulerPluginManager extends DefaultPluginManager {
     \Traversable $namespaces,
     CacheBackendInterface $cacheBackend,
     ModuleHandlerInterface $module_handler,
+    // Trailing comma is incompatible with PHPUnit 9.6.19 in Drupal 9.5 PHP 7.4.
+    // phpcs:ignore Drupal.Functions.MultiLineFunctionDeclaration.MissingTrailingComma
     EntityTypeManagerInterface $entity_type_manager
   ) {
     $subdir = 'Plugin/Scheduler';
@@ -53,7 +55,7 @@ class SchedulerPluginManager extends DefaultPluginManager {
    */
   protected function findDefinitions() {
     // This is an overridden method from the parent class. This version filters
-    // out plugins with missing module and entity type depencencies before they
+    // out plugins with missing module and entity type dependencies before they
     // are initialized, removing the need for separate checks per plugin.
     $definitions = parent::findDefinitions();
 

@@ -55,7 +55,7 @@ scheduler_has_unpublished_this_node_event:
 
 # Use a deriver to build the corresponding six events for all other entity
 # types that are supported by Scheduler. This will not create any node events,
-# as they need to remain unchanged as above for backwards compatibilty.
+# as they need to remain unchanged as above for backwards compatibility.
 scheduler:
   deriver: 'Drupal\scheduler_rules_integration\Event\EventDeriver'
   class: '\Drupal\rules\EventHandler\ConfigurableEventHandlerEntityBundle'

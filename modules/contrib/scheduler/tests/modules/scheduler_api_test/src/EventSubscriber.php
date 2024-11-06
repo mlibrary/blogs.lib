@@ -3,10 +3,10 @@
 namespace Drupal\scheduler_api_test;
 
 use Drupal\scheduler\Event\SchedulerCommerceProductEvents;
+use Drupal\scheduler\Event\SchedulerEvent;
 use Drupal\scheduler\Event\SchedulerMediaEvents;
 use Drupal\scheduler\Event\SchedulerNodeEvents;
 use Drupal\scheduler\Event\SchedulerTaxonomyTermEvents;
-use Drupal\scheduler\SchedulerEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -34,9 +34,9 @@ class EventSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
 
-    // Initialise the array to avoid 'variable is undefined' phpcs error.
+    // Initialize the array to avoid 'variable is undefined' phpcs error.
     $events = [];
 
     // The values in the arrays give the function names below.
@@ -64,7 +64,7 @@ class EventSubscriber implements EventSubscriberInterface {
     $events[SchedulerCommerceProductEvents::PRE_PUBLISH_IMMEDIATELY][] = ['apiTestProductPrePublishImmediately'];
     $events[SchedulerCommerceProductEvents::PUBLISH_IMMEDIATELY][] = ['apiTestProductPublishImmediately'];
 
-    // These six events are dispatched for Taxomony Term entity types only.
+    // These six events are dispatched for Taxonomy Term entity types only.
     $events[SchedulerTaxonomyTermEvents::PRE_PUBLISH][] = ['apiTestTaxonomyTermPrePublish'];
     $events[SchedulerTaxonomyTermEvents::PUBLISH][] = ['apiTestTaxonomyTermPublish'];
     $events[SchedulerTaxonomyTermEvents::PRE_UNPUBLISH][] = ['apiTestTaxonomyTermPreUnpublish'];

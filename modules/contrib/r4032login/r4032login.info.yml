@@ -3,9 +3,9 @@ description: 'Redirect anonymous users from 403 Access Denied pages to the /user
 core_version_requirement: ^9.3 || ^10
 type: module
 
-configure: system.site_information_settings
+configure: r4032login.settings.form
 
-# Information added by Drupal.org packaging script on 2023-03-31
-version: '2.2.1'
+# Information added by Drupal.org packaging script on 2024-06-20
+version: '2.2.2'
 project: 'r4032login'
-datestamp: 1680284413
+datestamp: 1718893092

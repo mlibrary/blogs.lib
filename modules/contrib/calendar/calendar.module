@@ -2,19 +2,15 @@
 
 /**
  * @file
- */
-
-use Drupal\calendar\Plugin\views\argument\CalendarDate;
-use Drupal\Component\Datetime\DateTimePlus;
-/**
- * @file
  * This is the Calendar module for calendar filtering and display in views.
  */
 
+use Drupal\calendar\CalendarHelper;
+use Drupal\calendar\Plugin\views\argument\CalendarDate;
+use Drupal\Component\Datetime\DateTimePlus;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 use Drupal\views\ViewExecutable;
-use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\calendar\CalendarHelper;
 
 define('CALENDAR_SHOW_ALL', 0);
 define('CALENDAR_HIDE_ALL', -1);
@@ -93,7 +89,7 @@ function _calendar_views_track_current_date(ViewExecutable $view) {
 }
 
 /**
- * Implementation of hook_help().
+ * Implements hook_help().
  */
 function calendar_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
@@ -113,10 +109,20 @@ function calendar_theme() {
       'file' => 'calendar.theme.inc',
     ],
     'calendar_month_multiple_entity' => [
-      'variables' => ['curday' => NULL, 'count' => NULL, 'view' => NULL, 'ids' => NULL],
+      'variables' => [
+        'curday' => NULL,
+        'count' => NULL,
+        'view' => NULL,
+        'ids' => NULL,
+      ],
     ],
     'calendar_datebox' => [
-      'variables' => ['date' => NULL, 'view' => NULL, 'items' => NULL, 'selected' => NULL],
+      'variables' => [
+        'date' => NULL,
+        'view' => NULL,
+        'items' => NULL,
+        'selected' => NULL,
+      ],
       'file' => 'calendar.theme.inc',
     ],
     'calendar_empty_day' => [
@@ -140,7 +146,11 @@ function calendar_theme() {
       'variables' => ['view_and_display_id' => NULL, 'title' => NULL],
     ],
     'calendar_item' => [
-      'variables' => ['view' => NULL, 'rendered_fields' => NULL, 'item' => NULL],
+      'variables' => [
+        'view' => NULL,
+        'rendered_fields' => NULL,
+        'item' => NULL,
+      ],
       'file' => 'calendar.theme.inc',
     ],
     'calendar_week' => [
@@ -156,7 +166,13 @@ function calendar_theme() {
       'file' => 'calendar.theme.inc',
     ],
     'calendar_year' => [
-      'variables' => ['view' => NULL, 'rows' => [], 'options' => [], 'months' => [], 'mini' => FALSE],
+      'variables' => [
+        'view' => NULL,
+        'rows' => [],
+        'options' => [],
+        'months' => [],
+        'mini' => FALSE,
+      ],
       'file' => 'calendar.theme.inc',
     ],
     'calendar_header' => [

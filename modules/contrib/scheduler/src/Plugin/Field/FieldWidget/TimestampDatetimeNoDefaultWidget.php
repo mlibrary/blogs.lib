@@ -5,8 +5,10 @@ namespace Drupal\scheduler\Plugin\Field\FieldWidget;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Datetime\Element\Datetime;
 use Drupal\Core\Datetime\Plugin\Field\FieldWidget\TimestampDatetimeWidget;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the 'datetime timestamp' widget.
@@ -21,6 +23,44 @@ use Drupal\Core\Form\FormStateInterface;
  * )
  */
 class TimestampDatetimeNoDefaultWidget extends TimestampDatetimeWidget {
+
+  /**
+   * The Scheduler settings config object.
+   *
+   * @var \Drupal\Core\Config\Scheduler
+   */
+  protected $schedulerSettings;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(
+    $plugin_id,
+    $plugin_definition,
+    FieldDefinitionInterface $field_definition,
+    array $settings,
+    array $third_party_settings,
+    // Trailing comma is incompatible with PHPUnit 9.6.19 in Drupal 9.5 PHP 7.4.
+    // phpcs:ignore Drupal.Functions.MultiLineFunctionDeclaration.MissingTrailingComma
+    $scheduler_settings
+  ) {
+    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
+    $this->schedulerSettings = $scheduler_settings;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $plugin_id,
+      $plugin_definition,
+      $configuration['field_definition'],
+      $configuration['settings'],
+      $configuration['third_party_settings'],
+      $container->get('config.factory')->get('scheduler.settings'),
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -40,7 +80,7 @@ class TimestampDatetimeNoDefaultWidget extends TimestampDatetimeWidget {
     $element['value']['#value_callback'] = [$this, 'valueCallback'];
 
     // Hide the seconds portion of the time input element if that option is set.
-    if (\Drupal::config('scheduler.settings')->get('hide_seconds')) {
+    if ($this->schedulerSettings->get('hide_seconds')) {
       $element['value']['#date_increment'] = 60;
       // Some browsers HTML5 date element implementations show the seconds on
       // pre-existing date values event though the number cannot be changed. To
@@ -64,15 +104,14 @@ class TimestampDatetimeNoDefaultWidget extends TimestampDatetimeWidget {
    * using javascript - see js/scheduler_default_time.js. But that cannot be
    * done when the date is not 'required' hence do the processing here too.
    */
-  public static function valueCallback(&$element, $input, FormStateInterface $form_state) {
+  public function valueCallback(&$element, $input, FormStateInterface $form_state) {
     if ($input !== FALSE) {
       $date_input = $element['#date_date_element'] != 'none' && !empty($input['date']) ? $input['date'] : '';
       $time_input = $element['#date_time_element'] != 'none' && !empty($input['time']) ? $input['time'] : '';
       // If there is an input date but no time and the date-only option is on
       // then set the input time to the default specified by scheduler options.
-      $config = \Drupal::config('scheduler.settings');
-      if (!empty($date_input) && empty($time_input) && $config->get('allow_date_only')) {
-        $input['time'] = $config->get('default_time');
+      if (!empty($date_input) && empty($time_input) && $this->schedulerSettings->get('allow_date_only')) {
+        $input['time'] = $this->schedulerSettings->get('default_time');
       }
     }
 

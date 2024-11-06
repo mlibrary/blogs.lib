@@ -56,7 +56,6 @@ class CalendarDateInfo {
   protected $range;
 
   // @todo Find a better way to hold all "minimum x" information
-
   /**
    * The minimum date of this calendar.
    *

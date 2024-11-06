@@ -1,5 +1,8 @@
 # FROM mglaman/drupal-check/phpstan/deprecation_testing.neon
 parameters:
+	drupal:
+		rules:
+			classExtendsInternalClassRule: false
 	parallel:
 		maximumNumberOfProcesses: 0
 	customRulesetUsed: true
@@ -8,7 +11,6 @@ parameters:
 		- '#Plugin definitions cannot be altered.#'
 		- '#Missing cache backend declaration for performance.#'
 		- '#Plugin manager has cache backend specified but does not declare cache tags.#'
-
 	# FROM mglaman/drupal-check/phpstan/base_config.neon
 	reportUnmatchedIgnoredErrors: false
 	excludePaths:

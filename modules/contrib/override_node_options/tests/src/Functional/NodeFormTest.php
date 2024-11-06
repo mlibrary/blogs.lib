@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\override_node_options\Functional;
 
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
@@ -13,6 +14,8 @@ use Drupal\Tests\BrowserTestBase;
  * @group override_node_options
  */
 class NodeFormTest extends BrowserTestBase {
+
+  use StringTranslationTrait;
 
   /**
    * A standard authenticated user.
@@ -46,7 +49,7 @@ class NodeFormTest extends BrowserTestBase {
 
     $types = NodeType::loadMultiple();
     if (empty($types['article'])) {
-      $this->drupalCreateContentType(['type' => 'page', 'name' => t('Page')]);
+      $this->drupalCreateContentType(['type' => 'page', 'name' => $this->t('Page')]);
     }
 
     $this->normalUser = $this->drupalCreateUser([
@@ -82,7 +85,7 @@ class NodeFormTest extends BrowserTestBase {
       self::assertEquals(
         $node->get($field)->value,
         $value,
-        t('Node :field was updated to :value, expected :expected.',
+        $this->t('Node :field was updated to :value, expected :expected.',
           [
             ':field' => $field,
             ':value' => $node->get($field)->value,
@@ -149,7 +152,7 @@ class NodeFormTest extends BrowserTestBase {
           'status[value]' => TRUE,
           'sticky[value]' => TRUE,
         ],
-        t('Save')
+        $this->t('Save')
       );
 
       $this->assertNodeFieldsUpdated($this->node, $fields);
@@ -190,7 +193,7 @@ class NodeFormTest extends BrowserTestBase {
       $this->submitForm([
         'revision' => TRUE,
         'revision_log[0][value]' => '',
-      ], t('Save'));
+      ], $this->t('Save'));
 
       $this->assertNodeFieldsUpdated($this->node, [], $this->node->getRevisionId());
     }
@@ -232,15 +235,15 @@ class NodeFormTest extends BrowserTestBase {
 
       $this->drupalGet('node/' . $this->node->id() . '/edit');
 
-      $this->submitForm(['uid[0][target_id]' => 'invalid-user'], t('Save'));
+      $this->submitForm(['uid[0][target_id]' => 'invalid-user'], $this->t('Save'));
 
-      $this->assertSession()->pageTextContains('There are no entities matching "invalid-user".');
+      $this->assertSession()->pageTextContains('There are no users matching "invalid-user".');
 
-      $this->submitForm(['created[0][value][date]' => 'invalid-date'], t('Save'));
+      $this->submitForm(['created[0][value][date]' => 'invalid-date'], $this->t('Save'));
 
       $this->assertSession()->pageTextContains('The Authored on date is invalid.');
 
-      $this->submitForm($fields, t('Save'));
+      $this->submitForm($fields, $this->t('Save'));
 
       $this->assertNodeFieldsUpdated($this->node, [
         'created' => $time,

@@ -47,7 +47,7 @@ class SchedulerDeleteEntityTest extends SchedulerBrowserTestBase {
     $this->clickLink('Delete');
     // The text 'error message' is used in a header h2 html tag which is
     // normally made hidden from browsers but will be in the page source.
-    // It is also good when testing for the absense of something to also test
+    // It is also good when testing for the absence of something to also test
     // for the presence of text, hence the second assertion for each check.
     $this->assertSession()->pageTextNotContains('Error message');
     $this->assertSession()->pageTextContains("Are you sure you want to delete the $entity_type_label {$published_entity->label()}");

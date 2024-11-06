@@ -216,7 +216,7 @@ class ViewsFieldTemplate implements ContainerDeriverInterface {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   protected function setDerivative(array $derivative, array $base_plugin_definition) {
 

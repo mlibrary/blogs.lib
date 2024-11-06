@@ -2,15 +2,25 @@
 
 namespace Drupal\scheduler_content_moderation_integration\EventSubscriber;
 
+use Drupal\content_moderation\ModerationInformationInterface;
+use Drupal\scheduler\Event\SchedulerEvent;
 use Drupal\scheduler\Event\SchedulerMediaEvents;
-use Drupal\scheduler\SchedulerEvent;
-use Drupal\scheduler\SchedulerEvents;
+use Drupal\scheduler\Event\SchedulerNodeEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * React to the PUBLISH_IMMEDIATELY scheduler event.
  */
 class SchedulerEventSubscriber implements EventSubscriberInterface {
+
+  /**
+   * New instance of SchedulerEventSubscriber.
+   *
+   * @param \Drupal\content_moderation\ModerationInformationInterface $moderationInformation
+   *   The moderation information service.
+   */
+  public function __construct(protected ModerationInformationInterface $moderationInformation) {
+  }
 
   /**
    * Operations to perform after Scheduler publishes an entity immediately.
@@ -20,8 +30,13 @@ class SchedulerEventSubscriber implements EventSubscriberInterface {
    * @param \Drupal\scheduler\SchedulerEvent $event
    *   The event being acted on.
    */
-  public function publishImmediately(SchedulerEvent $event) {
-    /** @var Drupal\Core\Entity\EntityInterface $entity */
+  public function publishImmediately(SchedulerEvent $event): void {
+    $entity = $event->getNode();
+
+    if (!$this->moderationInformation->isModeratedEntity($entity)) {
+      return;
+    }
+
     $entity = $event->getEntity();
     $entity->set('moderation_state', $entity->publish_state->getValue());
     $event->setEntity($entity);
@@ -30,10 +45,10 @@ class SchedulerEventSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     // The values in the arrays give the function names above. The same function
     // can be used for all supported entity types.
-    $events[SchedulerEvents::PUBLISH_IMMEDIATELY][] = ['publishImmediately'];
+    $events[SchedulerNodeEvents::PUBLISH_IMMEDIATELY][] = ['publishImmediately'];
     $events[SchedulerMediaEvents::PUBLISH_IMMEDIATELY][] = ['publishImmediately'];
     return $events;
   }

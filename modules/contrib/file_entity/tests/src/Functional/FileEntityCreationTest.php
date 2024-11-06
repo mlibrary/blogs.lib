@@ -50,7 +50,7 @@ class FileEntityCreationTest extends FileEntityTestBase {
     $edit = array();
     $edit['files[upload]'] = \Drupal::service('file_system')->realpath($test_file->uri);
     $this->drupalGet('file/add');
-    $this->submitForm($edit, t('Next'));
+    $this->submitForm($edit, 'Next');
 
     // Check that the document file has been uploaded.
     $this->assertSession()->responseContains(t('@type %name was uploaded.', array('@type' => 'Document', '%name' => 'text-0_0.txt')));
@@ -74,7 +74,7 @@ class FileEntityCreationTest extends FileEntityTestBase {
     $edit['files[upload]'] = \Drupal::service('file_system')->realpath($test_file->uri);
     $this->drupalGet('file/add');
     $this->assertEmpty($this->xpath('//input[@id="edit-upload-remove-button"]'), 'Remove');
-    $this->submitForm($edit, t('Next'));
+    $this->submitForm($edit, 'Next');
 
     // Check if your on form step 2, scheme selecting.
     // At this point it should not skip this form.
@@ -86,7 +86,7 @@ class FileEntityCreationTest extends FileEntityTestBase {
     // Submit form and set scheme to private.
     $edit = array();
     $edit['scheme'] = 'private';
-    $this->submitForm($edit, t('Next'));
+    $this->submitForm($edit, 'Next');
 
     // Check that the document file has been uploaded.
     $this->assertSession()->responseContains(t('@type %name was uploaded.', array('@type' => 'Document', '%name' => 'text-0_0.txt')));
@@ -111,7 +111,7 @@ class FileEntityCreationTest extends FileEntityTestBase {
     $test_file = $this->getTestFile('image');
     $edit = array('files[upload]' => \Drupal::service('file_system')->realpath($test_file->uri));
     $this->drupalGet('file/add');
-    $this->submitForm($edit, t('Next'));
+    $this->submitForm($edit, 'Next');
 
     $data = array(
       'field_image_title_text' => 'My image',
@@ -123,7 +123,7 @@ class FileEntityCreationTest extends FileEntityTestBase {
     foreach ($data as $field => $value) {
       $edit[$field . '[0][value]'] = $value;
     }
-    $this->submitForm($edit, t('Save'));
+    $this->submitForm($edit, 'Save');
     $file = $this->getFileByFilename('image-test_0.png');
     $this->drupalGet('file/' . $file->id());
     $this->assertSession()->responseContains('alt="A test image"');
@@ -176,7 +176,7 @@ class FileEntityCreationTest extends FileEntityTestBase {
       'remove_archive' => TRUE,
     ];
     $this->drupalGet('admin/content/files/archive');
-    $this->submitForm($edit, t('Submit'));
+    $this->submitForm($edit, 'Submit');
 
     $this->assertSession()->pageTextContains('Extracted archive.tar.gz and added 1 new files.');
 
@@ -201,7 +201,7 @@ class FileEntityCreationTest extends FileEntityTestBase {
       'remove_archive' => FALSE,
     ];
     $this->drupalGet('admin/content/files/archive');
-    $this->submitForm($edit, t('Submit'));
+    $this->submitForm($edit, 'Submit');
 
     $this->assertTrue($file = !empty($file_storage->loadByProperties(['filename' => 'archive2.tar.gz'])), "Archive is in the database since value for remove_checkbox is FALSE.");
     $this->assertTrue($file ? $this->getFileByFilename('archive2.tar.gz')->isPermanent() : FALSE, "Archive is permanent since value for remove_checkbox is FALSE.");

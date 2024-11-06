@@ -6,7 +6,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Class SettingsForm.
+ * Configure override_node_options settings.
  *
  * @package Drupal\override_node_options\Form
  */

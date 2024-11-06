@@ -73,10 +73,12 @@ to draft a content change before it going live. To do this, the editor would:
 MAINTAINERS
 -----------
 
+[//]: # cspell:disable
 * [Christian Fritsch (chr.fritsch)](https://www.drupal.org/u/chrfritsch)
 * [Daniel Bosen (daniel.bosen)](https://www.drupal.org/u/danielbosen)
 * [Volker Killesreiter (volkerk)](https://www.drupal.org/u/volkerk)
 * [Stephen Mustgrave (smustgrave)](https://www.drupal.org/u/smustgrave)
 * [Jonathan Smith (jonathan1055)](https://www.drupal.org/u/jonathan1055)
+[//]: # cspell:enable
 
 This project was initially developed with support from [Thunder](https://www.drupal.org/thunder).

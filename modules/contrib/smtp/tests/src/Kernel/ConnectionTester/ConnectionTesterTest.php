@@ -14,6 +14,9 @@ use PHPMailer\PHPMailer\PHPMailer;
  */
 class ConnectionTesterTest extends KernelTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     'smtp',
   ];
@@ -61,11 +64,11 @@ class ConnectionTesterTest extends KernelTestBase {
   /**
    * Provider for testHookRequirements().
    */
-  public function providerHookRequirements() {
+  public static function providerHookRequirements() {
     return [
       [
         'message' => 'SMTP on, working.',
-        '$smtp_on' => TRUE,
+        'smtp_on' => TRUE,
         'result' => TRUE,
         'exception' => '',
         'expected' => [
@@ -78,7 +81,7 @@ class ConnectionTesterTest extends KernelTestBase {
       ],
       [
         'message' => 'SMTP on, result FALSE.',
-        '$smtp_on' => TRUE,
+        'smtp_on' => TRUE,
         'result' => FALSE,
         'exception' => '',
         'expected' => [
@@ -91,7 +94,7 @@ class ConnectionTesterTest extends KernelTestBase {
       ],
       [
         'message' => 'SMTP on, PHPMailerException.',
-        '$smtp_on' => TRUE,
+        'smtp_on' => TRUE,
         'result' => FALSE,
         'exception' => PHPMailerException::class,
         'expected' => [
@@ -104,7 +107,7 @@ class ConnectionTesterTest extends KernelTestBase {
       ],
       [
         'message' => 'SMTP on, Exception.',
-        '$smtp_on' => TRUE,
+        'smtp_on' => TRUE,
         'result' => FALSE,
         'exception' => \Exception::class,
         'expected' => [
@@ -117,7 +120,7 @@ class ConnectionTesterTest extends KernelTestBase {
       ],
       [
         'message' => 'SMTP off.',
-        '$smtp_on' => FALSE,
+        'smtp_on' => FALSE,
         'result' => FALSE,
         'exception' => '',
         'expected' => [
@@ -134,14 +137,16 @@ class ConnectionTesterTest extends KernelTestBase {
   /**
    * Create a mock PHPMailer class for testing the exceptions.
    *
-   * @param $result
+   * @param bool $result
    *   Expected Result.
-   * @param $exception
+   * @param string $exception
    *   Exception passed in.
    *
-   * @return \PHPMailer\PHPMailer\PHPMailer|__anonymous@4029
+   * @return \PHPMailer\PHPMailer\PHPMailer
+   *   The PHPMailer library.
    */
   private function getMockMailer($result, $exception) {
+
     $class = new class($result, $exception) extends PHPMailer {
 
       public function __construct($result, $exception) {
@@ -159,6 +164,7 @@ class ConnectionTesterTest extends KernelTestBase {
         }
         return $this->result;
       }
+
     };
     return $class;
   }

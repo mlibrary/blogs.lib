@@ -9,7 +9,7 @@ index e478e9130..34c326327 100644
 -    if (empty($tokens)) {
 -      return Xss::filterAdmin($text);
 -    }
- 
+
      $twig_tokens = [];
 +    if (!empty($tokens)) {
      foreach ($tokens as $token => $replacement) {
@@ -25,17 +25,17 @@ index e478e9130..34c326327 100644
 -      // Otherwise, Xss::filterAdmin could remove valid Twig syntax before the
 -      // template is parsed.
 +    }
- 
+
        $build = [
          '#type' => 'inline_template',
 @@ -422,10 +416,6 @@ function ($children, $elements) {
        // using Renderer::executeInRenderContext() instead.
        // @todo: https://www.drupal.org/node/2566621
-       return (string) $this->getRenderer()->renderPlain($build);
+       return (string) $this->getRenderer()->renderInIsolation($build);
 -    }
 -    else {
 -      return Xss::filterAdmin($text);
 -    }
    }
- 
+
    /**

@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Plugin;
 
 use Drupal\Tests\taxonomy\Functional\Views\TaxonomyTestBase;
+use Drupal\user\UserInterface;
+use Drupal\views\Tests\ViewTestData;
 use Drupal\views\Views;
 
 /**
@@ -18,14 +22,12 @@ class EntityArgumentTest extends TaxonomyTestBase {
    *
    * @var array
    */
-  public static $testViews = ['test_entity_id_argument'];
+  public static array $testViews = ['test_entity_id_argument'];
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
-  protected static $modules = ['node', 'taxonomy', 'views_test_config'];
+  protected static $modules = ['node', 'taxonomy'];
 
   /**
    * {@inheritdoc}
@@ -33,27 +35,29 @@ class EntityArgumentTest extends TaxonomyTestBase {
   protected $defaultTheme = 'stark';
 
   /**
-   * An user with permissions to administer taxonomy.
+   * A user with permission to administer taxonomy.
    *
    * @var \Drupal\user\UserInterface
    */
-  protected $adminUser;
+  protected UserInterface $adminUser;
 
   /**
    * {@inheritdoc}
    */
   protected function setUp($import_test_views = TRUE, $modules = []): void {
-    parent::setUp($import_test_views);
+    parent::setUp($import_test_views, $modules);
+    ViewTestData::createTestViews(static::class, ['views_test_config']);
 
     // Create an administrative user.
     $this->adminUser = $this->drupalCreateUser(['administer taxonomy', 'bypass node access']);
     $this->drupalLogin($this->adminUser);
+
   }
 
   /**
-   * Tests the generated title of a view: entity target argument.
+   * Tests the generated title of a view with an entity target argument.
    */
-  public function testArgumentTitle() {
+  public function testArgumentTitle(): void {
     $view = Views::getView('test_entity_id_argument');
     $assert_session = $this->assertSession();
 

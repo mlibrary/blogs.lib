@@ -2,13 +2,10 @@
 
 namespace Drupal\image_captcha\Form;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DrupalKernel;
-use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\Language;
-use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 use Drupal\image_captcha\Constants\ImageCaptchaConstants;
@@ -34,30 +31,14 @@ class ImageCaptchaSettingsForm extends ConfigFormBase {
   protected $fileSystem;
 
   /**
-   * Constructs a \Drupal\image_captcha\Form\ImageCaptchaSettingsForm object.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The factory for configuration objects.
-   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
-   *   The language manager.
-   * @param \Drupal\Core\File\FileSystemInterface $fileSystem
-   *   The file_system service.
-   */
-  public function __construct(ConfigFactoryInterface $config_factory, LanguageManagerInterface $language_manager, FileSystemInterface $fileSystem) {
-    parent::__construct($config_factory);
-    $this->languageManager = $language_manager;
-    $this->fileSystem = $fileSystem;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('language_manager'),
-      $container->get('file_system')
-    );
+    $instance = parent::create($container);
+    $instance->languageManager = $container->get('language_manager');
+    $instance->fileSystem = $container->get('file_system');
+
+    return $instance;
   }
 
   /**

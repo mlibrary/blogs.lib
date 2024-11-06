@@ -27,6 +27,7 @@ class UpgradeStatusAccessTest extends BrowserTestBase {
   /**
    * Tests access without permission.
    */
+  #[\ReturnTypeWillChange]
   public function testDeprecationDashboardAccessUnprivileged() {
     $this->drupalGet(Url::fromRoute('upgrade_status.report'));
     $this->assertSession()->statusCodeEquals(403);

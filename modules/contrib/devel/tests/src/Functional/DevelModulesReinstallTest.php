@@ -27,7 +27,7 @@ class DevelModulesReinstallTest extends DevelBrowserTestBase {
   /**
    * Reinstall modules.
    */
-  public function testDevelReinstallModules() {
+  public function testDevelReinstallModules(): void {
     // Minimal profile enables only dblog, block and node.
     $modules = ['dblog', 'block'];
 
@@ -39,7 +39,7 @@ class DevelModulesReinstallTest extends DevelBrowserTestBase {
     // Prepare field data in an associative array.
     $edit = [];
     foreach ($modules as $module) {
-      $edit["reinstall[$module]"] = TRUE;
+      $edit[sprintf('reinstall[%s]', $module)] = TRUE;
     }
 
     $this->drupalGet('devel/reinstall');

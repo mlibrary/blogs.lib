@@ -28,7 +28,7 @@ class CalendarLegend extends BlockBase implements BlockPluginInterface {
       '#type' => 'select',
       '#title' => $this->t('Legend View'),
       '#description' => $this->t('Choose the view display that contains the settings for the stripes that should be displayed in a legend in this block. Note that if you change the stripe values in that view you will need to clear the cache to pick up the new values in this block.'),
-      '#default_value' => isset($config['calendar_legend_view_settings_view']) ? $config['calendar_legend_view_settings_view'] : '',
+      '#default_value' => $config['calendar_legend_view_settings_view'] ?? '',
       '#options' => $options,
     ];
 

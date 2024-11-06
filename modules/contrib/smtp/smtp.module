@@ -16,7 +16,6 @@
  */
 
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Url;
 
 /**
  * Implements hook_modules_installed().
@@ -97,6 +96,7 @@ function _smtp_mailer_send(array $variables) {
   $mailer = $variables['mailer'];
   $to = $variables['to'];
   $from = $variables['from'];
+  $system = $variables['mail_system'];
 
   $logger = \Drupal::logger('smtp');
 
@@ -107,13 +107,16 @@ function _smtp_mailer_send(array $variables) {
   try {
     $mailer->Send();
   }
-  catch (Exception $e) {
+  catch (\Exception $e) {
     $logger->error('Error sending e-mail from @from to @to: @error_message', [
       '@from' => $from,
       '@to' => $to,
       '@error_message' => $mailer->ErrorInfo,
     ]);
     return FALSE;
+  }
+  finally {
+    $system->debug();
   }
 
   if (!$smtp_config->get('smtp_keepalive')) {

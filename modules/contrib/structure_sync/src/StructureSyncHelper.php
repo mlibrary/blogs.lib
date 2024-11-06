@@ -32,7 +32,7 @@ class StructureSyncHelper {
    * Function to export menu links.
    */
   public static function exportMenuLinks(array $form = NULL, FormStateInterface $form_state = NULL) {
-    $menuLinksController = new MenuLinksController();
+    $menuLinksController = MenuLinksController::create(\Drupal::getContainer());
     $menuLinksController->exportMenuLinks($form, $form_state);
   }
 
@@ -68,7 +68,7 @@ class StructureSyncHelper {
    * 'safe' or 'force' to apply that import style.
    */
   public static function importMenuLinks(array $form, FormStateInterface $form_state = NULL) {
-    $menuLinksController = new MenuLinksController();
+    $menuLinksController = MenuLinksController::create(\Drupal::getContainer());
     $menuLinksController->importMenuLinks($form, $form_state);
   }
 

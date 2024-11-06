@@ -4,10 +4,10 @@ namespace Drupal\calendar\Plugin\views\pager;
 
 use Drupal\calendar\CalendarHelper;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\pager\PagerPluginBase;
 use Drupal\views\ViewExecutable;
-use Drupal\Core\Url;
 
 /**
  * The plugin to handle calendar pager.

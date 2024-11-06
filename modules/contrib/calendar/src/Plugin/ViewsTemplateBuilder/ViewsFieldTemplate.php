@@ -74,7 +74,7 @@ class ViewsFieldTemplate extends ViewsDuplicateBuilderBase {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $config_form = parent::buildConfigurationForm($form, $form_state);

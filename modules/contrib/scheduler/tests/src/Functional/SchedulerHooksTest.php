@@ -10,7 +10,7 @@ use Drupal\node\Entity\NodeType;
  * Tests the API hook functions of the Scheduler module.
  *
  * This class covers the eight hook functions that Scheduler provides, allowing
- * other modules to interact with editting, scheduling and processing via cron.
+ * other modules to interact with editing, scheduling and processing via cron.
  *
  * @group scheduler_api
  */
@@ -85,7 +85,7 @@ class SchedulerHooksTest extends SchedulerBrowserTestBase {
    * @return array
    *   Each array item has the values: [entity type id, bundle id].
    */
-  public function dataCustomEntityTypes() {
+  public static function dataCustomEntityTypes() {
     $data = [
       '#node' => ['node', 'scheduler_api_node_test'],
       '#media' => ['media', 'scheduler_api_media_test'],
@@ -147,7 +147,7 @@ class SchedulerHooksTest extends SchedulerBrowserTestBase {
       ${"entity$i"} = $storage->load(${"entity$i"}->id());
     }
 
-    // Check tha entity 1 and 2 have been published.
+    // Check that entity 1 and 2 have been published.
     $this->assertTrue($entity1->isPublished(), "After cron, $entityTypeId 1 '{$entity1->label()}' should be published.");
     $this->assertTrue($entity2->isPublished(), "After cron, $entityTypeId 2 '{$entity2->label()}' should be published.");
 
@@ -171,7 +171,7 @@ class SchedulerHooksTest extends SchedulerBrowserTestBase {
     // Create test entities using the standard scheduler test entity types.
     // Entity 1 is set for scheduled publishing, but will be removed by the test
     // API generic hook_scheduler_list_alter() function. Entity 2 is similar but
-    // is removed via the specifc hook_scheduler_{type}_list_alter() function.
+    // is removed via the specific hook_scheduler_{type}_list_alter() function.
     $entity1 = $this->createEntity($entityTypeId, $bundle, [
       'status' => FALSE,
       'title' => "Pink $entityTypeId list_alter do not publish me",
@@ -186,7 +186,7 @@ class SchedulerHooksTest extends SchedulerBrowserTestBase {
     // Entity 3 is not published and has no publishing date set. The test module
     // generic hook_scheduler_list_alter() function will add a date and add the
     // id into the list to be published. Entity 4 is similar but the date and id
-    // is added by the specifc hook_scheduler_{type}_list_alter() function.
+    // is added by the specific hook_scheduler_{type}_list_alter() function.
     $entity3 = $this->createEntity($entityTypeId, $bundle, [
       'status' => FALSE,
       'title' => "Pink $entityTypeId list_alter publish me",
@@ -198,7 +198,7 @@ class SchedulerHooksTest extends SchedulerBrowserTestBase {
 
     // Entity 5 is set for scheduled unpublishing, but will be removed by the
     // generic hook_scheduler_list_alter() function. Entity 6 is similar but is
-    // removed by the specifc hook_scheduler_{type}_list_alter() function.
+    // removed by the specific hook_scheduler_{type}_list_alter() function.
     $entity5 = $this->createEntity($entityTypeId, $bundle, [
       'status' => TRUE,
       'title' => "Pink $entityTypeId list_alter do not unpublish me",
@@ -213,7 +213,7 @@ class SchedulerHooksTest extends SchedulerBrowserTestBase {
     // Entity 7 is published and has no unpublishing date set. The generic
     // hook_scheduler_list_alter() will add a date and add the id into the list
     // to be unpublished. Entity 8 is similar but the date and id will be added
-    // by the specifc hook_scheduler_{type}_list_alter() function.
+    // by the specific hook_scheduler_{type}_list_alter() function.
     $entity7 = $this->createEntity($entityTypeId, $bundle, [
       'status' => TRUE,
       'title' => "Pink $entityTypeId list_alter unpublish me",
@@ -256,7 +256,7 @@ class SchedulerHooksTest extends SchedulerBrowserTestBase {
    * Covers hook_scheduler_{type}_publishing_allowed()
    *
    * This hook is used to deny the publishing of individual entities. The test
-   * uses the customised content type which has checkboxes 'Approved for
+   * uses the customized content type which has checkboxes 'Approved for
    * publishing' and 'Approved for unpublishing'.
    *
    * @dataProvider dataCustomEntityTypes()
@@ -305,13 +305,13 @@ class SchedulerHooksTest extends SchedulerBrowserTestBase {
     $bundle_field_name = $entity->getEntityType()->get('entity_keys')['bundle'];
     $entity->$bundle_field_name->entity->setThirdPartySetting('scheduler', 'publish_past_date', 'publish')->save();
 
-    // Check that an entity can be approved and published programatically.
+    // Check that an entity can be approved and published programmatically.
     $entity = $this->createUnapprovedEntity($entityTypeId, $bundle, 'publish_on');
     $this->assertFalse($entity->isPublished(), "New unapproved '{$entity->label()}' with a date in the past should not be published immediately after saving.");
     $this->approveEntity($entityTypeId, $entity->id(), 'field_approved_publishing');
     $storage->resetCache([$entity->id()]);
     $entity = $storage->load($entity->id());
-    $this->assertTrue($entity->isPublished(), "New approved '{$entity->label()}' with a date in the past should be published immediately when created programatically.");
+    $this->assertTrue($entity->isPublished(), "New approved '{$entity->label()}' with a date in the past should be published immediately when created programmatically.");
 
     // Check that an entity can be approved and published via edit form.
     $entity = $this->createUnapprovedEntity($entityTypeId, $bundle, 'publish_on');

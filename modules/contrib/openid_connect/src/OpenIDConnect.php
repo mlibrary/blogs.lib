@@ -670,6 +670,25 @@ class OpenIDConnect {
                 $account->set($property_name, ['target_id' => $file->id()]);
                 break;
 
+              case 'email':
+                if ($property_name === 'mail') {
+                  // The account email address is a very special user property,
+                  // as it is one of the properties that requires to be unique
+                  // for all Drupal users.
+                  $account_by_mail = $this->userStorage->loadByProperties(['mail' => $claim_value]);
+                  if (empty($account_by_mail) || ($account_by_mail->id() == $account->id())) {
+                    $account->set('mail', $claim_value);
+                  }
+                  else {
+                    $this->logger->warning('Could not save user info. Email address %email is already used in another account.',
+                      ['%email' => $claim_value]);
+                  }
+                }
+                else {
+                  $account->set($property_name, $claim_value);
+                }
+                break;
+
               default:
                 $this->logger->error('Could not save user info, property type not implemented: %property_type',
                   ['%property_type' => $property_type]
@@ -688,7 +707,7 @@ class OpenIDConnect {
 
     // Map groups to Drupal roles.
     if (isset($userinfo['groups'])) {
-      $role_mappings = $this->configFactory->get('openid_connect.settings')->get('role_mappings');
+      $role_mappings = $this->configFactory->get('openid_connect.settings')->get('role_mappings') ?? [];
       foreach ($role_mappings as $role => $mappings) {
         if (!empty(array_intersect($mappings, $userinfo['groups']))) {
           // User has a mapped role. Add it to their account.

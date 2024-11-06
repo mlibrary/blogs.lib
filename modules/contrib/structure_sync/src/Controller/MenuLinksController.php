@@ -3,24 +3,52 @@
 namespace Drupal\structure_sync\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\structure_sync\StructureSyncHelper;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Menu\MenuLinkTreeInterface;
+use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
+use Drupal\structure_sync\StructureSyncHelper;
 use Drush\Drush;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Controller for syncing menu links.
  */
 class MenuLinksController extends ControllerBase {
 
+  /**
+   * An editable structure_sync.data configuration object.
+   *
+   * @var \Drupal\Core\Config\Config
+   */
   private $config;
 
   /**
-   * Constructor for menu links controller.
+   * The menu tree service.
+   *
+   * @var \Drupal\Core\Menu\MenuLinkTreeInterface
    */
-  public function __construct() {
+  protected $menuTree;
+
+  /**
+   * Constructor for menu links controller.
+   *
+   * @param \Drupal\Core\Menu\MenuLinkTreeInterface $menuTree
+   *   The menu tree service.
+   */
+  public function __construct(MenuLinkTreeInterface $menuTree) {
     $this->config = $this->getEditableConfig();
     $this->entityTypeManager();
+    $this->menuTree = $menuTree;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new self(
+      $container->get('menu.link_tree'),
+    );
   }
 
   /**
@@ -39,19 +67,22 @@ class MenuLinksController extends ControllerBase {
     StructureSyncHelper::logMessage('Menu links export started');
 
     if (is_object($form_state) && $form_state->hasValue('export_menu_list')) {
-      $menu_list = $form_state->getValue('export_menu_list');
-      $menu_list = array_filter($menu_list, 'is_string');
+      $menuList = $form_state->getValue('export_menu_list');
+      $menuList = array_filter($menuList, 'is_string');
     }
 
     $this->config->clear('menus')->save();
 
-    if (isset($menu_list)) {
+    if (isset($menuList)) {
       $menuLinks = [];
 
-      foreach ($menu_list as $menu_name) {
-        $menuLinks = array_merge($this->entityTypeManager
+      foreach ($menuList as $menuName) {
+        // Retrieve all menu links.
+        $unsortedMenuLinks = $this->entityTypeManager
           ->getStorage('menu_link_content')
-          ->loadByProperties(['menu_name' => $menu_name]), $menuLinks);
+          ->loadByProperties(['menu_name' => $menuName]);
+        // Sort them by their position in the menu tree.
+        $menuLinks = array_merge($this->sortMenuLinks($unsortedMenuLinks, $menuName), $menuLinks);
       }
     }
     else {
@@ -73,6 +104,7 @@ class MenuLinksController extends ControllerBase {
         'weight' => $menuLink->weight->value,
         'langcode' => $menuLink->langcode->value,
         'uuid' => $menuLink->uuid(),
+        'options' => $menuLink->link->options,
       ];
 
       StructureSyncHelper::logMessage('Exported "' . $menuLink->title->value . '" of menu "' . $menuLink->menu_name->value . '"');
@@ -82,6 +114,49 @@ class MenuLinksController extends ControllerBase {
 
     $this->messenger()->addStatus($this->t('The menu links have been successfully exported.'));
     StructureSyncHelper::logMessage('Menu links exported');
+  }
+
+  /**
+   * Function to sort menu links by weight.
+   *
+   * When retrieving menu links using EntityTypeManager, they will be in order
+   * of creation (sorted by id). However if menu links have been rearranged,
+   * you can have a smaller id as a child of a greater id.
+   * Sorting the menu links array will ensure that descendent links are created
+   * after their parents.
+   */
+  public function sortMenuLinks(array $unsortedMenuLinks, $menuName) {
+    // Retrieve the full menu tree of $menuName.
+    $tree = $this->menuTree->load($menuName, new MenuTreeParameters());
+    // Flatten it to have an array to use as sorting reference.
+    $flatMenuTree = $this->menuTreeFlatten($tree);
+
+    $menuLinksSorted = [];
+    // Use $flatMenuTree as the order reference to sort menu links.
+    foreach ($flatMenuTree as $uuid) {
+      foreach ($unsortedMenuLinks as $menuLink) {
+        if ($menuLink->uuid() === $uuid) {
+          $menuLinksSorted[] = $menuLink;
+        }
+      }
+    }
+
+    return $menuLinksSorted;
+  }
+
+  /**
+   * Helper function to recursively get all UUID of menu links from a menu.
+   */
+  public function menuTreeFlatten(array $tree) {
+    $flatTree = [];
+    foreach ($tree as $menuLinkContentId => $menuLinkTree) {
+      $flatTree[] = str_replace('menu_link_content:', '', $menuLinkContentId);
+      if ($menuLinkTree->hasChildren) {
+        $flatTree = array_merge($flatTree, $this->menuTreeFlatten($menuLinkTree->subtree));
+      }
+    }
+
+    return $flatTree;
   }
 
   /**
@@ -113,38 +188,33 @@ class MenuLinksController extends ControllerBase {
     // Get menu links from config.
     $menusConfig = $this->config->get('menus');
 
-    $menus = [];
-
-    if (isset($menusSelected)) {
-      foreach ($menusConfig as $menu) {
-        if (in_array($menu['menu_name'], array_keys($menusSelected))) {
-          $menus[] = $menu;
-        }
-      }
-    }
-    else {
-      $menus = $menusConfig;
+    // Importing with no config should print out a log message.
+    if (empty($menusConfig)) {
+      $message = $this->t("No menu exported: Nothing to import.\nMenus need to be exported first before they can be imported.");
+      StructureSyncHelper::logMessage($message);
+      return;
     }
 
+    // Drush import: Process all menu items stored in config.
     if (array_key_exists('drush', $form) && $form['drush'] === TRUE) {
       $context = [];
       $context['drush'] = TRUE;
 
       switch ($style) {
         case 'full':
-          self::deleteDeletedMenuLinks($menus, $context);
-          self::importMenuLinksFull($menus, $context);
+          self::deleteDeletedMenuLinks($menusConfig, $context);
+          self::importMenuLinksFull($menusConfig, $context);
           self::menuLinksImportFinishedCallback(NULL, NULL, NULL);
           break;
 
         case 'safe':
-          self::importMenuLinksSafe($menus, $context);
+          self::importMenuLinksSafe($menusConfig, $context);
           self::menuLinksImportFinishedCallback(NULL, NULL, NULL);
           break;
 
         case 'force':
           self::deleteMenuLinks($context);
-          self::importMenuLinksForce($menus, $context);
+          self::importMenuLinksForce($menusConfig, $context);
           self::menuLinksImportFinishedCallback(NULL, NULL, NULL);
           break;
       }
@@ -152,7 +222,19 @@ class MenuLinksController extends ControllerBase {
       return;
     }
 
-    // Import the menu links with the chosen style of importing.
+    // Form import: Check if any menu was selected for import.
+    if (empty($menusSelected)) {
+      $message = $this->t('No menu selected for import: Nothing to import.');
+      StructureSyncHelper::logMessage($message);
+      $this->messenger()->addWarning($message);
+      return;
+    }
+    // Filter menus saved in config with the ones selected for the import.
+    $menus = array_filter($menusConfig, function ($menu_link_item) use ($menusSelected) {
+      return in_array($menu_link_item['menu_name'], $menusSelected);
+    });
+
+    // Import the selected menu links with the chosen style of import.
     switch ($style) {
       case 'full':
         $batch = [
@@ -220,13 +302,13 @@ class MenuLinksController extends ControllerBase {
     }
 
     if (!empty($uuidsInConfig)) {
-        $query = StructureSyncHelper::getEntityQuery('menu_link_content');
-        $query->condition('uuid', $uuidsInConfig, 'NOT IN');
-        $ids = $query->execute();
-        $controller = StructureSyncHelper::getEntityManager()
-            ->getStorage('menu_link_content');
-        $entities = $controller->loadMultiple($ids);
-        $controller->delete($entities);
+      $query = StructureSyncHelper::getEntityQuery('menu_link_content');
+      $query->condition('uuid', $uuidsInConfig, 'NOT IN');
+      $ids = $query->execute();
+      $controller = StructureSyncHelper::getEntityManager()
+        ->getStorage('menu_link_content');
+      $entities = $controller->loadMultiple($ids);
+      $controller->delete($entities);
     }
 
     if (array_key_exists('drush', $context) && $context['drush'] === TRUE) {
@@ -248,12 +330,12 @@ class MenuLinksController extends ControllerBase {
     }
     $entities = [];
     if (!empty($uuidsInConfig)) {
-        $query = StructureSyncHelper::getEntityQuery('menu_link_content');
-        $query->condition('uuid', $uuidsInConfig, 'IN');
-        $ids = $query->execute();
-        $controller = StructureSyncHelper::getEntityManager()
-            ->getStorage('menu_link_content');
-        $entities = $controller->loadMultiple($ids);
+      $query = StructureSyncHelper::getEntityQuery('menu_link_content');
+      $query->condition('uuid', $uuidsInConfig, 'IN');
+      $ids = $query->execute();
+      $controller = StructureSyncHelper::getEntityManager()
+        ->getStorage('menu_link_content');
+      $entities = $controller->loadMultiple($ids);
     }
 
     $parents = array_column($menus, 'parent');
@@ -297,6 +379,7 @@ class MenuLinksController extends ControllerBase {
               'link' => [
                 'uri' => $menuLink['uri'],
                 'title' => $menuLink['link_title'],
+                'options' => $menuLink['options'],
               ],
               'menu_name' => $menuLink['menu_name'],
               'expanded' => in_array($menuLink['expanded'], ['1', TRUE], TRUE),
@@ -318,6 +401,7 @@ class MenuLinksController extends ControllerBase {
                     ->set('link', [
                       'uri' => $menuLink['uri'],
                       'title' => $menuLink['link_title'],
+                      'options' => $menuLink['options'],
                     ])
                     ->set('expanded', in_array($menuLink['expanded'], ['1', TRUE], TRUE))
                     ->set('enabled', in_array($menuLink['enabled'], ['1', TRUE], TRUE))
@@ -380,6 +464,7 @@ class MenuLinksController extends ControllerBase {
         'link' => [
           'uri' => $menuLink['uri'],
           'title' => $menuLink['link_title'],
+          'options' => $menuLink['options'],
         ],
         'menu_name' => $menuLink['menu_name'],
         'expanded' => in_array($menuLink['expanded'], ['1', TRUE], TRUE),
@@ -422,6 +507,7 @@ class MenuLinksController extends ControllerBase {
         'link' => [
           'uri' => $menuLink['uri'],
           'title' => $menuLink['link_title'],
+          'options' => $menuLink['options'],
         ],
         'menu_name' => $menuLink['menu_name'],
         'expanded' => in_array($menuLink['expanded'], ['1', TRUE], TRUE),

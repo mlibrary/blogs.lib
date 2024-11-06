@@ -2,8 +2,8 @@
 
 namespace Drupal\externalauth\Event;
 
-use Drupal\user\UserInterface;
 use Drupal\Component\EventDispatcher\Event;
+use Drupal\user\UserInterface;
 
 /**
  * Notify event listeners about an externalauth user login.

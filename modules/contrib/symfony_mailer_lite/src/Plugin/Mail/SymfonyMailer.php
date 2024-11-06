@@ -268,7 +268,7 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
       $this->normalizeHeaders($message);
       if (!empty($message['headers']) && is_array($message['headers'])) {
         foreach ($message['headers'] as $header_key => $header_value) {
-          if (empty($header_key) || in_array($header_key, $headers_to_skip, FALSE)) {
+          if (empty($header_value) || empty($header_key) || in_array($header_key, $headers_to_skip, FALSE)) {
             continue;
           }
 
@@ -311,6 +311,9 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
       }
       if (!empty($message['headers']['From'])) {
         $email->from($message['headers']['From']);
+      }
+      if (!empty($message['headers']['Reply-To'])) {
+        $email->replyTo($message['headers']['Reply-To']);
       }
       if (!empty($message['headers']['Sender'])) {
         if (empty($email->getReplyTo())) {
@@ -475,6 +478,11 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
         // Validate required fields.
         if (empty($a['filename']) || empty($a['filemime'])) {
           continue;
+        }
+
+        // Convert markup to string.
+        if($a['filecontent'] instanceof MarkupInterface) {
+          $a['filecontent'] = (string) $a['filecontent'];
         }
 
         // Attach file (either using a static file or provided content).

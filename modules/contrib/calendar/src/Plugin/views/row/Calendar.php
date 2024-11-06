@@ -5,20 +5,20 @@ namespace Drupal\calendar\Plugin\views\row;
 use Drupal\calendar\CalendarEvent;
 use Drupal\calendar\CalendarHelper;
 use Drupal\calendar\CalendarViewsTrait;
+use Drupal\Core\Datetime\DateFormatter;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\views\Plugin\views\argument\Date;
-use Drupal\Core\Datetime\DateFormatter;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\row\RowPluginBase;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Plugin which creates a view on the resulting object and formats it as a
@@ -192,7 +192,7 @@ class Calendar extends RowPluginBase {
       foreach ($type_names as $key => $name) {
         $form['colors']['calendar_colors_type'][$key] = [
           '#title' => $name,
-          '#default_value' => isset($colors[$key]) ? $colors[$key] : CALENDAR_EMPTY_STRIPE,
+          '#default_value' => $colors[$key] ?? CALENDAR_EMPTY_STRIPE,
           '#dependency' => ['edit-row-options-colors-legend' => ['type']],
           '#type' => 'textfield',
           '#size' => 7,
@@ -280,7 +280,7 @@ class Calendar extends RowPluginBase {
         foreach ($vocab as $key => $term) {
           $form['colors']['calendar_colors_taxonomy'][$term->tid] = [
             '#title' => $this->t('@term_name', ['@term_name' => $term->name]),
-            '#default_value' => isset($term_colors[$term->tid]) ? $term_colors[$term->tid] : CALENDAR_EMPTY_STRIPE,
+            '#default_value' => $term_colors[$term->tid] ?? CALENDAR_EMPTY_STRIPE,
             '#access' => !empty($vocabulary_field_options),
             '#dependency_count' => 2,
             '#dependency' => [
@@ -655,7 +655,7 @@ class Calendar extends RowPluginBase {
    *   The event result object.
    */
   public function nodeTypeStripe(CalendarEvent &$event) {
-    $colors = isset($this->options['colors']['calendar_colors_type']) ? $this->options['colors']['calendar_colors_type'] : [];
+    $colors = $this->options['colors']['calendar_colors_type'] ?? [];
     if (empty($colors)) {
       return;
     }
@@ -682,7 +682,7 @@ class Calendar extends RowPluginBase {
    *   A calendar event.
    */
   public function calendarTaxonomyStripe(CalendarEvent &$event) {
-    $colors = isset($this->options['colors']['calendar_colors_taxonomy']) ? $this->options['colors']['calendar_colors_taxonomy'] : [];
+    $colors = $this->options['colors']['calendar_colors_taxonomy'] ?? [];
     if (empty($colors)) {
       return;
     }

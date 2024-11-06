@@ -28,10 +28,10 @@ final class RouteDeprecationAnalyzer {
     foreach ($routing_files as $routing_file) {
       $content = file_get_contents($routing_file);
       if (strpos($content, '_access_node_revision')) {
-        $deprecations[] = new DeprecationMessage('The _access_node_revision routing requirement is deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Use _entity_access instead. See https://www.drupal.org/node/3161210.', $routing_file, 0);
+        $deprecations[] = new DeprecationMessage('The _access_node_revision routing requirement is deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Use _entity_access instead. See https://www.drupal.org/node/3161210.', $routing_file, 0, 'RouteDeprecationAnalyzer');
       }
       if (strpos($content, '_access_media_revision')) {
-        $deprecations[] = new DeprecationMessage('The _access_media_revision routing requirement is deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Use _entity_access instead. See https://www.drupal.org/node/3161210.', $routing_file, 0);
+        $deprecations[] = new DeprecationMessage('The _access_media_revision routing requirement is deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Use _entity_access instead. See https://www.drupal.org/node/3161210.', $routing_file, 0, 'RouteDeprecationAnalyzer');
       }
     }
     return $deprecations;

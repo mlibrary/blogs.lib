@@ -121,7 +121,7 @@ class SettingsFormTest extends BrowserTestBase {
     $page->pressButton('Save configuration');
 
     $assert_session->pageTextContains('The configuration options have been saved.');
-    $this->assertSame(FALSE, $this->config('oembed_providers.settings')->get('external_fetch'));
+    $this->assertFalse($this->config('oembed_providers.settings')->get('external_fetch'));
 
     $this->drupalGet('/admin/config/media/oembed-providers');
 

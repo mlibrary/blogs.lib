@@ -10,7 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
 /**
  * Implements hook_form_alter().
  */
-function scmi_testing_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+function scmi_testing_form_alter(&$form, FormStateInterface $form_state, $form_id): void {
   // Only continue if the form is for adding or editing the test entity types.
   if (!in_array($form_id, [
     'node_page_form',

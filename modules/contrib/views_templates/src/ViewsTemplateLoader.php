@@ -3,6 +3,7 @@
 namespace Drupal\views_templates;
 
 use Drupal\Component\Serialization\Yaml;
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\views_templates\Plugin\ViewsDuplicateBuilderPluginInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 
@@ -12,6 +13,23 @@ use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 class ViewsTemplateLoader implements ViewsTemplateLoaderInterface {
 
   /**
+   * The list of available modules.
+   *
+   * @var \Drupal\Core\Extension\ModuleExtensionList
+   */
+  protected $extensionListModule;
+
+  /**
+   * Class constructor.
+   *
+   * @param \Drupal\Core\Extension\ModuleExtensionList $extension_list_module
+   *   The list of available modules.
+   */
+  public function __construct(ModuleExtensionList $extension_list_module) {
+    $this->extensionListModule = $extension_list_module;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function load(ViewsDuplicateBuilderPluginInterface $builder) {
@@ -19,7 +37,7 @@ class ViewsTemplateLoader implements ViewsTemplateLoaderInterface {
 
     $template_id = $builder->getViewTemplateId();
     if (!isset($templates[$template_id])) {
-      $dir = \Drupal::service('extension.list.module')->getPath($builder->getDefinitionValue('provider')) . '/views_templates';
+      $dir = $this->extensionListModule->getPath($builder->getDefinitionValue('provider')) . '/views_templates';
       if (is_dir($dir)) {
 
         $file_path = $dir . '/' . $builder->getViewTemplateId() . '.yml';

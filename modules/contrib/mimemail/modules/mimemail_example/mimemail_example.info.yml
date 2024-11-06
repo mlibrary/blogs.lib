@@ -8,7 +8,7 @@ dependencies:
 
 configure: mimemail_example.example
 
-# Information added by Drupal.org packaging script on 2023-03-23
-version: '8.x-1.0-alpha5'
+# Information added by Drupal.org packaging script on 2023-10-12
+version: '8.x-1.0-alpha6'
 project: 'mimemail'
-datestamp: 1679607105
+datestamp: 1697143287

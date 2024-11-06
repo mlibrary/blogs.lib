@@ -4,8 +4,8 @@ namespace Drupal\pathauto\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\pathauto\AliasTypeManager;
 use Drupal\pathauto\AliasStorageHelperInterface;
+use Drupal\pathauto\AliasTypeManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -87,7 +87,10 @@ class PathautoAdminDelete extends FormBase {
         '#type' => 'checkbox',
         '#title' => (string) $definition['label'],
         '#default_value' => FALSE,
-        '#description' => $this->t('Delete aliases for all @label. Number of aliases which will be deleted: %count.', ['@label' => (string) $definition['label'], '%count' => $count]),
+        '#description' => $this->t('Delete aliases for all @label. Number of aliases which will be deleted: %count.', [
+          '@label' => (string) $definition['label'],
+          '%count' => $count,
+        ]),
       ];
     }
 

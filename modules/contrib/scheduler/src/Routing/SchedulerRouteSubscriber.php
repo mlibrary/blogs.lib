@@ -14,12 +14,15 @@ class SchedulerRouteSubscriber extends RouteSubscriberBase {
    * {@inheritdoc}
    */
   protected function alterRoutes(RouteCollection $collection) {
+    // Access is controlled via \Drupal\scheduler\Access\SchedulerRouteAccess
+    // and originally this was specified using $route->getRequirements() and
+    // setting $requirements['_custom_access'] = the class.
+    // However, we need scheduler.manager as an argument (to satisfy dependency
+    // injection) so now this is provided by a service scheduler.access_check.
     $user_page_routes = \Drupal::service('scheduler.manager')->getUserPageViewRoutes();
     foreach ($user_page_routes as $user_route) {
       if ($route = $collection->get($user_route)) {
-        $requirements = $route->getRequirements();
-        $requirements['_custom_access'] = '\Drupal\scheduler\Access\SchedulerRouteAccess::access';
-        $route->setRequirements($requirements);
+        $route->setRequirement('_custom_access', 'scheduler.access_check::access');
       }
     }
   }

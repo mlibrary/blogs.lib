@@ -4,6 +4,7 @@ namespace Drupal\scheduler\Controller;
 
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\scheduler\Form\SchedulerCronForm;
 use Drupal\scheduler\SchedulerManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -63,8 +64,8 @@ class LightweightCronController extends ControllerBase {
    *   The access result.
    */
   public function access($cron_key) {
-    $valid_cron_key = $this->config('scheduler.settings')
-      ->get('lightweight_cron_access_key');
+    $valid_cron_key = $this->state()
+      ->get(SchedulerCronForm::CRON_ACCESS_KEY, '');
     return AccessResult::allowedIf($valid_cron_key == $cron_key);
   }
 

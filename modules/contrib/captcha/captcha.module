@@ -731,7 +731,7 @@ function captcha_whitelist_ips_parse_values($whitelist_ips_value) {
   $value_rows = explode("\n", $whitelist_ips_value);
   foreach ($value_rows as $value_row) {
     $value_row = trim($value_row);
-    if (strpos($value_row, '-') !== FALSE) {
+    if (!empty($value_row) && strpos($value_row, '-') !== FALSE) {
       $whitelist_ips[CaptchaConstants::CAPTCHA_WHITELIST_IP_RANGE][] = $value_row;
     }
     else {

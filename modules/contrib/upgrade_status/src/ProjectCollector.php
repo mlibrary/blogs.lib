@@ -331,7 +331,7 @@ class ProjectCollector {
         $extension->info['upgrade_status_next'] = self::NEXT_UPDATE;
       }
       elseif ($extension->info['upgrade_status_type'] == self::TYPE_CONTRIB) {
-        // For installed contributed modules that do not have compatile updates, collaborate.
+        // For installed contributed modules that do not have compatible updates, collaborate.
         $extension->info['upgrade_status_next'] = self::NEXT_COLLABORATE;
       }
       else {
@@ -460,47 +460,6 @@ class ProjectCollector {
   }
 
   /**
-   * Get the Drupal 10 plan for a project, either explicitly fetched or cached.
-   *
-   * @param string $project_machine_name
-   *   Machine name for project.
-   *
-   * @return NULL|string
-   *   Either NULL or the Drupal 10 plan for the project.
-   */
-  public function getPlan(string $project_machine_name) {
-    // Drupal 9 plans are discontinued, return NULL on Drupal 8.
-    if ($this->getDrupalCoreMajorVersion() < 9) {
-      return NULL;
-    }
-
-    // Return explicitly fetched Drupal 10 plan if available.
-    $result = $this->getResults($project_machine_name);
-    if (!empty($result) && !empty($result['plans'])) {
-      return $result['plans'];
-    }
-
-    // Read our shipped snapshot of Drupal 10 plans to find this one.
-    if (function_exists('drupal_get_path')) {
-      // @todo remove compatibility layer with Drupal 9.3.0 when removing Drupal 9 compatibility.
-      $module_path = drupal_get_path('module', 'upgrade_status');
-    }
-    else {
-      $module_path = \Drupal::service('extension.list.module')->getPath('upgrade_status');
-    }
-    $file = fopen($module_path . '/project_plans.csv', 'r');
-    while ($line = fgetcsv($file, 0, ";")) {
-      if ($line[0] == $project_machine_name) {
-        fclose($file);
-        // Replace drupal.org link formatting with actual links.
-        return preg_replace('!\[#(\d+)\]!', '<a href="https://drupal.org/node/\1">[#\1]</a>', $line[1]);
-      }
-    }
-    fclose($file);
-    return NULL;
-  }
-
-  /**
    * Return list of possible next steps and their labels and descriptions.
    *
    * @return array
@@ -513,36 +472,43 @@ class ProjectCollector {
         $this->t('Remove'),
         $this->t('The likely best action is to remove projects that are uninstalled. Why invest in updating them to be compatible if you are not using them?'),
         ProjectCollector::SUMMARY_ACT,
+        'color-warning ' . ProjectCollector::NEXT_REMOVE
       ],
       ProjectCollector::NEXT_UPDATE => [
         $this->t('Update'),
         $this->t('There is an update available. Even if that is not fully compatible with the next major Drupal core, it may be more compatible than what you have, so best to start with updating first.'),
         ProjectCollector::SUMMARY_ACT,
+        'color-warning ' . ProjectCollector::NEXT_REMOVE
       ],
       ProjectCollector::NEXT_SCAN => [
         $this->t('Scan'),
         $this->t('Status of this project cannot be determined without scanning the source code here. Use this form to run a scan on these.'),
         ProjectCollector::SUMMARY_ANALYZE,
+        'color-warning ' . ProjectCollector::NEXT_REMOVE
       ],
       ProjectCollector::NEXT_COLLABORATE => [
         $this->t('Collaborate with maintainers'),
         $this->t('There may be Drupal.org issues by contributors or even <a href=":drupal-bot">the Project Update Bot</a>. Work with the maintainer to get them committed, provide feedback if they worked.', [':drupal-bot' => 'https://www.drupal.org/u/project-update-bot']),
         ProjectCollector::SUMMARY_ACT,
+        'color-warning ' . ProjectCollector::NEXT_REMOVE
       ],
       ProjectCollector::NEXT_RECTOR => [
         $this->t('Fix with rector'),
         $this->t('Some or all problems found can be fixed automatically with <a href=":drupal-rector">drupal-rector</a>. Make the machine do the work.', [':drupal-rector' => 'https://www.drupal.org/project/rector']),
         ProjectCollector::SUMMARY_ACT,
+        'color-error ' . ProjectCollector::NEXT_REMOVE
       ],
       ProjectCollector::NEXT_MANUAL => [
         $this->t('Fix manually'),
         $this->t('It looks like there is no automated fixes for either problems found. Check the report for pointers on how to fix.'),
         ProjectCollector::SUMMARY_ACT,
+        'color-error ' . ProjectCollector::NEXT_REMOVE
       ],
       ProjectCollector::NEXT_RELAX => [
         $this->t('Compatible with next major Drupal core version'),
         $this->t('Well done. Congrats! Let\'s get everything else here!'),
         ProjectCollector::SUMMARY_RELAX,
+        'color-success ' . ProjectCollector::NEXT_REMOVE
       ],
     ];
   }
@@ -553,7 +519,7 @@ class ProjectCollector {
    * A customized version of Semver::satisfies(), since that only works for
    * a == condition.
    *
-   * @paran string $constraints
+   * @param string $constraints
    *   Composer compatible constraints from core_version_requirement or
    *   drupal/core requirement.
    *
@@ -567,19 +533,21 @@ class ProjectCollector {
   }
 
   /**
-   * Checks constraint compatibility with PHP 8.
+   * Checks constraint compatibility with a PHP version.
    *
    * A customized version of Semver::satisfies(), since that only works for
    * a == condition.
    *
-   * @paran string $constraints
+   * @param string $constraints
    *   Composer compatible constraints from a PHP version requirement.
+   * @param string $php
+   *   Optional PHP version number. Defaults to 8.0.0.
    *
    * @return bool
    */
-  public static function isCompatibleWithPHP8(string $constraints) {
+  public static function isCompatibleWithPHP(string $constraints, string $php = '8.0.0') {
     $version_parser = new VersionParser();
-    $provider = new Constraint('>=', $version_parser->normalize('8.0.0'));
+    $provider = new Constraint('>=', $version_parser->normalize($php));
     $parsed_constraints = $version_parser->parseConstraints($constraints);
     return $parsed_constraints->matches($provider);
   }
@@ -594,10 +562,12 @@ class ProjectCollector {
     $major = (int) \Drupal::VERSION;
     switch ($major) {
       case 9:
-        return '9.4';
+        return '9.5';
       case 10:
-        return '10.0';
-      }
+        return '10.2';
+      case 11:
+        return '11.0';
+    }
     return '';
   }
 

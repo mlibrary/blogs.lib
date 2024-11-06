@@ -27,6 +27,7 @@ class Scheduler extends AccessPluginBase {
    * {@inheritdoc}
    */
   public function access(AccountInterface $account) {
+    return FALSE;
   }
 
   /**

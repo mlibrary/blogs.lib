@@ -2,11 +2,11 @@
 
 namespace Drupal\oembed_providers;
 
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\Component\Utility\UrlHelper;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -399,6 +399,9 @@ class OembedProviderForm extends EntityForm {
     }
 
     $form_state->setRedirect('entity.oembed_provider.collection');
+
+    return $this->entity
+      ->save();
   }
 
   /**
@@ -443,8 +446,8 @@ class OembedProviderForm extends EntityForm {
     if (!in_array($parsed_url['scheme'], ['http', 'https'])) {
       return FALSE;
     }
-    // User, password, and fragments are not valid.
-    if (isset($parsed_url['user']) || isset($parsed_url['pass']) || isset($parsed_url['fragment'])) {
+    // User and password are not valid.
+    if (isset($parsed_url['user']) || isset($parsed_url['pass'])) {
       return FALSE;
     }
     // Valid the host, which may contain an optional wildcard subdomain.
@@ -454,7 +457,7 @@ class OembedProviderForm extends EntityForm {
     $host = (bool) preg_match("
       /^
       (?:
-        (?:([*\.]?)([a-z0-9\-\.]{2,})(\.)([a-z0-9\-\.]+)|%[0-9a-f]{2})+
+        (?:([*\.]?)([a-z0-9\-\.]{1,})(\.)([a-z0-9\-\.]+)|%[0-9a-f]{2})+
         |(?:\[(?:[0-9a-f]{0,4}:)*(?:[0-9a-f]{0,4})\])
       )
     $/xi", $parsed_url['host']);

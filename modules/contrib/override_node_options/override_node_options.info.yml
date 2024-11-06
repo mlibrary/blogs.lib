@@ -7,7 +7,7 @@ configure: override_node_options.settings
 dependencies:
   - drupal:node
 
-# Information added by Drupal.org packaging script on 2023-02-19
-version: '8.x-2.7'
+# Information added by Drupal.org packaging script on 2024-04-18
+version: '8.x-2.8'
 project: 'override_node_options'
-datestamp: 1676800642
+datestamp: 1713475053

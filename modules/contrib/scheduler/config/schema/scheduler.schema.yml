@@ -58,9 +58,6 @@ scheduler.settings:
     hide_seconds:
       type: boolean
       label: 'Hide the seconds on the input control when entering a time'
-    lightweight_cron_access_key:
-      type: string
-      label: 'Lightweight cron access key'
     log:
       type: boolean
       label: 'Log every Scheduler lightweight cron activation and completion message'
@@ -112,11 +109,11 @@ node.type.*.third_party.scheduler: &third_party_settings_alias
       type: boolean
       label: 'Create a new revision on unpublishing'
 
-# Use the saved alias to repeat the same schema for media.type and
-# commerce_product.commerce_product_type. Adding a separate comment betweeen the
-# two definitions below causes a "cannot parse" error.
+# Use the saved alias to repeat the schema for Media entity type.
 media.type.*.third_party.scheduler: *third_party_settings_alias
 
+# Repeat the schema for Commerce Product entity type.
 commerce_product.commerce_product_type.*.third_party.scheduler: *third_party_settings_alias
 
+# Repeat the schema for Taxonomy Terms
 taxonomy.vocabulary.*.third_party.scheduler: *third_party_settings_alias

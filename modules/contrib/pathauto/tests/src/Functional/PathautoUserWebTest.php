@@ -17,7 +17,7 @@ class PathautoUserWebTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stable';
+  protected $defaultTheme = 'stark';
 
   /**
    * Modules to enable.
@@ -43,6 +43,8 @@ class PathautoUserWebTest extends BrowserTestBase {
     $permissions = [
       'administer pathauto',
       'administer url aliases',
+      'bulk delete aliases',
+      'bulk update aliases',
       'create url aliases',
       'administer users',
     ];

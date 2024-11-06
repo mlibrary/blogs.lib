@@ -10,7 +10,7 @@ use Drupal\Core\Render\BubbleableMetadata;
 /**
  * Implements hook_token_info().
  */
-function scheduler_content_moderation_integration_token_info() {
+function scheduler_content_moderation_integration_token_info(): array {
   $info['tokens']['node']['scheduled-moderation-publish-state'] = [
     'name' => t('Scheduled Moderation Publish State'),
     'description' => t("The published state the node will be set to."),
@@ -26,21 +26,21 @@ function scheduler_content_moderation_integration_token_info() {
 /**
  * Implements hook_tokens().
  */
-function scheduler_content_moderation_integration_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
-  /** @var ModerationInformationInterface $moderation_info */
+function scheduler_content_moderation_integration_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata): array {
+  /** @var \Drupal\content_moderation\ModerationInformationInterface $moderation_info */
   $moderation_info = Drupal::service('content_moderation.moderation_information');
   $language_code = isset($options['language']) ? $options['language']->language : NULL;
   $replacements = [];
 
   if ($type == 'node' && !empty($data['node'])) {
-    /** @var NodeInterface $node */
+    /** @var \Drupal\node\NodeInterface $node */
     $node = $data['node'];
     if ($moderation_info->isModeratedEntity($node)) {
-      /** @var WorkflowInterface $workflow */
+      /** @var \Drupal\workflows\WorkflowInterface $workflow */
       $workflow = $moderation_info->getWorkflowForEntity($node);
-      /** @var ContentModerationStateInterface[] $states */
+      /** @var \Drupal\content_moderation\Entity\ContentModerationStateInterface[] $states */
       $states = $workflow->getTypePlugin()->getStates();
-      /** @var NodeInterface $node */
+      /** @var \Drupal\node\NodeInterface $node */
       $node = \Drupal::service('entity.repository')->getTranslationFromContext($node, $language_code, ['operation' => 'node_tokens']);
       foreach ($tokens as $name => $original) {
         switch ($name) {

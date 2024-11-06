@@ -14,10 +14,8 @@ class ErrorHandlerSubscriber implements EventSubscriberInterface {
 
   /**
    * The current user.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
    */
-  protected $account;
+  protected AccountProxyInterface $account;
 
   /**
    * ErrorHandlerSubscriber constructor.
@@ -35,16 +33,18 @@ class ErrorHandlerSubscriber implements EventSubscriberInterface {
    * @param \Symfony\Component\HttpKernel\Event\RequestEvent|null $event
    *   The event to process.
    */
-  public function registerErrorHandler(RequestEvent $event = NULL) {
-    if ($this->account && $this->account->hasPermission('access devel information')) {
-      devel_set_handler(devel_get_handlers());
+  public function registerErrorHandler(RequestEvent $event = NULL): void {
+    if (!$this->account->hasPermission('access devel information')) {
+      return;
     }
+
+    devel_set_handler(devel_get_handlers());
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     // Runs as soon as possible in the request but after
     // AuthenticationSubscriber (priority 300) because you need to access to
     // the current user for determine whether register the devel error handler

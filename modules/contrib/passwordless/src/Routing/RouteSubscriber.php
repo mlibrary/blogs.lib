@@ -25,8 +25,14 @@ class RouteSubscriber extends RouteSubscriberBase {
     if ($route = $collection->get('user.reset')) {
       $route->setDefaults([
         '_controller' => '\Drupal\passwordless\Controller\PasswordlessUserController::resetPass',
-        '_title' => 'Log-in',
+      ]);
+    }
+
+    if ($route = $collection->get('user.reset.login')) {
+      $route->setDefaults([
+        '_controller' => '\Drupal\passwordless\Controller\PasswordlessUserController::resetPassLogin',
       ]);
     }
   }
+
 }

@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Url;
+use Drupal\scheduler\Form\SchedulerCronForm;
 use Drupal\views\Entity\View;
 
 /**
@@ -77,9 +78,7 @@ function scheduler_install($is_syncing) {
     return;
   }
   // Set cron access key value, as this is now required in SchedulerCronForm.
-  \Drupal::service('config.factory')->getEditable('scheduler.settings')
-    ->set('lightweight_cron_access_key', substr(md5(rand()), 0, 20))
-    ->save();
+  \Drupal::state()->set(SchedulerCronForm::CRON_ACCESS_KEY, substr(md5(rand()), 0, 20));
 }
 
 /**
@@ -93,6 +92,8 @@ function scheduler_uninstall() {
   $scheduler_manager = \Drupal::service('scheduler.manager');
   $scheduler_manager->entityUpdate();
   $scheduler_manager->entityRevert();
+
+  \Drupal::state()->delete(SchedulerCronForm::CRON_ACCESS_KEY);
 }
 
 /**
@@ -266,4 +267,15 @@ function scheduler_update_8208() {
   else {
     return t('No update required.');
   }
+}
+
+/**
+ * Move lightweight_cron_access_key from config to state.
+ */
+function scheduler_update_8209() {
+  $config = \Drupal::service('config.factory')->getEditable('scheduler.settings');
+  $key = $config->get('lightweight_cron_access_key');
+  \Drupal::state()->set(SchedulerCronForm::CRON_ACCESS_KEY, $key);
+  $config->clear('lightweight_cron_access_key')->save();
+  return t('Cron access key now stored in state.');
 }

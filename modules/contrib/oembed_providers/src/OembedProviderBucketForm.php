@@ -7,16 +7,14 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Render\Element\Checkboxes;
+use Drupal\oembed_providers\Helper;
 use Drupal\oembed_providers\OEmbed\ProviderRepositoryDecorator;
-use Drupal\oembed_providers\Traits\HelperTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form controller for the oEmbed provider bucket edit/add forms.
  */
 class OembedProviderBucketForm extends EntityForm {
-
-  use HelperTrait;
 
   /**
    * The decorated oEmbed ProviderRepository.
@@ -85,7 +83,7 @@ class OembedProviderBucketForm extends EntityForm {
     $entity = $this->entity;
 
     $form['security_warning'] = [
-      '#markup' => $this->disabledProviderSecurityWarning(),
+      '#markup' => Helper::disabledProviderSecurityWarning(),
       // Simulate warning message.
       '#prefix' => '<div role="contentinfo" aria-label="Warning message" class="messages messages--warning">',
       '#suffix' => '</div>',
@@ -157,6 +155,9 @@ class OembedProviderBucketForm extends EntityForm {
     }
 
     $form_state->setRedirect('entity.oembed_provider_bucket.collection');
+
+    return $this->entity
+      ->save();
   }
 
   /**

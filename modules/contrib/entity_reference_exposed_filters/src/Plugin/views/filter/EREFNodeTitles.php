@@ -378,8 +378,11 @@ class EREFNodeTitles extends ManyToOne implements PluginInspectionInterface, Con
       $get_entity = $this->entityTypeManager->getStorage($gen_options['target_entity_type_id']);
       $relatedContentQuery = $this->entityTypeManager->getStorage($gen_options['target_entity_type_id'])->getQuery()
         ->accessCheck(TRUE)
-        ->condition('type', $gen_options['target_bundles'], 'IN')
-        ->sort('type', $this->sortBundleOrder[$this->options['sort_bundle_order']]);
+        ->condition('type', $gen_options['target_bundles'], 'IN');
+      // Check if the key 'sort_bundle_order' exists and has value before using it.
+      if (!empty($this->options['sort_bundle_order'])) {
+        $relatedContentQuery->sort('type', $this->sortBundleOrder[$this->options['sort_bundle_order']]);
+      }
       // Leave this for any debugging ->sort('title', 'ASC');.
       if ($this->options['get_unpublished'] != 2) {
         $relatedContentQuery->condition('status', $this->options['get_unpublished']);

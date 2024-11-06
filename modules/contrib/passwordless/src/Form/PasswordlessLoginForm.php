@@ -2,7 +2,6 @@
 
 namespace Drupal\passwordless\Form;
 
-use Drupal\Core\Link;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\user\Form\UserPasswordForm;
@@ -23,8 +22,10 @@ class PasswordlessLoginForm extends UserPasswordForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = \Drupal::config('passwordless.settings');
+    $config = $this->config('passwordless.settings');
     $form = parent::buildForm($form, $form_state);
+    // Pretend this is the core login form.
+    $form['#attributes']['class'][] = 'user-login-form';
 
     $form['name']['#type'] = 'email';
     $form['name']['#title'] = $this->t('Email address');
@@ -33,7 +34,7 @@ class PasswordlessLoginForm extends UserPasswordForm {
 
     if (!empty($config->get('passwordless_show_help'))) {
       $form['passwordless_help_link'] = [
-        '#title' => $this->t($config->get('passwordless_help_link_text')),
+        '#title' => $config->get('passwordless_help_link_text'),
         '#type' => 'link',
         '#url' => Url::fromRoute('passwordless.help'),
         '#attributes' => [
@@ -53,65 +54,43 @@ class PasswordlessLoginForm extends UserPasswordForm {
 
   /**
    * {@inheritdoc}
-   *
-   * Identical to \Drupal\user\Form\UserPasswordForm::validateForm()
-   * except for the error message.
-   *
-   * Difference from 7.x version: despite the form label, it will validate
-   * user names as well as email addresses.
-   *
-   * @todo Add multiple_email support when module is available.
-   */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-    $name = trim($form_state->getValue('name'));
-    // Try to load by email.
-    $users = $this->userStorage->loadByProperties([
-      'mail' => $name,
-      'status' => '1',
-    ]);
-    if (empty($users)) {
-      // No success, try to load by name.
-      $users = $this->userStorage->loadByProperties([
-        'name' => $name,
-        'status' => '1',
-      ]);
-    }
-    $account = reset($users);
-    if ($account && $account->id()) {
-      $form_state->setValueForElement(['#parents' => ['account']], $account);
-    }
-    else {
-      $form_state->setErrorByName('name', $this->t('Sorry, %name is not recognized as an active email address on this website.', ['%name' => $name]));
-    }
-  }
-
-  /**
-   * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $config = \Drupal::config('passwordless.settings');
+    $config = $this->config('passwordless.settings');
     $langcode = $this->languageManager->getCurrentLanguage()->getId();
     $redirect = 'user.page';
 
-    $account = $form_state->getValue('account');
-    // Mail one time login URL and instructions using current language.
-    $mail = _user_mail_notify('password_reset', $account, $langcode);
-    if (!empty($mail)) {
-      $this->logger('passwordless')
-        ->notice('Login link mailed to %name at %email.', [
-          '%name' => $account->getDisplayName(),
-          '%email' => $account->getEmail(),
+    if ($account = $form_state->getValue('account')) {
+      // Mail one-time login URL and instructions using current language.
+      $mail = _user_mail_notify('password_reset', $account, $langcode);
+      if (!empty($mail)) {
+        $this->logger('passwordless')
+          ->notice('Login link mailed to %name at %email.', [
+            '%name' => $account->getDisplayName(),
+            '%email' => $account->getEmail(),
+          ]);
+      }
+    }
+    else {
+      $this->logger('user')
+        ->info('Passwordless-login form was submitted with an unknown or inactive account: %name.', [
+          '%name' => $form_state->getValue('name'),
         ]);
+    }
 
-      if (!empty($config->get('passwordless_toggle_sent_page'))) {
-        $redirect = 'passwordless.user_login_sent';
-      }
-      else {
-        $this->messenger()
-          ->addMessage(t('The login link has been sent to your email address.'));
-      }
+    if (!empty($config->get('passwordless_toggle_sent_page'))) {
+      $redirect = 'passwordless.user_login_sent';
+    }
+    else {
+      // Make sure the status text is displayed even if no email was sent. This
+      // message is deliberately the same as the success message for privacy.
+      $this->messenger()
+        ->addStatus($this->t('If %identifier is a valid account, an email will be sent with a login link.', [
+          '%identifier' => $form_state->getValue('name'),
+        ]));
     }
 
     $form_state->setRedirect($redirect);
   }
+
 }

@@ -99,7 +99,7 @@ class DateArgumentWrapper {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function createDateTime() {
     if ($value = $this->dateArg->getValue()) {
@@ -112,7 +112,7 @@ class DateArgumentWrapper {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   protected function createFromFormat($value) {
     $format = $this->getArgFormat();
@@ -133,7 +133,7 @@ class DateArgumentWrapper {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function format($format) {
     if ($date = $this->createDateTime()) {
@@ -143,7 +143,7 @@ class DateArgumentWrapper {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getGranularity() {
     $plugin_id = $this->dateArg->getPluginId();
@@ -255,7 +255,7 @@ class DateArgumentWrapper {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   protected function getYearWeek($value) {
     if (is_numeric($value) && strlen($value) == 6) {

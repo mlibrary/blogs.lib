@@ -51,7 +51,7 @@ class PublishedStateConstraintTest extends SchedulerContentModerationBrowserTest
     // only test for the violation that is produced by this module.
     $violations = $entity->validate();
     $message = (count($violations) > 0) ? $violations->get(0)->getMessage() : 'No violation message found';
-    $this->assertEquals('The scheduled publishing state of <em class="placeholder">archived</em> is not a valid transition from the current moderation state of <em class="placeholder">draft</em> for this content.', $message);
+    $this->assertEquals('The scheduled publishing state of archived is not a valid transition from the current moderation state of draft for this content.', strip_tags($message));
 
     // @todo Figure out how to actually test this with valid options that don't
     // break the select list widget but still test the invalid transition.

@@ -2,24 +2,26 @@
 
 namespace Drupal\Tests\smtp\Unit\Plugin\Mail;
 
-use Drupal\Core\File\FileSystemInterface;
-use Drupal\Core\Session\AccountProxyInterface;
-use Prophecy\PhpUnit\ProphecyTrait;
 use Drupal\Component\Utility\EmailValidator;
 use Drupal\Component\Utility\EmailValidatorInterface;
 use Drupal\Core\File\FileSystem;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\File\MimeType\MimeTypeGuesser;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Session\AccountProxy;
+use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\smtp\Plugin\Mail\SMTPMailSystem;
 use Drupal\Tests\UnitTestCase;
-use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
+use PHPMailer\PHPMailer\PHPMailer;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mime\MimeTypeGuesserInterface;
 
 /**
@@ -41,6 +43,7 @@ class SMTPMailSystemTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    parent::setUp();
     $this->mockConfigFactory = $this->getConfigFactoryStub([
       'smtp.settings' => [
         'smtp_timeout' => 30,
@@ -60,6 +63,8 @@ class SMTPMailSystemTest extends UnitTestCase {
     $this->mockCurrentUser = $this->prophesize(AccountProxy::class);
     $this->mockFileSystem = $this->prophesize(FileSystem::class);
     $this->mimeTypeGuesser = $this->prophesize(MimeTypeGuesser::class);
+    $this->mockRender = $this->prophesize(RendererInterface::class);
+    $this->mockSession = $this->prophesize(SessionInterface::class);
 
     $mockContainer = $this->mockContainer = $this->prophesize(ContainerInterface::class);
     $mockContainer->get('config.factory')->willReturn($this->mockConfigFactory);
@@ -68,6 +73,8 @@ class SMTPMailSystemTest extends UnitTestCase {
     $mockContainer->get('current_user')->willReturn($this->mockCurrentUser->reveal());
     $mockContainer->get('file_system')->willReturn($this->mockFileSystem->reveal());
     $mockContainer->get('file.mime_type.guesser')->willReturn($this->mimeTypeGuesser->reveal());
+    $mockContainer->get('renderer')->willReturn($this->mockRender->reveal());
+    $mockContainer->get('session')->willReturn($this->mockSession->reveal());
 
     $mockStringTranslation = $this->prophesize(TranslationInterface::class);
     $mockStringTranslation->translate(Argument::any())->willReturnArgument(0);
@@ -84,7 +91,7 @@ class SMTPMailSystemTest extends UnitTestCase {
   /**
    * Provides scenarios for getComponents().
    */
-  public function getComponentsProvider() {
+  public static function getComponentsProvider() {
     return [
       [
         // Input.
@@ -141,7 +148,20 @@ class SMTPMailSystemTest extends UnitTestCase {
    * @dataProvider getComponentsProvider
    */
   public function testGetComponents($input, $expected) {
-    $mailSystem = new SMTPMailSystemTestHelper([], '', [], $this->mockLogger->reveal(), $this->mockMessenger->reveal(), $this->emailValidator, $this->mockConfigFactory, $this->mockCurrentUser->reveal(), $this->mockFileSystem->reveal(), $this->mimeTypeGuesser->reveal());
+    $mailSystem = new SMTPMailSystemTestHelper(
+      [],
+      '',
+      [],
+      $this->mockLogger->reveal(),
+      $this->mockMessenger->reveal(),
+      $this->emailValidator,
+      $this->mockConfigFactory,
+      $this->mockCurrentUser->reveal(),
+      $this->mockFileSystem->reveal(),
+      $this->mimeTypeGuesser->reveal(),
+      $this->mockRender->reveal(),
+      $this->mockSession->reveal()
+    );
 
     $ret = $mailSystem->publicGetComponents($input);
 
@@ -160,7 +180,20 @@ class SMTPMailSystemTest extends UnitTestCase {
    * Test applyRerouting().
    */
   public function testApplyRerouting() {
-    $mailSystemRerouted = new SMTPMailSystemTestHelper([], '', [], $this->mockLogger->reveal(), $this->mockMessenger->reveal(), $this->emailValidator, $this->mockConfigFactoryRerouted, $this->mockCurrentUser->reveal(), $this->mockFileSystem->reveal(), $this->mimeTypeGuesser->reveal());
+    $mailSystemRerouted = new SMTPMailSystemTestHelper(
+      [],
+      '',
+      [],
+      $this->mockLogger->reveal(),
+      $this->mockMessenger->reveal(),
+      $this->emailValidator,
+      $this->mockConfigFactoryRerouted,
+      $this->mockCurrentUser->reveal(),
+      $this->mockFileSystem->reveal(),
+      $this->mimeTypeGuesser->reveal(),
+      $this->mockRender->reveal(),
+      $this->mockSession->reveal(),
+    );
     $to = 'abc@example.com';
     $headers = [
       'some' => 'header',
@@ -171,7 +204,20 @@ class SMTPMailSystemTest extends UnitTestCase {
     $this->assertEquals($new_to, 'blackhole@galaxy.com', 'to address is set to the reroute address.');
     $this->assertEquals($new_headers, ['some' => 'header'], 'bcc and cc headers are unset when rerouting.');
 
-    $mailSystemNotRerouted = new SMTPMailSystemTestHelper([], '', [], $this->mockLogger->reveal(), $this->mockMessenger->reveal(), $this->emailValidator, $this->mockConfigFactory, $this->mockCurrentUser->reveal(), $this->mockFileSystem->reveal(), $this->mimeTypeGuesser->reveal());
+    $mailSystemNotRerouted = new SMTPMailSystemTestHelper(
+      [],
+      '',
+      [],
+      $this->mockLogger->reveal(),
+      $this->mockMessenger->reveal(),
+      $this->emailValidator,
+      $this->mockConfigFactory,
+      $this->mockCurrentUser->reveal(),
+      $this->mockFileSystem->reveal(),
+      $this->mimeTypeGuesser->reveal(),
+      $this->mockRender->reveal(),
+      $this->mockSession->reveal(),
+    );
     $to = 'abc@example.com';
     $headers = [
       'some' => 'header',
@@ -186,7 +232,7 @@ class SMTPMailSystemTest extends UnitTestCase {
   /**
    * Provides scenarios for testMailValidator().
    */
-  public function mailValidatorProvider() {
+  public static function mailValidatorProvider() {
     $emailValidatorPhpMailerDefault = new EmailValidatorPhpMailerDefault();
     $emailValidatorDrupal = new EmailValidator();
     return [
@@ -259,7 +305,9 @@ class SMTPMailSystemTest extends UnitTestCase {
       $this->mockConfigFactory,
       $this->mockCurrentUser->reveal(),
       $this->mockFileSystem->reveal(),
-      $this->mimeTypeGuesser->reveal()
+      $this->mimeTypeGuesser->reveal(),
+      $this->mockRender->reveal(),
+      $this->mockSession->reveal()
     );
     $message = [
       'to' => $to,
@@ -292,11 +340,13 @@ class SMTPMailSystemTest extends UnitTestCase {
       [],
       $this->mockLogger->reveal(),
       $this->mockMessenger->reveal(),
-      new EmailValidatorPhpMailerDefault(),
+      $this->emailValidator,
       $this->mockConfigFactory,
       $this->mockCurrentUser->reveal(),
       $this->mockFileSystem->reveal(),
-      $this->mimeTypeGuesser->reveal()
+      $this->mimeTypeGuesser->reveal(),
+      $this->mockRender->reveal(),
+      $this->mockSession->reveal(),
     );
 
     $message = [
@@ -322,7 +372,7 @@ class SMTPMailSystemTest extends UnitTestCase {
   /**
    * Tests #3308653 and duplicated headers.
    */
-  public function testFromHeaders_3308653() {
+  public function testFromHeaders3308653() {
     $mailer = new class (
       [],
       'SMTPMailSystem',
@@ -339,7 +389,9 @@ class SMTPMailSystemTest extends UnitTestCase {
       ]),
       $this->createMock(AccountProxyInterface::class),
       $this->createMock(FileSystemInterface::class),
-      $this->createMock(MimeTypeGuesserInterface::class)
+      $this->createMock(MimeTypeGuesserInterface::class),
+      $this->createMock(RendererInterface::class),
+      $this->createMock(SessionInterface::class)
     ) extends SMTPMailSystem {
 
       /**
@@ -361,6 +413,7 @@ class SMTPMailSystemTest extends UnitTestCase {
            * @return array
            *   The MIMEHeader as an array.
            */
+          //phpcs:ignore
           public function getMIMEHeaders() {
             return array_filter(explode(static::$LE, $this->MIMEHeader));
           }

@@ -50,7 +50,7 @@ class SchedulerCommands extends DrushCommands {
    * @option nomsg
    *   to avoid the "cron completed" message being written to the terminal.
    * @option nolog
-   *   to overide the site setting and not write 'started' and 'completed'
+   *   to override the site setting and not write 'started' and 'completed'
    *   messages to the dblog.
    *
    * @command scheduler:cron

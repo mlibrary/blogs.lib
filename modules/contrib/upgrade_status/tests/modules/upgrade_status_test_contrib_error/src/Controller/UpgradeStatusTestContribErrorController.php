@@ -14,6 +14,7 @@ class UpgradeStatusTestContribErrorController extends ControllerBase {
     upgrade_status_test_contrib_error_function_9_to_11();
     upgrade_status_test_contrib_error_function_10_to_11();
     upgrade_status_test_contrib_error_function_10_to_12();
+    upgrade_status_test_contrib_error_function_11_to_13();
   }
 
 }

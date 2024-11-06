@@ -2,69 +2,21 @@
 
 namespace Drupal\variationcache\Cache;
 
-use Drupal\Core\Cache\CacheFactoryInterface;
-use Drupal\Core\Cache\Context\CacheContextsManager;
-use Symfony\Component\HttpFoundation\RequestStack;
-
 /**
- * Defines the variation cache factory.
+ * @file
+ * Contains a class alias to keep old code functioning now that this module has
+ * been integrated into Drupal 10.2 and higher. If you are running on this core
+ * version, you should simply uninstall this module and update code that used to
+ * use this module to point to the core classes directly.
  *
- * @ingroup cache
+ * This is an extra precaution on top of the class_alias calls in the module
+ * file because, sometimes, the variation_cache_factory service is already
+ * instantiated while the container is being built (e.g. in an event subscriber)
+ * and the module file hasn't been loaded yet at that point.
  */
-class VariationCacheFactory implements VariationCacheFactoryInterface {
-
-  /**
-   * Instantiated variation cache bins.
-   *
-   * @var \Drupal\variationcache\Cache\VariationCacheInterface[]
-   */
-  protected $bins = [];
-
-  /**
-   * The request stack.
-   *
-   * @var \Symfony\Component\HttpFoundation\RequestStack
-   */
-  protected $requestStack;
-
-  /**
-   * The cache factory.
-   *
-   * @var \Drupal\Core\Cache\CacheFactoryInterface
-   */
-  protected $cacheFactory;
-
-  /**
-   * The cache contexts manager.
-   *
-   * @var \Drupal\Core\Cache\Context\CacheContextsManager
-   */
-  protected $cacheContextsManager;
-
-  /**
-   * Constructs a new VariationCacheFactory object.
-   *
-   * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
-   *   The request stack.
-   * @param \Drupal\Core\Cache\CacheFactoryInterface $cache_factory
-   *   The cache factory.
-   * @param \Drupal\Core\Cache\Context\CacheContextsManager $cache_contexts_manager
-   *   The cache contexts manager.
-   */
-  public function __construct(RequestStack $request_stack, CacheFactoryInterface $cache_factory, CacheContextsManager $cache_contexts_manager) {
-    $this->requestStack = $request_stack;
-    $this->cacheFactory = $cache_factory;
-    $this->cacheContextsManager = $cache_contexts_manager;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function get($bin) {
-    if (!isset($this->bins[$bin])) {
-      $this->bins[$bin] = new VariationCache($this->requestStack, $this->cacheFactory->get($bin), $this->cacheContextsManager);
-    }
-    return $this->bins[$bin];
-  }
-
+if (!class_exists('\Drupal\Core\Cache\VariationCacheFactory')) {
+  @class_alias('\Drupal\variationcache\Old\Cache\VariationCacheFactory', '\Drupal\variationcache\Cache\VariationCacheFactory');
+}
+else {
+  @class_alias('\Drupal\Core\Cache\VariationCacheFactory', '\Drupal\variationcache\Cache\VariationCacheFactory');
 }

@@ -53,7 +53,7 @@ class EntityReferenceRevisionsAutocompleteTest extends BrowserTestBase {
    * referenced entity and of the entity the field is attached to are different.
    */
   public function testEntityReferenceRevisionsAutocompleteProcessing() {
-    $admin_user = $this->drupalCreateUser(array(
+    $admin_permissions = array(
       'administer site configuration',
       'administer nodes',
       'administer blocks',
@@ -63,7 +63,12 @@ class EntityReferenceRevisionsAutocompleteTest extends BrowserTestBase {
       'administer node display',
       'administer node form display',
       'edit any article content',
-    ));
+    );
+    if (version_compare(\Drupal::VERSION, '10.1', '>=')) {
+      $admin_permissions[] = 'administer block types';
+      $admin_permissions[] = 'administer block content';
+    }
+    $admin_user = $this->drupalCreateUser($admin_permissions);
     $this->drupalLogin($admin_user);
 
     // Create a custom block content bundle.
@@ -146,7 +151,8 @@ class EntityReferenceRevisionsAutocompleteTest extends BrowserTestBase {
       'id' => $machine_name,
       'revision' => TRUE,
     );
-    $this->drupalGet('admin/structure/block/block-content/types/add');
+    $block_link = version_compare(\Drupal::VERSION, "10", ">=") ? 'admin/structure/block-content/add': 'admin/structure/block/block-content/types/add';
+    $this->drupalGet($block_link);
     $this->submitForm($edit, 'Save');
     $this->assertSession()->pageTextContains($label);
   }

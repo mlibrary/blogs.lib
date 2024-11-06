@@ -132,7 +132,7 @@ class SchedulerRulesActionsTest extends SchedulerBrowserTestBase {
     $this->drupalGet($this->entityAddUrl($entityTypeId, $enabledBundle));
     $this->submitForm(["{$titleField}[0][value]" => $title], 'Save');
     $entity = $this->getEntityByTitle($entityTypeId, $title);
-    $this->assertSession()->pageTextContains(sprintf('%s is scheduled to be published %s', $title, $publish_on_formatted));
+    $assert->pageTextContains(sprintf('%s is scheduled to be published %s', $title, $publish_on_formatted));
 
     // Check that rule 1 is triggered and rule 2 is not. Check that a publishing
     // date has been set and the status is now unpublished.
@@ -327,7 +327,7 @@ class SchedulerRulesActionsTest extends SchedulerBrowserTestBase {
     $this->drupalGet($this->entityAddUrl($entityTypeId, $enabledBundle));
     $this->submitForm(["{$titleField}[0][value]" => $title], 'Save');
     $entity = $this->getEntityByTitle($entityTypeId, $title);
-    $this->assertSession()->pageTextContains(sprintf('%s is scheduled to be unpublished %s', $title, $unpublish_on_formatted));
+    $assert->pageTextContains(sprintf('%s is scheduled to be unpublished %s', $title, $unpublish_on_formatted));
 
     // Check that rule 3 is triggered and rule 4 is not. Check that a publishing
     // date has been set and the status is now unpublished.

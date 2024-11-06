@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\override_node_options\Functional;
 
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -10,6 +11,8 @@ use Drupal\Tests\BrowserTestBase;
  * @group override_node_options
  */
 class BulkFormTest extends BrowserTestBase {
+
+  use StringTranslationTrait;
 
   /**
    * {@inheritdoc}
@@ -55,7 +58,7 @@ class BulkFormTest extends BrowserTestBase {
       'node_bulk_form[0]' => TRUE,
     ];
 
-    $this->submitForm($edit, t('Apply to selected items'));
+    $this->submitForm($edit, $this->t('Apply to selected items'));
 
     $this->assertSession()->pageTextContains('Unpublish content was applied to 1 item.');
     $this->assertSession()->pageTextNotContains('No access to execute Unpublish content');

@@ -57,9 +57,12 @@ class MimeMail extends PhpMail implements ContainerFactoryPluginInterface {
    *   The renderer service.
    */
   public function __construct(ConfigFactoryInterface $config_factory, ModuleHandlerInterface $module_handler, EmailValidatorInterface $email_validator, RendererInterface $renderer) {
-    // Bypass parent constructor because the parent statically initializes
-    // $this->configFactory (defined in the parent) instead of injecting it.
+    parent::__construct();
+
+    // Replace the parent constructor's configFactory because the parent
+    // statically initializes it instead of injecting it.
     $this->configFactory = $config_factory;
+
     $this->moduleHandler = $module_handler;
     $this->emailValidator = $email_validator;
     $this->renderer = $renderer;

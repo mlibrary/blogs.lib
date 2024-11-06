@@ -28,11 +28,12 @@ class SchedulerJavascriptDefaultTimeTest extends SchedulerJavascriptTestBase {
     // to local testing having a different locale to drupal.org testing.
     // @see https://www.drupal.org/project/scheduler/issues/2913829 from #18.
     $this->drupalLogin($this->schedulerUser);
+    $this->nodetype->setThirdPartySetting('scheduler', 'fields_display_mode', 'fieldset')
+      ->setThirdPartySetting('scheduler', 'expand_fieldset', 'always')->save();
     $this->drupalGet('node/add/' . $this->type);
     $page = $this->getSession()->getPage();
     $title = "Add a {$this->typeName} to determine the date-picker format";
     $page->fillField('edit-title-0-value', $title);
-    $page->clickLink('Scheduling options');
     // Set the date using a day and month which could be correctly interpreted
     // either way. Set the year to be next year to ensure a future date.
     // Use a time format which includes 'pm' as this may be necessary, and will
@@ -41,7 +42,6 @@ class SchedulerJavascriptDefaultTimeTest extends SchedulerJavascriptTestBase {
     $page->fillField('edit-publish-on-0-value-time', '06:00:00pm');
     $page->pressButton('Save');
     $node = $this->drupalGetNodeByTitle($title);
-    $this->drupalGet('node/' . $node->id());
     // If the saved month is 2 then the format is d/m/Y, otherwise it is m/d/Y.
     $this->datepickerFormat = (date('n', $node->publish_on->value) == 2 ? 'd/m/Y' : 'm/d/Y');
   }
@@ -116,9 +116,9 @@ class SchedulerJavascriptDefaultTimeTest extends SchedulerJavascriptTestBase {
    * @return array
    *   Each array item has the values: [entity type id, bundle id, field name].
    */
-  public function dataTimeWhenSchedulingIsRequired() {
+  public static function dataTimeWhenSchedulingIsRequired() {
     $data = [];
-    foreach ($this->dataStandardEntityTypes() as $key => $values) {
+    foreach (self::dataStandardEntityTypes() as $key => $values) {
       $data["$key-1"] = array_merge($values, ['publish']);
       $data["$key-2"] = array_merge($values, ['unpublish']);
     }

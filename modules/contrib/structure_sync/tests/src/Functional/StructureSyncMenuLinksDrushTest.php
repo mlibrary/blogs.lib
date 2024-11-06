@@ -23,6 +23,7 @@ class StructureSyncMenuLinksDrushTest extends BrowserTestBase {
    * @var array
    */
   protected static $modules = [
+    'dblog',
     'structure_sync',
     'menu_link_content',
   ];
@@ -101,6 +102,12 @@ class StructureSyncMenuLinksDrushTest extends BrowserTestBase {
     // "Oxygen" menu link should be updated by a full import.
     $oxygenMenuLinks = $this->menuLinkStorage->loadByProperties(['uuid' => 'd2385dc8-e70d-490f-8ec7-d95c828c98ac']);
     $this->assertEquals('Oxygen gas', reset($oxygenMenuLinks)->description->value);
+
+    // Importing with no config should print out a log message.
+    $this->drush('config:delete "structure_sync.data"');
+    $this->drush('import:menus --choice=safe');
+    $this->drush('watchdog:show --count=1 --field=message');
+    $this->assertEquals("No menu exported: Nothing to import.\\nMenus need to be exported first before they can be imported.", $this->getOutput());
   }
 
 }

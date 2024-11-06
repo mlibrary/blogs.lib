@@ -149,7 +149,7 @@ class CaptchaAdminTest extends CaptchaWebTestBase {
     ];
 
     $this->drupalGet(self::CAPTCHA_ADMIN_PATH);
-    $this->submitForm($edit, $this->t('Save configuration'));
+    $this->submitForm($edit, 'Save configuration');
 
     // Create a node with comments enabled.
     $node = $this->drupalCreateNode();
@@ -171,7 +171,7 @@ class CaptchaAdminTest extends CaptchaWebTestBase {
     // Enable Math CAPTCHA.
     $edit = ['captchaType' => CaptchaConstants::CAPTCHA_MATH_CAPTCHA_TYPE];
     $this->drupalGet($this->getUrl());
-    $this->submitForm($edit, $this->t('Save'));
+    $this->submitForm($edit, 'Save');
 
     // Check if returned to original comment form.
     $this->assertSession()->addressEquals($add_comment_url);
@@ -206,7 +206,7 @@ class CaptchaAdminTest extends CaptchaWebTestBase {
 
     // Disable challenge through CAPTCHA admin links.
     $this->drupalGet(Url::fromRoute('entity.captcha_point.disable', ['captcha_point' => self::COMMENT_FORM_ID]));
-    $this->submitForm([], $this->t('Disable'));
+    $this->submitForm([], 'Disable');
 
     // Check if returned to captcha point list.
     global $base_url;
@@ -242,7 +242,7 @@ class CaptchaAdminTest extends CaptchaWebTestBase {
     $edit = $this->getCommentFormValues();
     $edit['captcha_response'] = 'xx';
     $this->drupalGet($add_comment_url);
-    $this->submitForm($edit, $this->t('Preview'));
+    $this->submitForm($edit, 'Preview');
     $this->assertSession()->pageTextContains(self::CAPTCHA_WRONG_RESPONSE_ERROR_MESSAGE);
   }
 
@@ -258,7 +258,7 @@ class CaptchaAdminTest extends CaptchaWebTestBase {
     $xss = '<script type="text/javascript">alert("xss")</script>';
     $edit = ['description' => $xss];
     $this->drupalGet(self::CAPTCHA_ADMIN_PATH);
-    $this->submitForm($edit, $this->t('Save configuration'));
+    $this->submitForm($edit, 'Save configuration');
 
     // Visit user register form and check if JavaScript snippet is there.
     $this->drupalLogout();
@@ -281,7 +281,7 @@ class CaptchaAdminTest extends CaptchaWebTestBase {
     // Clear the cache.
     $this->drupalLogin($this->adminUser);
     $this->drupalGet(self::CAPTCHA_ADMIN_PATH);
-    $this->submitForm([], $this->t('Clear the CAPTCHA placement cache'));
+    $this->submitForm([], 'Clear the CAPTCHA placement cache');
 
     // Check that the placement cache is unset.
     $placement_map = $this->container->get('cache.default')
@@ -333,7 +333,7 @@ class CaptchaAdminTest extends CaptchaWebTestBase {
     // Set CAPTCHA point through admin/user/captcha/captcha/captcha_point.
     $form_values['label'] = $label;
     $this->drupalGet(self::CAPTCHA_ADMIN_PATH . '/captcha-points/add');
-    $this->submitForm($form_values, $this->t('Save'));
+    $this->submitForm($form_values, 'Save');
     $this->assertSession()->responseContains($this->t('Captcha Point for %label form was created.', ['%label' => $captcha_point_form_id]));
 
     // Check in database.
@@ -344,7 +344,7 @@ class CaptchaAdminTest extends CaptchaWebTestBase {
 
     // Disable CAPTCHA point again.
     $this->drupalGet(self::CAPTCHA_ADMIN_PATH . '/captcha-points/' . $captcha_point_form_id . '/disable');
-    $this->submitForm([], $this->t('Disable'));
+    $this->submitForm([], 'Disable');
     $this->assertSession()->responseContains($this->t('Captcha point %label has been disabled.', ['%label' => $label]));
 
     // Check in database.
@@ -357,7 +357,7 @@ class CaptchaAdminTest extends CaptchaWebTestBase {
       'captchaType' => $captcha_point_module . '/' . $captcha_point_type,
     ];
     $this->drupalGet(self::CAPTCHA_ADMIN_PATH . '/captcha-points/' . $captcha_point_form_id);
-    $this->submitForm($form_values, $this->t('Save'));
+    $this->submitForm($form_values, 'Save');
     $this->assertSession()->responseContains($this->t('Captcha Point for %form_id form was updated.', ['%form_id' => $captcha_point_form_id]));
 
     // Check in database.
@@ -367,7 +367,7 @@ class CaptchaAdminTest extends CaptchaWebTestBase {
 
     // Delete CAPTCHA point.
     $this->drupalGet(self::CAPTCHA_ADMIN_PATH . '/captcha-points/' . $captcha_point_form_id . '/delete');
-    $this->submitForm([], $this->t('Delete'));
+    $this->submitForm([], 'Delete');
     $this->assertSession()->responseContains($this->t('Captcha point %label has been deleted.', ['%label' => $label]));
 
     $result = $this->getCaptchaPointSettingFromDatabase($captcha_point_form_id);
@@ -392,7 +392,7 @@ class CaptchaAdminTest extends CaptchaWebTestBase {
       'captchaType' => $captcha_point_module . '/' . $captcha_point_type,
     ];
     $this->drupalGet(self::CAPTCHA_ADMIN_PATH . '/captcha-points/add');
-    $this->submitForm($form_values, $this->t('Save'));
+    $this->submitForm($form_values, 'Save');
     $this->assertSession()->responseContains($this->t('Captcha Point for %form_id form was created.', ['%form_id' => $captcha_point_form_id]));
 
     // Switch from admin to non-admin.
@@ -553,7 +553,7 @@ class CaptchaAdminTest extends CaptchaWebTestBase {
     $session->elementExists('css', 'details.captcha-admin-links.form-wrapper');
     // Check summary text:
     $session->elementExists('css', 'details.captcha-admin-links.form-wrapper > summary');
-    $session->elementTextContains('css', 'details.captcha-admin-links.form-wrapper > summary', 'CAPTCHA: challenge "captcha/Math" enabled');
+    $session->elementTextContains('css', '#system-performance-settings > details.captcha-admin-links.form-wrapper > summary', 'CAPTCHA: challenge "captcha/Math" enabled');
     // Check if link to settings page exists:
     $session->elementExists('css', 'details.captcha-admin-links.form-wrapper > a[href*="/admin/config/people/captcha"]');
     // Check if link to assoicated captcha point exists:
@@ -633,7 +633,7 @@ class CaptchaAdminTest extends CaptchaWebTestBase {
     $session->pageTextNotContains('This question is for testing whether or not you are a human visitor and to prevent automated spam submissions.');
 
     // Logout and check the behaviour on the non admin page:
-    $this->drupalLogout();
+    method_exists($this, 'drupalResetSession') ? $this->drupalResetSession() : $this->drupalLogout();
     $this->drupalGet('/test-field-xpath');
 
     // Go to the test page and check if the captcha gets displayed:

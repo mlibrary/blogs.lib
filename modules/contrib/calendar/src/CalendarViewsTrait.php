@@ -11,7 +11,7 @@ use Drupal\views\Views;
 trait CalendarViewsTrait {
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   protected function getTableEntityType($table) {
     static $recursion = 0;

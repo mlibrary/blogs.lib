@@ -5,6 +5,7 @@
  * Contains paragraphs.module
  */
 
+use \Drupal\Core\Field\FieldTypeCategoryManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -126,54 +127,82 @@ function paragraphs_form_entity_form_display_edit_form_alter(&$form, FormStateIn
 
 /**
  * Implements hook_form_FORM_ID_alter().
- */
-function paragraphs_form_field_storage_config_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  if ($form_state->getFormObject()->getEntity()->getType() == 'entity_reference') {
-    // Entity Reference fields are no longer supported to reference Paragraphs.
-    unset($form['settings']['target_type']['#options'][(string) t('Content')]['paragraph']);
-  }
-}
-
-/**
- * Implements hook_form_FORM_ID_alter().
  *
  * Indicate unsupported multilingual paragraphs field configuration.
  */
 function paragraphs_form_field_config_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $field = $form_state->getFormObject()->getEntity();
 
-  if (!\Drupal::hasService('content_translation.manager')) {
-    return;
+  if (\Drupal::hasService('content_translation.manager')) {
+    $bundle_is_translatable = \Drupal::service('content_translation.manager')->isEnabled($field->getTargetEntityTypeId(), $field->getTargetBundle());
+
+    if ($bundle_is_translatable && $field->getType() === 'entity_reference_revisions' && $field->getSetting('target_type') === 'paragraph') {
+      // This is a translatable ERR field pointing to a paragraph.
+      $message_display = 'warning';
+      $message_text = t('Paragraphs fields do not support translation. See the <a href=":documentation">online documentation</a>.', [
+        ':documentation' => Url::fromUri('https://www.drupal.org/node/2735121')
+          ->toString()
+      ]);
+
+      if ($form['translatable']['#default_value'] == TRUE) {
+        $message_display = 'error';
+      }
+
+      $form['paragraphs_message'] = [
+        '#type' => 'container',
+        '#markup' => $message_text,
+        '#attributes' => [
+          'class' => ['messages messages--' . $message_display],
+        ],
+        '#weight' => 0,
+      ];
+    }
   }
 
-  $bundle_is_translatable = \Drupal::service('content_translation.manager')
-    ->isEnabled($field->getTargetEntityTypeId(), $field->getTargetBundle());
+  if ($field->getType() == 'entity_reference') {
+    $selector = 'field_storage[subform][settings][target_type]';
 
-  if (!$bundle_is_translatable
-    || $field->getType() != 'entity_reference_revisions'
-    || $field->getSetting('target_type') != 'paragraph') {
-    return;
+    // Add a note about paragraphs if selected.
+    $form['field_storage']['subform']['settings']['paragraph_warning_wrapper'] = [
+      '#type' => 'container',
+      '#states' => [
+        'visible' => [
+          ':input[name="' . $selector . '"]' => ['value' => 'paragraph'],
+        ],
+      ],
+      'warning' => [
+        '#theme' => 'status_messages',
+        '#message_list' => [
+          'warning' => [
+            t('Note: Regular paragraph fields should use the revision based reference fields, entity reference fields should only be used for cases when an existing paragraph is referenced from somewhere else.'),
+          ],
+        ],
+        '#status_headings' => [
+          'error' => t('Warning'),
+        ],
+      ],
+    ];
   }
 
-  // This is a translatable ERR field pointing to a paragraph.
-  $message_display = 'warning';
-  $message_text = t('Paragraphs fields do not support translation. See the <a href=":documentation">online documentation</a>.', [
-    ':documentation' => Url::fromUri('https://www.drupal.org/node/2735121')
-      ->toString()
-  ]);
+}
 
-  if ($form['translatable']['#default_value'] == TRUE) {
-    $message_display = 'error';
+function paragraphs_field_ui_preconfigured_options_alter(array &$options, $field_type) {
+  // Move the preconfigured paragraph option to the generic category,
+  // so it is available as a top-level option in the new field type selection
+  // UI in Drupal 10.2+.
+  if ($field_type == 'entity_reference_revisions' && !empty($options['paragraph'])) {
+    $options['paragraph']['weight'] = -15;
+    $options['paragraph']['category'] = FieldTypeCategoryManagerInterface::FALLBACK_CATEGORY;;
+    $options['paragraph']['label'] = t('Paragraphs');
+    $options['paragraph']['description'] = t('Create structured content.');
   }
+}
 
-  $form['paragraphs_message'] = array(
-    '#type' => 'container',
-    '#markup' => $message_text,
-    '#attributes' => array(
-      'class' => array('messages messages--' . $message_display),
-    ),
-    '#weight' => 0,
-  );
+/**
+ * Implements hook_preprocess_form_element__new_storage_type().
+ */
+function paragraphs_preprocess_form_element__new_storage_type(&$variables) {
+  $variables['#attached']['library'][] = 'paragraphs/paragraph-field-type-icon';
 }
 
 /**
@@ -298,6 +327,14 @@ function template_preprocess_paragraph(&$variables) {
   }
 
   $paragraph_type = $variables['elements']['#paragraph']->getParagraphType();
+  if (!$paragraph_type) {
+    \Drupal::logger('paragraphs')
+      ->critical(t('Unable to load paragraph type %type when displaying paragraph %id'), [
+        '%type' => $variables['elements']['#paragraph']->bundle(),
+        '%id' => $variables['elements']['#paragraph']->id(),
+      ]);
+    $paragraph_type = ParagraphsType::create(['id' => $variables['elements']['#paragraph']->bundle()]);
+  }
   foreach ($paragraph_type->getEnabledBehaviorPlugins() as $plugin_value) {
     $plugin_value->preprocess($variables);
   }
@@ -390,13 +427,13 @@ function paragraphs_preprocess_field_multiple_value_form(&$variables) {
     if (isset($variables['table']['#tabledrag'])) {
       // Remove the tabledrag.
       unset($variables['table']['#tabledrag']);
-      unset($variables['table']['#header'][1]);
+      unset($variables['table']['#header'][2]);
       foreach ($variables['table']['#rows'] as $key => $value) {
         $variables['table']['#rows'][$key]['data'][0]['class'][] = 'paragraph-bullet';
         // Restore the removed weight and give access FALSE.
-        if (isset($value['data'][2])) {
-          $variables['table']['#rows'][$key]['data'][1]['data']['_weight'] = $value['data'][2]['data'];
-          unset($variables['table']['#rows'][$key]['data'][2]);
+        if (isset($value['data'][3])) {
+          $variables['table']['#rows'][$key]['data'][1]['data']['_weight'] = $value['data'][3]['data'];
+          unset($variables['table']['#rows'][$key]['data'][3]);
           $variables['table']['#rows'][$key]['data'][1]['data']['_weight']['#access'] = FALSE;
         }
       }

@@ -23,7 +23,7 @@ class UnPublishStateConstraint extends Constraint {
    *
    * @var string
    */
-  public $invalidPublishToUnPublishTransitionMessage = 'The scheduled un-publishing state of %unpublish_state is not a valid transition from the scheduled publishing state of %publish_state.';
+  public string $invalidPublishToUnPublishTransitionMessage = 'The scheduled un-publishing state of %unpublish_state is not a valid transition from the scheduled publishing state of %publish_state.';
 
   /**
    * Invalid unpublish transition message.
@@ -33,6 +33,6 @@ class UnPublishStateConstraint extends Constraint {
    *
    * @var string
    */
-  public $invalidUnPublishTransitionMessage = 'The scheduled un-publishing state of %unpublish_state is not a valid transition from the current moderation state of %content_state for this content.';
+  public string $invalidUnPublishTransitionMessage = 'The scheduled un-publishing state of %unpublish_state is not a valid transition from the current moderation state of %content_state for this content.';
 
 }

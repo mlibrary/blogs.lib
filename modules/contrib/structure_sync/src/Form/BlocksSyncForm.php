@@ -3,13 +3,14 @@
 namespace Drupal\structure_sync\Form;
 
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\structure_sync\StructureSyncHelper;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Config\ConfigFactoryInterface;
 
 /**
  * Import and export form for content in structure, like taxonomy terms.
@@ -23,6 +24,11 @@ class BlocksSyncForm extends ConfigFormBase {
    */
   protected $database;
 
+  /**
+   * An entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
   protected $entityTypeManager;
 
   /**
@@ -35,8 +41,8 @@ class BlocksSyncForm extends ConfigFormBase {
   /**
    * Class constructor.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, Connection $database, EntityTypeManagerInterface $entityManager) {
-    parent::__construct($config_factory);
+  public function __construct(ConfigFactoryInterface $config_factory, TypedConfigManagerInterface $typedConfigManager, Connection $database, EntityTypeManagerInterface $entityManager) {
+    parent::__construct($config_factory, $typedConfigManager);
     $this->database = $database;
     $this->entityTypeManager = $entityManager;
   }
@@ -45,8 +51,9 @@ class BlocksSyncForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
+    return new self(
       $container->get('config.factory'),
+      $container->get('config.typed'),
       $container->get('database'),
       $container->get('entity_type.manager')
     );

@@ -50,6 +50,24 @@ function smtp_update_8004() {
 }
 
 /**
+ * Add SMTP debug level and set default to 1.
+ */
+function smtp_update_8005() {
+  \Drupal::configFactory()->getEditable('smtp.settings')
+    ->set('smtp_debug_level', 1)
+    ->save(TRUE);
+}
+
+/**
+ * Convert smtp_allowhtml to a boolean.
+ */
+function smtp_update_8006() {
+  $config = \Drupal::configFactory()->getEditable('smtp.settings');
+  $config->set('smtp_allowhtml', (bool) $config->get('smtp_allowhtml'))
+    ->save(TRUE);
+}
+
+/**
  * Implements hook_requirements().
  */
 function smtp_requirements(string $phase) {

@@ -3,6 +3,7 @@
 namespace Drupal\Tests\scheduler\Functional;
 
 use Drupal\Core\Url;
+use Drupal\scheduler\Form\SchedulerCronForm;
 
 /**
  * Tests the Scheduler lightweight cron urls and admin form.
@@ -29,8 +30,7 @@ class SchedulerLightweightCronTest extends SchedulerBrowserTestBase {
     // Run scheduler lightweight cron anonymously with the valid cron key which
     // is defined during install. It should run OK but no content will be
     // produced so the response should be "204 No Content".
-    $config = $this->config('scheduler.settings');
-    $key = $config->get('lightweight_cron_access_key');
+    $key = $this->container->get('state')->get(SchedulerCronForm::CRON_ACCESS_KEY, '');
     $this->drupalGet('scheduler/cron/' . $key);
     $this->assertSession()->statusCodeEquals(204);
   }

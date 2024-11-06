@@ -52,18 +52,18 @@ abstract class SchedulerBrowserTestBase extends BrowserTestBase {
     parent::setUp();
     // Call the common set-up functions defined in the traits.
     $this->schedulerSetUp();
-    // $this->getName() includes the test class and the dataProvider key. We can
-    // use this to save time and resources by avoiding calls to the media and
-    // product setup functions when they are not needed. The exception is the
-    // permissions tests, which use all entities for all tests.
-    $testName = $this->getName();
+    // $this->toString() includes the test class and the dataProvider key.
+    // We can use this to save time and resources by avoiding calls to the
+    // entity-specific setup functions when they are not needed. The exception
+    // is the permission tests, which use all entities for all tests.
+    $testName = $this->toString();
     if (stristr($testName, 'media') || stristr($testName, 'permission')) {
       $this->schedulerMediaSetUp();
     }
-    if (stristr($this->getName(), 'product') || stristr($testName, 'permission')) {
+    if (stristr($testName, 'product') || stristr($testName, 'permission')) {
       $this->SchedulerCommerceProductSetUp();
     }
-    if (stristr($this->getName(), 'taxonomy') || stristr($testName, 'permission')) {
+    if (stristr($testName, 'taxonomy') || stristr($testName, 'permission')) {
       $this->SchedulerTaxonomyTermSetup();
     }
   }

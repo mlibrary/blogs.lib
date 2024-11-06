@@ -144,7 +144,7 @@ class CalendarValidator extends ArgumentValidatorPluginBase {
   }
 
   /**
-   * {@inheritdoc}.
+   * {@inheritdoc}
    */
   public function getContextDefinition() {
     return new ContextDefinition('string', $this->argument->adminLabel(), FALSE);

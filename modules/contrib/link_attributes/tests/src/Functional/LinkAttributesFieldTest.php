@@ -52,7 +52,7 @@ class LinkAttributesFieldTest extends BrowserTestBase {
     $this->drupalLogin($this->adminUser);
     // Breadcrumb is required for FieldUiTestTrait::fieldUIAddNewField.
     $this->drupalPlaceBlock('system_breadcrumb_block');
-    \Drupal::state()->set('link_attributes_test_alterinfo.hook_link_attributes_plugin_alter', TRUE);
+    \Drupal::state()->set('link_attributes_test_alterinfo.hook_link_attributes_plugin_alter', 'type_one');
   }
 
   /**
@@ -286,6 +286,50 @@ class LinkAttributesFieldTest extends BrowserTestBase {
 
     // See if the details are open now, as attributes are set:
     $this->drupalGet('node/' . $node->id() . '/edit');
+    $session->elementAttributeExists('css', '#edit-field-' . $field_name . '-0-options-attributes', 'open');
+  }
+
+  /**
+   * Tests that the details widget is opened any of the attributes is required.
+   */
+  public function testWidgetDetailsWithRequiredField() {
+    // Add a content type.
+    $type = $this->drupalCreateContentType();
+    $type_path = 'admin/structure/types/manage/' . $type->id();
+    $add_path = 'node/add/' . $type->id();
+
+    // Add a link field to the newly-created type.
+    $label = $this->randomMachineName();
+    $field_name = mb_strtolower($label);
+    $storage_settings = ['cardinality' => 'number', 'cardinality_number' => 2];
+    $this->fieldUIAddNewField($type_path, $field_name, $label, 'link', $storage_settings);
+
+    // Manually clear cache on the tester side.
+    \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
+
+    // Change the link widget and enable some attributes.
+    \Drupal::entityTypeManager()
+      ->getStorage('entity_form_display')
+      ->load('node.' . $type->id() . '.default')
+      ->setComponent('field_' . $field_name, [
+        'type' => 'link_attributes',
+        'settings' => [
+          'enabled_attributes' => [
+            'rel' => TRUE,
+            'class' => TRUE,
+            'target' => TRUE,
+          ],
+          'widget_default_open' => LinkWithAttributesWidget::WIDGET_OPEN_EXPAND_IF_VALUES_SET,
+        ],
+      ])
+      ->save();
+
+    \Drupal::state()->set('link_attributes_test_alterinfo.hook_link_attributes_plugin_alter', 'type_two');
+    \Drupal::service('plugin.manager.link_attributes')->clearCachedDefinitions();
+
+    // Check if the link field have the attributes displayed on node add page.
+    $this->drupalGet($add_path);
+    $session = $this->assertSession();
     $session->elementAttributeExists('css', '#edit-field-' . $field_name . '-0-options-attributes', 'open');
   }
 

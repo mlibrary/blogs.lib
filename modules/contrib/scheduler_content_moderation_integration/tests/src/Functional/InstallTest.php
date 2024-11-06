@@ -35,13 +35,20 @@ class InstallTest extends BrowserTestBase {
   protected static $modules = ['scheduler', 'media'];
 
   /**
+   * The moderation workflow.
+   *
+   * @var \Drupal\workflows\Entity\Workflow
+   */
+  protected $workflow;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
     // This is taken from SchedulerBrowserTestBase.
     $this->schedulerSetUp();
-    if (stristr($this->getName(), 'media')) {
+    if (stristr($this->toString(), 'media')) {
       $this->schedulerMediaSetUp();
     }
   }
@@ -95,10 +102,11 @@ class InstallTest extends BrowserTestBase {
    * @return array
    *   Each array item has the values: [entity type id, bundle id].
    */
-  public function dataInstallTest() {
+  public static function dataInstallTest() {
     $data = [
-      '#node' => ['node', $this->type],
-      '#media' => ['media', $this->mediaTypeName],
+      // cspell:disable-next-line
+      '#node' => ['node', 'testpage'],
+      '#media' => ['media', 'test_video'],
     ];
     return $data;
   }

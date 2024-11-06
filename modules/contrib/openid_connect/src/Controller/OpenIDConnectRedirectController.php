@@ -368,7 +368,7 @@ class OpenIDConnectRedirectController implements ContainerInjectionInterface, Ac
       $this->session->saveTargetLinkUri($query->get('target_link_uri'));
     }
 
-    $scopes = $this->claims->getScopes();
+    $scopes = $this->claims->getScopes($openid_connect_client->getPlugin());
     return $openid_connect_client->getPlugin()->authorize($scopes, $additional_parameters);
   }
 

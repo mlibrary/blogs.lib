@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * The processing below is based on code in the Rules module. For an example see
  * src/Plugin/RulesEvent/EntityUpdateDeriver.php. For backwards compatibility
- * the node event names must remain unchnaged, and this is not possible when
+ * the node event names must remain unchanged, and this is not possible when
  * using this deriver. Hence the node event names stay written out long-hand in
  * scheduler_rules_integration.rules.events.yml.
  */

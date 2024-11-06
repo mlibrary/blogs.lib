@@ -3,13 +3,18 @@
 namespace Drupal\devel_generate;
 
 use Drupal\Component\Utility\Random;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\Core\Entity\FieldableEntityInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a base DevelGenerate plugin implementation.
@@ -17,41 +22,66 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 abstract class DevelGenerateBase extends PluginBase implements DevelGenerateBaseInterface {
 
   /**
-   * The plugin settings.
-   *
-   * @var array
+   * The entity type manager service.
    */
-  protected $settings = [];
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * The language manager.
+   */
+  protected LanguageManagerInterface $languageManager;
+
+  /**
+   * The module handler.
+   */
+  protected ModuleHandlerInterface $moduleHandler;
+
+  /**
+   * The entity field manager.
+   */
+  protected EntityFieldManagerInterface $entityFieldManager;
+
+  /**
+   * The plugin settings.
+   */
+  protected array $settings = [];
 
   /**
    * The random data generator.
-   *
-   * @var \Drupal\Component\Utility\Random
    */
-  protected $random;
+  protected ?Random $random = NULL;
 
   /**
-   * The entity type manager service.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   * Instantiates a new instance of this class.
    */
-  protected $entityTypeManager;
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    $instance = new static($configuration, $plugin_id, $plugin_definition);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->messenger = $container->get('messenger');
+    $instance->languageManager = $container->get('language_manager');
+    $instance->moduleHandler = $container->get('module_handler');
+    $instance->stringTranslation = $container->get('string_translation');
+    $instance->entityFieldManager = $container->get('entity_field.manager');
+
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
    */
-  public function getSetting($key) {
+  public function getSetting(string $key) {
     // Merge defaults if we have no value for the key.
     if (!array_key_exists($key, $this->settings)) {
       $this->settings = $this->getDefaultSettings();
     }
+
     return $this->settings[$key] ?? NULL;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getDefaultSettings() {
+  public function getDefaultSettings(): array {
     $definition = $this->getPluginDefinition();
     return $definition['settings'];
   }
@@ -59,28 +89,28 @@ abstract class DevelGenerateBase extends PluginBase implements DevelGenerateBase
   /**
    * {@inheritdoc}
    */
-  public function getSettings() {
+  public function getSettings(): array {
     return $this->settings;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function settingsForm(array $form, FormStateInterface $form_state) {
+  public function settingsForm(array $form, FormStateInterface $form_state): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function settingsFormValidate(array $form, FormStateInterface $form_state) {
+  public function settingsFormValidate(array $form, FormStateInterface $form_state): void {
     // Validation is optional.
   }
 
   /**
    * {@inheritdoc}
    */
-  public function generate(array $values) {
+  public function generate(array $values): void {
     $this->generateElements($values);
     $this->setMessage('Generate process complete.');
   }
@@ -91,7 +121,7 @@ abstract class DevelGenerateBase extends PluginBase implements DevelGenerateBase
    * @param array $values
    *   The input values from the settings form.
    */
-  protected function generateElements(array $values) {
+  protected function generateElements(array $values): void {
 
   }
 
@@ -105,16 +135,14 @@ abstract class DevelGenerateBase extends PluginBase implements DevelGenerateBase
    * @param array $base
    *   A list of base field names to populate.
    */
-  public static function populateFields(EntityInterface $entity, array $skip = [], array $base = []) {
+  public function populateFields(EntityInterface $entity, array $skip = [], array $base = []): void {
     if (!$entity->getEntityType()->entityClassImplements(FieldableEntityInterface::class)) {
       // Nothing to do.
       return;
     }
 
-    /** @var \Drupal\Core\Field\FieldDefinitionInterface[] $instances */
-    $instances = \Drupal::service('entity_field.manager')->getFieldDefinitions($entity->getEntityTypeId(), $entity->bundle());
+    $instances = $this->entityFieldManager->getFieldDefinitions($entity->getEntityTypeId(), $entity->bundle());
     $instances = array_diff_key($instances, array_flip($skip));
-
     foreach ($instances as $instance) {
       $field_storage = $instance->getFieldStorageDefinition();
       $field_name = $field_storage->getName();
@@ -122,11 +150,14 @@ abstract class DevelGenerateBase extends PluginBase implements DevelGenerateBase
         // Skip base field unless specifically requested.
         continue;
       }
-      $max = $cardinality = $field_storage->getCardinality();
+
+      $max = $field_storage->getCardinality();
+      $cardinality = $max;
       if ($cardinality == FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED) {
         // Just an arbitrary number for 'unlimited'.
-        $max = rand(1, 3);
+        $max = random_int(1, 3);
       }
+
       $entity->$field_name->generateSampleItems($max);
     }
   }
@@ -141,19 +172,19 @@ abstract class DevelGenerateBase extends PluginBase implements DevelGenerateBase
   /**
    * Set a message for either drush or the web interface.
    *
-   * @param string $msg
+   * @param string|\Drupal\Component\Render\MarkupInterface $msg
    *   The message to display.
    * @param string $type
    *   (optional) The message type, as defined in MessengerInterface. Defaults
    *   to MessengerInterface::TYPE_STATUS.
    */
-  protected function setMessage($msg, $type = MessengerInterface::TYPE_STATUS) {
+  protected function setMessage($msg, string $type = MessengerInterface::TYPE_STATUS): void {
     if (function_exists('drush_log')) {
       $msg = strip_tags($msg);
       drush_log($msg);
     }
     else {
-      \Drupal::messenger()->addMessage($msg, $type);
+      $this->messenger->addMessage($msg, $type);
     }
   }
 
@@ -166,27 +197,12 @@ abstract class DevelGenerateBase extends PluginBase implements DevelGenerateBase
    * @return bool
    *   TRUE if the parameter is a number, FALSE otherwise.
    */
-  public static function isNumber($number) {
-    if ($number == NULL) {
+  public static function isNumber(mixed $number): bool {
+    if ($number === NULL) {
       return FALSE;
     }
-    if (!is_numeric($number)) {
-      return FALSE;
-    }
-    return TRUE;
-  }
 
-  /**
-   * Gets the entity type manager service.
-   *
-   * @return \Drupal\Core\Entity\EntityTypeManagerInterface
-   *   The entity type manager service.
-   */
-  protected function getEntityTypeManager() {
-    if (!$this->entityTypeManager) {
-      $this->entityTypeManager = \Drupal::entityTypeManager();
-    }
-    return $this->entityTypeManager;
+    return is_numeric($number);
   }
 
   /**
@@ -195,10 +211,11 @@ abstract class DevelGenerateBase extends PluginBase implements DevelGenerateBase
    * @return \Drupal\Component\Utility\Random
    *   The random data generator.
    */
-  protected function getRandom() {
-    if (!$this->random) {
+  protected function getRandom(): Random {
+    if (!$this->random instanceof Random) {
       $this->random = new Random();
     }
+
     return $this->random;
   }
 
@@ -216,26 +233,23 @@ abstract class DevelGenerateBase extends PluginBase implements DevelGenerateBase
    * @return string
    *   A sentence of the required length.
    */
-  protected function randomSentenceOfLength($sentence_length, $max_word_length = 8) {
+  protected function randomSentenceOfLength(int $sentence_length, int $max_word_length = 8): string {
     // Maximum word length cannot be longer than the sentence length.
     $max_word_length = min($sentence_length, $max_word_length);
     $words = [];
     $remainder = $sentence_length;
     do {
-      if ($remainder <= $max_word_length) {
-        // If near enough to the end then generate the exact length word to fit.
-        $next_word = $remainder;
-      }
-      else {
-        // Cannot fill the remaining space with one word, so choose a random
-        // length, short enough for a following word of at least minimum length.
-        $next_word = mt_rand(2, min($max_word_length, $remainder - 3));
-      }
+      // If near enough to the end then generate the exact length word to fit.
+      // Otherwise, the remaining space cannot be filled with one word, so
+      // choose a random length, short enough for a following word of at least
+      // minimum length.
+      $next_word = $remainder <= $max_word_length ? $remainder : mt_rand(2, min($max_word_length, $remainder - 3));
+
       $words[] = $this->getRandom()->word($next_word);
       $remainder = $remainder - $next_word - 1;
     } while ($remainder > 0);
-    $sentence = ucfirst(implode(' ', $words));
-    return $sentence;
+
+    return ucfirst(implode(' ', $words));
   }
 
   /**
@@ -249,7 +263,7 @@ abstract class DevelGenerateBase extends PluginBase implements DevelGenerateBase
    * @return array
    *   The language details section of the form.
    */
-  protected function getLanguageForm($items) {
+  protected function getLanguageForm(string $items): array {
     // We always need a language, even if the language module is not installed.
     $options = [];
     $languages = $this->languageManager->getLanguages(LanguageInterface::STATE_CONFIGURABLE);
@@ -297,10 +311,11 @@ abstract class DevelGenerateBase extends PluginBase implements DevelGenerateBase
    * @return string
    *   The language code to use.
    */
-  protected function getLangcode(array $add_language) {
-    if (empty($add_language)) {
+  protected function getLangcode(array $add_language): string {
+    if ($add_language === []) {
       return $this->languageManager->getDefaultLanguage()->getId();
     }
+
     return $add_language[array_rand($add_language)];
   }
 
@@ -309,13 +324,16 @@ abstract class DevelGenerateBase extends PluginBase implements DevelGenerateBase
    *
    * Borrowed from Drush.
    *
-   * @param string $args
+   * @param string|array|null $args
    *   A simple csv string; e.g. 'a,b,c'
    *   or a simple list of items; e.g. array('a','b','c')
    *   or some combination; e.g. array('a,b','c') or array('a,','b,','c,').
    */
   public static function csvToArray($args): array {
-    //
+    if ($args === NULL) {
+      return [];
+    }
+
     // 1: implode(',',$args) converts from array('a,','b,','c,') to 'a,,b,,c,'
     // 2: explode(',', ...) converts to array('a','','b','','c','')
     // 3: array_filter(...) removes the empty items

@@ -297,12 +297,7 @@ class ParagraphsLibraryTest extends ParagraphsTestBase {
     $this->assertSession()->buttonExists('Save configuration');
     // Assert that users can create fields to
     $this->clickLink('Manage fields');
-    if (version_compare(\Drupal::VERSION, '10.1', '>=')) {
-      $this->clickLink('Create a new field');
-    }
-    else {
-      $this->clickLink('Add field');
-    }
+    $this->clickLink('Create a new field');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->pageTextNotContains('plugin does not exist');
     $this->drupalGet('admin/config/content');
@@ -582,8 +577,8 @@ class ParagraphsLibraryTest extends ParagraphsTestBase {
     // Disallow the paragraphs type "Text" for the used content type.
     $this->drupalGet('admin/structure/types/manage/paragraphed_test/fields/node.paragraphed_test.field_paragraphs');
     $edit = [
-      'settings[handler_settings][negate]' => 0,
-      'settings[handler_settings][target_bundles_drag_drop][from_library][enabled]' => 1,
+      'settings[handler_settings][negate]' => '0',
+      'settings[handler_settings][target_bundles_drag_drop][from_library][enabled]' => '1',
       'settings[handler_settings][target_bundles_drag_drop][text][enabled]' => FALSE,
     ];
     $this->submitForm($edit, 'Save settings');

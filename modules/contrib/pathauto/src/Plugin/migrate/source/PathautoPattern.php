@@ -2,8 +2,8 @@
 
 namespace Drupal\pathauto\Plugin\migrate\source;
 
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\EntityTypeBundleInfo;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Row;
@@ -95,7 +95,7 @@ class PathautoPattern extends DrupalSqlBase {
         $row->setSourceProperty('id', $entity_type);
         $row->setSourceProperty('label', (string) $definition->getLabel() . ' - default');
         $row->setSourceProperty('type', 'canonical_entities:' . $entity_type);
-        $row->setSourceProperty('pattern', unserialize($row->getSourceProperty('value')));
+        $row->setSourceProperty('pattern', unserialize($row->getSourceProperty('value'), ['allowed_classes' => FALSE]));
         return parent::prepareRow($row);
       }
       elseif (strpos($name, 'pathauto_' . $entity_type . '_') === 0) {
@@ -114,7 +114,7 @@ class PathautoPattern extends DrupalSqlBase {
         $row->setSourceProperty('id', $entity_type . '_' . $bundle);
         $row->setSourceProperty('label', (string) $definition->getLabel() . ' - ' . $bundles[$bundle]['label']);
         $row->setSourceProperty('type', 'canonical_entities:' . $entity_type);
-        $row->setSourceProperty('pattern', unserialize($row->getSourceProperty('value')));
+        $row->setSourceProperty('pattern', unserialize($row->getSourceProperty('value'), ['allowed_classes' => FALSE]));
 
         $selection_criteria = [
           'id' => 'entity_bundle:' . $entity_type,

@@ -8,7 +8,7 @@ use Drupal\Tests\media\Traits\OEmbedTestTrait;
 /**
  * Tests custom provider loading.
  *
- * @covers \Drupal\oembed_providers\OEmbed\ProviderRepository
+ * @covers \Drupal\oembed_providers\OEmbed\ProviderRepositoryDecorator
  *
  * @group oembed_providers
  */

@@ -6,7 +6,6 @@
  */
 
 use Drupal\Core\Config\Entity\ConfigEntityUpdater;
-use Drupal\views\Views;
 use Drupal\views\ViewEntityInterface;
 use Drupal\views\ViewsConfigUpdater;
 
@@ -75,7 +74,7 @@ function views_post_update_responsive_image_lazy_load(?array &$sandbox = NULL): 
 /**
  * Update timestamp formatter settings for views.
  */
-function views_post_update_timestamp_formatter(array &$sandbox = NULL): void {
+function views_post_update_timestamp_formatter(?array &$sandbox = NULL): void {
   /** @var \Drupal\views\ViewsConfigUpdater $view_config_updater */
   $view_config_updater = \Drupal::classResolver(ViewsConfigUpdater::class);
   \Drupal::classResolver(ConfigEntityUpdater::class)->update($sandbox, 'view', function (ViewEntityInterface $view) use ($view_config_updater): bool {
@@ -120,7 +119,7 @@ function views_post_update_remove_skip_cache_setting(): void {
 /**
  * Remove default_argument_skip_url setting.
  */
-function views_post_update_remove_default_argument_skip_url(array &$sandbox = NULL): void {
+function views_post_update_remove_default_argument_skip_url(?array &$sandbox = NULL): void {
   /** @var \Drupal\views\ViewsConfigUpdater $view_config_updater */
   $view_config_updater = \Drupal::classResolver(ViewsConfigUpdater::class);
   \Drupal::classResolver(ConfigEntityUpdater::class)->update($sandbox, 'view', function (ViewEntityInterface $view) use ($view_config_updater): bool {
@@ -140,31 +139,35 @@ function views_post_update_taxonomy_filter_user_context(?array &$sandbox = NULL)
 }
 
 /**
+ * Adds a default pager heading.
+ */
+function views_post_update_pager_heading(?array &$sandbox = NULL): void {
+  /** @var \Drupal\views\ViewsConfigUpdater $view_config_updater */
+  $view_config_updater = \Drupal::classResolver(ViewsConfigUpdater::class);
+  \Drupal::classResolver(ConfigEntityUpdater::class)->update($sandbox, 'view', function (ViewEntityInterface $view) use ($view_config_updater): bool {
+    return $view_config_updater->needsPagerHeadingUpdate($view);
+  });
+}
+
+/**
+ * Removes entity display cache metadata from views with rendered entity fields.
+ */
+function views_post_update_rendered_entity_field_cache_metadata(?array &$sandbox = NULL): void {
+  /** @var \Drupal\views\ViewsConfigUpdater $view_config_updater */
+  $view_config_updater = \Drupal::classResolver(ViewsConfigUpdater::class);
+  \Drupal::classResolver(ConfigEntityUpdater::class)->update($sandbox, 'view', function (ViewEntityInterface $view) use ($view_config_updater): bool {
+    return $view_config_updater->needsRenderedEntityFieldUpdate($view);
+  });
+}
+
+/**
  * Post update configured views for entity reference argument plugin IDs.
  */
-function views_post_update_views_data_argument_plugin_id() {
-  $config_factory = \Drupal::configFactory();
-
-  // Loop through any view, on 'arguments', to update the plugin IDs.
-  foreach ($config_factory->listAll('views.view') as $config_name) {
-    $config = $config_factory->getEditable($config_name);
-    $save = FALSE;
-
-    foreach ($config->get('display') as $display_id => $display_config) {
-      foreach ((array) $config->get('display.' . $display_id . '.display_options.arguments') as $argument_id => $argument_config) {
-        // This update deals with the Entity reference field type.
-        $argument_table_data = Views::viewsData()->get($argument_config['table']);
-        $argument_definition = isset($argument_table_data[$argument_config['field']]['argument']) ? $argument_table_data[$argument_config['field']]['argument'] : NULL;
-        if (isset($argument_config['plugin_id']) && $argument_definition && $argument_config['plugin_id'] == 'numeric' && $argument_definition['id'] == 'entity_target_id') {
-          $config->set("display.$display_id.display_options.arguments.$argument_id.plugin_id", 'entity_target_id');
-          $config->set("display.$display_id.display_options.arguments.$argument_id.target_entity_type_id", $argument_definition['target_entity_type_id']);
-          $save = TRUE;
-        }
-      }
-    }
-
-    if ($save) {
-      $config->save();
-    }
-  }
+function views_post_update_views_data_argument_plugin_id(?array &$sandbox = NULL): void {
+  /** @var \Drupal\views\ViewsConfigUpdater $view_config_updater */
+  $view_config_updater = \Drupal::classResolver(ViewsConfigUpdater::class);
+  $view_config_updater->setDeprecationsEnabled(FALSE);
+  \Drupal::classResolver(ConfigEntityUpdater::class)->update($sandbox, 'view', function (ViewEntityInterface $view) use ($view_config_updater): bool {
+    return $view_config_updater->needsEntityArgumentUpdate($view);
+  });
 }

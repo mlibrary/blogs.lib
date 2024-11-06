@@ -6,3 +6,4 @@ package: Filters
 configure: filter.admin_overview
 dependencies:
   - drupal:filter
+  - ckeditor:ckeditor

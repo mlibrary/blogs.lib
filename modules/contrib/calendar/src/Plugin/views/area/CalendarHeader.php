@@ -69,7 +69,7 @@ class CalendarHeader extends TokenizeAreaPluginBase {
       }
       else {
         if ($this->view->display_handler->renderPager()) {
-          $exposed_input = isset($this->view->exposed_raw_input) ? $this->view->exposed_raw_input : NULL;
+          $exposed_input = $this->view->exposed_raw_input ?? NULL;
           $render = $this->view->renderPager($exposed_input);
 
           // Override the exclude option of the pager.

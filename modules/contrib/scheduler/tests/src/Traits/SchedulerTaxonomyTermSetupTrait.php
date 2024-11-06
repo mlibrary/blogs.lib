@@ -98,7 +98,7 @@ trait SchedulerTaxonomyTermSetupTrait {
     /** @var  taxonomyTermStorage $taxonomyTermStorage */
     $this->taxonomyTermStorage = $this->container->get('entity_type.manager')->getStorage('taxonomy_term');
 
-    // Add extra permisssions to the role assigned to the adminUser.
+    // Add extra permissions to the role assigned to the adminUser.
     $this->addPermissionsToUser($this->adminUser, [
       'create terms in ' . $this->vocabularyId,
       'edit terms in ' . $this->vocabularyId,
@@ -111,7 +111,7 @@ trait SchedulerTaxonomyTermSetupTrait {
       'view scheduled taxonomy_term',
     ]);
 
-    // Add extra permisssions to the role assigned to the schedulerUser.
+    // Add extra permissions to the role assigned to the schedulerUser.
     $this->addPermissionsToUser($this->schedulerUser, [
       'create terms in ' . $this->vocabularyId,
       'edit terms in ' . $this->vocabularyId,

@@ -273,29 +273,8 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
    * {@inheritdoc}
    */
   public function authorize(string $scope = 'openid email', array $additional_params = []): Response {
-    $language_none = \Drupal::languageManager()
-      ->getLanguage(LanguageInterface::LANGCODE_NOT_APPLICABLE);
-
-    $redirect_uri = Url::fromRoute(
-      'openid_connect.redirect_controller_redirect',
-      [
-        'openid_connect_client' => $this->parentEntityId,
-      ],
-      [
-        'absolute' => TRUE,
-        'language' => $language_none,
-      ]
-    )->toString(TRUE);
-
-    $url_options = [
-      'query' => [
-        'client_id' => $this->configuration['client_id'],
-        'response_type' => 'code',
-        'scope' => $scope,
-        'redirect_uri' => $redirect_uri->getGeneratedUrl(),
-        'state' => $this->stateToken->generateToken(),
-      ],
-    ];
+    $redirect_uri = $this->getRedirectUrl()->toString(TRUE);
+    $url_options = $this->getUrlOptions($scope, $redirect_uri);
 
     if (!empty($additional_params)) {
       $url_options['query'] = array_merge($url_options['query'], $additional_params);

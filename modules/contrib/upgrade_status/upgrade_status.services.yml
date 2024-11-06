@@ -11,6 +11,7 @@ services:
       - '@upgrade_status.theme_function_deprecation_analyzer'
       - '@upgrade_status.route_deprecation_analyzer'
       - '@upgrade_status.extension_metadata_deprecation_analyzer'
+      - '@upgrade_status.config_schema_deprecation_analyzer'
       - '@upgrade_status.css_deprecation_analyzer'
       - '@datetime.time'
   upgrade_status.library_deprecation_analyzer:
@@ -33,6 +34,8 @@ services:
     class: Drupal\upgrade_status\CSSDeprecationAnalyzer
   upgrade_status.extension_metadata_deprecation_analyzer:
     class: Drupal\upgrade_status\ExtensionMetadataDeprecationAnalyzer
+  upgrade_status.config_schema_deprecation_analyzer:
+    class: Drupal\upgrade_status\ConfigSchemaDeprecationAnalyzer
   upgrade_status.project_collector:
     class: Drupal\upgrade_status\ProjectCollector
     arguments:

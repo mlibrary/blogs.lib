@@ -10,7 +10,7 @@ dependencies:
 test_dependencies:
   - page_manager:page_manager
 
-# Information added by Drupal.org packaging script on 2022-11-16
-version: '8.x-4.7'
+# Information added by Drupal.org packaging script on 2024-06-17
+version: '8.x-4.8'
 project: 'panels'
-datestamp: 1668632923
+datestamp: 1718663808

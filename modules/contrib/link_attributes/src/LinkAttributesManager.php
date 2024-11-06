@@ -65,7 +65,7 @@ class LinkAttributesManager extends DefaultPluginManager implements PluginManage
     // Translate options.
     if (!empty($definition['options'])) {
       foreach ($definition['options'] as $property => $option) {
-        $definition['options'][$property] = new TranslatableMarkup($option);
+        $definition['options'][$property] = new TranslatableMarkup($option); // phpcs:ignore
       }
     }
   }

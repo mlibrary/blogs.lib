@@ -58,7 +58,7 @@ function image_captcha_update_8001() {
   $config = \Drupal::configFactory()->getEditable('image_captcha.settings');
 
   foreach ($config->get('image_captcha_fonts') as $index => $font) {
-    if (strpos($font, '.ttf') !== FALSE) {
+    if (!empty($font) && strpos($font, '.ttf') !== FALSE) {
       $config->set('image_captcha_fonts.' . $index, hash('sha256', $font));
     }
   }

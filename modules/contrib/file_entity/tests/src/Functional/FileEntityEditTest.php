@@ -55,8 +55,7 @@ class FileEntityEditTest extends FileEntityTestBase {
     $this->assertEquals($edit_url, $actual_url, t('On edit page.'));
 
     // Check that the name field is displayed with the correct value.
-    $active = t('(active tab)');
-    $link_text = t('@local-task-title<span class="element-invisible">@active</span>', array('@local-task-title' => t('Edit'), '@active' => $active));
+    $link_text = t('Edit');
     $this->assertSession()->pageTextContains(strip_tags($link_text));
     $this->assertSession()->fieldValueEquals($name_key, $file->label());
 

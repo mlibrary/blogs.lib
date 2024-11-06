@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ViewsBuilderController extends ControllerBase {
 
   /**
-   * The plugin builder servive.
+   * The plugin builder service.
    *
    * @var \Drupal\Component\Plugin\PluginManagerInterface
    */

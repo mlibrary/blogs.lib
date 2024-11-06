@@ -98,7 +98,8 @@ class StructureSyncBlocksTest extends WebDriverTestBase {
     // Importing blocks using safe mode.
     $this->drupalGet('admin/structure/structure-sync/blocks');
     $this->click('#edit-import-blocks-safe');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    // Wait for the import batch to complete so the buttons are visible again.
+    $this->assertSession()->waitForElementVisible('css', '#edit-import-blocks-full');
 
     // Deleted block item should be imported.
     $tigGasBlockContents = $this->blockContentStorage->loadByProperties(['info' => 'Argon']);
@@ -118,7 +119,8 @@ class StructureSyncBlocksTest extends WebDriverTestBase {
 
     // Importing blocks using full mode.
     $this->click('#edit-import-blocks-full');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    // Wait for the import batch to complete so the buttons are visible again.
+    $this->assertSession()->waitForElementVisible('css', '#edit-import-blocks-force');
 
     // "Electrode" block content should be deleted by full import.
     $electrodeBlockContents = $this->blockContentStorage->loadByProperties(['info' => 'Electrode']);
@@ -130,7 +132,8 @@ class StructureSyncBlocksTest extends WebDriverTestBase {
 
     // Importing blocks using force mode.
     $this->click('#edit-import-blocks-force');
-    $this->assertSession()->assertWaitOnAjaxRequest();
+    // Wait for the import batch to complete so the buttons are visible again.
+    $this->assertSession()->waitForElementVisible('css', '#edit-import-blocks-force');
 
     // "Oxygen" block content should be updated by a full import.
     $oxygenBlockContents = $this->blockContentStorage->loadByProperties(['info' => 'Oxygen']);

@@ -4,8 +4,8 @@ namespace Drupal\structure_sync\Controller;
 
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\structure_sync\StructureSyncHelper;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\structure_sync\StructureSyncHelper;
 use Drush\Drush;
 
 /**
@@ -13,6 +13,11 @@ use Drush\Drush;
  */
 class BlocksController extends ControllerBase {
 
+  /**
+   * An editable structure_sync.data configuration object.
+   *
+   * @var \Drupal\Core\Config\Config
+   */
   private $config;
 
   /**
@@ -66,8 +71,8 @@ class BlocksController extends ControllerBase {
         'langcode' => $block->langcode->getValue()[0]['value'],
         'uuid' => $block->uuid(),
         'bundle' => $block->bundle(),
-        'revision_id' => null,
-        'rev_id_current' => null,
+        'revision_id' => NULL,
+        'rev_id_current' => NULL,
       ];
 
       $entityFieldManager = StructureSyncHelper::getEntityFieldManager();
@@ -232,14 +237,14 @@ class BlocksController extends ControllerBase {
       $uuidsInConfig[] = $block['uuid'];
     }
 
-    if(!empty($uuidsInConfig)) {
-        $query = StructureSyncHelper::getEntityQuery('block_content');
-        $query->condition('uuid', $uuidsInConfig, 'NOT IN');
-        $ids = $query->execute();
-        $controller = StructureSyncHelper::getEntityManager()
-            ->getStorage('block_content');
-        $entities = $controller->loadMultiple($ids);
-        $controller->delete($entities);
+    if (!empty($uuidsInConfig)) {
+      $query = StructureSyncHelper::getEntityQuery('block_content');
+      $query->condition('uuid', $uuidsInConfig, 'NOT IN');
+      $ids = $query->execute();
+      $controller = StructureSyncHelper::getEntityManager()
+        ->getStorage('block_content');
+      $entities = $controller->loadMultiple($ids);
+      $controller->delete($entities);
     }
 
     if (array_key_exists('drush', $context) && $context['drush'] === TRUE) {
@@ -261,13 +266,13 @@ class BlocksController extends ControllerBase {
     }
 
     $entities = [];
-    if(!empty($uuidsInConfig)) {
-        $query = StructureSyncHelper::getEntityQuery('block_content');
-        $query->condition('uuid', $uuidsInConfig, 'IN');
-        $ids = $query->execute();
-        $controller = StructureSyncHelper::getEntityManager()
-            ->getStorage('block_content');
-        $entities = $controller->loadMultiple($ids);
+    if (!empty($uuidsInConfig)) {
+      $query = StructureSyncHelper::getEntityQuery('block_content');
+      $query->condition('uuid', $uuidsInConfig, 'IN');
+      $ids = $query->execute();
+      $controller = StructureSyncHelper::getEntityManager()
+        ->getStorage('block_content');
+      $entities = $controller->loadMultiple($ids);
     }
 
     $context['sandbox']['max'] = count($blocks);

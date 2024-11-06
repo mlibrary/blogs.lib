@@ -98,7 +98,7 @@ trait SchedulerSetupTrait {
   protected $database;
 
   /**
-   * The request time stored as interger for direct re-use in many tests.
+   * The request time stored as integer for direct re-use in many tests.
    *
    * @var int
    */
@@ -192,7 +192,6 @@ trait SchedulerSetupTrait {
 
     // Store the core dateFormatter service for re-use in the actual tests.
     $this->dateFormatter = $this->container->get('date.formatter');
-
   }
 
   /**
@@ -273,7 +272,7 @@ trait SchedulerSetupTrait {
 
       default:
         // Incorrect parameter values.
-        throw new \Exception(sprintf('Unrecognised combination of entityTypeId "%s" and bundle "%s" passed to createEntity()', $entityTypeId, $bundle));
+        throw new \Exception(sprintf('Unrecognized combination of entityTypeId "%s" and bundle "%s" passed to createEntity()', $entityTypeId, $bundle));
 
     }
     return $entity;
@@ -308,7 +307,7 @@ trait SchedulerSetupTrait {
 
       default:
         // Incorrect parameter value.
-        throw new \Exception(sprintf('Unrecognised entityTypeId value "%s" passed to getEntityByTitle()', $entityTypeId));
+        throw new \Exception(sprintf('Unrecognized entityTypeId value "%s" passed to getEntityByTitle()', $entityTypeId));
     }
   }
 
@@ -350,7 +349,7 @@ trait SchedulerSetupTrait {
     $bundleEntityType = $entityTypeManager->getDefinition($entityTypeId)->getBundleEntityType();
     if (!$entity_type = $entityTypeManager->getStorage($bundleEntityType)->load($bundle)) {
       // Incorrect parameter values.
-      throw new \Exception(sprintf('Unrecognised combination of entityTypeId "%s" and bundle "%s" passed to entityTypeObject()', $entityTypeId, $bundle));
+      throw new \Exception(sprintf('Unrecognized combination of entityTypeId "%s" and bundle "%s" passed to entityTypeObject()', $entityTypeId, $bundle));
     };
     return $entity_type;
   }
@@ -376,7 +375,7 @@ trait SchedulerSetupTrait {
 
       default:
         // Incorrect parameter value.
-        throw new \Exception(sprintf('Unrecognised entityTypeId "%s" passed to titleField()', $entityTypeId));
+        throw new \Exception(sprintf('Unrecognized entityTypeId "%s" passed to titleField()', $entityTypeId));
     }
   }
 
@@ -400,7 +399,7 @@ trait SchedulerSetupTrait {
 
       default:
         // Incorrect parameter value.
-        throw new \Exception(sprintf('Unrecognised entityTypeId "%s" passed to bodyField()', $entityTypeId));
+        throw new \Exception(sprintf('Unrecognized entityTypeId "%s" passed to bodyField()', $entityTypeId));
     }
   }
 
@@ -431,7 +430,7 @@ trait SchedulerSetupTrait {
 
       default:
         // Incorrect parameter value.
-        throw new \Exception(sprintf('Unrecognised entityTypeId "%s" passed to entitySavedMessage()', $entityTypeId));
+        throw new \Exception(sprintf('Unrecognized entityTypeId "%s" passed to entitySavedMessage()', $entityTypeId));
     }
   }
 
@@ -477,7 +476,7 @@ trait SchedulerSetupTrait {
 
       default:
         // Incorrect parameter values.
-        throw new \Exception(sprintf('Unrecognised combination of entityTypeId "%s" and bundle "%s" passed to entityAddUrl()', $entityTypeId, $bundle));
+        throw new \Exception(sprintf('Unrecognized combination of entityTypeId "%s" and bundle "%s" passed to entityAddUrl()', $entityTypeId, $bundle));
     }
     if (!$url = Url::fromRoute($route, [$type_parameter => $bundle])) {
       // Incorrect parameter values.
@@ -534,7 +533,7 @@ trait SchedulerSetupTrait {
     $url = $urls[$page][$entityTypeId] ?? ($urls[$page]['default'] ?? NULL);
     if (empty($url)) {
       // Incorrect parameter values.
-      throw new \Exception(sprintf('Unrecognised combination of page "%s", entityTypeId "%s" and bundle "%s" passed to adminUrl()', $page, $entityTypeId, $bundle));
+      throw new \Exception(sprintf('Unrecognized combination of page "%s", entityTypeId "%s" and bundle "%s" passed to adminUrl()', $page, $entityTypeId, $bundle));
     }
     return $url;
   }
@@ -575,16 +574,16 @@ trait SchedulerSetupTrait {
    *   Each array item has the values: [entity type id, bundle id]. The array
    *   key is #entity_type_id, to allow easy removal of unwanted rows later.
    */
-  public function dataStandardEntityTypes() {
-    // The data provider has access to $this where the values are set in the
-    // property definition.
-    $data = [
-      '#node' => ['node', $this->type],
-      '#media' => ['media', $this->mediaTypeName],
-      '#commerce_product' => ['commerce_product', $this->productTypeName],
-      '#taxonomy_term' => ['taxonomy_term', $this->vocabularyId],
+  public static function dataStandardEntityTypes(): array {
+    // With PHPUnit 10 the dataProvider functions can no longer use $this, so
+    // the names have to be hard-coded here.
+    // @see https://www.drupal.org/project/scheduler/issues/3463141
+    return [
+      '#node' => ['node', 'testpage'],
+      '#media' => ['media', 'test_video'],
+      '#commerce_product' => ['commerce_product', 'test_product'],
+      '#taxonomy_term' => ['taxonomy_term', 'test_vocab'],
     ];
-    return $data;
   }
 
   /**
@@ -594,14 +593,13 @@ trait SchedulerSetupTrait {
    *   Each array item has the values: [entity type id, bundle id]. The array
    *   key is #entity_type_id, to allow easy removal of unwanted rows later.
    */
-  public function dataNonEnabledTypes() {
-    $data = [
-      '#node' => ['node', $this->nonSchedulerType],
-      '#media' => ['media', $this->nonSchedulerMediaTypeName],
-      '#commerce_product' => ['commerce_product', $this->nonSchedulerProductTypeName],
-      '#taxonomy_term' => ['taxonomy_term', $this->nonSchedulerVocabularyId],
+  public static function dataNonEnabledTypes(): array {
+    return [
+      '#node' => ['node', 'not_for_scheduler'],
+      '#media' => ['media', 'test_audio_not_enabled'],
+      '#commerce_product' => ['commerce_product', 'non_enabled_product'],
+      '#taxonomy_term' => ['taxonomy_term', 'vocab_not_enabled'],
     ];
-    return $data;
   }
 
 }

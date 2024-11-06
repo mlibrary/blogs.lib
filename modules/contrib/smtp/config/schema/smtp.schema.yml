@@ -42,7 +42,7 @@ smtp.settings:
       type: string
       label: 'HELO'
     smtp_allowhtml:
-      type: string
+      type: boolean
       label: 'Allow to send e-mails formated as HTML'
     smtp_test_address:
       type: email
@@ -53,6 +53,9 @@ smtp.settings:
     smtp_debugging:
       type: boolean
       label: 'Enable debugging'
+    smtp_debug_level:
+      type: integer
+      label: 'Debug level'
     prev_mail_system:
       type: string
       label: 'Previous mail system'

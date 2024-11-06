@@ -16,8 +16,8 @@ trait StructureSyncMenuLinksSetUpTrait {
   public function createSetUpContent(): void {
     $this->menuLinkStorage = $this->container->get('entity_type.manager')->getStorage('menu_link_content');
 
-    // Create three menus to tests different cases,
-    // avoid exporting the third thanks to unchecking the corresponding checkbox.
+    // Create three menus to tests different cases, avoid exporting the third
+    // thanks to unchecking the corresponding checkbox.
     Menu::create([
       'id' => 'mig',
       'label' => 'MIG',
@@ -73,7 +73,16 @@ trait StructureSyncMenuLinksSetUpTrait {
     MenuLinkContent::create([
       'title' => 'Argon',
       'description' => 'Argon gas',
-      'link' => 'https://en.wikipedia.org/wiki/Argon',
+      'link' => [
+        'uri' => 'https://en.wikipedia.org/wiki/Argon',
+        // Set the menu link 'class' and 'target' attributes.
+        'options' => [
+          'attributes' => [
+            'class' => ['tig-argon-gas-class1 tig-argon-gas-class2'],
+            'target' => '_blank',
+          ],
+        ],
+      ],
       'weight' => 1,
       'menu_name' => 'tig',
       'uuid' => '48062c1c-132b-476e-bc3c-8511fb8896e4',
@@ -85,7 +94,16 @@ trait StructureSyncMenuLinksSetUpTrait {
     MenuLinkContent::create([
       'title' => 'Oxygen',
       'description' => 'Oxygen gas',
-      'link' => 'https://en.wikipedia.org/wiki/Oxygen',
+      'link' => [
+        'uri' => 'https://en.wikipedia.org/wiki/Oxygen',
+        // Set the menu link 'class' and 'target' attributes.
+        'options' => [
+          'attributes' => [
+            'class' => ['tig-oxygen-gas-class1 tig-oxygen-gas-class2'],
+            'target' => '_self',
+          ],
+        ],
+      ],
       'weight' => 2,
       'menu_name' => 'tig',
       'uuid' => 'd2385dc8-e70d-490f-8ec7-d95c828c98ac',

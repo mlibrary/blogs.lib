@@ -22,6 +22,7 @@ use Drupal\migrate\Plugin\MigrateSourceInterface;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Row;
 use Drupal\migrate_drupal\Plugin\migrate\source\DrupalSqlBase;
+use Drupal\scheduler\Form\SchedulerCronForm;
 use Drupal\workbench_moderation\Plugin\Action\ModerationOptOutPublishNode;
 use Drupal\workbench_moderation\Plugin\Action\ModerationOptOutUnpublishNode;
 
@@ -42,7 +43,7 @@ function scheduler_help($route_name, RouteMatchInterface $route_match) {
 
     case 'scheduler.cron_form':
       $base_url = $GLOBALS['base_url'];
-      $access_key = \Drupal::config('scheduler.settings')->get('lightweight_cron_access_key');
+      $access_key = \Drupal::state()->get(SchedulerCronForm::CRON_ACCESS_KEY, '');
       $cron_url = $base_url . '/scheduler/cron/' . $access_key;
       $output = '<p>' . t("When you have set up Drupal's standard crontab job cron.php then Scheduler will be executed during each cron run. However, if you would like finer granularity to scheduler, but don't want to run Drupal's cron more often then you can use the lightweight cron handler provided by Scheduler. This is an independent cron job which only runs the scheduler process and does not execute any cron tasks defined by Drupal core or any other modules.") . '</p>';
       $output .= '<p>' . t("Scheduler's cron is at /scheduler/cron/{access-key} and a sample crontab entry to run scheduler every minute might look like:") . '</p>';
@@ -720,7 +721,7 @@ function _scheduler_translation_validate($form, FormStateInterface $form_state) 
   foreach ($settings as $entity_type => $content_types) {
     $publishing_enabled_types = $scheduler_manager->getEnabledTypes($entity_type, 'publish');
     $unpublishing_enabled_types = $scheduler_manager->getEnabledTypes($entity_type, 'unpublish');
-    if (empty($publishing_enabled_types) && empty($publishing_enabled_types)) {
+    if (empty($publishing_enabled_types) && empty($unpublishing_enabled_types)) {
       continue;
     }
 
@@ -1170,7 +1171,7 @@ function scheduler_feeds_processor_targets_alter(&$targets, $entity_type, $bundl
  * @see https://www.drupal.org/project/scheduler/issues/2651354
  */
 function scheduler_feeds_set_target($source, $entity, $target, $value, $mapping) {
-  // We expect a string or integer, but can accomodate an array, by taking the
+  // We expect a string or integer, but can accommodate an array, by taking the
   // first item. Use trim() so that a string of blanks is reduced to empty.
   $value = is_array($value) ? trim(reset($value)) : trim($value);
 
@@ -1422,13 +1423,9 @@ function scheduler_local_tasks_alter(&$local_tasks) {
       unset($data['scheduler']);
     }
     // We assume that the duplicates are only caused by Scheduler. Other modules
-    // could be causing more so log this and solve it later if it ever happens.
-    if (count($data) > 1) {
-      \Drupal::logger('scheduler')->warning('Local task route %route contains duplicates in addition to Scheduler. %data', [
-        '%route' => $route,
-        '%data' => print_r($data, TRUE),
-      ]);
-    }
+    // could be causing more. If count($data) is still > 1 after the unset above
+    // then look at $data to find out which module is adding the route.
+    // @see https://www.drupal.org/project/scheduler/issues/3388029
   }
 }
 

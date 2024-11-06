@@ -11,10 +11,10 @@
  * This functions returns an array of rules configurations with the
  * configuration names as keys.
  *
- * @todo Convert to 8.x, this is stil 7.x code
+ * @todo Convert to 8.x, this is still 7.x code
  */
 function scheduler_rules_integration_default_rules_configuration() {
-  // Initialise the array to avoid 'variable is undefined' phpcs error.
+  // Initialize the array to avoid 'variable is undefined' phpcs error.
   $configs = [];
 
   // Define two reaction rules which will be displayed on the 'Rules' tab. These
@@ -22,7 +22,7 @@ function scheduler_rules_integration_default_rules_configuration() {
   // values and/or add more conditions and actions.
   // 1. Reaction rule to send an email when Scheduler publishes content.
   $rule = rules_reaction_rule();
-  $rule->label = t('Send e-mail when content is published by Scheduler');
+  $rule->label = t('Send email when content is published by Scheduler');
   $rule->active = FALSE;
   $rule->event('scheduler_node_has_been_published_event')
     ->condition(rules_condition('data_is_empty', ['data:select' => 'node:author:mail', 'value' => TRUE])->negate())
@@ -37,7 +37,7 @@ function scheduler_rules_integration_default_rules_configuration() {
 
   // 2. Reaction rule to send an email when Scheduler unpublishes content.
   $rule = rules_reaction_rule();
-  $rule->label = t('Send e-mail when content is unpublished by Scheduler');
+  $rule->label = t('Send email when content is unpublished by Scheduler');
   $rule->active = FALSE;
   $rule->event('scheduler_node_has_been_unpublished_event')
     ->condition(rules_condition('data_is_empty', ['data:select' => 'node:author:mail', 'value' => TRUE])->negate())

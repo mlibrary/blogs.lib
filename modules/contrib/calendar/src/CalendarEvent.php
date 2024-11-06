@@ -7,6 +7,7 @@ use Drupal\Core\Entity\ContentEntityInterface;
 /**
  * Defines a calendar event object.
  */
+#[\AllowDynamicProperties]
 class CalendarEvent {
 
   /**
@@ -129,7 +130,7 @@ class CalendarEvent {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   public function getBundle() {
     return $this->entity->bundle();

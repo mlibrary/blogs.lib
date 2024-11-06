@@ -6,11 +6,11 @@ dependencies:
     - user
 id: authmap
 label: 'External authentication links'
-module: views
-description: ''
-tag: ''
+module: externalauth
+description: 'Provides overview of external authentication links.'
+tag: default
 base_table: authmap
-base_field: ''
+base_field: uid
 display:
   default:
     display_plugin: default

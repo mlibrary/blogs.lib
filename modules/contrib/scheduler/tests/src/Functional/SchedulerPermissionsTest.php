@@ -131,7 +131,7 @@ class SchedulerPermissionsTest extends SchedulerBrowserTestBase {
     $edit = ["{$titleField}[0][value]" => $title, 'status[value]' => TRUE];
     $this->submitForm($edit, 'Save');
     $this->assertSession()->pageTextMatches($this->entitySavedMessage($entityTypeId, $title));
-    $this->assertNotEmpty($entity = $this->getEntityByTitle($entityTypeId, $title), sprintf('The new %s with title "%s" was created sucessfully.', $entityTypeId, $title));
+    $this->assertNotEmpty($entity = $this->getEntityByTitle($entityTypeId, $title), sprintf('The new %s with title "%s" was created successfully.', $entityTypeId, $title));
     $this->assertTrue($entity->isPublished(), 'The new entity is published');
 
     // Check that a new entity can be saved as unpublished.
@@ -140,7 +140,7 @@ class SchedulerPermissionsTest extends SchedulerBrowserTestBase {
     $this->drupalGet($add_url);
     $this->submitForm($edit, 'Save');
     $this->assertSession()->pageTextMatches($this->entitySavedMessage($entityTypeId, $title));
-    $this->assertNotEmpty($entity = $this->getEntityByTitle($entityTypeId, $title), sprintf('The new %s with title "%s" was created sucessfully.', $entityTypeId, $title));
+    $this->assertNotEmpty($entity = $this->getEntityByTitle($entityTypeId, $title), sprintf('The new %s with title "%s" was created successfully.', $entityTypeId, $title));
     $this->assertFalse($entity->isPublished(), 'The new entity is unpublished');
 
     // Set publishing and unpublishing to required, to make it a stronger test.
@@ -211,7 +211,7 @@ class SchedulerPermissionsTest extends SchedulerBrowserTestBase {
     $this->drupalGet($published_entity->toUrl('edit-form'));
     $this->submitForm(["{$titleField}[0][value]" => $title], 'Save');
 
-    // Check the updated title, to verify that edit and save was sucessful.
+    // Check the updated title, to verify that edit and save was successful.
     $published_entity = $storage->load($published_entity->id());
     $this->assertEquals($title, $published_entity->label(), 'The published entity title has been updated correctly after edit.');
 
@@ -229,9 +229,9 @@ class SchedulerPermissionsTest extends SchedulerBrowserTestBase {
    * @return array
    *   Each array item has the values: [entity type id, bundle id, user name].
    */
-  public function dataPermissionsTest() {
+  public static function dataPermissionsTest() {
     $data = [];
-    foreach ($this->dataStandardEntityTypes() as $key => $values) {
+    foreach (self::dataStandardEntityTypes() as $key => $values) {
       $data["$key-1"] = array_merge($values, ['nodeUser']);
       $data["$key-2"] = array_merge($values, ['mediaUser']);
       $data["$key-3"] = array_merge($values, ['commerceProductUser']);

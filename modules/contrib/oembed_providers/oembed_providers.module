@@ -6,7 +6,8 @@
  */
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\oembed_providers\Traits\HelperTrait;
+use Drupal\media\Plugin\media\Source\OEmbedInterface;
+use Drupal\oembed_providers\Helper;
 
 /**
  * Implements hook_media_source_info_alter().
@@ -57,7 +58,7 @@ function oembed_providers_form_media_type_edit_form_alter(&$form, FormStateInter
   // Only render warning message for media types with oEmbed source.
   if ($source instanceof OEmbedInterface) {
     $warning = [
-      '#markup' => HelperTrait::disabledProviderSecurityWarning(),
+      '#markup' => Helper::disabledProviderSecurityWarning(),
       // Simulate warning message.
       '#prefix' => '<div role="contentinfo" aria-label="Warning message" class="messages messages--warning">',
       '#suffix' => '</div>',

@@ -49,11 +49,12 @@ class TwigExtension extends AbstractExtension {
    *   Variables.
    *
    * @return false|string|void
+   *   Output buffering clean OR false.
    */
   public function drupalDump(Environment $env, array $context, array $args = []) {
 
     if (!$env->isDebug()) {
-      return;
+      return FALSE;
     }
 
     ob_start();

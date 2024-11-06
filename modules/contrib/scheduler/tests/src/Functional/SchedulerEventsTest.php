@@ -152,8 +152,8 @@ class SchedulerEventsTest extends SchedulerBrowserTestBase {
    * @return array
    *   Each array item has the values: [entity type id, bundle id].
    */
-  public function dataSchedulerEvents() {
-    $data = $this->dataStandardEntityTypes();
+  public static function dataSchedulerEvents() {
+    $data = self::dataStandardEntityTypes();
     unset($data['#node']);
     return $data;
   }

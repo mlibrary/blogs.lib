@@ -61,6 +61,7 @@ class MigrateCaptchaSimpleConfigurationTest extends MigrateDrupal7TestBase {
    */
   public function testConfigurationMigration() {
     // Test Config.
+    $this->expectedConfig['captcha.settings'] = version_compare(\Drupal::VERSION, '10.3.0', '>=') ? ['langcode' => 'en'] + $this->expectedConfig['captcha.settings'] : $this->expectedConfig['captcha.settings'];
     foreach ($this->expectedConfig as $config_id => $values) {
       $actual = \Drupal::config($config_id)->get();
       $this->assertSame($values, $actual);

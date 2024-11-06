@@ -327,3 +327,10 @@ function openid_connect_update_8210() {
     }
   }
 }
+
+/**
+ * Enable core's file module.
+ */
+function openid_connect_update_30001() {
+  \Drupal::service('module_installer')->install(['file']);
+}

@@ -2,13 +2,13 @@
 
 namespace Drupal\externalauth\Plugin\migrate\destination;
 
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\externalauth\AuthmapInterface;
+use Drupal\migrate\Plugin\migrate\destination\DestinationBase;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Row;
-use Drupal\migrate\Plugin\migrate\destination\DestinationBase;
 use Drupal\user\UserStorageInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 
 /**
  * Drupal 8 authmap destination.

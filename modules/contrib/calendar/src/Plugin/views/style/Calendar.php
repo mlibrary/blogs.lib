@@ -5,19 +5,19 @@ namespace Drupal\calendar\Plugin\views\style;
 use Drupal\calendar\CalendarDateInfo;
 use Drupal\calendar\CalendarHelper;
 use Drupal\calendar\CalendarStyleInfo;
-use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\views\Entity\View;
-use Drupal\Core\Datetime\DateFormatter;
 use Drupal\calendar\Plugin\views\row\Calendar as CalendarRow;
+use Drupal\Component\Datetime\TimeInterface;
+use Drupal\Core\Datetime\DateFormatter;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
+use Drupal\views\Entity\View;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\style\StylePluginBase;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\Component\Datetime\TimeInterface;
 
 /**
  * Views style plugin for the Calendar module.
@@ -1131,7 +1131,7 @@ class Calendar extends StylePluginBase {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   private function isPastMonth(int $month, int $current_month) {
     if ($current_month == 1 && $month == 12) {
@@ -1146,7 +1146,7 @@ class Calendar extends StylePluginBase {
   }
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   private function isFutureMonth(int $month, int $current_month) {
     if ($current_month == 12 && $month == 1) {

@@ -23,7 +23,7 @@ class SchedulerBasicProductTest extends SchedulerBrowserTestBase {
     ];
     // Create a product entity with the scheduler fields populated as required.
     $entity = $this->createProduct($values);
-    $this->assertNotEmpty($entity, 'The entity was created sucessfully.');
+    $this->assertNotEmpty($entity, 'The entity was created successfully.');
 
     // Assert that the entity has a publish_on date.
     $this->assertNotEmpty($entity->publish_on, 'The entity has a publish_on date');
@@ -64,7 +64,7 @@ class SchedulerBasicProductTest extends SchedulerBrowserTestBase {
     ];
     // Create a product with the scheduler fields populated as required.
     $entity = $this->createProduct($values);
-    $this->assertNotEmpty($entity, 'The entity was created sucessfully.');
+    $this->assertNotEmpty($entity, 'The entity was created successfully.');
 
     // Assert that the entity has an unpublish_on date.
     $this->assertNotEmpty($entity->unpublish_on, 'The entity has an unpublish_on date');

@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\pathauto\Functional;
 
-use Drupal\Tests\BrowserTestBase;
 use Drupal\comment\Tests\CommentTestTrait;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests pathauto settings form.
@@ -19,7 +19,7 @@ class PathautoEnablingEntityTypesTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stable';
+  protected $defaultTheme = 'stark';
 
   /**
    * Modules to enable.
@@ -47,6 +47,8 @@ class PathautoEnablingEntityTypesTest extends BrowserTestBase {
     $permissions = [
       'administer pathauto',
       'administer url aliases',
+      'bulk delete aliases',
+      'bulk update aliases',
       'create url aliases',
       'administer nodes',
       'post comments',

@@ -199,14 +199,14 @@ class OpenIDConnectSettingsForm extends ConfigFormBase {
       '#title' => 'EXPERIMENTAL - ' . $this->t('User role mapping'),
       '#type' => 'fieldset',
       '#description' => $this->t('For each Drupal role, provide the sets of equivalent external groups, separated by spaces. A user belonging to one of the provided groups will be assigned the configured Drupal role.') .
-                        $this->t("<br/><strong>Note:</strong> The module will not update user roles with no mapped external groups. If all mappings to one of the roles are removd, users will keep that role until it is removed in the Drupal user administration."),
+                        $this->t("<br/><strong>Note:</strong> The module will not update user roles with no mapped external groups. If all mappings to one of the roles are removed, users will keep that role until it is removed in the Drupal user administration."),
       '#tree' => TRUE,
     ];
     // phpcs:enable
 
     foreach ($roles as $role_id => $role) {
       $default = '';
-      if (is_array($role_mappings[$role_id])) {
+      if (isset($role_mappings[$role_id]) && is_array($role_mappings[$role_id])) {
         // Surround any mappings with spaces with double quotes.
         foreach ($role_mappings[$role_id] as $key => $mapping) {
           if (strpos($mapping, ' ') !== FALSE) {
@@ -226,7 +226,7 @@ class OpenIDConnectSettingsForm extends ConfigFormBase {
     $form['advanced'] = [
       '#title' => $this->t('Advanced'),
       '#type' => 'details',
-      '#open' => $settings->get('connect_existing_users') ? TRUE : FALSE,
+      '#open' => $settings->get('connect_existing_users'),
     ];
     $form['advanced']['connect_existing_users'] = [
       '#type' => 'checkbox',
@@ -246,7 +246,10 @@ class OpenIDConnectSettingsForm extends ConfigFormBase {
 
     $role_mappings = [];
     foreach ($form_state->getValue('role_mappings') as $role => $mapping) {
-      $role_mappings[$role] = array_values(array_filter(str_getcsv($mapping, ' ')));
+      $values = array_values(array_filter(str_getcsv($mapping, ' ')));
+      if (!empty($values)) {
+        $role_mappings[$role] = $values;
+      }
     }
 
     $this->config('openid_connect.settings')

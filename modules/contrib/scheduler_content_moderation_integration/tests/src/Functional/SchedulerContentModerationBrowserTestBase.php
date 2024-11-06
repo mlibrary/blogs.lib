@@ -2,7 +2,7 @@
 
 namespace Drupal\Tests\scheduler_content_moderation_integration\Functional;
 
-use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\commerce_product\Entity\ProductType;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 use Drupal\Tests\scheduler\Traits\SchedulerMediaSetupTrait;
@@ -31,7 +31,7 @@ abstract class SchedulerContentModerationBrowserTestBase extends BrowserTestBase
     'scheduler_content_moderation_integration',
     'content_moderation',
     'media',
-    'taxonomy',
+    'commerce_product',
   ];
 
   /**
@@ -40,6 +40,34 @@ abstract class SchedulerContentModerationBrowserTestBase extends BrowserTestBase
    * @var \Drupal\workflows\Entity\Workflow
    */
   protected $workflow;
+
+  /**
+   * The user with full permission to schedule node content.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $schedulerUser;
+
+  /**
+   * The user without permission to schedule node content.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $restrictedUser;
+
+  /**
+   * The user with full permission to schedule media content.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $schedulerMediaUser;
+
+  /**
+   * The user without permission to schedule media content.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $restrictedMediaUser;
 
   /**
    * {@inheritdoc}
@@ -118,19 +146,19 @@ abstract class SchedulerContentModerationBrowserTestBase extends BrowserTestBase
     /** @var MediaStorageInterface $mediaStorage */
     $this->mediaStorage = $this->container->get('entity_type.manager')->getStorage('media');
 
-    // Create a test vocabulary that is enabled for scheduling. Taxonomy terms
-    // are not moderatable.
-    Vocabulary::create([
-      'vid' => 'test_vocab',
-      'name' => 'Flags',
+    // Create a test product type that is enabled for scheduling. Commerce
+    // products are not moderatable.
+    ProductType::create([
+      'id' => 'test_product',
+      'label' => 'Flags',
     ])->setThirdPartySetting('scheduler', 'publish_enable', TRUE)
       ->setThirdPartySetting('scheduler', 'unpublish_enable', TRUE)
       ->save();
 
     // Enable the scheduler fields in the default form display, mimicking what
-    // would be done if the taxonomy vocab had been enabled via admin UI.
+    // would be done if the commerce_product had been enabled via admin UI.
     $this->container->get('entity_display.repository')
-      ->getFormDisplay('taxonomy_term', 'test_vocab')
+      ->getFormDisplay('commerce_product', 'test_product')
       ->setComponent('publish_on', ['type' => 'datetime_timestamp_no_default'])
       ->setComponent('unpublish_on', ['type' => 'datetime_timestamp_no_default'])
       ->save();
@@ -148,9 +176,9 @@ abstract class SchedulerContentModerationBrowserTestBase extends BrowserTestBase
       // Media.
       'administer media types',
       'access media overview',
-      // Taxonomy.
-      'administer taxonomy',
-      'access taxonomy overview',
+      // Commerce product.
+      'administer commerce_product_type',
+      'administer commerce_product',
     ]);
     $this->adminUser->set('name', 'Admin User')->save();
 
@@ -240,12 +268,11 @@ abstract class SchedulerContentModerationBrowserTestBase extends BrowserTestBase
    * @return array
    *   Each array item has the values: [entity type id, bundle id].
    */
-  public function dataEntityTypes() {
-    $data = [
+  public static function dataEntityTypes(): array {
+    return [
       '#node' => ['node', 'page'],
       '#media' => ['media', 'soundtrack'],
     ];
-    return $data;
   }
 
 }

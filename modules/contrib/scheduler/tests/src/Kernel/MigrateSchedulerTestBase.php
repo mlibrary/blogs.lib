@@ -6,10 +6,8 @@ use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
 
 /**
  * Base class for testing the migration of Drupal 7 configuration and data.
- *
- * @group scheduler_kernel
  */
-class MigrateSchedulerTestBase extends MigrateDrupal7TestBase {
+abstract class MigrateSchedulerTestBase extends MigrateDrupal7TestBase {
 
   /**
    * {@inheritdoc}

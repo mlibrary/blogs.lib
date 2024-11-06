@@ -2,9 +2,9 @@
 
 namespace Drupal\calendar\Template;
 
+use Drupal\calendar\CalendarEvent;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
-use Drupal\calendar\CalendarEvent;
 
 /**
  * A class providing Calendar Twig extensions.

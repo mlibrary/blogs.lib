@@ -164,7 +164,7 @@ class LayoutChangeSettings extends FormBase {
    * @param \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant $plugin
    *   The plugin to update.
    * @param \Drupal\Core\Layout\LayoutInterface $layout
-   *   The layout for which we are upating settings.
+   *   The layout for which we are updating settings.
    * @param array $cached_values
    *   The current cached values from the wizard.
    * @param array $configuration

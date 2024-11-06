@@ -86,6 +86,8 @@ class SchedulerRulesActionDeriver extends DeriverBase implements ContainerDerive
         '@entity_type_label' => $entity_type->getLabel(),
         '@entity_type_singular' => $entity_type->getSingularLabel(),
       ];
+      // Initialize to keep PHPStan happy.
+      $date_label = $date_description = '';
       // Define the action label, context label and description, depending on
       // which derivative we are building.
       switch ($base_plugin_id) {

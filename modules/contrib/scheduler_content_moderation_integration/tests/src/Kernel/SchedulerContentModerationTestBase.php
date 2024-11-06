@@ -37,7 +37,6 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
-    'action',
     'content_moderation',
     'datetime',
     'field',
@@ -112,7 +111,7 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
   protected function configureExampleNodeType() {
     $node_type = NodeType::create([
       'type' => 'example',
-      'label' => 'Example',
+      'name' => 'Example content',
     ]);
     $node_type->setThirdPartySetting('scheduler', 'publish_enable', TRUE);
     $node_type->setThirdPartySetting('scheduler', 'unpublish_enable', TRUE);
@@ -148,7 +147,7 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
    * @return array
    *   Each array item has the values: [entity type id, bundle id].
    */
-  public function dataEntityTypes() {
+  public static function dataEntityTypes() {
     $data = [
       '#node' => ['node', 'example'],
       '#media' => ['media', 'soundtrack'],

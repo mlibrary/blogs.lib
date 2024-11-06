@@ -60,7 +60,7 @@ class HookImplementationTest extends SchedulerContentModerationTestBase {
    *
    * @dataProvider hideSchedulerFieldsProvider
    */
-  public function testHookHideSchedulerFields($expected, $nodeChoice, $options) {
+  public function testHookHideSchedulerFields($expected, $nodeChoice, $options): void {
     $node = $this->$nodeChoice;
 
     // Create the starting state, so that we can add the specific new states and
@@ -96,7 +96,7 @@ class HookImplementationTest extends SchedulerContentModerationTestBase {
   /**
    * Data provider for self:testHookHideSchedulerFields().
    */
-  public function hideSchedulerFieldsProvider() {
+  public static function hideSchedulerFieldsProvider(): array {
     return [
       // Two states in addition to _none. Should not hide the fields.
       [FALSE, 'moderatedNode', ['Some state', 'Not hidden']],

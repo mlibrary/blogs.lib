@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\rules\Core\RulesActionBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides base class on which all Scheduler Rules actions are built.

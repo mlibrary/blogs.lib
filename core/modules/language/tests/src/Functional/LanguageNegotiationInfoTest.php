@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\language\Functional;
 
 use Drupal\Core\Language\LanguageInterface;
@@ -14,9 +16,7 @@ use Drupal\Tests\BrowserTestBase;
 class LanguageNegotiationInfoTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['language', 'content_translation'];
 
@@ -72,7 +72,7 @@ class LanguageNegotiationInfoTest extends BrowserTestBase {
   /**
    * Tests alterations to language types/negotiation info.
    */
-  public function testInfoAlterations() {
+  public function testInfoAlterations(): void {
     $this->stateSet([
       // Enable language_test type info.
       'language_test.language_types' => TRUE,
@@ -134,7 +134,7 @@ class LanguageNegotiationInfoTest extends BrowserTestBase {
 
     // Check language negotiation results.
     $this->drupalGet('');
-    $last = $this->container->get('state')->get('language_test.language_negotiation_last');
+    $last = \Drupal::keyValue('language_test')->get('language_negotiation_last');
     foreach ($this->languageManager()->getDefinedLanguageTypes() as $type) {
       $langcode = $last[$type];
       $value = $type == LanguageInterface::TYPE_CONTENT || str_contains($type, 'test') ? 'it' : 'en';
@@ -182,7 +182,7 @@ class LanguageNegotiationInfoTest extends BrowserTestBase {
   /**
    * Tests altering config of configurable language types.
    */
-  public function testConfigLangTypeAlterations() {
+  public function testConfigLangTypeAlterations(): void {
     // Default of config.
     $test_type = LanguageInterface::TYPE_CONTENT;
     $this->assertFalse($this->isLanguageTypeConfigurable($test_type), 'Language type is not configurable.');

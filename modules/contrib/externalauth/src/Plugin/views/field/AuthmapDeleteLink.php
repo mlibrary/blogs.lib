@@ -37,11 +37,13 @@ class AuthmapDeleteLink extends LinkBase {
   protected function renderLink(ResultRow $row): string {
     // From EntityLink:
     if ($this->options['output_url_as_text']) {
-      return $this->getUrlInfo($row)->toString();
+      return $this->getUrlInfo($row) ? $this->getUrlInfo($row)->toString() : '';
     }
     // From LinkBase, minus addLangCode() which needs an entity.
-    $this->options['alter']['make_link'] = TRUE;
-    $this->options['alter']['url'] = $this->getUrlInfo($row);
+    if ($this->getUrlInfo($row)) {
+      $this->options['alter']['make_link'] = TRUE;
+      $this->options['alter']['url'] = $this->getUrlInfo($row);
+    }
     $text = !empty($this->options['text']) ? $this->sanitizeValue($this->options['text']) : $this->getDefaultLabel();
     return $text;
   }
@@ -49,11 +51,14 @@ class AuthmapDeleteLink extends LinkBase {
   /**
    * {@inheritdoc}
    */
-  protected function getUrlInfo(ResultRow $row): Url {
-    return Url::fromRoute('externalauth.authmap_delete_form', [
-      'provider' => $row->authmap_provider,
-      'uid' => $row->authmap_uid,
-    ]);
+  protected function getUrlInfo(ResultRow $row): ?Url {
+    if (isset($row->authmap_provider, $row->uid)) {
+      return Url::fromRoute('externalauth.authmap_delete_form', [
+        'provider' => $row->authmap_provider,
+        'uid' => $row->uid,
+      ]);
+    }
+    return NULL;
   }
 
   /**

@@ -93,12 +93,11 @@ class ParagraphsInlineEntityFormTest extends ParagraphsTestBase {
     ]);
 
     // Set cardinality explicit to -1.
-    $this->drupalGet('admin/structure/types/manage/article/fields/node.article.field_paragraphs/storage');
+    $this->drupalGet('admin/structure/types/manage/article/fields/node.article.field_paragraphs');
     $edit = [
-      'settings[target_type]' => 'paragraph',
-      'cardinality' => '-1',
+      'field_storage[subform][cardinality]' => '-1',
     ];
-    $this->submitForm($edit, 'Save field settings');
+    $this->submitForm($edit, 'Save settings');
 
     // Enable IEF simple widget.
     $this->drupalGet('admin/structure/paragraphs_type/simple/form-display');

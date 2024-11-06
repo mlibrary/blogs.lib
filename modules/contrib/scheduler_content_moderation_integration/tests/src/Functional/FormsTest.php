@@ -22,7 +22,6 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
   public function testEntityFormAlter($entityTypeId, $bundle, $operation) {
     $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
     $entityType = $this->entityTypeObject($entityTypeId, $bundle);
-    /** @var \Drupal\Tests\WebAssert $assert */
     $assert = $this->assertSession();
 
     if ($operation == 'add') {
@@ -142,7 +141,6 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
    */
   public function testFormAlterWithDeniedAccess($entityTypeId, $bundle, $operation) {
     $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
-    /** @var \Drupal\Tests\WebAssert $assert */
     $assert = $this->assertSession();
 
     if ($operation == 'add') {
@@ -155,7 +153,7 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
 
     // Check that both state fields are shown by default.
     $this->drupalGet($url);
-    $this->assertSession()->statusCodeEquals(200, "The $operation form is displayed without error");
+    $this->assertSession()->statusCodeEquals(200);
     $assert->FieldExists('publish_state[0]');
     $assert->FieldExists('unpublish_state[0]');
 
@@ -171,7 +169,7 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
 
     // Check that both state fields are now hidden.
     $this->drupalGet($url);
-    $this->assertSession()->statusCodeEquals(200, "The $operation form is displayed without error");
+    $this->assertSession()->statusCodeEquals(200);
     $assert->FieldNotExists('publish_state[0]');
     $assert->FieldNotExists('unpublish_state[0]');
   }
@@ -184,8 +182,7 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
    * @param bool $showing
    *   The expected status of the field. TRUE = enabled, FALSE = hidden.
    */
-  public function assertStateField($field, $showing) {
-    /** @var \Drupal\Tests\WebAssert $assert */
+  public function assertStateField(string $field, bool $showing): void {
     $assert = $this->assertSession();
     // The field is enabled if the weight setting exists and is non-zero.
     $xpath = $this->assertSession()->buildXPathQuery('//input[@id=:id and not(@value="0")]', [':id' => "edit-fields-{$field}-weight"]);
@@ -261,9 +258,9 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
    * @return array
    *   Each array item has the values: [entity type id, bundle id, operation].
    */
-  public function dataFormAlter() {
+  public static function dataFormAlter(): array {
     $data = [];
-    foreach ($this->dataEntityTypes() as $key => $entity_types) {
+    foreach (static::dataEntityTypes() as $key => $entity_types) {
       $data["{$key}-add"] = array_merge($entity_types, ['add']);
       $data["{$key}-edit"] = array_merge($entity_types, ['edit']);
     }
@@ -274,17 +271,17 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
    * Provides test data for the entity type form alter test.
    *
    * Use the standard moderatable entity types, with an added parameter of TRUE,
-   * then add taxonomy_term (which is non-moderatbale) with parameter FALSE.
+   * then add commerce product (which is non-moderatable) with parameter FALSE.
    *
    * @return array
    *   Each array item has the values: [entity type id, bundle id, moderatable].
    */
-  public function dataEntityTypeFormAlter() {
+  public static function dataEntityTypeFormAlter(): array {
     $data = [];
-    foreach ($this->dataEntityTypes() as $key => $entity_types) {
+    foreach (static::dataEntityTypes() as $key => $entity_types) {
       $data[$key] = array_merge($entity_types, [TRUE]);
     }
-    $data['#taxonomy_term'] = ['taxonomy_term', 'test_vocab', FALSE];
+    $data['#commerce_product'] = ['commerce_product', 'test_product', FALSE];
     return $data;
   }
 

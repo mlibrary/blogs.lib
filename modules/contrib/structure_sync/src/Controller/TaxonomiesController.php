@@ -3,8 +3,8 @@
 namespace Drupal\structure_sync\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\structure_sync\StructureSyncHelper;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\structure_sync\StructureSyncHelper;
 use Drupal\taxonomy\Entity\Term;
 use Drush\Drush;
 
@@ -13,6 +13,11 @@ use Drush\Drush;
  */
 class TaxonomiesController extends ControllerBase {
 
+  /**
+   * An editable structure_sync.data configuration object.
+   *
+   * @var \Drupal\Core\Config\Config
+   */
   private $config;
 
   /**
@@ -93,7 +98,7 @@ class TaxonomiesController extends ControllerBase {
           'description__value' => $entity->get('description')->value,
           'description__format' => $entity->get('description')->format,
           'weight' => $entity->weight->value,
-          'parent' => isset($parents[$entity->id()]) ? $parents[$entity->id()] : '0',
+          'parent' => $parents[$entity->id()] ?? '0',
           'uuid' => $entity->uuid(),
         ];
 
@@ -127,12 +132,12 @@ class TaxonomiesController extends ControllerBase {
               foreach ($entity_reference_field_value as $field_item) {
                 $target_term_entity = StructureSyncHelper::getEntityManager()
                   ->getStorage('taxonomy_term')->load($field_item['target_id']);
-		if ($target_term_entity) {
+                if ($target_term_entity) {
                   $entity_fields[$field_name][] = [
                     'name' => $target_term_entity->getName(),
-                    'vid' => $target_term_entity->bundle()
+                    'vid' => $target_term_entity->bundle(),
                   ];
-		}
+                }
               }
             }
           }
@@ -180,7 +185,7 @@ class TaxonomiesController extends ControllerBase {
     // Get taxonomies from config.
     $taxonomiesConfig = $this->config->get('taxonomies');
 
-    $taxonomies = [];
+    $taxonomies = $taxonomiesConfig ? $taxonomiesConfig : [];
 
     if (isset($taxonomiesSelected)) {
       foreach ($taxonomiesConfig as $taxKey => $taxValue) {
@@ -189,12 +194,9 @@ class TaxonomiesController extends ControllerBase {
         }
       }
     }
-    else {
-      $taxonomies = $taxonomiesConfig;
-    }
 
     // Sorts taxonomies so that all parent terms come before -- and therefore
-    // are created before -- their respective child terms
+    // are created before -- their respective child terms.
     foreach ($taxonomies as $taxonomy => $terms) {
       $parents = [];
       foreach ($terms as $key => $term_data) {
@@ -298,7 +300,7 @@ class TaxonomiesController extends ControllerBase {
       }
     }
 
-    if(!empty($uuidsInConfig)) {
+    if (!empty($uuidsInConfig)) {
       $query = StructureSyncHelper::getEntityQuery('taxonomy_term');
       $query->condition('uuid', $uuidsInConfig, 'NOT IN');
       $tids = $query->execute();
@@ -328,7 +330,7 @@ class TaxonomiesController extends ControllerBase {
       }
     }
     $entities = [];
-    if(!empty($uuidsInConfig)) {
+    if (!empty($uuidsInConfig)) {
       $query = StructureSyncHelper::getEntityQuery('taxonomy_term');
       $query->condition('uuid', $uuidsInConfig, 'IN');
       $tids = $query->execute();
@@ -388,7 +390,8 @@ class TaxonomiesController extends ControllerBase {
                       $entity_fields[$field_name][] = [
                         'target_id' => reset($tid),
                       ];
-                    } else {
+                    }
+                    else {
                       // If we encounter a term reference field referencing a
                       // term that hasn't been imported again, trigger re-import
                       // following current import to update term reference
@@ -403,7 +406,6 @@ class TaxonomiesController extends ControllerBase {
             if (count($tids) <= 0) {
               $entity_properties = [
                 'vid' => $vid,
-                'uuid' => $taxonomy['uuid'],
                 'langcode' => $taxonomy['langcode'],
                 'name' => $taxonomy['name'],
                 'description' => [
@@ -481,7 +483,7 @@ class TaxonomiesController extends ControllerBase {
         StructureSyncHelper::logMessage('Running additional full import'
           . ' after all terms have been created in order to identify missing '
           . ' TIDs for term reference fields.');
-        Self::importTaxonomiesFull($taxonomies, $context);
+        self::importTaxonomiesFull($taxonomies, $context);
       }
 
       $firstRun = FALSE;
@@ -494,7 +496,7 @@ class TaxonomiesController extends ControllerBase {
 
     drupal_flush_all_caches();
 
-    StructureSyncHelper::logMessage('Succesfully flushed caches');
+    StructureSyncHelper::logMessage('Successfully flushed caches');
 
     $context['finished'] = 1;
   }
@@ -556,11 +558,11 @@ class TaxonomiesController extends ControllerBase {
                       $entity_fields[$field_name] = $field_value;
                     }
                     // If importing entity reference field that references other
-                    // taxonomy terms, look up associated TID from name/VID value
-                    // pair provided during export: Because TIDs aren't synced and
-                    // may get altered using this module, we need to look up TIDs
-                    // from the name/VID pair during import, otherwise term
-                    // reference fields may lose data.
+                    // taxonomy terms, look up associated TID from name/VID
+                    // value pair provided during export: Because TIDs aren't
+                    // synced and may get altered using this module, we need to
+                    // look up TIDs from the name/VID pair during import,
+                    // otherwise term reference fields may lose data.
                     else {
                       foreach ($field_value as $field_properties) {
                         $tid = StructureSyncHelper::getEntityManager()
@@ -575,11 +577,12 @@ class TaxonomiesController extends ControllerBase {
                           $entity_fields[$field_name][] = [
                             'target_id' => reset($tid),
                           ];
-                        } else {
-                          // If we encounter a term reference field referencing a
-                          // term that hasn't been imported again, trigger re-import
-                          // following current import to update term reference
-                          // fields once all terms are available.
+                        }
+                        else {
+                          // If we encounter a term reference field referencing
+                          // a term that hasn't been imported again, trigger
+                          // re-import following current import to update term
+                          // reference fields once all terms are available.
                           $runAgain = TRUE;
                         }
                       }
@@ -646,7 +649,7 @@ class TaxonomiesController extends ControllerBase {
         StructureSyncHelper::logMessage('Running additional full import'
           . ' after all terms have been created in order to identify missing '
           . ' TIDs for term reference fields.');
-        Self::importTaxonomiesFull($taxonomies, $context);
+        self::importTaxonomiesFull($taxonomies, $context);
       }
 
       $firstRun = FALSE;
@@ -739,11 +742,12 @@ class TaxonomiesController extends ControllerBase {
                         $entity_fields[$field_name][] = [
                           'target_id' => reset($tid),
                         ];
-                      } else {
+                      }
+                      else {
                         // If we encounter a term reference field referencing a
-                        // term that hasn't been imported again, trigger re-import
-                        // following current import to update term reference
-                        // fields once all terms are available.
+                        // term that hasn't been imported again, trigger
+                        // re-import following current import to update term
+                        // reference fields once all terms are available.
                         $runAgain = TRUE;
                       }
                     }
@@ -793,7 +797,7 @@ class TaxonomiesController extends ControllerBase {
         StructureSyncHelper::logMessage('Running additional full import'
           . ' after all terms have been created in order to identify missing '
           . ' TIDs for term reference fields.');
-        Self::importTaxonomiesFull($taxonomies, $context);
+        self::importTaxonomiesFull($taxonomies, $context);
       }
 
       $firstRun = FALSE;

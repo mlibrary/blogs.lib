@@ -25,8 +25,8 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         'def43f6c87e4f8dfd0c9e1b1bab14fe8' => __DIR__ . '/..' . '/symfony/polyfill-iconv/bootstrap.php',
         '2f69d3914119f042cca9e44442d5ce95' => __DIR__ . '/../..' . '/core/includes/bootstrap.inc',
+        '9b38cf48e83f5d8f60375221cd213eee' => __DIR__ . '/..' . '/phpstan/phpstan/bootstrap.php',
         '801c31d8ed748cfa537fa45402288c95' => __DIR__ . '/..' . '/psy/psysh/src/functions.php',
-        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -35,6 +35,14 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
             'phpowermove\\docblock\\' => 21,
             'phootwork\\lang\\' => 15,
             'phootwork\\collection\\' => 21,
+        ),
+        'm' => 
+        array (
+            'mglaman\\PHPStanDrupal\\' => 22,
+        ),
+        'd' => 
+        array (
+            'dekor\\' => 6,
         ),
         'c' => 
         array (
@@ -53,7 +61,6 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         array (
             'Symfony\\Polyfill\\Php83\\' => 23,
             'Symfony\\Polyfill\\Php81\\' => 23,
-            'Symfony\\Polyfill\\Php80\\' => 23,
             'Symfony\\Polyfill\\Mbstring\\' => 26,
             'Symfony\\Polyfill\\Intl\\Normalizer\\' => 33,
             'Symfony\\Polyfill\\Intl\\Idn\\' => 26,
@@ -100,6 +107,7 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
             'Psr\\Cache\\' => 10,
             'PhpParser\\' => 10,
             'Peast\\' => 6,
+            'PHPStan\\' => 8,
             'PHPMailer\\PHPMailer\\' => 20,
         ),
         'O' => 
@@ -135,6 +143,7 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
             'Drush\\' => 6,
             'Drupal\\Core\\' => 12,
             'Drupal\\Component\\' => 17,
+            'DrupalFinder\\' => 13,
             'DrupalCodeGenerator\\' => 20,
             'Doctrine\\Persistence\\' => 21,
             'Doctrine\\Deprecations\\' => 22,
@@ -174,6 +183,14 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         array (
             0 => __DIR__ . '/..' . '/phootwork/collection',
         ),
+        'mglaman\\PHPStanDrupal\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mglaman/phpstan-drupal/src',
+        ),
+        'dekor\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/dekor/php-array-table/src',
+        ),
         'cweagans\\Composer\\' => 
         array (
             0 => __DIR__ . '/..' . '/cweagans/composer-patches/src',
@@ -197,10 +214,6 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         'Symfony\\Polyfill\\Php81\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php81',
-        ),
-        'Symfony\\Polyfill\\Php80\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
         ),
         'Symfony\\Polyfill\\Mbstring\\' => 
         array (
@@ -363,6 +376,10 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         array (
             0 => __DIR__ . '/..' . '/mck89/peast/lib/Peast',
         ),
+        'PHPStan\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpstan/phpstan-deprecation-rules/src',
+        ),
         'PHPMailer\\PHPMailer\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
@@ -382,7 +399,6 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         'Html2Text\\' => 
         array (
             0 => __DIR__ . '/..' . '/html2text/html2text/src',
-            1 => __DIR__ . '/..' . '/html2text/html2text/test',
         ),
         'GuzzleHttp\\Psr7\\' => 
         array (
@@ -419,6 +435,10 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         'Drupal\\Component\\' => 
         array (
             0 => __DIR__ . '/../..' . '/core/lib/Drupal/Component',
+        ),
+        'DrupalFinder\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/webflo/drupal-finder/src',
         ),
         'DrupalCodeGenerator\\' => 
         array (
@@ -509,7 +529,6 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
     );
 
     public static $classMap = array (
-        'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'CURLStringFile' => __DIR__ . '/..' . '/symfony/polyfill-php81/Resources/stubs/CURLStringFile.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'DateError' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/DateError.php',
@@ -522,7 +541,7 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         'DateObjectError' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/DateObjectError.php',
         'DateRangeError' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/DateRangeError.php',
         'Drupal' => __DIR__ . '/../..' . '/core/lib/Drupal.php',
-        'DrupalFinder\\DrupalFinder' => __DIR__ . '/..' . '/webflo/drupal-finder/src/DrupalFinder.php',
+        'Drupal\\Component\\Datetime\\Time' => __DIR__ . '/../..' . '/core/lib/Drupal/Component/Datetime/Time.php',
         'Drupal\\Component\\DependencyInjection\\Container' => __DIR__ . '/../..' . '/core/lib/Drupal/Component/DependencyInjection/Container.php',
         'Drupal\\Component\\DependencyInjection\\PhpArrayContainer' => __DIR__ . '/../..' . '/core/lib/Drupal/Component/DependencyInjection/PhpArrayContainer.php',
         'Drupal\\Component\\FileCache\\FileCacheFactory' => __DIR__ . '/../..' . '/core/lib/Drupal/Component/FileCache/FileCacheFactory.php',
@@ -550,7 +569,6 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         'PEAR_Error' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/PEAR.php',
         'PEAR_ErrorStack' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/PEAR/ErrorStack.php',
         'PEAR_Exception' => __DIR__ . '/..' . '/pear/pear_exception/PEAR/Exception.php',
-        'PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
         'ReturnTypeWillChange' => __DIR__ . '/..' . '/symfony/polyfill-php81/Resources/stubs/ReturnTypeWillChange.php',
         'SQLite3Exception' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/SQLite3Exception.php',
         'SebastianBergmann\\Diff\\Chunk' => __DIR__ . '/..' . '/sebastian/diff/src/Chunk.php',
@@ -569,10 +587,7 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         'SebastianBergmann\\Diff\\Output\\UnifiedDiffOutputBuilder' => __DIR__ . '/..' . '/sebastian/diff/src/Output/UnifiedDiffOutputBuilder.php',
         'SebastianBergmann\\Diff\\Parser' => __DIR__ . '/..' . '/sebastian/diff/src/Parser.php',
         'SebastianBergmann\\Diff\\TimeEfficientLongestCommonSubsequenceCalculator' => __DIR__ . '/..' . '/sebastian/diff/src/TimeEfficientLongestCommonSubsequenceCalculator.php',
-        'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
         'System' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/System.php',
-        'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
-        'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

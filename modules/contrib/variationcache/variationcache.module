@@ -1,0 +1,29 @@
+<?php
+
+use Drupal\variationcache\Old\Cache\CacheRedirect;
+use Drupal\variationcache\Old\Cache\VariationCache;
+use Drupal\variationcache\Old\Cache\VariationCacheFactory;
+use Drupal\variationcache\Old\Cache\VariationCacheFactoryInterface;
+use Drupal\variationcache\Old\Cache\VariationCacheInterface;
+
+/**
+ * @file
+ * Contains class aliases to keep old code functioning now that this module has
+ * been integrated into Drupal 10.2 and higher. If you are running on this core
+ * version, you should simply uninstall this module and update code that used to
+ * use this module to point to the core classes directly.
+ */
+if (!class_exists('\Drupal\Core\Cache\CacheRedirect')) {
+  @class_alias(CacheRedirect::class, '\Drupal\variationcache\Cache\CacheRedirect');
+  @class_alias(VariationCache::class, '\Drupal\variationcache\Cache\VariationCache');
+  @class_alias(VariationCacheFactory::class, '\Drupal\variationcache\Cache\VariationCacheFactory');
+  @class_alias(VariationCacheFactoryInterface::class, '\Drupal\variationcache\Cache\VariationCacheFactoryInterface');
+  @class_alias(VariationCacheInterface::class, '\Drupal\variationcache\Cache\VariationCacheInterface');
+}
+else {
+  @class_alias('\Drupal\Core\Cache\CacheRedirect', '\Drupal\variationcache\Cache\CacheRedirect');
+  @class_alias('\Drupal\Core\Cache\VariationCache', '\Drupal\variationcache\Cache\VariationCache');
+  @class_alias('\Drupal\Core\Cache\VariationCacheFactory', '\Drupal\variationcache\Cache\VariationCacheFactory');
+  @class_alias('\Drupal\Core\Cache\VariationCacheFactoryInterface', '\Drupal\variationcache\Cache\VariationCacheFactoryInterface');
+  @class_alias('\Drupal\Core\Cache\VariationCacheInterface', '\Drupal\variationcache\Cache\VariationCacheInterface');
+}

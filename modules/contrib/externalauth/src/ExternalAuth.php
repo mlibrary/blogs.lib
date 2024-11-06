@@ -3,14 +3,14 @@
 namespace Drupal\externalauth;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Drupal\externalauth\Event\ExternalAuthAuthmapAlterEvent;
 use Drupal\externalauth\Event\ExternalAuthEvents;
 use Drupal\externalauth\Event\ExternalAuthLoginEvent;
 use Drupal\externalauth\Event\ExternalAuthRegisterEvent;
-use Drupal\externalauth\Event\ExternalAuthAuthmapAlterEvent;
-use Drupal\user\UserInterface;
 use Drupal\externalauth\Exception\ExternalAuthRegisterException;
+use Drupal\user\UserInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Service to handle external authentication logic.
@@ -166,7 +166,7 @@ class ExternalAuth implements ExternalAuthInterface {
     if ($current_authname === $authname) {
       return;
     }
-    
+
     // If we update the authmap entry, let's log the change.
     if (!empty($current_authname)) {
       $this->logger->debug('Authmap change (%old => %new) for user %name with uid %uid from provider %provider', [

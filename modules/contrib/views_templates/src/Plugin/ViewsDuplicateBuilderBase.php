@@ -4,13 +4,15 @@ namespace Drupal\views_templates\Plugin;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Utility\Error;
 use Drupal\views\Entity\View;
 use Drupal\views_templates\ViewsTemplateLoaderInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 
 /**
- * ViewsDuplicateBuilderBase Class.
+ * Confirms existence of template and handles duplication.
  */
 abstract class ViewsDuplicateBuilderBase extends ViewsBuilderBase implements ViewsDuplicateBuilderPluginInterface, ContainerFactoryPluginInterface {
 
@@ -29,12 +31,25 @@ abstract class ViewsDuplicateBuilderBase extends ViewsBuilderBase implements Vie
   protected $loadedTemplate;
 
   /**
+   * A logger instance.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
+  /**
    * Constructor to the class ViewDuplicateBuilderBase.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ViewsTemplateLoaderInterface $loader) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ViewsTemplateLoaderInterface $loader, ?LoggerInterface $logger = NULL) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->templateLoader = $loader;
 
+    if ($logger === NULL) {
+      @trigger_error('Calling ' . __METHOD__ . '() without the $logger argument is deprecated in drupal:10.1.0 and it will be required in drupal:11.0.0. See https://www.drupal.org/node/2932520', E_USER_DEPRECATED);
+      // @phpstan-ignore-next-line
+      $logger = \Drupal::service('logger.channel.views_templates');
+    }
+    $this->logger = $logger;
   }
 
   /**
@@ -125,7 +140,7 @@ abstract class ViewsDuplicateBuilderBase extends ViewsBuilderBase implements Vie
         $template = $this->templateLoader->load($this);
       }
       catch (FileNotFoundException $e) {
-        watchdog_exception('views_templates', $e, $e->getMessage());
+        Error::logException($this->logger, $e);
         return NULL;
       }
 

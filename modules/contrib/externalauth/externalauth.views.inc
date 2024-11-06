@@ -8,7 +8,7 @@
 /**
  * Implements hook_views_data().
  */
-function externalauth_views_data() {
+function externalauth_views_data(): array {
   $data = [];
 
   $data['authmap'] = [
@@ -20,6 +20,10 @@ function externalauth_views_data() {
           'left_field' => 'uid',
           'field' => 'uid',
         ],
+      ],
+      'base' => [
+        'field' => 'uid',
+        'title' => t('External Authentication Map'),
       ],
     ],
     'provider_field' => [

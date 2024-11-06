@@ -12,6 +12,7 @@
   },
   "require": {
     "php": ">=7.1.0",
-    "ext-json": "*"
+    "ext-json": "*",
+    "drupal/externalauth": "^2.0"
   }
 }

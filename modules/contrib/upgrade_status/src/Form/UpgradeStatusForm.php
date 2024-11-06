@@ -19,7 +19,6 @@ use Drupal\upgrade_status\CookieJar;
 use Drupal\upgrade_status\DeprecationAnalyzer;
 use Drupal\upgrade_status\ProjectCollector;
 use Drupal\upgrade_status\ScanResultFormatter;
-use Drupal\upgrade_status\Util\DatabaseServerMetadataExtractor;
 use Drupal\user\Entity\Role;
 use GuzzleHttp\Cookie\SetCookie;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -242,7 +241,12 @@ class UpgradeStatusForm extends FormBase {
       ];
     }
 
-    $environment = $this->buildEnvironmentChecks();
+    if ($this->nextMajor == 11) {
+      $environment = $this->buildEnvironmentChecksFor11();
+    }
+    else {
+      $environment = $this->buildEnvironmentChecksFor10();
+    }
     $form['summary'] = $this->buildResultSummary($environment['status']);
     $environment_description = $environment['description'];
     unset($environment['status']);
@@ -253,7 +257,7 @@ class UpgradeStatusForm extends FormBase {
       '#title' => $this->t('Drupal core and hosting environment'),
       '#description' => $environment_description,
       '#open' => TRUE,
-      '#attributes' => ['class' => ['upgrade-status-summary-environment']],
+      '#attributes' => ['class' => ['upgrade-status-of-environment']],
       'data' => $environment,
       '#tree' => TRUE,
     ];
@@ -274,8 +278,8 @@ class UpgradeStatusForm extends FormBase {
           '#title' => $step_label[0],
           '#description' => $step_label[1],
           '#open' => TRUE,
-          '#attributes' => ['class' => ['upgrade-status-summary', 'upgrade-status-next-step-' . $next_step]],
-          'data' => $this->buildProjectList($sublist, $next_step),
+          '#attributes' => ['class' => ['upgrade-status-next-step']],
+          'data' => $this->buildProjectList($sublist, $next_step, $step_label),
           '#tree' => TRUE,
         ];
       }
@@ -315,11 +319,13 @@ class UpgradeStatusForm extends FormBase {
    *   Array of extensions representing projects.
    * @param string $next_step
    *   The machine name of the suggested next step to take for these projects.
+   * @param array $step_label
+   *   Labels and other metadata for the step.
    *
    * @return array
    *   Build array.
    */
-  protected function buildProjectList(array $projects, string $next_step) {
+  protected function buildProjectList(array $projects, string $next_step, array $step_label) {
     $header = [
       'project'  => ['data' => $this->t('Project'), 'class' => 'project-label'],
       'type'     => ['data' => $this->t('Type'), 'class' => 'type-label'],
@@ -330,7 +336,6 @@ class UpgradeStatusForm extends FormBase {
       'updatev'  => ['data' => $this->t('Drupal.org version'), 'class' => 'updatev-info'],
       'update9'  => ['data' => $this->t('Drupal.org ' . $this->nextMajor . '-ready'), 'class' => 'update9-info'],
       'issues'   => ['data' => $this->t('Drupal.org issues'), 'class' => 'issue-info'],
-      'plan'     => ['data' => $this->t('Plan'), 'class' => 'plan-info'],
     ];
     $build['list'] = [
       '#type' => 'tableselect',
@@ -340,7 +345,7 @@ class UpgradeStatusForm extends FormBase {
     ];
     foreach ($projects as $name => $extension) {
       $option = [
-        '#attributes' => ['class' => 'project-' . $name],
+        '#attributes' => ['class' => 'project-' . $name . ' ' . $step_label[3]],
       ];
       $option['project'] = [
         'data' => [
@@ -519,7 +524,7 @@ class UpgradeStatusForm extends FormBase {
         ]
       ];
       if ($extension->info['upgrade_status_type'] == ProjectCollector::TYPE_CUSTOM) {
-        $option['issues'] = $option['plan'] = [
+        $option['issues'] = [
           'data' => [
             'label' => [
               '#type' => 'markup',
@@ -539,20 +544,22 @@ class UpgradeStatusForm extends FormBase {
             ],
           ]
         ];
-        $plan = (string) $this->projectCollector->getPlan($name);
-        $option['plan'] = [
-          'data' => [
-            'label' => [
-              '#type' => 'markup',
-              '#markup' => !empty($plan) ? $plan : $this->t('N/A'),
-            ],
-          ]
-        ];
       }
       $build['list']['#options'][$name] = $option;
     }
 
     return $build;
+  }
+
+  /**
+   * Preprocess function to add class to the header row of our table.
+   */
+  function upgrade_status_preprocess_table_custom_header(array &$element) {
+    // Check if this is the table you want to target.
+    if (!empty($element['list']['#upgrade_status_step_class'])) {
+      // Add class to the header row.
+      $element['#header']['#attributes']['class'][] = $element['list']['#upgrade_status_step_class'];
+    }
   }
 
   /**
@@ -590,13 +597,13 @@ class UpgradeStatusForm extends FormBase {
     ];
 
     $header = [
-      ProjectCollector::SUMMARY_ANALYZE => ['data' => $this->t('Gather data'), 'class' => 'summary-' . ProjectCollector::SUMMARY_ANALYZE],
-      ProjectCollector::SUMMARY_ACT => ['data' => $this->t('Fix incompatibilities'), 'class' => 'status-' . ProjectCollector::SUMMARY_ACT],
-      ProjectCollector::SUMMARY_RELAX => ['data' => $this->t('Relax'), 'class' => 'status-' . ProjectCollector::SUMMARY_RELAX],
+      ProjectCollector::SUMMARY_ANALYZE => ['data' => $this->t('Gather data')],
+      ProjectCollector::SUMMARY_ACT => ['data' => $this->t('Fix incompatibilities')],
+      ProjectCollector::SUMMARY_RELAX => ['data' => $this->t('Relax')],
     ];
     $build = [
       '#type' => 'table',
-      '#attributes' => ['class' => ['upgrade-status-overview']],
+      '#attributes' => ['class' => ['upgrade-status-of-site']],
       '#header' => $header,
       '#rows' => [
         [
@@ -613,7 +620,7 @@ class UpgradeStatusForm extends FormBase {
       foreach($next_steps as $next_step => $step_label) {
         // If this next step summary belongs in this table cell, collect it.
         if ($step_label[2] == $key) {
-          foreach ($projects as $name => $project) {
+          foreach ($projects as $project) {
             if ($project->info['upgrade_status_next'] == $next_step) {
               @$cell_data[$next_step]++;
             }
@@ -632,14 +639,14 @@ class UpgradeStatusForm extends FormBase {
       }
       if (($key == ProjectCollector::SUMMARY_ACT) && !is_null($environment_status) && !$environment_status) {
         $cell_items[] = [
-          '#markup' => '<a href="#edit-environment" class="upgrade-status-summary-label">' . $this->t('Environment is incompatible') . '</a>',
+          '#markup' => '<a href="#edit-environment">' . $this->t('Environment is incompatible') . '</a>',
         ];
       }
 
       if (count($cell_data)) {
         foreach ($cell_data as $next_step => $count) {
           $cell_items[] = [
-            '#markup' => '<a href="#edit-' . $next_step . '" class="upgrade-status-summary-label upgrade-status-summary-label-' . $next_step . '">' . $this->formatPlural($count, '@type: 1 project', '@type: @count projects', ['@type' => $next_steps[$next_step][0]]) . '</a>',
+            '#markup' => '<a href="#edit-' . $next_step . '">' . $this->formatPlural($count, '@type: 1 project', '@type: @count projects', ['@type' => $next_steps[$next_step][0]]) . '</a>',
           ];
         }
       }
@@ -659,7 +666,7 @@ class UpgradeStatusForm extends FormBase {
           '#allowed_tags' => ['svg', 'path', 'text'],
           '#markup' => <<<MARKUP
         <div class="upgrade-status-result-chart">
-        <svg viewBox="0 0 36 36" class="upgrade-status-result-circle">
+        <svg viewBox="0 0 36 36" class="upgrade-status-of-site-circle">
           <path class="circle-bg"
             d="M18 2.0845
               a 15.9155 15.9155 0 0 1 0 31.831
@@ -678,7 +685,7 @@ MARKUP
         ];
         if (!empty($environment_status)) {
           $cell_items[] = [
-            '#markup' => '<a href="#edit-environment" class="upgrade-status-summary-label">' . $this->t('Environment checks passed') . '</a>',
+            '#markup' => '<a href="#edit-environment">' . $this->t('Environment checks passed') . '</a>',
           ];
         }
       }
@@ -699,22 +706,14 @@ MARKUP
   }
 
   /**
-   * Builds a list of environment checks.
+   * Builds a list of environment checks for Drupal 10 compatibility.
    *
    * @return array
    *   Build array. The overall environment status (TRUE, FALSE or NULL) is
    *   indicated in the 'status' key, while a 'description' key explains the
    *   environment requirements on a high level.
    */
-  protected function buildEnvironmentChecks() {
-    if ($this->nextMajor == 11) {
-      return [
-        'description' => $this->t('<a href=":platform">Drupal 11 environment requirements are still to be defined</a>.', [':platform' => 'https://www.drupal.org/project/drupal/issues/3214954']),
-        // Checks neither passed, nor failed.
-        'status' => NULL,
-      ];
-    }
-
+  protected function buildEnvironmentChecksFor10() {
     $status = TRUE;
     $header = [
       'requirement' => ['data' => $this->t('Requirement'), 'class' => 'requirement-label'],
@@ -726,221 +725,7 @@ MARKUP
       '#rows' => [],
     ];
 
-    if ($this->nextMajor == 10) {
-      $build['description'] = $this->t('Upgrades to Drupal 10 are supported from Drupal 9.4.x and Drupal 9.5.x. It is suggested to update to the latest Drupal 9 version available. <a href=":platform">Several hosting platform requirements have been raised for Drupal 10</a>.', [':platform' => 'https://www.drupal.org/node/3228686']);
-
-      // Check Drupal version. Link to update if available.
-      $core_version_info = [
-        '#type' => 'markup',
-        '#markup' => $this->t('Version @version.', ['@version' => \Drupal::VERSION]),
-      ];
-      $has_core_update = FALSE;
-      $core_update_info = $this->releaseStore->get('drupal');
-      if (isset($core_update_info['releases']) && is_array($core_update_info['releases'])) {
-        // Find the latest release that are higher than our current and is not beta/alpha/rc/dev.
-        foreach ($core_update_info['releases'] as $version => $release) {
-          $major_version = explode('.', $version)[0];
-          if ($major_version === '9' && !strpos($version, '-') && (version_compare($version, \Drupal::VERSION) > 0)) {
-            $link = $core_update_info['link'] . '/releases/' . $version;
-            $core_version_info = [
-              '#type' => 'link',
-              '#title' => version_compare(\Drupal::VERSION, '9.4.0') >= 0 ?
-                $this->t('Version @current allows to upgrade but @new is available.', ['@current' => \Drupal::VERSION, '@new' => $version]) :
-                $this->t('Version @current does not allow to upgrade and @new is available.', ['@current' => \Drupal::VERSION, '@new' => $version]),
-              '#url' => Url::fromUri($link),
-            ];
-            $has_core_update = TRUE;
-            break;
-          }
-        }
-      }
-      if (version_compare(\Drupal::VERSION, '9.4.0') >= 0) {
-        if (!$has_core_update) {
-          $class = 'no-known-error';
-        }
-        else {
-          $class = 'known-warning';
-        }
-      }
-      else {
-        $status = FALSE;
-        $class = 'known-error';
-      }
-      $build['data']['#rows'][] = [
-        'class' => $class,
-        'data' => [
-          'requirement' => [
-            'class' => 'requirement-label',
-            'data' => $this->t('Drupal core should be at least 9.4.x'),
-          ],
-          'status' => [
-            'data' => $core_version_info,
-            'class' => 'status-info',
-          ],
-        ]
-      ];
-
-      // Check PHP version.
-      $version = PHP_VERSION;
-      // The value of MINIMUM_PHP in Drupal 10.
-      $minimum_php = '8.1.0';
-      if (version_compare($version, $minimum_php) >= 0) {
-        $class = 'no-known-error';
-      }
-      else {
-        $class = 'known-error';
-        $status = FALSE;
-      }
-      $build['data']['#rows'][] = [
-        'class' => [$class],
-        'data' => [
-          'requirement' => [
-            'class' => 'requirement-label',
-            'data' => $this->t('PHP version should be at least @minimum_php. Before updating to PHP 8, use <code>$ composer why-not php 8.1</code> to check if any projects need updating for compatibility. Also check custom projects manually.', ['@minimum_php' => $minimum_php]),
-          ],
-          'status' => [
-            'data' => $this->t('Version @version', ['@version' => $version]),
-            'class' => 'status-info',
-          ],
-        ]
-      ];
-
-      // Check database version.
-      $database_type = $this->database->databaseType();
-      $version = $this->database->version();
-      $addendum = '';
-      if ($database_type == 'pgsql') {
-        $database_type_full_name = 'PostgreSQL';
-        $requirement = $this->t('When using PostgreSQL, minimum version is 12 <a href=":trgm">with the pg_trgm extension</a> created.', [':trgm' => 'https://www.postgresql.org/docs/10/pgtrgm.html']);
-        $has_trgm = $this->database->query("SELECT installed_version FROM pg_available_extensions WHERE name = 'pg_trgm'")->fetchField();
-        if (version_compare($version, '12') >= 0 && $has_trgm) {
-          $class = 'no-known-error';
-          $addendum = $this->t('Has pg_trgm extension.');
-        }
-        else {
-          $status = FALSE;
-          $class = 'known-error';
-          if (!$has_trgm) {
-            $addendum = $this->t('No pg_trgm extension.');
-          }
-        }
-        $build['data']['#rows'][] = [
-          'class' => [$class],
-          'data' => [
-            'requirement' => [
-              'class' => 'requirement-label',
-              'data' => [
-                '#type' => 'markup',
-                '#markup' => $requirement
-              ],
-            ],
-            'status' => [
-              'data' => trim($database_type_full_name . ' ' . $version . ' ' . $addendum),
-              'class' => 'status-info',
-            ],
-          ]
-        ];
-      }
-
-      // Check JSON support in database.
-      $class = 'no-known-error';
-      $requirement = $this->t('Supported.');
-      try {
-        if (!method_exists($this->database, 'hasJson') || !$this->database->hasJson()) {
-          // A hasJson() method was added to Connection from Drupal 9.4.0
-          // but we cannot rely on being on Drupal 9.4.x+
-          $this->database->query($database_type == 'pgsql' ? 'SELECT JSON_TYPEOF(\'1\')' : 'SELECT JSON_TYPE(\'1\')');
-        }
-      }
-      catch (\Exception $e) {
-        $class = 'known-error';
-        $status = FALSE;
-        $requirement = $this->t('Not supported.');
-      }
-      $build['data']['#rows'][] = [
-        'class' => [$class],
-        'data' => [
-          'requirement' => [
-            'class' => 'requirement-label',
-            'data' => $this->t('Database JSON support required'),
-          ],
-          'status' => [
-            'data' => $requirement,
-            'class' => 'status-info',
-          ],
-        ]
-      ];
-
-      // Check user roles on the site for invalid permissions.
-      $class = 'no-known-error';
-      $requirement = [];
-      $user_roles = Role::loadMultiple();
-      $all_permissions = array_keys(\Drupal::service('user.permissions')->getPermissions());
-      foreach ($user_roles as $role) {
-        $role_permissions = $role->getPermissions();
-        $valid_role_permissions = array_intersect($role_permissions, $all_permissions);
-        $invalid_role_permissions = array_diff($role_permissions, $valid_role_permissions);
-        if (!empty($invalid_role_permissions)) {
-          $class = 'known-error';
-          $status = FALSE;
-          $requirement[] = [
-            '#theme' => 'item_list',
-            '#prefix' => $this->t('Permissions of user role: "@role":', ['@role' => $role->label()]),
-            '#items' => $invalid_role_permissions,
-          ];
-        }
-      }
-      $build['data']['#rows'][] = [
-        'class' => [$class],
-        'data' => [
-          'requirement' => [
-            'class' => 'requirement-label',
-            'data' => $this->t('<a href=":url">Invalid permissions will trigger runtime exceptions in Drupal 10.</a> Permissions should be defined in a permissions.yml file or a permission callback.', [':url' => 'https://www.drupal.org/node/3193348']),
-          ],
-          'status' => [
-            'data' => [
-              '#theme' => 'item_list',
-              '#items' => $requirement,
-              '#empty' => $this->t('None found.'),
-            ],
-            'class' => 'status-info',
-          ],
-        ]
-      ];
-
-      // Check for deprecated or obsolete core extensions.
-      $class = 'no-known-error';
-      $requirement = $this->t('None installed.');
-      $deprecated_or_obsolete = $this->projectCollector->collectCoreDeprecatedAndObsoleteExtensions();
-      if (!empty($deprecated_or_obsolete)) {
-        $class = 'known-error';
-        $status = FALSE;
-        $requirement = join(', ', $deprecated_or_obsolete);
-      }
-      $build['data']['#rows'][] = [
-        'class' => [$class],
-        'data' => [
-          'requirement' => [
-            'class' => 'requirement-label',
-            'data' => $this->t('Deprecated or obsolete core extensions installed. These will be removed in the next major version.'),
-          ],
-          'status' => [
-            'data' => [
-              '#markup' => $requirement,
-            ],
-            'class' => 'status-info',
-          ],
-        ]
-      ];
-
-      // Save the overall status indicator in the build array. It will be
-      // popped off later to be used in the summary table.
-      $build['status'] = $status;
-
-      return $build;
-    }
-
-    $build['description'] = $this->t('<a href=":upgrade">Upgrades to Drupal 9 are supported from Drupal 8.8.x and Drupal 8.9.x</a>. It is suggested to update to the latest Drupal 8 version available. <a href=":platform">Several hosting platform requirements have been raised for Drupal 9</a>.', [':upgrade' => 'https://www.drupal.org/docs/9/how-to-prepare-your-drupal-7-or-8-site-for-drupal-9/upgrading-a-drupal-8-site-to-drupal-9', ':platform' => 'https://www.drupal.org/docs/9/how-drupal-9-is-made-and-what-is-included/environment-requirements-of-drupal-9']);
+    $build['description'] = $this->t('Upgrades to Drupal 10 are supported from Drupal 9.4.x and Drupal 9.5.x. It is suggested to update to the latest Drupal 9 version available. <a href=":platform">Several hosting platform requirements have been raised for Drupal 10</a>.', [':platform' => 'https://www.drupal.org/node/3228686']);
 
     // Check Drupal version. Link to update if available.
     $core_version_info = [
@@ -953,11 +738,11 @@ MARKUP
       // Find the latest release that are higher than our current and is not beta/alpha/rc/dev.
       foreach ($core_update_info['releases'] as $version => $release) {
         $major_version = explode('.', $version)[0];
-        if ($major_version === '8' && !strpos($version, '-') && (version_compare($version, \Drupal::VERSION) > 0)) {
+        if ($major_version === '9' && !strpos($version, '-') && (version_compare($version, \Drupal::VERSION) > 0)) {
           $link = $core_update_info['link'] . '/releases/' . $version;
           $core_version_info = [
             '#type' => 'link',
-            '#title' => version_compare(\Drupal::VERSION, '8.8.0') >= 0 ?
+            '#title' => version_compare(\Drupal::VERSION, '9.4.0') >= 0 ?
               $this->t('Version @current allows to upgrade but @new is available.', ['@current' => \Drupal::VERSION, '@new' => $version]) :
               $this->t('Version @current does not allow to upgrade and @new is available.', ['@current' => \Drupal::VERSION, '@new' => $version]),
             '#url' => Url::fromUri($link),
@@ -967,24 +752,24 @@ MARKUP
         }
       }
     }
-    if (version_compare(\Drupal::VERSION, '8.8.0') >= 0) {
+    if (version_compare(\Drupal::VERSION, '9.4.0') >= 0) {
       if (!$has_core_update) {
-        $class = 'no-known-error';
+        $class = 'color-success';
       }
       else {
-        $class = 'known-warning';
+        $class = 'color-warning';
       }
     }
     else {
       $status = FALSE;
-      $class = 'known-error';
+      $class = 'color-error';
     }
     $build['data']['#rows'][] = [
       'class' => $class,
       'data' => [
         'requirement' => [
           'class' => 'requirement-label',
-          'data' => $this->t('Drupal core should be 8.8.x or 8.9.x'),
+          'data' => $this->t('Drupal core should be at least 9.4.x'),
         ],
         'status' => [
           'data' => $core_version_info,
@@ -995,11 +780,13 @@ MARKUP
 
     // Check PHP version.
     $version = PHP_VERSION;
-    if (version_compare($version, '7.3.0') >= 0) {
-      $class = 'no-known-error';
+    // The value of MINIMUM_PHP in Drupal 10.
+    $minimum_php = '8.1.0';
+    if (version_compare($version, $minimum_php) >= 0) {
+      $class = 'color-success';
     }
     else {
-      $class = 'known-error';
+      $class = 'color-error';
       $status = FALSE;
     }
     $build['data']['#rows'][] = [
@@ -1007,7 +794,7 @@ MARKUP
       'data' => [
         'requirement' => [
           'class' => 'requirement-label',
-          'data' => $this->t('PHP version should be at least 7.3.0'),
+          'data' => $this->t('PHP version should be at least @minimum_php. Before updating to PHP @minimum_php, use <code>$ composer why-not php @minimum_php</code> to check if any projects need updating for compatibility. Also check custom projects manually.', ['@minimum_php' => $minimum_php]),
         ],
         'status' => [
           'data' => $this->t('Version @version', ['@version' => $version]),
@@ -1016,62 +803,349 @@ MARKUP
       ]
     ];
 
-    $database_server_metadata_extractor = new DatabaseServerMetadataExtractor($this->database);
-    $database_type = $database_server_metadata_extractor->getType();
-    $version = $database_server_metadata_extractor->getVersion();
-
-    if ($database_type == 'mysql') {
-      $database_type_full_name = 'MySQL or Percona Server';
-      $requirement = $this->t('When using MySQL/Percona, minimum version is 5.7.8');
-      if (version_compare($version, '5.7.8') >= 0) {
-        $class = 'no-known-error';
-      }
-      elseif (version_compare($version, '5.6.0') >= 0) {
-        $class = 'known-warning';
-        $requirement .= ' ' . $this->t('Alternatively, <a href=":driver">install the MySQL 5.6 driver for Drupal 9</a> for now.', [':driver' => 'https://www.drupal.org/project/mysql56']);
+    // Check database version.
+    $database_type = $this->database->databaseType();
+    $version = $this->database->version();
+    $addendum = '';
+    if ($database_type == 'pgsql') {
+      $database_type_full_name = 'PostgreSQL';
+      $requirement = $this->t('When using PostgreSQL, minimum version is 12 <a href=":trgm">with the pg_trgm extension</a> created.', [':trgm' => 'https://www.postgresql.org/docs/10/pgtrgm.html']);
+      $has_trgm = $this->database->query("SELECT installed_version FROM pg_available_extensions WHERE name = 'pg_trgm'")->fetchField();
+      if (version_compare($version, '12') >= 0 && $has_trgm) {
+        $class = 'color-success';
+        $addendum = $this->t('Has pg_trgm extension.');
       }
       else {
         $status = FALSE;
-        $class = 'known-error';
-        $requirement .= ' ' . $this->t('Once updated to at least 5.6, you can also <a href=":driver">install the MySQL 5.6 driver for Drupal 9</a> for now.', [':driver' => 'https://www.drupal.org/project/mysql56']);
+        $class = 'color-error';
+        if (!$has_trgm) {
+          $addendum = $this->t('No pg_trgm extension.');
+        }
+      }
+      $build['data']['#rows'][] = [
+        'class' => [$class],
+        'data' => [
+          'requirement' => [
+            'class' => 'requirement-label',
+            'data' => [
+              '#type' => 'markup',
+              '#markup' => $requirement
+            ],
+          ],
+          'status' => [
+            'data' => trim($database_type_full_name . ' ' . $version . ' ' . $addendum),
+            'class' => 'status-info',
+          ],
+        ]
+      ];
+    }
+
+    // Check JSON support in database.
+    $class = 'color-success';
+    $requirement = $this->t('Supported.');
+    try {
+      if (!method_exists($this->database, 'hasJson') || !$this->database->hasJson()) {
+        // A hasJson() method was added to Connection from Drupal 9.4.0
+        // but we cannot rely on being on Drupal 9.4.x+
+        $this->database->query($database_type == 'pgsql' ? 'SELECT JSON_TYPEOF(\'1\')' : 'SELECT JSON_TYPE(\'1\')');
       }
     }
-    elseif ($database_type == 'mariadb') {
-      $database_type_full_name = 'MariaDB';
-      $requirement = $this->t('When using MariaDB, minimum version is 10.3.7');
-      if (version_compare($version, '10.3.7') >= 0) {
-        $class = 'no-known-error';
+    catch (\Exception $e) {
+      $class = 'color-error';
+      $status = FALSE;
+      $requirement = $this->t('Not supported.');
+    }
+    $build['data']['#rows'][] = [
+      'class' => [$class],
+      'data' => [
+        'requirement' => [
+          'class' => 'requirement-label',
+          'data' => $this->t('Database JSON support required'),
+        ],
+        'status' => [
+          'data' => $requirement,
+          'class' => 'status-info',
+        ],
+      ]
+    ];
+
+    // Check user roles on the site for invalid permissions.
+    $class = 'color-success';
+    $requirement = [];
+    $user_roles = Role::loadMultiple();
+    $all_permissions = array_keys(\Drupal::service('user.permissions')->getPermissions());
+    foreach ($user_roles as $role) {
+      $role_permissions = $role->getPermissions();
+      $valid_role_permissions = array_intersect($role_permissions, $all_permissions);
+      $invalid_role_permissions = array_diff($role_permissions, $valid_role_permissions);
+      if (!empty($invalid_role_permissions)) {
+        $class = 'color-error';
+        $status = FALSE;
+        $requirement[] = [
+          '#theme' => 'item_list',
+          '#prefix' => $this->t('Permissions of user role: "@role":', ['@role' => $role->label()]),
+          '#items' => $invalid_role_permissions,
+        ];
       }
-      elseif (version_compare($version, '10.1.0') >= 0) {
-        $class = 'known-warning';
-        $requirement .= ' ' . $this->t('Alternatively, <a href=":driver">install the MariaDB 10.1 driver for Drupal 9</a> for now.', [':driver' => 'https://www.drupal.org/project/mysql56']);
+    }
+    $build['data']['#rows'][] = [
+      'class' => [$class],
+      'data' => [
+        'requirement' => [
+          'class' => 'requirement-label',
+          'data' => $this->t('<a href=":url">Invalid permissions will trigger runtime exceptions in Drupal 10.</a> Permissions should be defined in a permissions.yml file or a permission callback.', [':url' => 'https://www.drupal.org/node/3193348']),
+        ],
+        'status' => [
+          'data' => [
+            '#theme' => 'item_list',
+            '#items' => $requirement,
+            '#empty' => $this->t('None found.'),
+          ],
+          'class' => 'status-info',
+        ],
+      ]
+    ];
+
+    // Check for deprecated or obsolete core extensions.
+    $class = 'color-success';
+    $requirement = $this->t('None installed.');
+    $deprecated_or_obsolete = $this->projectCollector->collectCoreDeprecatedAndObsoleteExtensions();
+    if (!empty($deprecated_or_obsolete)) {
+      $class = 'color-error';
+      $status = FALSE;
+      $requirement = join(', ', $deprecated_or_obsolete);
+    }
+    $build['data']['#rows'][] = [
+      'class' => [$class],
+      'data' => [
+        'requirement' => [
+          'class' => 'requirement-label',
+          'data' => $this->t('Deprecated or obsolete core extensions installed. These will be removed in the next major version.'),
+        ],
+        'status' => [
+          'data' => [
+            '#markup' => $requirement,
+          ],
+          'class' => 'status-info',
+        ],
+      ]
+    ];
+
+    // Check Drush. We only detect site-local drush for now.
+    if (class_exists('\\Drush\\Drush')) {
+      $version = call_user_func('\\Drush\\Drush::getMajorVersion');
+      if (version_compare($version, '11') >= 0) {
+        $class = 'color-success';
       }
       else {
         $status = FALSE;
-        $class = 'known-error';
-        $requirement .= ' ' . $this->t('Once updated to at least 10.1, you can also <a href=":driver">install the MariaDB 10.1 driver for Drupal 9</a> for now.', [':driver' => 'https://www.drupal.org/project/mysql56']);
+        $class = 'color-error';
+      }
+      $label = $this->t('Version @version', ['@version' => $version]);
+    }
+    else {
+      $class = '';
+      $label = $this->t('Version cannot be detected, check manually.');
+    }
+    $build['data']['#rows'][] = [
+      'class' => $class,
+      'data' => [
+        'requirement' => [
+          'class' => 'requirement-label',
+          'data' => $this->t('When using Drush, minimum version is 11'),
+        ],
+        'status' => [
+          'data' => $label,
+          'class' => 'status-info',
+        ],
+      ]
+    ];
+
+    // Save the overall status indicator in the build array. It will be
+    // popped off later to be used in the summary table.
+    $build['status'] = $status;
+
+    return $build;
+  }
+
+  /**
+   * Builds a list of environment checks for Drupal 11 compatibility.
+   *
+   * @return array
+   *   Build array. The overall environment status (TRUE, FALSE or NULL) is
+   *   indicated in the 'status' key, while a 'description' key explains the
+   *   environment requirements on a high level.
+   */
+  protected function buildEnvironmentChecksFor11() {
+    $status = TRUE;
+    $header = [
+      'requirement' => ['data' => $this->t('Requirement'), 'class' => 'requirement-label'],
+      'status' => ['data' => $this->t('Status'), 'class' => 'status-info'],
+    ];
+    $build['data'] = [
+      '#type' => 'table',
+      '#header' => $header,
+      '#rows' => [],
+    ];
+
+    $build['description'] = $this->t('Below are Drupal 11\'s system requirements. If you are working with multiple (dev, stage, live) environments, make sure to check the same requirements there.');
+
+    // Check Drupal version. Link to update if available.
+    $core_version_info = [
+      '#type' => 'markup',
+      '#markup' => $this->t('Version @version.', ['@version' => \Drupal::VERSION]),
+    ];
+    $has_core_update = FALSE;
+    $core_update_info = $this->releaseStore->get('drupal');
+    if (isset($core_update_info['releases']) && is_array($core_update_info['releases'])) {
+      // Find the latest release that are higher than our current and is not beta/alpha/rc/dev.
+      foreach ($core_update_info['releases'] as $version => $release) {
+        $major_version = explode('.', $version)[0];
+        if ($major_version === '10' && !strpos($version, '-') && (version_compare($version, \Drupal::VERSION) > 0)) {
+          $link = $core_update_info['link'] . '/releases/' . $version;
+          $core_version_info = [
+            '#type' => 'link',
+            '#title' => version_compare(\Drupal::VERSION, '10.3.0') >= 0 ?
+              $this->t('Version @current allows to upgrade but @new is available.', ['@current' => \Drupal::VERSION, '@new' => $version]) :
+              $this->t('Version @current does not allow to upgrade and @new is available.', ['@current' => \Drupal::VERSION, '@new' => $version]),
+            '#url' => Url::fromUri($link),
+          ];
+          $has_core_update = TRUE;
+          break;
+        }
+      }
+    }
+    if (version_compare(\Drupal::VERSION, '10.3.0') >= 0) {
+      if (version_compare(\Drupal::VERSION, '10.4.0') >= 0) {
+        $this->messenger()->addWarning('Drupal 11.0 is not a supported upgrade from Drupal 10.4. Make sure to upgrade to 11.1!');
+      }
+      if (!$has_core_update) {
+        $class = 'color-success';
+      }
+      else {
+        $class = 'color-warning';
+      }
+    }
+    else {
+      $status = FALSE;
+      $class = 'color-error';
+    }
+    $build['data']['#rows'][] = [
+      'class' => $class,
+      'data' => [
+        'requirement' => [
+          'class' => 'requirement-label',
+          'data' => $this->t('Drupal core should be at least 10.3.0'),
+        ],
+        'status' => [
+          'data' => $core_version_info,
+          'class' => 'status-info',
+        ],
+      ]
+    ];
+
+    // Check PHP version.
+    $version = PHP_VERSION;
+    $minimum_php = '8.3.0';
+    if (version_compare($version, $minimum_php) >= 0) {
+      $class = 'color-success';
+    }
+    else {
+      $class = 'color-error';
+      $status = FALSE;
+    }
+    $build['data']['#rows'][] = [
+      'class' => [$class],
+      'data' => [
+        'requirement' => [
+          'class' => 'requirement-label',
+          'data' => $this->t('PHP version should be at least @minimum_php. Before updating to PHP @minimum_php, use <code>$ composer why-not php @minimum_php</code> to check if any projects need updating for compatibility. Also check custom projects manually.', ['@minimum_php' => $minimum_php]),
+        ],
+        'status' => [
+          'data' => $this->t('Version @version', ['@version' => $version]),
+          'class' => 'status-info',
+        ],
+      ]
+    ];
+
+    // Check database version.
+    $database_type = $this->database->databaseType();
+    $version = $this->database->version();
+    $addendum = '';
+    if ($database_type == 'mysql') {
+      if ($this->database->isMariaDb()) {
+        $database_type_full_name = 'MariaDB';
+        $requirement = $this->t('When using MariaDB, minimum version is 10.6');
+        if (version_compare($version, '10.6') >= 0) {
+          $class = 'color-success';
+        }
+        elseif (version_compare($version, '10.3.7') >= 0) {
+          if ($this->moduleHandler->moduleExists('mysql57')) {
+            $class = 'color-warning';
+            $requirement .= ' ' . $this->t('Keep using <a href=":driver">the MariaDB 10.3 driver</a> for now, which is already installed.', [':driver' => 'https://www.drupal.org/project/mysql57']);
+          }
+          else {
+            $class = 'color-error';
+            $requirement .= ' ' . $this->t('Alternatively, <a href=":driver">install the MariaDB 10.3 driver</a> for now.', [':driver' => 'https://www.drupal.org/project/mysql57']);
+          }
+        }
+        else {
+          // Should not happen because Drupal 10 already required 10.3.7, but just to be sure.
+          $status = FALSE;
+          $class = 'color-error';
+          $requirement .= ' ' . $this->t('Once updated to at least 10.3.7, you can also <a href=":driver">install the MariaDB 10.3 driver</a> for now.', [':driver' => 'https://www.drupal.org/project/mysql57']);
+        }
+      }
+      else {
+        $database_type_full_name = 'MySQL or Percona Server';
+        $requirement = $this->t('When using MySQL/Percona, minimum version is 8.0');
+        if (version_compare($version, '8.0') >= 0) {
+          $class = 'color-success';
+        }
+        elseif (version_compare($version, '5.7.8') >= 0) {
+          if ($this->moduleHandler->moduleExists('mysql57')) {
+            $class = 'color-warning';
+            $requirement .= ' ' . $this->t('Keep using <a href=":driver">the MySQL 5.7 driver</a> for now, which is already installed.', [':driver' => 'https://www.drupal.org/project/mysql57']);
+          }
+          else {
+            $class = 'color-error';
+            $requirement .= ' ' . $this->t('Alternatively, <a href=":driver">install the MySQL 5.7 driver</a> for now.', [':driver' => 'https://www.drupal.org/project/mysql57']);
+          }
+        }
+        else {
+          // Should not happen because Drupal 10 already required 5.7.8, but just to be sure.
+          $status = FALSE;
+          $class = 'color-error';
+          $requirement .= ' ' . $this->t('Once updated to at least 5.7.8, you can also <a href=":driver">install the MySQL 5.7 driver</a> for now.', [':driver' => 'https://www.drupal.org/project/mysql57']);
+        }
       }
     }
     elseif ($database_type == 'pgsql') {
       $database_type_full_name = 'PostgreSQL';
-      $requirement = $this->t('When using PostgreSQL, minimum version is 10 <a href=":trgm">with the pg_trgm extension</a> (The extension is not checked here).', [':trgm' => 'https://www.postgresql.org/docs/10/pgtrgm.html']);
-      if (version_compare($version, '10') >= 0) {
-        $class = 'no-known-error';
+      $requirement = $this->t('When using PostgreSQL, minimum version is 16 <a href=":trgm">with the pg_trgm extension</a> created.', [':trgm' => 'https://www.postgresql.org/docs/10/pgtrgm.html']);
+      $has_trgm = $this->database->query("SELECT installed_version FROM pg_available_extensions WHERE name = 'pg_trgm'")->fetchField();
+      if (version_compare($version, '16') >= 0 && $has_trgm) {
+        $class = 'color-success';
+        $addendum = $this->t('Has pg_trgm extension.');
       }
       else {
         $status = FALSE;
-        $class = 'known-error';
+        $class = 'color-error';
+        if (!$has_trgm) {
+          $addendum = $this->t('No pg_trgm extension.');
+        }
       }
     }
     elseif ($database_type == 'sqlite') {
       $database_type_full_name = 'SQLite';
-      $requirement = $this->t('When using SQLite, minimum version is 3.26');
-      if (version_compare($version, '3.26') >= 0) {
-        $class = 'no-known-error';
+      $minimum_sqlite = '3.45';
+      $requirement = $this->t('When using SQLite, minimum version is @minimum_sqlite', ['@minimum_sqlite' => $minimum_sqlite]);
+      if (version_compare($version, $minimum_sqlite) >= 0) {
+        $class = 'color-success';
       }
       else {
         $status = FALSE;
-        $class = 'known-error';
+        $class = 'color-error';
       }
     }
 
@@ -1092,33 +1166,48 @@ MARKUP
       ]
     ];
 
-    // Check Apache. Logic is based on system_requirements() code.
-    $request_object = \Drupal::request();
-    $software = $request_object->server->get('SERVER_SOFTWARE');
-    if (strpos($software, 'Apache') !== FALSE && preg_match('!^Apache/([\d\.]+) !', $software, $found)) {
-      $version = $found[1];
-      if (version_compare($version, '2.4.7') >= 0) {
-        $class = 'no-known-error';
-      }
-      else {
-        $status = FALSE;
-        $class = 'known-error';
-      }
-      $label = $this->t('Version @version', ['@version' => $version]);
-    }
-    else {
-      $class = '';
-      $label = $this->t('Version cannot be detected or not using Apache, check manually.');
+    // Check JSON support in database.
+    $class = 'color-success';
+    $requirement = $this->t('Supported.');
+    if (!method_exists($this->database, 'hasJson') || !$this->database->hasJson()) {
+      $class = 'color-error';
+      $status = FALSE;
+      $requirement = $this->t('Not supported.');
     }
     $build['data']['#rows'][] = [
       'class' => [$class],
       'data' => [
         'requirement' => [
           'class' => 'requirement-label',
-          'data' => $this->t('When using Apache, minimum version is 2.4.7'),
+          'data' => $this->t('Database JSON support required'),
         ],
         'status' => [
-          'data' => $label,
+          'data' => $requirement,
+          'class' => 'status-info',
+        ],
+      ]
+    ];
+
+    // Check for deprecated or obsolete core extensions.
+    $class = 'color-success';
+    $requirement = $this->t('None installed.');
+    $deprecated_or_obsolete = $this->projectCollector->collectCoreDeprecatedAndObsoleteExtensions();
+    if (!empty($deprecated_or_obsolete)) {
+      $class = 'color-error';
+      $status = FALSE;
+      $requirement = join(', ', $deprecated_or_obsolete);
+    }
+    $build['data']['#rows'][] = [
+      'class' => [$class],
+      'data' => [
+        'requirement' => [
+          'class' => 'requirement-label',
+          'data' => $this->t('Deprecated or obsolete core extensions installed. These will be removed in the next major version.'),
+        ],
+        'status' => [
+          'data' => [
+            '#markup' => $requirement,
+          ],
           'class' => 'status-info',
         ],
       ]
@@ -1127,12 +1216,12 @@ MARKUP
     // Check Drush. We only detect site-local drush for now.
     if (class_exists('\\Drush\\Drush')) {
       $version = call_user_func('\\Drush\\Drush::getMajorVersion');
-      if (version_compare($version, '10') >= 0) {
-        $class = 'no-known-error';
+      if (version_compare($version, '13') >= 0) {
+        $class = 'color-success';
       }
       else {
         $status = FALSE;
-        $class = 'known-error';
+        $class = 'color-error';
       }
       $label = $this->t('Version @version', ['@version' => $version]);
     }
@@ -1145,7 +1234,7 @@ MARKUP
       'data' => [
         'requirement' => [
           'class' => 'requirement-label',
-          'data' => $this->t('When using Drush, minimum version is 10'),
+          'data' => $this->t('When using Drush, minimum version is 13'),
         ],
         'status' => [
           'data' => $label,
@@ -1154,52 +1243,12 @@ MARKUP
       ]
     ];
 
-    // Check deprecated $config_directories if after Drupal 8.8.0. On older
-    // Drupal versions, the replacement is not supported and the setting may
-    // be generated by platforms like ddev, leading to false positives that
-    // the user should not even resolve yet before updating core.
-    if (version_compare(\Drupal::VERSION, '8.8.0') >= 0) {
-      $class = 'no-known-error';
-      $requirement = $this->t('Use of $config_directories in settings.php is deprecated.');
-      $label = $this->t('Not used');
-      $is_deprecated = $this->isDeprecatedConfigDirectorySettingUsed();
-      if ($is_deprecated !== FALSE) {
-        $status = FALSE;
-        $class = 'known-error';
-        if ($is_deprecated === TRUE) {
-          $label = $this->t('Deprecated configuration used');
-          $requirement .= ' ' . $this->t('<a href=":settings">Use $settings[\'config_sync_directory\'] instead.</a>', [':settings' => 'https://www.drupal.org/node/3018145']);
-        }
-        else {
-          $label = $this->t('Deprecated and new configuration used');
-          $requirement .= ' ' . $this->t('<a href=":settings">Use $settings[\'config_sync_directory\'] only.</a>', [':settings' => 'https://www.drupal.org/node/3018145']);
-        }
-      }
-      $build['data']['#rows'][] = [
-        'class' => $class,
-        'data' => [
-          'requirement' => [
-            'class' => 'requirement-label',
-            'data' => [
-              '#type' => 'markup',
-              '#markup' => $requirement
-            ],
-          ],
-          'status' => [
-            'data' => $label,
-            'class' => 'status-info',
-          ],
-        ]
-      ];
-    }
-
     // Save the overall status indicator in the build array. It will be
     // popped off later to be used in the summary table.
     $build['status'] = $status;
 
     return $build;
   }
-
 
   /**
    * Form submission handler.
@@ -1242,7 +1291,7 @@ MARKUP
       // HTTP. Processing projects directly is less safe (in case of PHP fatal
       // errors the batch process may halt), but we have no other choice here
       // but to take a chance.
-      list($error, $message, $data) = static::doHttpRequest('upgrade_status_request_test', 'upgrade_status_request_test');
+      list(, $message, $data) = static::doHttpRequest('upgrade_status_request_test', 'upgrade_status_request_test');
       if (empty($data) || !is_array($data) || ($data['message'] != 'Request test success')) {
         $use_http = FALSE;
         $this->logger->notice('Starting Upgrade Status on @count projects without HTTP sandboxing. @error', ['@error' => $message, '@count' => count($list)]);
@@ -1358,7 +1407,7 @@ MARKUP
     }
 
     // Do the HTTP request to run processing.
-    list($error, $message, $data) = static::doHttpRequest($extension->getName());
+    list($error, $message) = static::doHttpRequest($extension->getName());
 
     if ($error !== FALSE) {
       /** @var \Drupal\Core\KeyValueStore\KeyValueStoreInterface $key_value */
@@ -1480,7 +1529,7 @@ MARKUP
    * Checks config directory settings for use of deprecated values.
    *
    * The $config_directories variable is deprecated in Drupal 8. However,
-   * the Settings object obscures the fact in Settings:initialise(), where
+   * the Settings object obscures the fact in Settings:initialize(), where
    * it throws an error but levels the values in the deprecated location
    * and $settings. So after that, it is not possible to tell if either
    * were set in settings.php or not.
@@ -1505,7 +1554,7 @@ MARKUP
 
     if (!empty($config_directories)) {
       if (!empty($settings['config_sync_directory'])) {
-        // Both are set. The $settings copy will prevail in Settings::initialise().
+        // Both are set. The $settings copy will prevail in Settings::initialize().
         return NULL;
       }
       // Only the deprecated variable is set.

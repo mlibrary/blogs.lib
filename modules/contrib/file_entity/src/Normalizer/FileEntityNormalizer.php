@@ -22,11 +22,22 @@ class FileEntityNormalizer extends ContentEntityNormalizer {
   public function normalize($entity, $format = NULL, array $context = []): array|string|int|float|bool|\ArrayObject|NULL {
     $data = parent::normalize($entity, $format, $context);
     if (!isset($context['included_fields']) || in_array('data', $context['included_fields'])) {
-      // Save base64-encoded file contents to the "data" property.
-      $file_data = base64_encode(file_get_contents($entity->getFileUri()));
-      $data += array(
-        'data' => array(array('value' => $file_data)),
-      );
+      $file_uri = $entity->getFileUri();
+
+      // Check if the file exists before attempting to read it.
+      if (file_exists($file_uri)) {
+        // Save base64-encoded file contents to the "data" property.
+        $file_data = base64_encode(file_get_contents($file_uri));
+          $data += array(
+          'data' => array(array('value' => $file_data)),
+        );
+      }
+      else {
+        // Save null to the "data" property.
+        $data += array(
+          'data' => array(array('value' => NULL)),
+        );
+      }
     }
     return $data;
   }

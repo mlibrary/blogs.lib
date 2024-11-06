@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\easy_breadcrumb\Kernel;
 
 use Drupal\Core\Routing\RequestContext;
@@ -63,7 +65,7 @@ class EasyBreadcrumbBuilderTest extends KernelTestBase {
   /**
    * Provides data for the get title string test.
    */
-  public function providerTestGetTitleString() {
+  public static function providerTestGetTitleString() {
     return [
       ['easy_breadcrumb_test.title_string'],
       ['easy_breadcrumb_test.title_formattable_markup'],

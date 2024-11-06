@@ -51,8 +51,8 @@ class SchedulerFieldsDisplayTest extends SchedulerBrowserTestBase {
    * @return array
    *   Each row has values: [entity type id, bundle id, operation].
    */
-  public function dataEntityTypeForm() {
-    $types = $this->dataStandardEntityTypes();
+  public static function dataEntityTypeForm() {
+    $types = self::dataStandardEntityTypes();
     $data = [];
     foreach ($types as $key => $values) {
       $data["$key-1"] = array_merge($values, ['add first']);

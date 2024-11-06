@@ -157,8 +157,8 @@ class SchedulerRevisioningTest extends SchedulerBrowserTestBase {
    * @return array
    *   Each array item has the values: [entity type id, bundle id].
    */
-  public function dataAlterCreationDate() {
-    $data = $this->dataStandardEntityTypes();
+  public static function dataAlterCreationDate() {
+    $data = self::dataStandardEntityTypes();
     unset($data['#taxonomy_term']);
     return $data;
   }

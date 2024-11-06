@@ -8,7 +8,7 @@
  * for non-node entities the hook functions had to be renamed to allow generic
  * and specific variants and to maintain predictable expansion for any future
  * entity type. For backwards-compatibility the original hook function names are
- * maintined for node entities only, and this file provides test coverage.
+ * maintained for node entities only, and this file provides test coverage.
  */
 
 use Drupal\node\NodeInterface;

@@ -1,37 +1,47 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Update;
 
 use Drupal\FunctionalTests\Update\UpdatePathTestBase;
+use Drupal\views\Entity\View;
 
 /**
- * Tests the upgrade path for views field plugins.
- *
- * @see https://www.drupal.org/node/2455125
+ * Tests the upgrade path for converting numeric arguments to entity_target_id.
  *
  * @group Update
+ *
+ * @see views_post_update_views_data_argument_plugin_id()
  */
 class EntityArgumentUpdateTest extends UpdatePathTestBase {
 
   /**
    * {@inheritdoc}
    */
-  protected function setDatabaseDumpFiles() {
+  protected function setDatabaseDumpFiles(): void {
     $this->databaseDumpFiles = [
-      __DIR__ . '/../../../../../system/tests/fixtures/update/drupal-9.4.0.bare.standard.php.gz',
-      __DIR__ . '/../../../../tests/fixtures/update/entity-id-argument.php',
+      __DIR__ . '/../../../../../system/tests/fixtures/update/drupal-10.3.0.filled.standard.php.gz',
+      __DIR__ . '/../../../fixtures/update/entity-id-argument.php',
     ];
   }
 
   /**
-   * Tests that field plugins are updated properly.
+   * Tests that numeric argument plugins are updated properly.
    */
-  public function testUpdateHookN() {
+  public function testViewsFieldPluginConversion(): void {
+    $view = View::load('test_entity_id_argument_update');
+    $data = $view->toArray();
+    $this->assertEquals('numeric', $data['display']['default']['display_options']['arguments']['field_tags_target_id']['plugin_id']);
+    $this->assertArrayNotHasKey('target_entity_type_id', $data['display']['default']['display_options']['arguments']['field_tags_target_id']);
+
     $this->runUpdates();
 
-    $config = \Drupal::config('views.view.test_entity_id_argument_update');
-    $this->assertEquals('entity_target_id', $config->get('display.default.display_options.arguments.field_tags_target_id.plugin_id'));
-    $this->assertEquals('taxonomy_term', $config->get('display.default.display_options.arguments.field_tags_target_id.target_entity_type_id'));
+    $view = View::load('test_entity_id_argument_update');
+    $data = $view->toArray();
+    $this->assertEquals('entity_target_id', $data['display']['default']['display_options']['arguments']['field_tags_target_id']['plugin_id']);
+    $this->assertEquals('taxonomy_term', $data['display']['default']['display_options']['arguments']['field_tags_target_id']['target_entity_type_id']);
+
   }
 
 }

@@ -119,7 +119,7 @@ trait SchedulerCommerceProductSetupTrait {
     /** @var Drupal\commerce\CommerceContentEntityStorage $productStorage */
     $this->productStorage = $this->container->get('entity_type.manager')->getStorage('commerce_product');
 
-    // Add extra permisssions to the role assigned to the adminUser.
+    // Add extra permissions to the role assigned to the adminUser.
     $this->addPermissionsToUser($this->adminUser, [
       'create ' . $this->productTypeName . ' commerce_product',
       'update any ' . $this->productTypeName . ' commerce_product',
@@ -137,7 +137,7 @@ trait SchedulerCommerceProductSetupTrait {
       'view scheduled commerce_product',
     ]);
 
-    // Add extra permisssions to the role assigned to the schedulerUser.
+    // Add extra permissions to the role assigned to the schedulerUser.
     $this->addPermissionsToUser($this->schedulerUser, [
       'create ' . $this->productTypeName . ' commerce_product',
       'update any ' . $this->productTypeName . ' commerce_product',

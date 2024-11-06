@@ -6,6 +6,7 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -28,16 +29,26 @@ class OembedProvidersSettingsForm extends ConfigFormBase {
   protected $defaultCache;
 
   /**
+   * The key/value factory.
+   *
+   * @var \Drupal\Core\KeyValueStore\KeyValueFactoryInterface
+   */
+  protected $keyValue;
+
+  /**
    * Constructs an OembedProvidersSettingsForm object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The factory for configuration objects.
    * @param \Drupal\Core\Cache\CacheBackendInterface $default_cache
    *   Cache backend for default cache.
+   * @param \Drupal\Core\KeyValueStore\KeyValueFactoryInterface $key_value
+   *   The key/value factory.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, CacheBackendInterface $default_cache) {
+  public function __construct(ConfigFactoryInterface $config_factory, CacheBackendInterface $default_cache, KeyValueFactoryInterface $key_value) {
     $this->setConfigFactory($config_factory);
     $this->defaultCache = $default_cache;
+    $this->keyValue = $key_value;
 
   }
 
@@ -47,7 +58,8 @@ class OembedProvidersSettingsForm extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
-      $container->get('cache.default')
+      $container->get('cache.default'),
+      $container->get('keyvalue')
     );
   }
 
@@ -107,7 +119,7 @@ class OembedProvidersSettingsForm extends ConfigFormBase {
     ];
 
     $form['provider_store_reset']['markup'] = [
-      '#markup' => $this->t('<p>Drupal caches the oEmbed provider list with KeyValue storage, so normal cache clears won\'t clear the provider list.</p>'),
+      '#markup' => $this->t("<p>Drupal caches the oEmbed provider list with KeyValue storage, so normal cache clears won't clear the provider list.</p>"),
     ];
 
     return parent::buildForm($form, $form_state);
@@ -135,7 +147,7 @@ class OembedProvidersSettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     if ($form_state->getTriggeringElement()['#name'] == 'provider_store_reset') {
-      \Drupal::service('keyvalue')->get('media')->delete('oembed_providers');
+      $this->keyValue->get('media')->delete('oembed_providers');
     }
     else {
       $this->configFactory->getEditable('media.settings')

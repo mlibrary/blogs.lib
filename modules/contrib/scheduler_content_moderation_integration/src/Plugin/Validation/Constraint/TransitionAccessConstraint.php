@@ -20,6 +20,6 @@ class TransitionAccessConstraint extends Constraint {
    *
    * @var string
    */
-  public $noAccessMessage = 'You do not have access to transition from %original_state to %new_state';
+  public string $noAccessMessage = 'You do not have access to transition from %original_state to %new_state';
 
 }

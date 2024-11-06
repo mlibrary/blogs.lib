@@ -30,6 +30,14 @@ class DeprecationMessage {
    */
   protected $file;
 
+
+  /**
+   * The analyzer providing the message.
+   *
+   * @var string
+   */
+  protected string $analyzer;
+
   /**
    * Constructs a new deprecation message.
    *
@@ -40,10 +48,11 @@ class DeprecationMessage {
    * @param int $line
    *   The line associated to the deprecation message.
    */
-  public function __construct(string $message, string $file = '', int $line = 0) {
+  public function __construct(string $message, string $file = '', int $line = 0, string $analyzer = '') {
     $this->message = $message;
     $this->file = $file;
     $this->line = $line;
+    $this->analyzer = $analyzer;
   }
 
   /**
@@ -91,6 +100,15 @@ class DeprecationMessage {
    */
   public function setFile(string $file) {
     $this->file = $file;
+  }
+
+  /**
+   * Get analyzer providing the message.
+   *
+   * @return string
+   */
+  public function getAnalyzer(): string {
+    return $this->analyzer;
   }
 
 }

@@ -1,73 +1,55 @@
-# Editor Advanced link
-
-## Table of contents
+## CONTENTS OF THIS FILE
 
 - Introduction
 - Requirements
+- Recommended modules
 - Installation
 - Configuration
-- Recommended modules
 - Maintainers
 
-## Introduction
+## INTRODUCTION
 
-Enhances the link Dialog in CKEditor. Allows to define the following
-attributes:
-- `title`
-- `class`
-- `id`
-- `target`
-- `rel`
+Enhances the link Dialog in CKEditor.
+Allows to define the following attributes:
 
-For a full description of the module, visit the project page:\
-<https://www.drupal.org/project/editor_advanced_link>
+- title
+- class
+- id
+- target
+- rel
 
-To submit bug reports and feature suggestions, or track changes:\
-<https://www.drupal.org/project/issues/editor_advanced_link>
+* For a full description of the module, visit the project page:
+  https://www.drupal.org/project/editor_advanced_link
 
-## Requirements
+* To submit bug reports and feature suggestions, or track changes:
+  https://www.drupal.org/project/issues/editor_advanced_link
 
-This module requires no modules outside of Drupal Core.
+## REQUIREMENTS
 
-## Installation
+This module requires no modules outside of Drupal core.
 
-Install the module as you would normally install a contributed Drupal
-module. Visit [the documentation](https://www.drupal.org/docs/extending-drupal/installing-modules)
-for further information.
+## RECOMMENDED MODULES
 
-## Configuration
-
-- Install and enable the module.
-- Go to the "Text formats and editor" admin page
-  (admin/config/content/formats).
-- If you are using CKEditor 5, click the "Advanced links" tab. There you will
-  see a list of attributes provided by this module that you can enable. For
-  example, "ARIA label", "ID", and "Open in new window."
-- If you are using CKEditor 4, configure your text format.
-  - If the "Limit allowed HTML tags and correct faulty HTML" filter is disabled
-    you don't have anything to do with this text format
-  - else, add the `title`, `class`, `id`, `target` and/or the `rel` attributes
-    to the "allowed HTML tags" field (only those whitelisted will show up in
-    the dialog)
-
-
-## Recommended modules
-
-- [Editor File upload](https://www.drupal.org/project/editor_file):\
+- Editor File upload (https://www.drupal.org/project/editor_file):
   Allows to create link to uploaded files in the text editor easily.
-- [Linkit](https://www.drupal.org/project/linkit):\
+- Linkit (https://www.drupal.org/project/linkit):
   Provides an easy interface for internal and external linking with WYSIWYG
   editors by using an autocomplete field.
-- [CKEditor Entity Link](https://www.drupal.org/project/ckeditor_entity_link):\
+- CKEditor Entity Link (https://www.drupal.org/project/ckeditor_entity_link):
   It is an alternative to Linkit that also provides an easy interface for
   internal linking within the editor.
 
-## Maintainers
+## INSTALLATION
 
-Current maintainers:
+Install the module as you would normally install a contributed Drupal module.
+Visit https://www.drupal.org/node/1897420 for further information.
 
-- [Edouard Cunibil (DuaelFr)](https://www.drupal.org/u/duaelfr)
+## CONFIGURATION
 
-This project has been sponsored by:
+Install module and follow the insturctions:
 
-- [Happyculture](https://happyculture.coop) (paid contribution time)
+- go to the "Text formats and editor" admin page (admin/config/content/formats)
+- manage text format
+- if the "Limit allowed HTML tags and correct faulty HTML" filter is enabled, 
+  add the "title", "class", "id", "target" and/or the "rel" attributes to the
+  "allowed HTML tags" field (only those whitelisted will show up in the dialog).

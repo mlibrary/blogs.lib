@@ -18,7 +18,7 @@
  * own specific event class named 'Scheduler{Type}Events', they can be moved
  * into a Drupal\scheduler\Event namespace, with all event files being stored in
  * a src/Event folder. These two aliases, for the original node events, ensure
- * that any existing event subscribers will continue work unchnaged.
+ * that any existing event subscribers will continue work unchanged.
  */
 
 class_alias('Drupal\scheduler\Event\SchedulerEvent', 'Drupal\scheduler\SchedulerEvent');

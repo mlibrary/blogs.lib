@@ -21,22 +21,22 @@ class SchedulerDrushTest extends SchedulerBrowserTestBase {
     // check that all of the output messages are shown.
     $this->drush('scheduler:cron');
     $messages = $this->getErrorOutput();
-    $this->assertStringContainsString('Lightweight cron run activated by drush command', $messages, 'Starting dblog message not found', TRUE);
-    $this->assertStringContainsString('Lightweight cron run completed', $messages, 'Ending dblog message not found', TRUE);
-    $this->assertStringContainsString('Message: Scheduler lightweight cron completed', $messages, 'Drush message not found', TRUE);
+    $this->assertStringContainsString('Lightweight cron run activated by drush command', $messages, 'Starting dblog message not found');
+    $this->assertStringContainsString('Lightweight cron run completed', $messages, 'Ending dblog message not found');
+    $this->assertStringContainsString('Message: Scheduler lightweight cron completed', $messages, 'Drush message not found');
 
     // Use the sch:cron alias and simulate the --nomsg parameter, then check
     // that the drush confirmation message is not shown.
     $this->drush('sch:cron', [], ['nomsg' => '1']);
     $messages = $this->getErrorOutput();
-    $this->assertStringNotContainsString('Message: Scheduler lightweight cron completed', $messages, '--nomsg parameter did not work', TRUE);
+    $this->assertStringNotContainsString('Message: Scheduler lightweight cron completed', $messages, '--nomsg parameter did not work');
 
     // Use the alternative alias sch-cron and add the --nolog parameter, then
     // check that the dblog messages are not shown.
     $this->drush('sch-cron', [], ['nolog' => '1']);
     $messages = $this->getErrorOutput();
-    $this->assertStringNotContainsString('Lightweight cron run activated by drush command', $messages, '--nolog parameter did not work for starting message', TRUE);
-    $this->assertStringNotContainsString('Lightweight cron run completed', $messages, '--nolog parameter did not work for ending message', TRUE);
+    $this->assertStringNotContainsString('Lightweight cron run activated by drush command', $messages, '--nolog parameter did not work for starting message');
+    $this->assertStringNotContainsString('Lightweight cron run completed', $messages, '--nolog parameter did not work for ending message');
   }
 
   /**
@@ -65,8 +65,8 @@ class SchedulerDrushTest extends SchedulerBrowserTestBase {
     $messages = $this->getErrorOutput();
     $bundle_field = $entity->getEntityType()->get('entity_keys')['bundle'];
     $type_label = $entity->$bundle_field->entity->label();
-    $this->assertStringContainsString(sprintf('%s: scheduled publishing of %s', $type_label, $title1), $messages, 'Scheduled publishing message not found', TRUE);
-    $this->assertStringContainsString(sprintf('%s: scheduled unpublishing of %s', $type_label, $title2), $messages, 'Scheduled unpublishing message not found', TRUE);
+    $this->assertStringContainsString(sprintf('%s: scheduled publishing of %s', $type_label, $title1), $messages, 'Scheduled publishing message not found');
+    $this->assertStringContainsString(sprintf('%s: scheduled unpublishing of %s', $type_label, $title2), $messages, 'Scheduled unpublishing message not found');
   }
 
   /**
@@ -78,7 +78,7 @@ class SchedulerDrushTest extends SchedulerBrowserTestBase {
     // that it runs, and produces the 'nothing to update' message.
     $this->drush('scheduler:entity-update');
     $messages = $this->getErrorOutput();
-    $this->assertStringContainsString('Scheduler entity update - nothing to update', $messages, 'Error! Entity update message not found', TRUE);
+    $this->assertStringContainsString('Scheduler entity update - nothing to update', $messages, 'Error! Entity update message not found');
   }
 
 }

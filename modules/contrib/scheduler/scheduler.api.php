@@ -21,7 +21,7 @@
  *
  * This hook allows modules to add more entity ids into the list being processed
  * in the current cron run. It is invoked during cron runs only. This function
- * is retained for backwards compatibility but is superceded by the more
+ * is retained for backwards compatibility but is superseded by the more
  * flexible hook_scheduler_list_alter().
  *
  * @param string $process
@@ -335,6 +335,64 @@ function hook_scheduler_unpublish_process(EntityInterface $entity) {
  * The parameters and return match the general variant of this hook.
  */
 function hook_scheduler_TYPE_unpublish_process(EntityInterface $entity) {
+}
+
+/*
+In addition to the hook functions for manipulating the list of ids to process,
+three query tags are added to the two database select queries, to enable other
+modules to implement hook_query_TAG_alter(). These are not strictly Scheduler
+hook functions, but are included here for completeness.
+For examples of use see tests/modules/scheduler_extras/scheduler_extras.module.
+ */
+
+/**
+ * Implements hook_query_TAG_alter() for TAG = scheduler.
+ *
+ * This is the top-level hook function to modify both the publish and unpublish
+ * queries. The fields used in these conditions must be common to all entity
+ * types that are enabled for scheduling on your site.
+ */
+function hook_query_scheduler_alter($query) {
+  $entityTypeId = $query->getMetaData('entity_type');
+  // Prevent all processing if either of the dates are more than 12 months ago.
+  $query->condition($query->orConditionGroup()
+    ->condition("{$entityTypeId}_field_revision.publish_on", strtotime('- 12 months'), '>')
+    ->condition("{$entityTypeId}_field_revision.unpublish_on", strtotime('- 12 months'), '>')
+  );
+}
+
+/**
+ * Implements hook_query_TAG_alter() for TAG = scheduler_publish.
+ *
+ * This hook is executed when selecting which entities to publish. It is
+ * applicable to all entity types.
+ */
+function hook_query_scheduler_publish_alter($query) {
+}
+
+/**
+ * Implements hook_query_TAG_alter() for TAG = scheduler_TYPE_publish.
+ *
+ * This hook is executed when selecting entities of a specific type.
+ */
+function hook_query_scheduler_TYPE_publish_alter($query) {
+}
+
+/**
+ * Implements hook_query_TAG_alter() for TAG = scheduler_unpublish.
+ *
+ * This hook is executed when selecting which entities to unpublish. It is
+ * applicable to all entity types.
+ */
+function hook_query_scheduler_unpublish_alter($query) {
+}
+
+/**
+ * Implements hook_query_TAG_alter() for TAG = scheduler_TYPE_unpublish.
+ *
+ * This hook is executed when selecting entities of a specific type.
+ */
+function hook_query_scheduler_TYPE_unpublish_alter($query) {
 }
 
 /**

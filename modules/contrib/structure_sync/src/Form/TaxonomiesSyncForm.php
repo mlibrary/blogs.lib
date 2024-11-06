@@ -2,11 +2,12 @@
 
 namespace Drupal\structure_sync\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\structure_sync\StructureSyncHelper;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -31,8 +32,8 @@ class TaxonomiesSyncForm extends ConfigFormBase {
   /**
    * Class constructor.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entityTypeManager) {
-    parent::__construct($config_factory);
+  public function __construct(ConfigFactoryInterface $config_factory, TypedConfigManagerInterface $typedConfigManager, EntityTypeManagerInterface $entityTypeManager) {
+    parent::__construct($config_factory, $typedConfigManager);
     $this->entityTypeManager = $entityTypeManager;
   }
 
@@ -40,8 +41,9 @@ class TaxonomiesSyncForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
+    return new self(
       $container->get('config.factory'),
+      $container->get('config.typed'),
       $container->get('entity_type.manager')
     );
   }

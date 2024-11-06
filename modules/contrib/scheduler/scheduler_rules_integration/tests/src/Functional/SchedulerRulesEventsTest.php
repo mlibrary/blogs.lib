@@ -115,7 +115,7 @@ class SchedulerRulesEventsTest extends SchedulerBrowserTestBase {
    *   The entity type being tested.
    * @param array $expectedMessages
    *   The ids of the messages that should be showing on the current page. All
-   *   other messsages should not be displayed.
+   *   other messages should not be displayed.
    */
   public function checkMessages(string $entityTypeId = NULL, array $expectedMessages = []) {
     // Add the required entity offset to each message id in the expected array.

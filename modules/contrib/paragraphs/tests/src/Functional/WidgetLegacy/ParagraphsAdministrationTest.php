@@ -145,13 +145,16 @@ class ParagraphsAdministrationTest extends ParagraphsTestBase {
     $this->drupalGet('admin/structure/paragraphs_type');
     $this->assertSession()->pageTextContains('There are no Paragraphs types yet.');
     $this->drupalGet('admin/structure/types/manage/paragraphs/fields/add-field');
+    $this->getSession()->getPage()->fillField('new_storage_type', 'field_ui:entity_reference_revisions:paragraph');
+    if ($this->coreVersion('10.3')) {
+      $this->getSession()->getPage()->pressButton('Continue');
+    }
     $edit = [
-      'new_storage_type' => 'field_ui:entity_reference_revisions:paragraph',
       'label' => 'Paragraph',
       'field_name' => 'paragraph',
     ];
-    $this->submitForm($edit, 'Save and continue');
-    $this->submitForm([], 'Save field settings');
+    $this->submitForm($edit, 'Continue');
+
     $this->assertSession()->linkByHrefExists('admin/structure/paragraphs_type/add');
     $this->clickLink('here');
     $this->assertSession()->addressEquals('admin/structure/paragraphs_type/add');
@@ -370,7 +373,7 @@ class ParagraphsAdministrationTest extends ParagraphsTestBase {
     // Set the fields as required.
     $this->drupalGet('admin/structure/types/manage/article/fields');
     $this->clickLink('Edit', 1);
-    $this->submitForm(['preview_mode' => '1'], 'Save content type');
+    $this->submitForm(['preview_mode' => '1'], 'Save');
     $this->drupalGet('admin/structure/paragraphs_type/nested_test/fields');
     $this->clickLink('Edit');
     $this->submitForm(['required' => TRUE], 'Save settings');
@@ -404,17 +407,6 @@ class ParagraphsAdministrationTest extends ParagraphsTestBase {
     $this->assertCount(2, $select->findAll('css', 'option'));
     $this->assertSession()->responseContains('value="entity_reference_paragraphs" selected="selected"');
 
-    // Check that Paragraphs is not displayed as an entity_reference field
-    // reference option.
-    $this->drupalGet('admin/structure/types/manage/article/fields/add-field');
-    $edit = [
-      'new_storage_type' => 'entity_reference',
-      'label' => 'unsupported field',
-      'field_name' => 'unsupportedfield',
-    ];
-    $this->submitForm($edit, 'Save and continue');
-    $this->assertSession()->optionNotExists('edit-settings-target-type', 'paragraph');
-
     // Test that all Paragraph types can be referenced if none is selected.
     $this->addParagraphsType('nested_double_test');
     static::fieldUIAddExistingField('admin/structure/paragraphs_type/nested_double_test', 'field_paragraphs', 'paragraphs_1');
@@ -446,9 +438,8 @@ class ParagraphsAdministrationTest extends ParagraphsTestBase {
     $this->assertSession()->pageTextNotContains('This entity (paragraph: ) cannot be referenced.');
 
     // Set the fields as not required.
-    $this->drupalGet('admin/structure/types/manage/article/fields');
-    $this->clickLink('Edit', 1);
-    $this->submitForm(['required' => FALSE], 'Save settings');
+    $this->drupalGet('admin/structure/types/manage/article/fields/node.article.field_paragraphs');
+    $this->submitForm(['required' => FALSE], 'Save');
 
     // Set the Paragraph field edit mode to 'Closed'.
     $this->drupalGet('admin/structure/types/manage/article/form-display');
@@ -488,7 +479,7 @@ class ParagraphsAdministrationTest extends ParagraphsTestBase {
     // Assert the validation error message.
     $this->assertSession()->pageTextContains('The referenced entity (node: 4) does not exist');
     // Triggering unrelated button, assert that error message is still present.
-    $this->submitForm([], 'Add another item');
+    $this->submitForm([], 'Save');
     $this->assertSession()->pageTextContains('The referenced entity (node: 4) does not exist');
     $this->assertSession()->pageTextContains('Entity reference (value 1) field is required.');
     // Try to collapse with an invalid reference.
@@ -496,7 +487,7 @@ class ParagraphsAdministrationTest extends ParagraphsTestBase {
     // Paragraph should be still in edit mode.
     $this->assertSession()->fieldExists('field_paragraphs[0][subform][field_entity_reference][0][target_id]');
     $this->assertSession()->fieldExists('field_paragraphs[0][subform][field_entity_reference][1][target_id]');
-    $this->submitForm([], 'Add another item');
+    $this->submitForm([], 'Save');
     // Assert the validation message.
     $this->assertSession()->pageTextMatches('/There are no (entities|content items) matching "foo"./');
     // Attempt to remove the Paragraph.

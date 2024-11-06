@@ -9,7 +9,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
-use MathieuViossat\Util\ArrayToTextTable;
+use dekor\ArrayToTextTable;
 
 /**
  * Format scan results for display or export.
@@ -140,13 +140,6 @@ class ScanResultFormatter {
         '#weight' => -10,
       ],
     ];
-    if (!empty($result['plans'])) {
-      $build['plans'] = [
-        '#type' => 'markup',
-        '#markup' => '<div class="list-description">' . $result['plans'] . '</div>',
-        '#weight' => 50,
-      ];
-    }
 
     // If this project had no known issues found, report that.
     if ($project_error_count === 0) {
@@ -261,22 +254,22 @@ class ScanResultFormatter {
     $group_help = [
       'rector' => [
         $this->t('Fix now with automation'),
-        'rector-covered',
-        $this->t('Avoid some manual work by using <a href="@drupal-rector">drupal-rector to fix issues automatically</a> or <a href="@upgrade-rector">Upgrade Rector to generate patches</a>.', ['@drupal-rector' => 'https://www.drupal.org/project/rector', '@upgrade-rector' => 'https://www.drupal.org/project/upgrade_rector']),
+        'color-warning rector-covered',
+        $this->t('Avoid some manual work by using <a href="@drupal-rector">drupal-rector to fix issues automatically</a>.', ['@drupal-rector' => 'https://www.drupal.org/project/rector']),
       ],
       'now' => [
         $this->t('Fix now manually'),
-        'known-errors',
+        'color-error',
         $this->t('It does not seem like these are covered by automation yet. <a href="@drupal-rector">Contribute to drupal-rector to provide coverage</a>. Fix manually in the meantime.', ['@drupal-rector' => 'https://www.drupal.org/project/rector']),
       ],
       'uncategorized' => [
         $this->t('Check manually'),
-        'known-warnings',
+        'color-warning',
         $this->t('Errors without Drupal source version numbers including parse errors and use of APIs from dependencies.'),
       ],
       'later' => [
         $this->t('Fix later'),
-        'known-later',
+        'color-warning known-later',
         // Issues to fix later need different guidance based on whether they
         // were found in a contributed project or a custom project.
         !empty($extension->info['project']) ?
@@ -285,7 +278,7 @@ class ScanResultFormatter {
       ],
       'ignore' => [
         $this->t('Ignore'),
-        'known-ignore',
+        'color-warning known-ignore',
         $this->t('Deprecated API use for APIs removed in future Drupal major versions is not required to fix yet.'),
       ],
     ];
@@ -295,19 +288,18 @@ class ScanResultFormatter {
         continue;
       }
       $build['groups'][$group_key] = [
+        '#prefix' => '<div class="upgrade-status-project-result-group">',
+        '#suffix' => '</div>',
         'title' => [
           '#type' => 'markup',
-          '#markup' => '<h3 class="upgrade-status-group">' . $group_info[0] . '</h3>',
+          '#markup' => '<h3>' . $group_info[0] . '</h3>',
         ],
         'description' => [
           '#type' => 'markup',
-          '#markup' => '<div class="upgrade-status-description">' . $group_info[2] . '</div>',
+          '#markup' => '<div class="description">' . $group_info[2] . '</div>',
         ],
         'errors' => [
           '#type' => 'table',
-          '#attributes' => [
-            'class' => ['upgrade-status-error-list'],
-          ],
           '#header' => [
             'filename' => $this->t('File name'),
             'line' => $this->t('Line'),
@@ -420,14 +412,6 @@ class ScanResultFormatter {
       ],
     ];
 
-    if (!empty($result['plans'])) {
-      $build['plans'] = [
-        '#type' => 'markup',
-        '#markup' => wordwrap(strip_tags($result['plans']), 80, "\n", true),
-        '#weight' => 50,
-      ];
-    }
-
     // If this project had no known issues found, report that.
     if ($project_error_count === 0) {
       $build['data'] = [
@@ -480,7 +464,7 @@ class ScanResultFormatter {
         ];
       }
       $asciiRenderer = new ArrayToTextTable($table);
-      $tables .= $asciiRenderer->getTable() . "\n";
+      $tables .= $asciiRenderer->render() . "\n";
     }
     $build['data'] = $tables;
 
