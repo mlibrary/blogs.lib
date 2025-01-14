@@ -1,5 +1,9 @@
 name: Condition Query
 type: module
 description: "Adds condition plugin by query parameter"
-core: 8.x
 core_version_requirement: ^8 || ^9 || ^10
+
+# Information added by Drupal.org packaging script on 2023-11-18
+version: '8.x-1.4'
+project: 'condition_query'
+datestamp: 1700332711

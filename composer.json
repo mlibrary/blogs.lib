@@ -50,21 +50,7 @@
             "type": "composer",
             "url": "https://packages.drupal.org/8",
             "exclude": [
-                "drupal/condition_query"
             ]
-        },
-        "drupal/condition_query": {
-            "type": "package",
-            "package": {
-                "name": "drupal/condition_query",
-                "version": "1.4",
-                "type": "drupal-module",
-                "source": {
-                    "type": "git",
-                    "url": "https://github.com/mlibrary/condition_query.git",
-                    "reference": "8.x-1.x"
-                }
-            }
         },
         "jquery_ui_touch_punch": {
           "type": "package",
@@ -88,7 +74,7 @@
         "drupal/calendar": "^1.0@beta",
         "drupal/captcha": "^1.2",
         "drupal/colorbox": "^2.0",
-        "drupal/condition_query": "1.4",
+        "drupal/condition_query": "^1.4",
         "drupal/config_devel": "^1.8",
         "drupal/content_moderation_notifications": "^3.5",
         "drupal/core": "^10.2",
