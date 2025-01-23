@@ -2,6 +2,7 @@
 
 namespace Drupal\openid_connect\Plugin;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\GeneratedUrl;
@@ -21,7 +22,6 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Drupal\Component\Datetime\TimeInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -403,9 +403,6 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
     try {
       $response = $this->httpClient->get($endpoints['userinfo'], $request_options);
       $userinfo = Json::decode((string) $response->getBody());
-
-      $this->loggerFactory->get('openid_connect_' . $this->pluginId)->debug('Response from userinfo endpoint: @userinfo',
-        ['@userinfo' => print_r($userinfo, TRUE)]);
 
       return (is_array($userinfo)) ? $userinfo : NULL;
     }

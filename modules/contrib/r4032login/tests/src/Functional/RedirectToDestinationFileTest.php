@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\r4032login\Functional;
 
-use Drupal\file\Entity\File;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\file\Entity\File;
 
 /**
  * Test redirection when accessing a private file with spaces in its name.

@@ -2,10 +2,10 @@
 
 namespace Drupal\captcha\Form;
 
-use Drupal\captcha\Constants\CaptchaConstants;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\captcha\Constants\CaptchaConstants;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**

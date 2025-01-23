@@ -26,7 +26,7 @@ class CalendarDateInfo {
   /**
    * The position of the date argument among the other view arguments.
    *
-   * @var intdateArgumentPosition
+   * @var int dateArgumentPosition
    *   The date argument position.
    */
   protected $dateArgumentPosition;
@@ -105,6 +105,8 @@ class CalendarDateInfo {
   protected $maxDate;
 
   /**
+   * Indicates whether certain actions are forbidden in the calendar.
+   *
    * @var bool
    *   The forbid value.
    * @todo Explain what this variable does.

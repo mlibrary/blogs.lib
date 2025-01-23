@@ -40,7 +40,14 @@ class SchedulerNonEnabledTypeTest extends SchedulerBrowserTestBase {
         'scheduler_publish_enable' => $publishing_enabled,
         'scheduler_unpublish_enable' => $unpublishing_enabled,
       ];
+      if ($entityTypeId == 'commerce_product') {
+        // Products need an extra checkbox to be ticked.
+        // cspell:ignore variationtypes .
+        $edit['edit-variationtypes-default'] = TRUE;
+      }
       $this->submitForm($edit, 'Save');
+      // Check that the save was successful with no error message.
+      $this->assertSession()->statusMessageNotExists('error');
 
       // Show the form display page for info.
       $this->drupalGet($this->adminUrl('bundle_form_display', $entityTypeId, $bundle));

@@ -2,12 +2,8 @@
 
 namespace Drupal\r4032login\Form;
 
-use Drupal\Component\Utility\UrlHelper;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Path\PathValidatorInterface;
-use Drupal\Core\Url;
 use Drupal\user\Entity\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -24,26 +20,13 @@ class AnonymousSettingsForm extends ConfigFormBase {
   protected $pathValidator;
 
   /**
-   * Constructs an AnonymousSettingsForm.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   Defines the configuration object factory.
-   * @param \Drupal\Core\Path\PathValidatorInterface $path_validator
-   *   The path validator service.
-   */
-  public function __construct(ConfigFactoryInterface $config_factory, PathValidatorInterface $path_validator) {
-    parent::__construct($config_factory);
-    $this->pathValidator = $path_validator;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('path.validator')
-    );
+    $instance = parent::create($container);
+    $instance->pathValidator = $container->get('path.validator');
+
+    return $instance;
   }
 
   /**
@@ -134,15 +117,17 @@ class AnonymousSettingsForm extends ConfigFormBase {
 
       // Check the path validity
       // and whether the anonymous user can access the entered path.
-      if (!UrlHelper::isExternal($r4032loginUserLoginPath)
-        && (($r4032loginUserLoginPath != '<front>') || ($r4032loginUserLoginPath = Url::fromRoute($r4032loginUserLoginPath)->toString()))
-        && (!$this->pathValidator->getUrlIfValidWithoutAccessCheck($r4032loginUserLoginPath)
-          || !($url = Url::fromUserInput($r4032loginUserLoginPath))
-          || !$url->access(User::getAnonymousUser()))
-      ) {
+      $url = $this->pathValidator->getUrlIfValidWithoutAccessCheck($r4032loginUserLoginPath);
+      if (!$url || (!$url->isExternal() && !$url->access(User::getAnonymousUser()))) {
         $form_state->setErrorByName('user_login_path', $this->t("The user login form path '%path' is either invalid or a logged out user does not have access to it.", [
           '%path' => $form_state->getValue('user_login_path'),
         ]));
+      }
+
+      // Make sure the path starts with a slash.
+      if (substr($r4032loginUserLoginPath, 0, 1) !== '/') {
+        $r4032loginUserLoginPath = '/' . $r4032loginUserLoginPath;
+        $form_state->setValue('user_login_path', $r4032loginUserLoginPath);
       }
     }
   }

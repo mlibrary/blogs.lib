@@ -5,10 +5,10 @@
  * Implements image CAPTCHA for use with the CAPTCHA module.
  */
 
-use Drupal\captcha\Constants\CaptchaConstants;
 use Drupal\Core\DrupalKernel;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
+use Drupal\captcha\Constants\CaptchaConstants;
 use Drupal\image_captcha\Constants\ImageCaptchaConstants;
 use Drupal\image_captcha\Service\ImageCaptchaRenderService;
 

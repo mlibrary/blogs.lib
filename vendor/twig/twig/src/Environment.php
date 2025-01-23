@@ -44,10 +44,10 @@ use Twig\TokenParser\TokenParserInterface;
  */
 class Environment
 {
-    public const VERSION = '3.15.0';
-    public const VERSION_ID = 31500;
+    public const VERSION = '3.18.0';
+    public const VERSION_ID = 31800;
     public const MAJOR_VERSION = 3;
-    public const MINOR_VERSION = 15;
+    public const MINOR_VERSION = 18;
     public const RELEASE_VERSION = 0;
     public const EXTRA_VERSION = '';
 
@@ -863,7 +863,7 @@ class Environment
     /**
      * @internal
      *
-     * @return array<string, array{precedence: int, class: class-string<AbstractUnary>}>
+     * @return array<string, array{precedence: int, precedence_change?: OperatorPrecedenceChange, class: class-string<AbstractUnary>}>
      */
     public function getUnaryOperators(): array
     {
@@ -873,7 +873,7 @@ class Environment
     /**
      * @internal
      *
-     * @return array<string, array{precedence: int, class: class-string<AbstractBinary>, associativity: ExpressionParser::OPERATOR_*}>
+     * @return array<string, array{precedence: int, precedence_change?: OperatorPrecedenceChange, class: class-string<AbstractBinary>, associativity: ExpressionParser::OPERATOR_*}>
      */
     public function getBinaryOperators(): array
     {

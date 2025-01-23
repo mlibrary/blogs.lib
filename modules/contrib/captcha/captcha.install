@@ -97,7 +97,7 @@ function captcha_requirements($phase) {
     $requirements['captcha_wrong_response_counter'] = [
       'title' => \Drupal::translation()->translate('CAPTCHA'),
       'value' => \Drupal::translation()->formatPlural(
-        \Drupal::state()->get('captcha.wrong_response_counter'),
+        \Drupal::state()->get('captcha.wrong_response_counter', 0),
         'Already 1 blocked form submission',
         'Already @count blocked form submissions'
       ),

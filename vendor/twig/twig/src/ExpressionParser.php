@@ -20,11 +20,11 @@ use Twig\Node\Expression\ArrayExpression;
 use Twig\Node\Expression\ArrowFunctionExpression;
 use Twig\Node\Expression\Binary\AbstractBinary;
 use Twig\Node\Expression\Binary\ConcatBinary;
-use Twig\Node\Expression\ConditionalExpression;
 use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\GetAttrExpression;
 use Twig\Node\Expression\MacroReferenceExpression;
 use Twig\Node\Expression\NameExpression;
+use Twig\Node\Expression\Ternary\ConditionalTernary;
 use Twig\Node\Expression\TestExpression;
 use Twig\Node\Expression\Unary\AbstractUnary;
 use Twig\Node\Expression\Unary\NegUnary;
@@ -53,9 +53,9 @@ class ExpressionParser
     public const OPERATOR_LEFT = 1;
     public const OPERATOR_RIGHT = 2;
 
-    /** @var array<string, array{precedence: int, class: class-string<AbstractUnary>}> */
+    /** @var array<string, array{precedence: int, precedence_change?: OperatorPrecedenceChange, class: class-string<AbstractUnary>}> */
     private $unaryOperators;
-    /** @var array<string, array{precedence: int, class: class-string<AbstractBinary>, associativity: self::OPERATOR_*}> */
+    /** @var array<string, array{precedence: int, precedence_change?: OperatorPrecedenceChange, class: class-string<AbstractBinary>, associativity: self::OPERATOR_*}> */
     private $binaryOperators;
     private $readyNodes = [];
     private array $precedenceChanges = [];
@@ -92,7 +92,7 @@ class ExpressionParser
 
     public function parseExpression($precedence = 0)
     {
-        if (func_num_args() > 1) {
+        if (\func_num_args() > 1) {
             trigger_deprecation('twig/twig', '3.15', 'Passing a second argument ($allowArrow) to "%s()" is deprecated.', __METHOD__);
         }
 
@@ -125,7 +125,7 @@ class ExpressionParser
 
             $expr->setAttribute('operator', 'binary_'.$token->getValue());
 
-            $this->triggerPrecedenceDeprecations($expr, $token);
+            $this->triggerPrecedenceDeprecations($expr);
 
             $token = $this->parser->getCurrentToken();
         }
@@ -149,14 +149,14 @@ class ExpressionParser
                 return;
             }
             $target = explode('_', $unaryOp)[1];
-            $change = $this->unaryOperators[$target]['precedence_change'];
             /** @var AbstractExpression $node */
             $node = $expr->getNode('node');
             foreach ($this->precedenceChanges as $operatorName => $changes) {
-                if (!in_array($unaryOp, $changes)) {
+                if (!\in_array($unaryOp, $changes)) {
                     continue;
                 }
                 if ($node->hasAttribute('operator') && $operatorName === $node->getAttribute('operator')) {
+                    $change = $this->unaryOperators[$target]['precedence_change'];
                     trigger_deprecation($change->getPackage(), $change->getVersion(), \sprintf('Add explicit parentheses around the "%s" unary operator to avoid behavior change in the next major version as its precedence will change in "%s" at line %d.', $target, $this->parser->getStream()->getSourceContext()->getName(), $node->getTemplateLine()));
                 }
             }
@@ -246,7 +246,7 @@ class ExpressionParser
             $expr->setAttribute('operator', 'unary_'.$token->getValue());
 
             if ($this->deprecationCheck) {
-                $this->triggerPrecedenceDeprecations($expr, $token);
+                $this->triggerPrecedenceDeprecations($expr);
             }
 
             return $this->parsePostfixExpression($expr);
@@ -269,22 +269,16 @@ class ExpressionParser
     private function parseConditionalExpression($expr): AbstractExpression
     {
         while ($this->parser->getStream()->nextIf(Token::PUNCTUATION_TYPE, '?')) {
-            if (!$this->parser->getStream()->nextIf(Token::PUNCTUATION_TYPE, ':')) {
-                $expr2 = $this->parseExpression();
-                if ($this->parser->getStream()->nextIf(Token::PUNCTUATION_TYPE, ':')) {
-                    // Ternary operator (expr ? expr2 : expr3)
-                    $expr3 = $this->parseExpression();
-                } else {
-                    // Ternary without else (expr ? expr2)
-                    $expr3 = new ConstantExpression('', $this->parser->getCurrentToken()->getLine());
-                }
-            } else {
-                // Ternary without then (expr ?: expr3)
-                $expr2 = $expr;
+            $expr2 = $this->parseExpression();
+            if ($this->parser->getStream()->nextIf(Token::PUNCTUATION_TYPE, ':')) {
+                // Ternary operator (expr ? expr2 : expr3)
                 $expr3 = $this->parseExpression();
+            } else {
+                // Ternary without else (expr ? expr2)
+                $expr3 = new ConstantExpression('', $this->parser->getCurrentToken()->getLine());
             }
 
-            $expr = new ConditionalExpression($expr, $expr2, $expr3, $this->parser->getCurrentToken()->getLine());
+            $expr = new ConditionalTernary($expr, $expr2, $expr3, $this->parser->getCurrentToken()->getLine());
         }
 
         return $expr;
@@ -622,10 +616,10 @@ class ExpressionParser
     {
         $namedArguments = false;
         $definition = false;
-        if (func_num_args() > 1) {
+        if (\func_num_args() > 1) {
             $definition = func_get_arg(1);
         }
-        if (func_num_args() > 0) {
+        if (\func_num_args() > 0) {
             trigger_deprecation('twig/twig', '3.15', 'Passing arguments to "%s()" is deprecated.', __METHOD__);
             $namedArguments = func_get_arg(0);
         }
@@ -937,10 +931,8 @@ class ExpressionParser
             $token = $stream->next();
             if (
                 Token::NAME_TYPE == $token->getType()
-                ||
-                Token::NUMBER_TYPE == $token->getType()
-                ||
-                (Token::OPERATOR_TYPE == $token->getType() && preg_match(Lexer::REGEX_NAME, $token->getValue()))
+                || Token::NUMBER_TYPE == $token->getType()
+                || (Token::OPERATOR_TYPE == $token->getType() && preg_match(Lexer::REGEX_NAME, $token->getValue()))
             ) {
                 $attribute = new ConstantExpression($token->getValue(), $token->getLine());
             } else {
@@ -955,11 +947,9 @@ class ExpressionParser
 
         if (
             $node instanceof NameExpression
-            &&
-            (
+            && (
                 null !== $this->parser->getImportedSymbol('template', $node->getAttribute('name'))
-                ||
-                '_self' === $node->getAttribute('name') && $attribute instanceof ConstantExpression
+                || '_self' === $node->getAttribute('name') && $attribute instanceof ConstantExpression
             )
         ) {
             return new MacroReferenceExpression(new TemplateVariable($node->getAttribute('name'), $node->getTemplateLine()), 'macro_'.$attribute->getAttribute('value'), $arguments, $node->getTemplateLine());

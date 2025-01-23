@@ -43,7 +43,7 @@ display:
       pager:
         type: calendar
         options:
-          pager_placement: top
+          exclude_display: false
       style:
         type: calendar
         options:

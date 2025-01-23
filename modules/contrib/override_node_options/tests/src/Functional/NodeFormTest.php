@@ -34,7 +34,7 @@ class NodeFormTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['override_node_options'];
+  protected static $modules = ['override_node_options'];
 
   /**
    * {@inheritdoc}
@@ -78,7 +78,8 @@ class NodeFormTest extends BrowserTestBase {
     }
 
     if ($vid) {
-      $node = node_revision_load($vid);
+      $node = \Drupal::entityTypeManager()->getStorage('node')
+      ->loadRevision($vid);
     }
 
     foreach ($fields as $field => $value) {

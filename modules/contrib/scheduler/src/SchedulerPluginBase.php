@@ -101,6 +101,16 @@ abstract class SchedulerPluginBase extends PluginBase implements SchedulerPlugin
   }
 
   /**
+   * Get the field name for the 'type' or 'bundle'.
+   *
+   * @return string
+   *   The name of the type/bundle field for this entity type.
+   */
+  public function typeFieldName() {
+    return $this->entityTypeObject->getKey('bundle');
+  }
+
+  /**
    * Get the id of the Devel Generate form for this entity type.
    *
    * @return string
@@ -170,16 +180,6 @@ abstract class SchedulerPluginBase extends PluginBase implements SchedulerPlugin
    */
   public function unpublishAction() {
     return $this->pluginDefinition['unpublishAction'] ?? $this->entityType() . '_unpublish_action';
-  }
-
-  /**
-   * Get the field name for the 'type' or 'bundle'.
-   *
-   * @return string
-   *   The name of the type/bundle field for this entity type.
-   */
-  public function typeFieldName() {
-    return $this->entityTypeObject->getKey('bundle');
   }
 
   /**

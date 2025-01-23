@@ -2,10 +2,8 @@
 
 namespace Drupal\r4032login\Form;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Path\PathValidatorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -21,26 +19,13 @@ class AuthenticatedSettingsForm extends ConfigFormBase {
   protected $pathValidator;
 
   /**
-   * Constructs a AuthenticatedSettingsForm.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   Defines the configuration object factory.
-   * @param \Drupal\Core\Path\PathValidatorInterface $path_validator
-   *   The path validator service.
-   */
-  public function __construct(ConfigFactoryInterface $config_factory, PathValidatorInterface $path_validator) {
-    parent::__construct($config_factory);
-    $this->pathValidator = $path_validator;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('path.validator')
-    );
+    $instance = parent::create($container);
+    $instance->pathValidator = $container->get('path.validator');
+
+    return $instance;
   }
 
   /**

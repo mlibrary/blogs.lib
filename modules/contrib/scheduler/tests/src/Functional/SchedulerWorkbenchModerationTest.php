@@ -5,7 +5,7 @@ namespace Drupal\Tests\scheduler\Functional;
 /**
  * Tests Scheduler with Workbench Moderation installed.
  *
- * @group scheduler
+ * @group scheduler_workbench
  */
 class SchedulerWorkbenchModerationTest extends SchedulerBrowserTestBase {
 

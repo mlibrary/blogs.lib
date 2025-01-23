@@ -62,7 +62,7 @@ class ViewsFieldTemplate extends ViewsDuplicateBuilderBase {
   /**
    * {@inheritdoc}
    */
-  protected function alterViewTemplateAfterCreation(array &$view_template, array $options = NULL) {
+  protected function alterViewTemplateAfterCreation(array &$view_template, ?array $options = NULL) {
     parent::alterViewTemplateAfterCreation($view_template, $options);
     $field_defs = $this->fieldManager->getBaseFieldDefinitions($this->getDefinitionValue('entity_type'));
     if (empty($field_defs['status'])) {

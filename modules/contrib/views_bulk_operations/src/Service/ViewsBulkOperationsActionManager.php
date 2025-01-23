@@ -96,7 +96,6 @@ class ViewsBulkOperationsActionManager extends ActionManager {
 
       $this->processDefinition($definition, $plugin_id);
     }
-    $this->alterDefinitions($definitions);
     foreach ($definitions as $plugin_id => $plugin_definition) {
       // If the plugin definition is an object, attempt to convert it to an
       // array, if that is not possible, skip further processing.
@@ -127,11 +126,15 @@ class ViewsBulkOperationsActionManager extends ActionManager {
       $definitions = $this->getCachedDefinitions();
     }
     if (!isset($definitions)) {
-      $this->alterParameters = $parameters;
       $definitions = $this->findDefinitions($parameters);
 
       $this->setCachedDefinitions($definitions);
     }
+
+    // Alter definitions after retrieving all from the cache for maximum
+    // flexibility.
+    $this->alterParameters = $parameters;
+    $this->alterDefinitions($definitions);
 
     return $definitions;
   }

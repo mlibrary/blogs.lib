@@ -6,6 +6,7 @@ use Drupal\Core\Archiver\ArchiverManager;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\file_entity\UploadValidatorsTrait;
@@ -85,7 +86,7 @@ class FileAddArchiveForm extends FormBase {
       '#progress_indicator' => 'bar',
       '#default_value' => $form_state->has('file') ? array($form_state->get('file')->id()) : NULL,
       '#required' => TRUE,
-      '#description' => $this->t('Files must be less than <strong>%valid_size</strong><br> Allowed file types: <strong>%valid_extension</strong>', array('%valid_size' => format_size($validators['file_validate_size'][0]), '%valid_extension' => $validators['file_validate_extensions'][0])),
+      '#description' => $this->t('Files must be less than <strong>%valid_size</strong><br> Allowed file types: <strong>%valid_extension</strong>', ['%valid_size' => ByteSizeMarkup::create($validators['FileSizeLimit']['fileLimit'])]),
       '#upload_validators' => $validators,
     );
 

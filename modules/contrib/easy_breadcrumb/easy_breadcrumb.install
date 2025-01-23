@@ -151,14 +151,3 @@ function easy_breadcrumb_update_8009() {
     return t('Breadcrumb segment minimum count has been set to 1 to maintain the existing behavior when rendering breadcrumbs.');
   }
 }
-
-/**
- * Implements hook_install().
- *
- * Help users get started with the module.
- */
-function easy_breadcrumb_install() {
-  \Drupal::messenger()->addMessage(t('Documentation for Easy Breadcrumb module is available on-site in the Help module or at <a href=":url">Drupal.org</a>.', [
-    ':url' => 'https://www.drupal.org/docs/contributed-modules/easy-breadcrumb',
-  ]));
-}

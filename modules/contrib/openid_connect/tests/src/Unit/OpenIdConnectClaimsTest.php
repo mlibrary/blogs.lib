@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\openid_connect\Unit;
 
@@ -220,7 +220,7 @@ class OpenIdConnectClaimsTest extends UnitTestCase {
    * @return array
    *   The default key, scope, type for the claims.
    */
-  public function defaultClaimsProvider(): array {
+  public static function defaultClaimsProvider(): array {
     return [
       ['name', 'profile', 'string'],
       ['given_name', 'profile', 'string'],

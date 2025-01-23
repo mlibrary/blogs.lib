@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\content_moderation_notifications\Unit\Entity;
 
-use Prophecy\PhpUnit\ProphecyTrait;
 use Drupal\content_moderation_notifications\Entity\ContentModerationNotification;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -10,6 +9,8 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\Tests\UnitTestCase;
+use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * Tests for the notification entity.
@@ -141,6 +142,7 @@ class ContentModerationNotificationTest extends UnitTestCase {
     $query = $this->prophesize(QueryInterface::class);
     $query->execute()->willReturn([]);
     $query->condition('uuid', NULL)->willReturn($query->reveal());
+    $query->accessCheck(Argument::any())->willReturn($query->reveal());
     $storage->getQuery()->willReturn($query->reveal());
     $storage->loadUnchanged('foo')->willReturn($notification);
     $notification->preSave($storage->reveal());

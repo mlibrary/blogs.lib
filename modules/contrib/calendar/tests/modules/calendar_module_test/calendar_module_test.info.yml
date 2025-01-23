@@ -1,0 +1,10 @@
+name: Calendar Module Test
+description: Testing module for calendar functionality.
+package: Testing
+type: module
+hidden: TRUE
+
+# Information added by Drupal.org packaging script on 2024-12-09
+version: '8.x-1.0-beta3'
+project: 'calendar'
+datestamp: 1733781154

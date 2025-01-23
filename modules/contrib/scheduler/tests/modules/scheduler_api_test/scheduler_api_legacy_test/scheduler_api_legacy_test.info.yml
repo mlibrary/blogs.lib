@@ -1,12 +1,12 @@
 name: 'Scheduler API Legacy Test'
 type: module
-description: 'Sub-module containing the legacy hook implementations.'
+description: 'Sub-module containing the legacy hook implementations and event namespaces.'
 package: Testing
 dependencies:
   - scheduler:scheduler
   - scheduler_api_test:scheduler_api_test
 
-# Information added by Drupal.org packaging script on 2024-08-15
-version: '2.1.0'
+# Information added by Drupal.org packaging script on 2025-01-09
+version: '2.2.0'
 project: 'scheduler'
-datestamp: 1723712693
+datestamp: 1736416857

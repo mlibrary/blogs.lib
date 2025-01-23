@@ -9,9 +9,6 @@
  * to solve.
  */
 
-use Drupal\captcha\Constants\CaptchaConstants;
-use Drupal\captcha\Element\Captcha;
-use Drupal\captcha\Entity\CaptchaPoint;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Form\BaseFormIdInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -19,6 +16,9 @@ use Drupal\Core\Link;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\Url;
+use Drupal\captcha\Constants\CaptchaConstants;
+use Drupal\captcha\Element\Captcha;
+use Drupal\captcha\Entity\CaptchaPoint;
 
 /**
  * Implements hook_help().

@@ -2,8 +2,8 @@
 .calendar-calendar .week-view #single-day-container,
 .calendar-calendar .day-view #multi-day-container,
 .calendar-calendar .day-view #single-day-container {
-  overflow-y: hidden;
   overflow-x: hidden;
+  overflow-y: hidden;
 }
 .calendar-calendar .week-view #single-day-container,
 .calendar-calendar .day-view #single-day-container {

@@ -5,7 +5,7 @@ package: Spam control
 core_version_requirement: ^9.5 || ^10 || ^11
 configure: captcha_settings
 
-# Information added by Drupal.org packaging script on 2024-07-02
-version: '8.x-1.15'
+# Information added by Drupal.org packaging script on 2024-11-22
+version: '8.x-1.16'
 project: 'captcha'
-datestamp: 1719900379
+datestamp: 1732250247

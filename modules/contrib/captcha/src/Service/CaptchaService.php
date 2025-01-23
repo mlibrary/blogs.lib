@@ -2,9 +2,9 @@
 
 namespace Drupal\captcha\Service;
 
-use Drupal\captcha\Constants\CaptchaConstants;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\captcha\Constants\CaptchaConstants;
 
 /**
  * Helper service for CAPTCHA module.
@@ -96,7 +96,7 @@ class CaptchaService {
    * @param array $captcha_element
    *   the CAPTCHA element to insert.
    */
-  public function insertCaptchaElement(array &$form, array $placement = NULL, array $captcha_element = NULL) {
+  public function insertCaptchaElement(array &$form, ?array $placement = NULL, ?array $captcha_element = NULL) {
     // Get path, target and target weight or use defaults if not available.
     $target_key = $placement['key'] ?? NULL;
     $target_weight = $placement['weight'] ?? NULL;

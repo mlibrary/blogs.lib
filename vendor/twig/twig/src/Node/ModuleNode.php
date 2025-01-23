@@ -44,11 +44,11 @@ final class ModuleNode extends Node
             'blocks' => $blocks,
             'macros' => $macros,
             'traits' => $traits,
-            'display_start' => new EmptyNode(),
-            'display_end' => new EmptyNode(),
-            'constructor_start' => new EmptyNode(),
-            'constructor_end' => new EmptyNode(),
-            'class_end' => new EmptyNode(),
+            'display_start' => new Nodes(),
+            'display_end' => new Nodes(),
+            'constructor_start' => new Nodes(),
+            'constructor_end' => new Nodes(),
+            'class_end' => new Nodes(),
         ];
         if (null !== $parent) {
             $nodes['parent'] = $parent;
@@ -244,9 +244,9 @@ final class ModuleNode extends Node
                         ->string($key)
                         ->raw(\sprintf(']; unset($_trait_%s_blocks[', $i))
                         ->string($key)
-                        ->raw("]); \$this->traitAliases[")
+                        ->raw(']); $this->traitAliases[')
                         ->subcompile($value)
-                        ->raw("] = ")
+                        ->raw('] = ')
                         ->string($key)
                         ->raw(";\n\n")
                     ;

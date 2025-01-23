@@ -2,6 +2,11 @@
 
 All Notable changes to `League\Container` will be documented in this file
 
+## 4.2.4
+
+### Fixed
+- Now properly handle string based fully qualified class names in with preceding slashes. (@M1ke)
+
 ## 4.2.3
 
 ### Fixed

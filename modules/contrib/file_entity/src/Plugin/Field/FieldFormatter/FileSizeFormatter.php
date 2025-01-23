@@ -42,7 +42,7 @@ class FileSizeFormatter extends FormatterBase {
 
     foreach ($files as $delta => $file) {
       $elements[$delta] = [
-        '#markup' => format_size($file->getSize(), $file->language()->getId()),
+        '#markup' => \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.2.0', fn() => \Drupal\Core\StringTranslation\ByteSizeMarkup::create($file->getSize(), $file->language()->getId()), fn() => format_size($file->getSize(), $file->language()->getId())),
       ];
     }
 

@@ -1,6 +1,9 @@
 <?php
 
-use Drupal\Core\Database\Database;
+/**
+ * @file
+ * Drupal install and update hooks.
+ */
 
 /**
  * Add field throw_authenticated_404 to the schema.

@@ -2,8 +2,10 @@
 
 namespace Drupal\content_moderation_notifications;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\SynchronizableInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Mail\MailManagerInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -11,6 +13,7 @@ use Drupal\token\TokenEntityMapperInterface;
 use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\RoleInterface;
+
 
 /**
  * General service for moderation-related questions about Entity API.
@@ -88,6 +91,11 @@ class Notification implements NotificationInterface {
    * {@inheritdoc}
    */
   public function processEntity(EntityInterface $entity) {
+    // Never process entities that syncing (for example, during a migration).
+    if ($entity instanceof SynchronizableInterface && $entity->isSyncing()) {
+      return;
+    }
+
     $notifications = $this->notificationInformation->getNotifications($entity);
     if (!empty($notifications)) {
       $this->sendNotification($entity, $notifications);
@@ -98,7 +106,8 @@ class Notification implements NotificationInterface {
    * {@inheritdoc}
    */
   public function sendNotification(EntityInterface $entity, array $notifications) {
-
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = \Drupal::service('renderer');
     /** @var \Drupal\content_moderation_notifications\ContentModerationNotificationInterface $notification */
     foreach ($notifications as $notification) {
       $data['langcode'] = $this->currentUser->getPreferredLangcode();
@@ -127,7 +136,12 @@ class Notification implements NotificationInterface {
         '#template' => $subject,
         '#context' => $data['params']['context'],
       ];
-      $subject = \Drupal::service('renderer')->renderPlain($template);
+      $subject = DeprecationHelper::backwardsCompatibleCall(
+        currentVersion: \Drupal::VERSION,
+        deprecatedVersion: '10.3',
+        currentCallable: fn() => $renderer->renderInIsolation($template),
+        deprecatedCallable: fn() => $renderer->renderPlain($template),
+      );
       // Remove any newlines from Subject.
       $subject = trim(str_replace("\n", ' ', $subject));
       $data['params']['subject'] = $subject;
@@ -139,7 +153,12 @@ class Notification implements NotificationInterface {
         '#template' => $message,
         '#context' => $data['params']['context'],
       ];
-      $message = \Drupal::service('renderer')->renderPlain($template);
+      $message = DeprecationHelper::backwardsCompatibleCall(
+        currentVersion: \Drupal::VERSION,
+        deprecatedVersion: '10.3',
+        currentCallable: fn() => $renderer->renderInIsolation($template),
+        deprecatedCallable: fn() => $renderer->renderPlain($template),
+      );
       $data['params']['message'] = check_markup($message, $notification->getMessageFormat());
 
       // Figure out who the email should be going to.
@@ -185,14 +204,21 @@ class Notification implements NotificationInterface {
         '#template' => $adhoc_emails,
         '#context' => $data['params']['context'],
       ];
-      $adhoc_emails = \Drupal::service('renderer')->renderPlain($template);
+      $adhoc_emails = DeprecationHelper::backwardsCompatibleCall(
+        currentVersion: \Drupal::VERSION,
+        deprecatedVersion: '10.3',
+        currentCallable: fn() => $renderer->renderInIsolation($template),
+        deprecatedCallable: fn() => $renderer->renderPlain($template),
+      );
 
       // Split Adhoc emails on commas and newlines.
       $adhoc_emails = array_map('trim', explode(',', preg_replace("/((\r?\n)|(\r\n?))/", ',', $adhoc_emails)));
       $anonymous_access = $entity->access('view', User::getAnonymousUser());
       foreach ($adhoc_emails as $email) {
         // Attempt to find a user matching this email.
-        $email_accounts = $this->entityTypeManager->getStorage('user')->loadByProperties(['status' => 1, 'mail' => $email]);
+        $email_accounts = $this->entityTypeManager->getStorage('user')->loadByProperties(
+          ['status' => 1, 'mail' => $email]
+        );
         $email_account = reset($email_accounts);
         if ($email_account && $entity->access('view', $email_account)) {
           $data['to'][] = $email;

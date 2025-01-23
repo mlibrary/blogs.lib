@@ -118,7 +118,7 @@
 .calendar-calendar div.day {
   float: right;
   clear: both;
-  width: 1.5em;
+  width: 1.8em;
   margin: 0;
   padding: 0.125em 0.25em 0 0.25em;
   text-align: center;
@@ -371,7 +371,6 @@ table.calendar-legend tr.even .stripe {
  * The following are not used by default but are available for themes.
  */
 
-
 /**
  * Multi day styles.
  */
@@ -422,7 +421,7 @@ table.calendar-legend tr.even .stripe {
 }
 .calendar-calendar .month-view .full td,
 .calendar-calendar .week-view .full td,
-.calendar-calendar .day-view  td {
+.calendar-calendar .day-view td {
   padding: 1px 2px 0 2px;
   vertical-align: top;
 }
@@ -441,6 +440,7 @@ table.calendar-legend tr.even .stripe {
 .calendar-calendar .month-view .full td .inner div.day,
 .calendar-calendar .month-view .full td .inner div.day a {
   margin-bottom: 0;
+  white-space: nowrap;
   border: none;
   background: none;
 }
@@ -546,7 +546,12 @@ table.calendar-legend tr.even .stripe {
   padding: 0 3px;
   background: #ffc;
 }
-.calendar-calendar .month-view .full td.single-day .calendar-more div.monthview {
+.calendar-calendar
+  .month-view
+  .full
+  td.single-day
+  .calendar-more
+  div.monthview {
   background: none;
 }
 .calendar-calendar .day-view td div.dayview {
@@ -578,12 +583,22 @@ table.calendar-legend tr.even .stripe {
 .calendar-calendar .week-view .full td.multi-day div.weekview {
   margin-bottom: 2px;
 }
-.calendar-calendar .month-view .full td.multi-day .calendar.monthview .view-field {
+.calendar-calendar
+  .month-view
+  .full
+  td.multi-day
+  .calendar.monthview
+  .view-field {
   float: left;
   margin-right: 3px;
   white-space: nowrap;
 }
-.calendar-calendar .week-view .full td.multi-day .calendar.weekview .view-field {
+.calendar-calendar
+  .week-view
+  .full
+  td.multi-day
+  .calendar.weekview
+  .view-field {
   display: inline;
   margin-right: 3px;
   white-space: nowrap;
@@ -613,13 +628,31 @@ table.calendar-legend tr.even .stripe {
 .calendar-calendar .full td.single-day .cutoff {
   display: none;
 }
-.calendar-calendar .month-view .full td.multi-day  .inner .monthview .continuation,
-.calendar-calendar .week-view .full td.multi-day  .inner .weekview .continuation {
+.calendar-calendar
+  .month-view
+  .full
+  td.multi-day
+  .inner
+  .monthview
+  .continuation,
+.calendar-calendar
+  .week-view
+  .full
+  td.multi-day
+  .inner
+  .weekview
+  .continuation {
   float: left;
   height: 1.9em;
   margin-right: 3px;
 }
-.calendar-calendar .week-view .full td.multi-day  .inner .weekview .continuation {
+.calendar-calendar
+  .week-view
+  .full
+  td.multi-day
+  .inner
+  .weekview
+  .continuation {
   height: 2.75em;
   margin-right: 8px;
   padding-top: 0.75em;

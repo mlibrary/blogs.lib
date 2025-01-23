@@ -5,6 +5,8 @@ namespace Drupal\content_moderation_notifications\Form;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\user\Entity\Role;
+use Drupal\user\RoleInterface;
 
 /**
  * Class ContentModerationNotificationFormBase.
@@ -147,13 +149,14 @@ class ContentModerationNotificationsFormBase extends EntityForm {
       '#type' => 'checkboxes',
       '#title' => $this->t('Transitions'),
       '#options' => $state_transitions_options,
-      '#default_value' => isset($content_moderation_notification->transitions) ? $content_moderation_notification->transitions : [],
+      '#default_value' => $content_moderation_notification->transitions ?? [],
       '#required' => TRUE,
       '#description' => $this->t('Select which transitions triggers this notification.'),
     ];
 
     // Role selection.
-    $roles_options = user_role_names(TRUE);
+    $roles = Role::loadMultiple();
+    $roles_options = array_map(fn(RoleInterface $role) => $role->label(), $roles);
 
     $form['roles'] = [
       '#type' => 'checkboxes',
@@ -235,7 +238,7 @@ class ContentModerationNotificationsFormBase extends EntityForm {
     $query = $this->entityTypeManager->getStorage('content_moderation_notification')->getQuery();
 
     // Query the entity ID to see if its in use.
-    $result = $query->condition('id', $element['#field_prefix'] . $entity_id)
+    $result = $query->accessCheck(FALSE)->condition('id', $element['#field_prefix'] . $entity_id)
       ->execute();
 
     // We don't need to return the ID, only if it exists or not.

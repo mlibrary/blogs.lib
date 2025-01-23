@@ -33,13 +33,19 @@ trait CalendarViewsTrait {
   }
 
   /**
-   * Determine if this field is Entity Reference field that references a taxonomy term.
+   * Determine if this field is an Entity Reference field.
+   *
+   * Checks if the field references a taxonomy term.
    *
    * @todo Change to a more generic is Content Entity Reference.
    *
-   * @param $field_info
+   * @param array $field_info
+   *   The field information array.
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $field_manager
    *   The entity field manager service.
+   *
+   * @return bool
+   *   TRUE if the field is a taxonomy term reference, FALSE otherwise.
    */
   protected function isTermReferenceField($field_info, EntityFieldManagerInterface $field_manager) {
     if (!empty($field_info['type']) && $field_info['type'] == 'entity_reference_label') {

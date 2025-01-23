@@ -18,7 +18,7 @@ class SchedulerEventsTest extends SchedulerBrowserTestBase {
    * the entity_form_display. Could these be removed from the config files and
    * then not needed here?
    */
-  protected static $modules = ['scheduler_api_test', 'menu_ui', 'path'];
+  protected static $modules = ['scheduler_api_test', 'scheduler_api_legacy_test', 'menu_ui', 'path'];
 
   /**
    * Covers six events for nodes.
@@ -26,8 +26,10 @@ class SchedulerEventsTest extends SchedulerBrowserTestBase {
    * The events allow other modules to react to the Scheduler process being run.
    * The API test implementations of the event listeners alter the nodes
    * 'promote' and 'sticky' settings and changes the title.
+   *
+   * @dataProvider dataNodeEvents()
    */
-  public function testNodeEvents() {
+  public function testNodeEvents($legacyNamespace = FALSE) {
     $this->drupalLogin($this->schedulerUser);
 
     // Create a test node.
@@ -36,7 +38,7 @@ class SchedulerEventsTest extends SchedulerBrowserTestBase {
       'type' => $this->type,
       'promote' => FALSE,
       'sticky' => FALSE,
-      'title' => 'API TEST node action',
+      'title' => $legacyNamespace ? 'API LEGACY TEST node action' : 'API TEST node action',
     ];
     $node = $this->drupalCreateNode($settings);
 
@@ -85,6 +87,22 @@ class SchedulerEventsTest extends SchedulerBrowserTestBase {
     $this->assertTrue($node->isSticky(), 'API event "PRE_PUBLISH_IMMEDIATELY" has changed the node to sticky.');
     $this->assertTrue($node->isPromoted(), 'API event "PUBLISH_IMMEDIATELY" has changed the node to promoted.');
     $this->assertEquals('Published immediately', $node->title->value, 'API action "PUBLISH_IMMEDIATELY" has changed the node title correctly.');
+  }
+
+  /**
+   * Provides test data for the node events test.
+   *
+   * The node tests are run twice. The first run tests the event subscriber in
+   * scheduler_api_test module, which uses the new namespaces. The second run
+   * tests the event subscriber defined in scheduler_api_legacy_test which still
+   * uses the old namespaces.
+   *
+   * @return array
+   *   True / False whether to use the legacy namespaces.
+   */
+  public static function dataNodeEvents() {
+    $data = ['#new-namespace' => [FALSE], '#legacy-namespace' => [TRUE]];
+    return $data;
   }
 
   /**

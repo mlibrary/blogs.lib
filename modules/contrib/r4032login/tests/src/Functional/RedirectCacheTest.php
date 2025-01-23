@@ -2,10 +2,10 @@
 
 namespace Drupal\Tests\r4032login\Functional;
 
-use Drupal\file\Entity\File;
-use Drupal\node\Entity\NodeType;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\file\Functional\FileFieldCreationTrait;
+use Drupal\file\Entity\File;
+use Drupal\node\Entity\NodeType;
 
 /**
  * Test caching redirection.

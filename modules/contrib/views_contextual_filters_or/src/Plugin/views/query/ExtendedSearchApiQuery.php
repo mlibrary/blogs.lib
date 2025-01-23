@@ -2,10 +2,9 @@
 
 namespace Drupal\views_contextual_filters_or\Plugin\views\query;
 
-use Drupal\search_api\Plugin\views\query\SearchApiQuery;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\search_api\Plugin\views\query\SearchApiQuery;
 use Drupal\views\ViewExecutable;
-use Drupal\Core\Url;
 
 /**
  * Object used to create a SELECT query.
@@ -18,9 +17,9 @@ class ExtendedSearchApiQuery extends SearchApiQuery {
   public function defineOptions() {
     $options = parent::defineOptions();
 
-    $options['contextual_filters_or'] = array(
+    $options['contextual_filters_or'] = [
       'default' => FALSE,
-    );
+    ];
 
     return $options;
   }
@@ -31,12 +30,12 @@ class ExtendedSearchApiQuery extends SearchApiQuery {
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
 
-    $form['contextual_filters_or'] = array(
+    $form['contextual_filters_or'] = [
       '#title' => t('Contextual filters OR'),
       '#description' => t('Contextual filters applied to OR logic.'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['contextual_filters_or']),
-    );
+    ];
   }
 
   /**

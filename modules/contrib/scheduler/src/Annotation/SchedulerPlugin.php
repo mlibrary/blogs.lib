@@ -16,6 +16,8 @@ class SchedulerPlugin extends Plugin {
   /**
    * The internal id / machine name of the plugin.
    *
+   * This is usually the entity_type_id followed by '_scheduler'.
+   *
    * @var string
    */
   public $id;
@@ -46,18 +48,21 @@ class SchedulerPlugin extends Plugin {
   public $entityType;
 
   /**
-   * The name of the type/bundle field.
-   *
-   * @var string
-   */
-  public $typeFieldName;
-
-  /**
    * Module name that plugin requires.
    *
    * @var string
    */
   public $dependency;
+
+  /**
+   * The name of the type/bundle field for the entity (optional).
+   *
+   * The default is the value of entity type 'bundle' key, so this property is
+   * only needed if the entity type does not have a 'bundle' field.
+   *
+   * @var string
+   */
+  public $typeFieldName;
 
   /**
    * The Form ID of the devel generate form (optional).
@@ -67,7 +72,7 @@ class SchedulerPlugin extends Plugin {
   public $develGenerateForm = '';
 
   /**
-   * The route of the collection overview page.
+   * The route of the collection overview page (optional).
    *
    * The default is entity.{$entityType}.collection so this property only needs
    * to be specified if that route is not the correct one.

@@ -1,37 +1,40 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\openid_connect\Unit;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Component\Utility\EmailValidator;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\ImmutableConfig;
+use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\EntityTypeRepositoryInterface;
 use Drupal\Core\Extension\ModuleHandler;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\externalauth\AuthmapInterface;
 use Drupal\externalauth\ExternalAuthInterface;
+use Drupal\file\Entity\File;
 use Drupal\file\FileRepositoryInterface;
+use Drupal\openid_connect\OpenIDConnect;
 use Drupal\openid_connect\OpenIDConnectClientEntityInterface;
 use Drupal\openid_connect\OpenIDConnectSessionInterface;
 use Drupal\openid_connect\Plugin\OpenIDConnectClientInterface;
 use Drupal\Tests\UnitTestCase;
+use Drupal\TestTools\Random;
 use Drupal\user\Entity\User;
 use Drupal\user\UserDataInterface;
-use Drupal\openid_connect\OpenIDConnect;
-use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\user\UserInterface;
-use Drupal\Core\Config\ImmutableConfig;
-use Drupal\Core\Logger\LoggerChannelInterface;
-use Drupal\Core\DependencyInjection\ContainerBuilder;
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Entity\EntityTypeRepositoryInterface;
-use Drupal\file\Entity\File;
-use Drupal\Core\Field\FieldItemListInterface;
-use Drupal\Core\File\FileSystemInterface;
+use PHPUnit\Framework\MockObject\Rule\InvokedCount;
 use Psr\Log\InvalidArgumentException;
 
 /**
@@ -162,7 +165,7 @@ class OpenIDConnectTest extends UnitTestCase {
   protected $fileRepository;
 
   /**
-   * {@inheritDoc}
+   * {@inheritdoc}
    */
   protected function setUp(): void {
     parent::setUp();
@@ -207,10 +210,7 @@ class OpenIDConnectTest extends UnitTestCase {
     $this->userData = $this
       ->createMock(UserDataInterface::class);
 
-    $emailValidator = $this
-      ->getMockBuilder('\Drupal\Component\Utility\EmailValidator')
-      ->addMethods([]);
-    $this->emailValidator = $emailValidator->getMock();
+    $this->emailValidator = $this->createMock(EmailValidator::class);
 
     $this->messenger = $this
       ->createMock(MessengerInterface::class);
@@ -301,8 +301,6 @@ class OpenIDConnectTest extends UnitTestCase {
   /**
    * Test for the hasSetPassword method.
    *
-   * @param \Drupal\Tests\openid_connect\Unit\MockObject|null $account
-   *   The account to test or null if none provided.
    * @param bool $hasPermission
    *   Whether the account should have the correct permission
    *   to change their own password.
@@ -314,45 +312,26 @@ class OpenIDConnectTest extends UnitTestCase {
    * @dataProvider dataProviderForHasSetPasswordAccess
    */
   public function testHasSetPasswordAccess(
-    ?MockObject $account,
     bool $hasPermission,
     array $connectedAccounts,
-    bool $expectedResult
+    bool $expectedResult,
   ): void {
-    if (empty($account)) {
+    $this->currentUser->expects($this->once())
+      ->method('hasPermission')
+      ->with('openid connect set own password')
+      ->willReturn($hasPermission);
+
+    if (!$hasPermission) {
       $this->currentUser->expects($this->once())
-        ->method('hasPermission')
-        ->with('openid connect set own password')
-        ->willReturn($hasPermission);
+        ->method('id')
+        ->willReturn(3);
 
-      if (!$hasPermission) {
-        $this->currentUser->expects($this->once())
-          ->method('id')
-          ->willReturn(3);
-
-        $this->authmap->expects($this->once())
-          ->method('getAll')
-          ->willReturn($connectedAccounts);
-      }
-    }
-    else {
-      $account->expects($this->once())
-        ->method('hasPermission')
-        ->with('openid connect set own password')
-        ->willReturn($hasPermission);
-
-      if (!$hasPermission) {
-        $account->expects($this->once())
-          ->method('id')
-          ->willReturn(3);
-
-        $this->authmap->expects($this->once())
-          ->method('getAll')
-          ->willReturn($connectedAccounts);
-      }
+      $this->authmap->expects($this->once())
+        ->method('getAll')
+        ->willReturn($connectedAccounts);
     }
 
-    $actualResult = $this->openIdConnect->hasSetPasswordAccess($account);
+    $actualResult = $this->openIdConnect->hasSetPasswordAccess($this->currentUser);
 
     $this->assertEquals($expectedResult, $actualResult);
   }
@@ -363,20 +342,20 @@ class OpenIDConnectTest extends UnitTestCase {
    * @return array|array[]
    *   Data provider parameters for the testHasSetPassword() method.
    */
-  public function dataProviderForHasSetPasswordAccess(): array {
+  public static function dataProviderForHasSetPasswordAccess(): array {
     $connectedAccounts = [
-      $this->randomMachineName() => 'sub',
+      Random::machineName() => 'sub',
     ];
 
     return [
-      [$this->currentUser, FALSE, [], TRUE],
-      [$this->currentUser, TRUE, [], TRUE],
-      [NULL, TRUE, [], TRUE],
-      [NULL, FALSE, [], TRUE],
-      [$this->currentUser, FALSE, $connectedAccounts, FALSE],
-      [$this->currentUser, TRUE, $connectedAccounts, TRUE],
-      [NULL, TRUE, $connectedAccounts, TRUE],
-      [NULL, FALSE, $connectedAccounts, FALSE],
+      [FALSE, [], TRUE],
+      [TRUE, [], TRUE],
+      [TRUE, [], TRUE],
+      [FALSE, [], TRUE],
+      [FALSE, $connectedAccounts, FALSE],
+      [TRUE, $connectedAccounts, TRUE],
+      [TRUE, $connectedAccounts, TRUE],
+      [FALSE, $connectedAccounts, FALSE],
     ];
   }
 
@@ -401,7 +380,7 @@ class OpenIDConnectTest extends UnitTestCase {
     array $userinfo,
     string $client_name,
     int $status,
-    bool $duplicate
+    bool $duplicate,
   ): void {
     // Mock the expected username.
     $expectedUserName = 'oidc_' . $client_name . '_' . md5($sub);
@@ -435,11 +414,10 @@ class OpenIDConnectTest extends UnitTestCase {
     if ($duplicate) {
       $this->userStorage->expects($this->exactly(2))
         ->method('loadByProperties')
-        ->withConsecutive(
-          [['name' => $expectedUserName]],
-          [['name' => "{$expectedUserName}_1"]]
-        )
-        ->willReturnOnConsecutiveCalls([1], []);
+        ->willReturnMap([
+          [['name' => $expectedUserName], [$account]],
+          [['name' => "{$expectedUserName}_1"], []],
+        ]);
     }
     else {
       $this->userStorage->expects($this->once())
@@ -460,26 +438,26 @@ class OpenIDConnectTest extends UnitTestCase {
    * @return array|array[]
    *   The parameters to pass to testCreateUser().
    */
-  public function dataProviderForCreateUser(): array {
+  public static function dataProviderForCreateUser(): array {
     return [
-      [$this->randomMachineName(), ['email' => 'test@123.com'], '', 0, FALSE],
-      [$this->randomMachineName(),
+      [Random::machineName(), ['email' => 'test@123.com'], '', 0, FALSE],
+      [Random::machineName(),
         [
           'email' => 'test@test123.com',
-          'name' => $this->randomMachineName(),
-        ], $this->randomMachineName(), 1, FALSE,
+          'name' => Random::machineName(),
+        ], Random::machineName(), 1, FALSE,
       ],
-      [$this->randomMachineName(),
+      [Random::machineName(),
         [
           'email' => 'test@test456.com',
-          'preferred_username' => $this->randomMachineName(),
-        ], $this->randomMachineName(), 1, TRUE,
+          'preferred_username' => Random::machineName(),
+        ], Random::machineName(), 1, TRUE,
       ],
     ];
   }
 
   /**
-   * Test coverate for the completeAuthorization() method.
+   * Test coverage for the completeAuthorization() method.
    *
    * @param bool $authenticated
    *   Should the user be authenticated.
@@ -492,7 +470,7 @@ class OpenIDConnectTest extends UnitTestCase {
    * @param array $userInfo
    *   The user info array.
    * @param bool $preAuthorize
-   *   Whether to preauthorize or not.
+   *   Whether to pre-authorize or not.
    * @param bool $accountExists
    *   Does the account already exist.
    *
@@ -506,7 +484,7 @@ class OpenIDConnectTest extends UnitTestCase {
     $userData,
     array $userInfo,
     bool $preAuthorize,
-    bool $accountExists
+    bool $accountExists,
   ): void {
     $clientId = $this->randomMachineName();
 
@@ -583,7 +561,7 @@ class OpenIDConnectTest extends UnitTestCase {
           $this->oidcLogger->expects($this->once())
             ->method('error')
             ->with(
-              'No e-mail address provided by @provider',
+              'No email address provided by @provider',
               ['@provider' => $clientId]
             );
         }
@@ -599,16 +577,13 @@ class OpenIDConnectTest extends UnitTestCase {
 
           $this->moduleHandler->expects($this->any())
             ->method('invokeAll')
-            ->withConsecutive(
-              ['openid_connect_pre_authorize'],
-              ['openid_connect_userinfo_save'],
-              ['openid_connect_post_authorize']
-            )
-            ->willReturnOnConsecutiveCalls(
-              $moduleHandlerResults,
-              TRUE,
-              TRUE
-            );
+            ->willReturnCallback(function ($parameter) use ($moduleHandlerResults) {
+              return match ($parameter) {
+                'openid_connect_pre_authorize' => $moduleHandlerResults,
+                'openid_connect_userinfo_save' => TRUE,
+                'openid_connect_post_authorize' => TRUE,
+              };
+            });
 
           if ($preAuthorize) {
             $this->entityFieldManager->expects($this->once())
@@ -619,18 +594,14 @@ class OpenIDConnectTest extends UnitTestCase {
             $immutableConfig = $this
               ->createMock(ImmutableConfig::class);
 
-            $immutableConfig->expects($this->exactly(2))
+            $immutableConfig->expects($this->atLeastOnce())
               ->method('get')
-              ->withConsecutive(
-                ['always_save_userinfo'],
-                ['userinfo_mappings']
-              )
-              ->willReturnOnConsecutiveCalls(
-                TRUE,
-                ['mail', 'name']
-              );
+              ->willReturnMap([
+                ['always_save_userinfo', TRUE],
+                ['userinfo_mappings', ['mail', 'name']],
+              ]);
 
-            $this->configFactory->expects($this->exactly(2))
+            $this->configFactory->expects($this->atLeastOnce())
               ->method('get')
               ->with('openid_connect.settings')
               ->willReturn($immutableConfig);
@@ -662,6 +633,11 @@ class OpenIDConnectTest extends UnitTestCase {
               ->method('loadByProperties')
               ->with(['mail' => $userInfo['email']])
               ->willReturn([$account]);
+
+            $this->emailValidator->expects($this->once())
+              ->method('isValid')
+              ->with($userInfo['email'])
+              ->willReturn(TRUE);
 
             $immutableConfig = $this
               ->createMock(ImmutableConfig::class);
@@ -747,19 +723,13 @@ class OpenIDConnectTest extends UnitTestCase {
 
             $ret = !(empty($userInfo['registerOverride']) && isset($userInfo['newAccount']) && $userInfo['newAccount']);
 
-            // @todo This can't probably use Consecutive.
             $immutableConfig->expects($this->any())
               ->method('get')
-              ->withConsecutive(
-                ['connect_existing_users'],
-                ['override_registration_settings'],
-                ['userinfo_mappings']
-              )
-              ->willReturn(
-                $ret,
-                $ret,
-                ['mail' => 'mail']
-              );
+              ->willReturnMap([
+                ['connect_existing_users', $ret],
+                ['override_registration_settings', $ret],
+                ['userinfo_mappings', ['mail' => 'mail']],
+              ]);
 
             $this->configFactory->expects($this->any())
               ->method('get')
@@ -828,17 +798,17 @@ class OpenIDConnectTest extends UnitTestCase {
    * @return array|array[]
    *   Test parameters to pass to testCompleteAuthorization().
    */
-  public function dataProviderForCompleteAuthorization(): array {
-    $sub = $this->randomMachineName();
+  public static function dataProviderForCompleteAuthorization(): array {
+    $sub = Random::machineName();
     $user_data = ['sub' => $sub];
     $id_token = implode('.', [
-      $this->randomMachineName(),
+      Random::machineName(),
       base64_encode(Json::encode($user_data)),
-      $this->randomMachineName(),
+      Random::machineName(),
     ]);
     $tokens = [
       "id_token" => $id_token,
-      "access_token" => $this->randomMachineName(),
+      "access_token" => Random::machineName(),
     ];
 
     return [
@@ -937,7 +907,7 @@ class OpenIDConnectTest extends UnitTestCase {
    * @param array $userData
    *   The user data array.
    * @param array $userInfo
-   *   The user infor array.
+   *   The user info array.
    * @param bool $expectedResult
    *   The expected result of the method.
    *
@@ -948,7 +918,7 @@ class OpenIDConnectTest extends UnitTestCase {
     array $tokens,
     array $userData,
     array $userInfo,
-    bool $expectedResult
+    bool $expectedResult,
   ): void {
     $pluginId = $this->randomMachineName();
     $clientId = $this->randomMachineName();
@@ -998,7 +968,7 @@ class OpenIDConnectTest extends UnitTestCase {
         $this->oidcLogger->expects($this->once())
           ->method('error')
           ->with(
-            'No e-mail address provided by @provider',
+            'No email address provided by @provider',
             ['@provider' => $clientId]
           );
       }
@@ -1091,30 +1061,30 @@ class OpenIDConnectTest extends UnitTestCase {
                 break;
 
               case 'field_string':
-                $account->expects($this->once())
+                $account->expects($this->any())
                   ->method('set');
 
                 $returnType = 'string';
                 break;
 
               case 'field_string_long':
-                $account->expects($this->once())
+                $account->expects($this->any())
                   ->method('set');
                 $returnType = 'string_long';
                 break;
 
               case 'field_datetime':
-                $account->expects($this->once())
+                $account->expects($this->any())
                   ->method('set');
                 $returnType = 'datetime';
                 break;
 
               case 'field_image':
-                $this->fileSystem->expects($this->once())
+                $this->fileSystem->expects($this->any())
                   ->method('basename')
                   ->with($value)
                   ->willReturn('test-file');
-                $account->expects($this->once())
+                $account->expects($this->any())
                   ->method('set');
 
                 $returnType = 'image';
@@ -1136,7 +1106,7 @@ class OpenIDConnectTest extends UnitTestCase {
                 break;
 
               case 'field_invalid':
-                $account->expects($this->never())
+                $account->expects($this->any())
                   ->method('set');
 
                 $this->oidcLogger->expects($this->once())
@@ -1152,7 +1122,7 @@ class OpenIDConnectTest extends UnitTestCase {
                 $exception = $this
                   ->createMock(InvalidArgumentException::class);
 
-                $account->expects($this->once())
+                $account->expects($this->any())
                   ->method('set')
                   ->willThrowException($exception);
 
@@ -1180,40 +1150,29 @@ class OpenIDConnectTest extends UnitTestCase {
 
           $this->moduleHandler->expects($this->exactly(3))
             ->method('invokeAll')
-            ->withConsecutive(
-              ['openid_connect_pre_authorize'],
-              ['openid_connect_userinfo_save'],
-              ['openid_connect_post_authorize']
-            )
-            ->willReturnOnConsecutiveCalls(
-              [],
-              TRUE,
-              TRUE
-            );
-
+            ->willReturnMap([
+              ['openid_connect_pre_authorize', []],
+              ['openid_connect_userinfo_save', TRUE],
+              ['openid_connect_post_authorize', TRUE],
+            ]);
         }
         else {
           $this->moduleHandler->expects($this->exactly(2))
             ->method('invokeAll')
-            ->withConsecutive(
-              ['openid_connect_pre_authorize'],
-              ['openid_connect_post_authorize']
-            )
-            ->willReturnOnConsecutiveCalls(
-              [],
-              TRUE
-            );
+            ->willReturnMap([
+              ['openid_connect_pre_authorize', []],
+              ['openid_connect_post_authorize', TRUE],
+            ]);
         }
 
         $immutableConfig = $this->createMock(ImmutableConfig::class);
 
         $immutableConfig->expects($this->atLeastOnce())
           ->method('get')
-          ->withConsecutive(['always_save_userinfo'], ['userinfo_mappings'])
-          ->willReturnOnConsecutiveCalls(
-            $userData['always_save'],
-            $mappings
-          );
+          ->willReturnMap([
+            ['always_save_userinfo', $userData['always_save']],
+            ['userinfo_mappings', $mappings],
+          ]);
 
         $this->configFactory->expects($this->atLeastOnce())
           ->method('get')
@@ -1233,25 +1192,25 @@ class OpenIDConnectTest extends UnitTestCase {
    * @return array|array[]
    *   Array of parameters to pass to testConnectCurrentUser().
    */
-  public function dataProviderForConnectCurrentUser(): array {
-    $sub = $this->randomMachineName();
+  public static function dataProviderForConnectCurrentUser(): array {
+    $sub = Random::machineName();
     $user_data = ['sub' => $sub];
     $id_token = implode('.', [
-      $this->randomMachineName(),
+      Random::machineName(),
       base64_encode(Json::encode($user_data)),
-      $this->randomMachineName(),
+      Random::machineName(),
     ]);
     $tokens = [
       "id_token" => $id_token,
-      "access_token" => $this->randomMachineName(),
+      "access_token" => Random::machineName(),
     ];
 
     return [
       [FALSE, [], [], [], FALSE],
       [TRUE,
         [
-          'id_token' => $this->randomMachineName(),
-          'access_token' => $this->randomMachineName(),
+          'id_token' => Random::machineName(),
+          'access_token' => Random::machineName(),
         ], [], [], FALSE,
       ],
       [TRUE, $tokens, [], ['email' => FALSE], FALSE],
@@ -1265,11 +1224,11 @@ class OpenIDConnectTest extends UnitTestCase {
         ['email' => 'valid@email.com'], TRUE,
       ],
       [TRUE, $tokens, ['sub' => $sub, 'always_save' => TRUE],
-        ['email' => 'valid@email.com', 'name' => $this->randomMachineName()], TRUE,
+        ['email' => 'valid@email.com', 'name' => Random::machineName()], TRUE,
       ],
       [TRUE, $tokens, ['sub' => $sub, 'always_save' => TRUE],
         [
-          'name' => $this->randomMachineName(),
+          'name' => Random::machineName(),
           'field_string' => 'This is a string',
           'email' => 'valid@email.com',
         ], TRUE,
@@ -1278,36 +1237,157 @@ class OpenIDConnectTest extends UnitTestCase {
         [
           'field_string_long' => 'This is long text.',
           'email' => 'valid@email.com',
-          'name' => $this->randomMachineName(),
+          'name' => Random::machineName(),
         ], TRUE,
       ],
       [TRUE, $tokens, ['sub' => $sub, 'always_save' => TRUE],
         [
           'field_datetime' => '2020-05-20',
           'email' => 'valid@email.com',
-          'name' => $this->randomMachineName(),
+          'name' => Random::machineName(),
         ], TRUE,
       ],
       [TRUE, $tokens, ['sub' => $sub, 'always_save' => TRUE],
         [
-          'name' => $this->randomMachineName(),
+          'name' => Random::machineName(),
           'field_image' => realpath(__DIR__) . '/image.png',
           'email' => 'valid@email.com',
         ], TRUE,
       ],
       [TRUE, $tokens, ['sub' => $sub, 'always_save' => TRUE],
         [
-          'name' => $this->randomMachineName(),
+          'name' => Random::machineName(),
           'field_invalid' => 'does_not_exist',
           'email' => 'valid@email.com',
         ], TRUE,
       ],
       [TRUE, $tokens, ['sub' => $sub, 'always_save' => TRUE],
         [
-          'name' => $this->randomMachineName(),
+          'name' => Random::machineName(),
           'field_image_exception' => new \stdClass(),
           'email' => 'valid@email.com',
         ], TRUE,
+      ],
+    ];
+  }
+
+  /**
+   * Test the saveUserinfo method.
+   *
+   * @param array $userinfo
+   *   The mocked userinfo array.
+   * @param array $mappings
+   *   The configured role mappings.
+   * @param array $add
+   *   The roles expected to be added.
+   * @param array $remove
+   *   The roles expected to be removed.
+   *
+   * @dataProvider dataProviderForTestRoleMappings
+   */
+  public function testRoleMappings(array $userinfo, array $mappings, array $add, array $remove): void {
+    $account = $this->createMock(UserInterface::class);
+    $this->entityFieldManager->expects($this->once())
+      ->method('getFieldDefinitions')
+      ->with('user', 'user')
+      ->willReturn([]);
+
+    $config = $this->createMock(ImmutableConfig::class);
+    $config->expects($this->any())
+      ->method('get')
+      ->with('role_mappings')
+      ->willReturn($mappings);
+
+    $this->configFactory->expects($this->any())
+      ->method('get')
+      ->with('openid_connect.settings')
+      ->willReturn($config);
+
+    $add_matcher = $this->exactly(count($add));
+    $account->expects($add_matcher)
+      ->method('addRole')
+      ->willReturnCallback(function (string $param) use ($add, $add_matcher) {
+        $this->assertSame($param, $add[$this->getInvocationCountHelper($add_matcher) - 1]);
+      });
+
+    $remove_matcher = $this->exactly(count($remove));
+    $account->expects($remove_matcher)
+      ->method('removeRole')
+      ->willReturnCallback(function (string $param) use ($remove, $remove_matcher) {
+        $this->assertSame($param, $remove[$this->getInvocationCountHelper($remove_matcher) - 1]);
+      });
+
+    $this->openIdConnect->saveUserinfo($account, ['userinfo' => $userinfo]);
+  }
+
+  /**
+   * Helper to determine the number of invocations.
+   *
+   * @param \PHPUnit\Framework\MockObject\Rule\InvokedCount $count
+   *   The invoked count object.
+   *
+   * @return int
+   *   The number of invocations.
+   */
+  private function getInvocationCountHelper(InvokedCount $count): int {
+    if (method_exists($count, 'getInvocationCount')) {
+      // @todo Remove this once we drop support for Drupal ^10.
+      trigger_deprecation('openid_connect', '3.x', 'The method InvocationMocker::getInvocationCount() is deprecated. Use numberOfInvocations() instead.');
+      return $count->getInvocationCount();
+    }
+
+    return $count->numberOfInvocations();
+  }
+
+  /**
+   * Data provider for the testRoleMappings method.
+   *
+   * @return array|array[]
+   *   Array of parameters to pass to testRoleMappings().
+   */
+  public function dataProviderForTestRoleMappings(): array {
+    return [
+      'add groupX, remove groupY' => [
+        'userinfo' => [
+          'groups' => ['groupX'],
+        ],
+        'mappings' => [
+          'role1' => ['groupX'],
+          'role2' => ['groupY'],
+        ],
+        'add' => ['role1'],
+        'remove' => ['role2'],
+      ],
+      'add groupX, groupY' => [
+        'userinfo' => [
+          'groups' => ['groupX', 'groupY'],
+        ],
+        'mappings' => [
+          'role1' => ['groupX'],
+          'role2' => ['groupY'],
+        ],
+        'add' => ['role1', 'role2'],
+        'remove' => [],
+      ],
+      'remove groupX, groupY' => [
+        'userinfo' => [
+          'groups' => [],
+        ],
+        'mappings' => [
+          'role1' => ['groupX'],
+          'role2' => ['groupY'],
+        ],
+        'add' => [],
+        'remove' => ['role1', 'role2'],
+      ],
+      'remove all groups when no groups in userinfo' => [
+        'userinfo' => [],
+        'mappings' => [
+          'role1' => ['groupX'],
+          'role2' => ['groupY'],
+        ],
+        'add' => [],
+        'remove' => ['role1', 'role2'],
       ],
     ];
   }

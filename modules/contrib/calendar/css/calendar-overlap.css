@@ -2,17 +2,17 @@
  * Overlapping week items
  */
 .calendar-calendar tr.holder {
-  height: 0;
   display: table-row;
+  height: 0;
 }
 
 .calendar-calendar .week-view .full div.item-wrapper,
 .calendar-calendar .day-view .full div.item-wrapper {
-  background-color: transparent;
-  border: 0;
   float: none;
-  margin: 0;
   width: 100%;
+  margin: 0;
+  border: 0;
+  background-color: transparent;
 }
 
 .calendar-calendar td .inner div,
@@ -22,10 +22,10 @@
 
 .calendar-calendar .week-view .full div.single-day div.weekview,
 .calendar-calendar .day-view .full div.single-day div.dayview {
-  background: #ffc;
+  overflow: hidden;
   width: auto;
   padding: 0 3px;
-  overflow: hidden;
+  background: #ffc;
 }
 
 .calendar-calendar .week-view .full div.single-day div.weekview,
@@ -37,11 +37,11 @@
 .calendar-calendar .week-view .single-day-footer,
 .calendar-calendar .day-view .single-day-footer,
 .calendar-calendar .day-view .header-body-divider {
-  background: #eeeeee;
-  border-left: 1px solid #cccccc;
-  border-right: 1px solid #cccccc;
-  font-size: 1px;
   height: 4px;
+  border-right: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  background: #eee;
+  font-size: 1px;
   line-height: 1px;
 }
 
@@ -50,23 +50,23 @@
 .calendar-calendar .day-view #multi-day-container,
 .calendar-calendar .day-view #single-day-container {
   position: relative;
-  background: #ffffff;
-  overflow-y: scroll;
   overflow-x: hidden;
-  border-left: 1px solid #cccccc;
-  border-bottom: 1px solid #cccccc;
+  overflow-y: scroll;
+  border-bottom: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  background: #fff;
 }
 
 .calendar-calendar .week-view #multi-day-container,
 .calendar-calendar .day-view #multi-day-container {
-  border-top: 1px solid #cccccc;
+  border-top: 1px solid #ccc;
 }
 
 .calendar-calendar .week-view #week-header-container,
 .calendar-calendar .day-view #day-header-container {
   width: 100%;
-  background: #ffffff;
-  border-bottom: 1px solid #cccccc;
+  border-bottom: 1px solid #ccc;
+  background: #fff;
 }
 
 .calendar-calendar .week-view #multi-day-container,
@@ -85,28 +85,32 @@
 
 .calendar-calendar .week-view #multi-day-container table td,
 .calendar-calendar .day-view #multi-day-container table td {
+  width: 14%;
+  vertical-align: top;
   border-top: 0;
   border-bottom: 0;
-  vertical-align: top;
-  width: 14%;
 }
 
-.calendar-calendar .week-view #multi-day-container table td.calendar-agenda-hour {
-  border-right: 1px solid #cccccc;
+.calendar-calendar
+  .week-view
+  #multi-day-container
+  table
+  td.calendar-agenda-hour {
+  border-right: 1px solid #ccc;
 }
 
 .calendar-calendar .week-view #single-day-container,
 .calendar-calendar .day-view #single-day-container {
-  border-top: 1px solid #cccccc;
   height: 500px;
+  border-top: 1px solid #ccc;
 }
 
 .calendar-calendar .week-view #single-day-container table td,
 .calendar-calendar .day-view #single-day-container table td {
+  width: 14%;
   padding: 0;
   border-top: 0;
   border-bottom: 0;
-  width: 14%;
 }
 
 .calendar-calendar .week-view td.first,
@@ -135,34 +139,34 @@
 }
 
 .calendar-calendar .week-view table.full {
-  table-layout: fixed;
   width: 100%;
   margin: 0;
+  table-layout: fixed;
 }
 
 .calendar-calendar .day-view table.full {
-  table-layout: fixed;
   width: 100%;
   margin: 0;
+  table-layout: fixed;
 }
 
 .calendar-calendar td.calendar-agenda-hour .calendar-hour,
 .calendar-calendar td.calendar-agenda-hour .calendar-ampm,
 .calendar-calendar .week-view .full div.calendar-agenda-hour span,
 .calendar-calendar .day-view .full div.calendar-agenda-hour span {
-  font-size: .8em;
-  font-weight: normal;
   margin-right: 0;
+  font-size: 0.8em;
+  font-weight: normal;
 }
 
 .calendar-calendar .week-view .full div.calendar-agenda-hour,
 .calendar-calendar .day-view .full div.calendar-agenda-hour,
 .calendar-calendar .week-view .full div.calendar-agenda-items,
 .calendar-calendar .day-view .full div.calendar-agenda-items {
-  height: 47px;
-  border-top: 1px solid #cccccc;
   clear: both;
   width: 100%;
+  height: 47px;
+  border-top: 1px solid #ccc;
 }
 
 .calendar-calendar .week-view .full .calendar-agenda-hour {
@@ -201,15 +205,15 @@
 }
 
 .calendar-calendar .week-view .full td.calendar-day-holder {
+  width: 14%;
   padding: 0;
   border: 0;
-  width: 14%;
 }
 
 .calendar-calendar .day-view .full td.calendar-day-holder {
+  width: 95%;
   padding: 0;
   border: 0;
-  width: 95%;
 }
 
 .calendar-calendar .week-view .full div.single-day,
@@ -232,14 +236,28 @@
   height: 22px !important;
 }
 
+/* stylelint-disable */
 .calendar-calendar .day-view .full td.multi-day .calendar.dayview .contents div,
-.calendar-calendar .week-view .full td.multi-day .calendar.weekview .contents div {
+.calendar-calendar
+  .week-view
+  .full
+  td.multi-day
+  .calendar.weekview
+  .contents
+  div {
 }
+/* stylelint-enable */
 
-.calendar-calendar .week-view .full td.multi-day .inner .weekview .continuation {
+.calendar-calendar
+  .week-view
+  .full
+  td.multi-day
+  .inner
+  .weekview
+  .continuation {
   height: 22px;
-  padding-top: 0;
   margin-right: 3px;
+  padding-top: 0;
 }
 
 .calendar-calendar .week-view .full td.multi-day .inner .weekview .continues,
@@ -252,24 +270,24 @@
 
 .calendar-calendar .week-view div.single-day .view-item,
 .calendar-calendar .day-view div.single-day .view-item {
-  width: 100%;
-  background: none;
-  text-align: left;
   z-index: 1;
-  margin-top: -24px;
-  max-width: 120px;
   float: left;
+  width: 100%;
+  max-width: 120px;
+  margin-top: -24px;
+  text-align: left;
+  background: none;
 }
 
 .calendar-calendar .week-view div.single-day .half-hour,
 .calendar-calendar .day-view div.single-day .half-hour {
-  font-size: 1px;
-  height: 23px;
-  width: 100%;
   position: relative;
   z-index: 0;
   top: 0;
-  border-bottom: 1px dotted #cccccc;
+  width: 100%;
+  height: 23px;
+  border-bottom: 1px dotted #ccc;
+  font-size: 1px;
 }
 
 .calendar-calendar .week-view div.single-day .view-item .calendar,
@@ -687,53 +705,53 @@
 }
 
 .calendar-calendar .week-view div.single-day .i_0 .view-item .calendar {
-  margin-left: 0px;
   width: 50%;
+  margin-left: 0;
 }
 
 .calendar-calendar .week-view div.single-day .i_1 .view-item .calendar {
-  margin-left: 10%;
   width: 85%;
+  margin-left: 10%;
 }
 
 .calendar-calendar .week-view div.single-day .i_2 .view-item .calendar {
-  margin-left: 16%;
   width: 79%;
+  margin-left: 16%;
 }
 
 .calendar-calendar .week-view div.single-day .i_3 .view-item .calendar {
-  margin-left: 21%;
   width: 74%;
+  margin-left: 21%;
 }
 
 .calendar-calendar .week-view div.single-day .i_4 .view-item .calendar {
-  margin-left: 30%;
   width: 65%;
+  margin-left: 30%;
 }
 
 .calendar-calendar .week-view div.single-day .i_5 .view-item .calendar {
-  margin-left: 34%;
   width: 61%;
+  margin-left: 34%;
 }
 
 .calendar-calendar .week-view div.single-day .i_6 .view-item .calendar {
-  margin-left: 42%;
   width: 53%;
+  margin-left: 42%;
 }
 
 .calendar-calendar .week-view div.single-day .i_7 .view-item .calendar {
-  margin-left: 49%;
   width: 46%;
+  margin-left: 49%;
 }
 
 .calendar-calendar .week-view div.single-day .i_8 .view-item .calendar {
-  margin-left: 55%;
   width: 40%;
+  margin-left: 55%;
 }
 
 .calendar-calendar .week-view div.single-day .i_9 .view-item .calendar {
-  margin-left: 65%;
   width: 30%;
+  margin-left: 65%;
 }
 
 .calendar-calendar .week-view div.single-day .i_0.md_0 .view-item .calendar {
@@ -745,53 +763,53 @@
 }
 
 .calendar-calendar .day-view div.single-day .i_0 .view-item .calendar {
-  margin-left: 2px;
   width: 25%;
+  margin-left: 2px;
 }
 
 .calendar-calendar .day-view div.single-day .i_1 .view-item .calendar {
-  margin-left: 10%;
   width: 89%;
+  margin-left: 10%;
 }
 
 .calendar-calendar .day-view div.single-day .i_2 .view-item .calendar {
-  margin-left: 20%;
   width: 79%;
+  margin-left: 20%;
 }
 
 .calendar-calendar .day-view div.single-day .i_3 .view-item .calendar {
-  margin-left: 30%;
   width: 69%;
+  margin-left: 30%;
 }
 
 .calendar-calendar .day-view div.single-day .i_4 .view-item .calendar {
-  margin-left: 40%;
   width: 59%;
+  margin-left: 40%;
 }
 
 .calendar-calendar .day-view div.single-day .i_5 .view-item .calendar {
-  margin-left: 50%;
   width: 49%;
+  margin-left: 50%;
 }
 
 .calendar-calendar .day-view div.single-day .i_6 .view-item .calendar {
-  margin-left: 60%;
   width: 39%;
+  margin-left: 60%;
 }
 
 .calendar-calendar .day-view div.single-day .i_7 .view-item .calendar {
-  margin-left: 70%;
   width: 29%;
+  margin-left: 70%;
 }
 
 .calendar-calendar .day-view div.single-day .i_8 .view-item .calendar {
-  margin-left: 75%;
   width: 24%;
+  margin-left: 75%;
 }
 
 .calendar-calendar .day-view div.single-day .i_9 .view-item .calendar {
-  margin-left: 80%;
   width: 19%;
+  margin-left: 80%;
 }
 
 .calendar-calendar .day-view div.single-day .i_0.md_0 .view-item .calendar {
@@ -813,7 +831,7 @@
 .single-day-footer .grippie,
 .header-body-divider .grippie {
   overflow: hidden;
-  background: #eee url("../images/grippie.png") no-repeat center 2px;
-  cursor: s-resize;
   height: 3px;
+  cursor: s-resize;
+  background: #eee url("../images/grippie.png") no-repeat center 2px;
 }

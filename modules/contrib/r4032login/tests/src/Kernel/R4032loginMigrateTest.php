@@ -35,6 +35,7 @@ class R4032loginMigrateTest extends MigrateDrupal7TestBase {
    */
   public function testR4032loginMigration() {
     $expected_config = [
+      'langcode' => 'en',
       'display_denied_message' => TRUE,
       'access_denied_message' => 'Access denied. You must log in to view this page.',
       'access_denied_message_type' => 'warning',

@@ -146,7 +146,7 @@ class OpenIDConnectSession implements OpenIDConnectSessionInterface {
   /**
    * {@inheritdoc}
    */
-  public function saveOp(string $op, int $uid = NULL) {
+  public function saveOp(string $op, ?int $uid = NULL) {
     $this->session->set('openid_connect_op', $op);
     if (isset($uid)) {
       $this->session->set('openid_connect_uid', $uid);
@@ -187,6 +187,42 @@ class OpenIDConnectSession implements OpenIDConnectSessionInterface {
    */
   public function saveAccessToken(string $token) {
     $this->session->set('openid_connect_access', $token);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function retrieveRefreshToken(bool $clear = FALSE) : ?string {
+    $ret = $this->session->get('openid_connect_refresh');
+    if ($clear) {
+      $this->session->remove('openid_connect_refresh');
+    }
+    return $ret;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function saveRefreshToken(string $token) {
+    $this->session->set('openid_connect_refresh', $token);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function retrieveExpireToken(bool $clear = FALSE) : ?int {
+    $ret = $this->session->get('openid_connect_expire');
+    if ($clear) {
+      $this->session->remove('openid_connect_expire');
+    }
+    return $ret;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function saveExpireToken(int $timestamp) {
+    $this->session->set('openid_connect_expire', $timestamp);
   }
 
   /**

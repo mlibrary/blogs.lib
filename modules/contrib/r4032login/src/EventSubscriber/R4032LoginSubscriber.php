@@ -114,7 +114,7 @@ class R4032LoginSubscriber extends HttpExceptionSubscriberBase {
     // Check if the path should be ignored.
     if (($noRedirectPages = trim($config->get('match_noredirect_pages') ?? ""))
       && (($this->pathMatcher->matchPath($currentPath, $noRedirectPages) && !$config->get('match_noredirect_negate'))
-      || (!$this->pathMatcher->matchPath($currentPath, $noRedirectPages) && $config->get('match_noredirect_negate')))
+        || (!$this->pathMatcher->matchPath($currentPath, $noRedirectPages) && $config->get('match_noredirect_negate')))
     ) {
       return;
     }

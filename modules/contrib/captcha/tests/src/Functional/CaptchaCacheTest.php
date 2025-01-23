@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\captcha\Functional;
 
-use Drupal\captcha\Constants\CaptchaConstants;
 use Drupal\Core\Database\Database;
+use Drupal\captcha\Constants\CaptchaConstants;
 use Drupal\image_captcha\Constants\ImageCaptchaConstants;
 
 /**

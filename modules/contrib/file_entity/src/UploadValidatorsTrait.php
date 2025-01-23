@@ -27,7 +27,7 @@ trait UploadValidatorsTrait {
     // Validate file extensions. If there are no file extensions in $params and
     // there are no Media defaults, there is no file extension validation.
     if (!empty($options['file_extensions'])) {
-      $validators['file_validate_extensions'] = array($options['file_extensions']);
+      $validators['FileExtension'] = ['extensions' => $options['file_extensions']];
     }
 
     // Cap the upload size according to the system or user defined limit.
@@ -45,15 +45,14 @@ trait UploadValidatorsTrait {
     }
 
     // There is always a file size limit due to the PHP server limit.
-    $validators['file_validate_size'] = array($max_filesize);
+    $validators['FileSizeLimit'] = ['fileLimit' => $max_filesize];
 
     // Add image validators.
     $options += array('min_resolution' => 0, 'max_resolution' => 0);
     if ($options['min_resolution'] || $options['max_resolution']) {
-      $validators['file_validate_image_resolution'] = array(
-        $options['max_resolution'],
-        $options['min_resolution'],
-      );
+      $validators['FileImageDimensions'] = [
+        'maxDimensions' => $options['max_resolution'] . 'x' . $options['min_resolution'],
+      ];
     }
 
     // Add other custom upload validators from options.

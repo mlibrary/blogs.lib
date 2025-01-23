@@ -180,7 +180,7 @@ trait SchedulerMediaSetupTrait {
    * @return \Drupal\media\MediaInterface
    *   The media object.
    */
-  public function getMediaItem(string $name = NULL) {
+  public function getMediaItem(?string $name = NULL) {
     $query = $this->mediaStorage->getQuery()
       ->accessCheck(FALSE)
       ->sort('mid', 'DESC');

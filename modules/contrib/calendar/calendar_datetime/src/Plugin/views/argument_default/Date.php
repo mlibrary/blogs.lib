@@ -2,11 +2,12 @@
 
 namespace Drupal\calendar_datetime\Plugin\views\argument_default;
 
+use Drupal\Component\Datetime\TimeInterface;
+use Drupal\views\Plugin\views\argument\Date as DateArgument;
 use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\views\Plugin\views\argument_default\ArgumentDefaultPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * The current date argument default handler.
@@ -21,18 +22,11 @@ use Symfony\Component\HttpFoundation\Request;
 class Date extends ArgumentDefaultPluginBase implements CacheableDependencyInterface {
 
   /**
-   * The date formatter service.
+   * The date format to use.
    *
-   * @var \Drupal\Core\Datetime\DateFormatterInterface
+   * @var string
    */
-  protected $dateFormatter;
-
-  /**
-   * The current Request object.
-   *
-   * @var \Symfony\Component\HttpFoundation\Request
-   */
-  protected $request;
+  protected $dateFormat = 'Y-m-d';
 
   /**
    * Constructs a new Date instance.
@@ -43,16 +37,13 @@ class Date extends ArgumentDefaultPluginBase implements CacheableDependencyInter
    *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\Core\Datetime\DateFormatterInterface $date_formatter
+   * @param \Drupal\Core\Datetime\DateFormatterInterface $dateFormatter
    *   The date formatter service.
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   The current request.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, DateFormatterInterface $date_formatter, Request $request) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, protected DateFormatterInterface $dateFormatter, protected TimeInterface $time) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-
-    $this->dateFormatter = $date_formatter;
-    $this->request = $request;
   }
 
   /**
@@ -64,27 +55,20 @@ class Date extends ArgumentDefaultPluginBase implements CacheableDependencyInter
       $plugin_id,
       $plugin_definition,
       $container->get('date.formatter'),
-      $container->get('request_stack')->getCurrentRequest()
+      $container->get('datetime.time')
     );
   }
 
   /**
-   * Return the default argument.
+   * {@inheritdoc}
    */
   public function getArgument() {
-    $argument = $this->argument;
 
     // The Date argument handlers provide their own format strings, otherwise
     // use a default.
-    if ($argument instanceof Date) {
-      /** @var \Drupal\views\Plugin\views\argument\Date $argument */
-      $format = $argument->getArgFormat();
-    }
-    else {
-      $format = 'Y-m-d';
-    }
+    $format = $this->argument instanceof DateArgument ? $this->argument->getArgFormat() : 'Y-m-d';
 
-    $request_time = $this->request->server->get('REQUEST_TIME');
+    $request_time = $this->time->getRequestTime();
 
     return $this->dateFormatter->format($request_time, 'custom', $format);
   }

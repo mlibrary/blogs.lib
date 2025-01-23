@@ -42,25 +42,14 @@ class OpenIDConnectClientCollection extends DefaultSingleLazyPluginCollection {
    */
   protected function initializePlugin($instance_id) {
     if (!$instance_id) {
-      throw new PluginException("The OpenID Connect client '{$this->clientId}' did not specify a plugin.");
+      throw new PluginException(sprintf("The OpenID Connect client %s did not specify a plugin.", $this->clientId));
     }
 
-    try {
-      parent::initializePlugin($instance_id);
-      if (isset($this->clientId)) {
-        /** @var \Drupal\openid_connect\Plugin\OpenIDConnectClientInterface $plugin */
-        $plugin = $this->get($instance_id);
-        $plugin->setParentEntityId($this->clientId);
-      }
-    }
-    catch (PluginException $e) {
-      $module = $this->configuration['provider'];
-      // Ignore clients belonging to uninstalled modules, but re-throw valid
-      // exceptions when the module is installed and the plugin is
-      // misconfigured.
-      if (!$module || \Drupal::moduleHandler()->moduleExists($module)) {
-        throw $e;
-      }
+    parent::initializePlugin($instance_id);
+    if (isset($this->clientId)) {
+      /** @var \Drupal\openid_connect\Plugin\OpenIDConnectClientInterface $plugin */
+      $plugin = $this->get($instance_id);
+      $plugin->setParentEntityId($this->clientId);
     }
   }
 

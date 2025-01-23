@@ -5,11 +5,11 @@
  * This is the Calendar module for calendar filtering and display in views.
  */
 
-use Drupal\calendar\CalendarHelper;
-use Drupal\calendar\Plugin\views\argument\CalendarDate;
 use Drupal\Component\Datetime\DateTimePlus;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
+use Drupal\calendar\CalendarHelper;
+use Drupal\datetime\Plugin\views\argument\Date;
 use Drupal\views\ViewExecutable;
 
 define('CALENDAR_SHOW_ALL', 0);
@@ -24,35 +24,6 @@ function calendar_page_attachments(array &$page) {
 }
 
 /**
- * Implements hook_date_default_argument_alter().
- *
- * Adjust the default date for a view based on the stored session value. This is
- * used for current date tracking.
- *
- * @todo Is this still necessary?
- */
-function calendar_date_default_argument_alter(&$argument, &$value) {
-  $user = \Drupal::currentUser();
-  $style_options = $argument->view->display_handler->get_option('style_options');
-  $tracking = \Drupal::config('calendar.settings')->get('calendar_track_date');
-  if (!empty($tracking) && ($tracking == 2 || !empty($user->uid))) {
-
-    // If this is a default date, i.e. we are visiting a new calendar display,
-    // set the default date for the display. See if we already have a session
-    // date to use. If so, use it. Otherwise the default is the current date.
-    if (!empty($_SESSION[$argument->view->name]['default_date'])) {
-      $default_date = $_SESSION[$argument->view->name]['default_date'];
-    }
-    else {
-      $default_date = date_now();
-      $_SESSION[$argument->view->name]['default_date'] = $default_date;
-    }
-    // Get the current date from the session.
-    $value = $default_date->format($argument->arg_format);
-  }
-}
-
-/**
  * Implements hook_views_pre_render().
  */
 function calendar_views_pre_render(ViewExecutable $view) {
@@ -60,24 +31,22 @@ function calendar_views_pre_render(ViewExecutable $view) {
 }
 
 /**
- * Track the current date as the user moves from calendar display to calendar
- * display.
+ * Track the current date as the user moves between calendar displays.
  *
- * @param \Drupal\views\ViewExecutable $view
- *
- * @return \Drupal\views\Plugin\views\argument\ArgumentPluginBase
+ * This function updates the session with the current date based on the user's
+ * navigation through the calendar.
  */
-function _calendar_views_track_current_date(ViewExecutable $view) {
+function _calendar_views_track_current_date(ViewExecutable $view): void {
   $user = \Drupal::currentUser();
 
-  $tracking = \Drupal::config('calendar.settings')->get('calendar_track_date');
+  $tracking = \Drupal::config('calendar.settings')->get('track_date');
   if (!empty($tracking) && ($tracking == 2 || !empty($user->uid))) {
     foreach ($view->argument as $id => &$argument) {
 
       // If this is not a default date, i.e. we have browsed to a new calendar
-      // period on a display we were already on, store the midpoint of the current
-      // view as the current date in a session.
-      if ($argument instanceof CalendarDate && empty($argument->is_default)) {
+      // period on a display we were already on, store the midpoint of the
+      // current view as the current date in a session.
+      if ($argument instanceof Date && empty($argument->is_default)) {
         $date_range = $argument->date_handler->arg_range($argument->argument);
         $session_date = $date_range[0];
         $days = intval(($date_range[1]->format('U') - $date_range[0]->format('U')) / 3600 / 24 / 2);
@@ -241,7 +210,9 @@ function calendar_groupby_times($type = '') {
  *   The path for the specific granularity, or an empty string if none was
  *   found.
  *
- * @deprecated use \Drupal\calendar\CalendarHelper::getURLForGranularity instead.
+ * @deprecated in drupal:9.5.0 and is removed from drupal:11.0.0. Use
+ *   \Drupal\calendar\CalendarHelper::getUrlForGranularity() instead.
+ * @see https://www.drupal.org/project/calendar/issues/2610940
  */
 function calendar_granularity_path(ViewExecutable &$view, $granularity) {
   // @todo Find out what should happen here.
@@ -251,11 +222,14 @@ function calendar_granularity_path(ViewExecutable &$view, $granularity) {
     $paths[$view_name][$granularity] = '';
 
     foreach ($view->displayHandlers->getConfiguration() as $id => $display) {
-      // Check for !empty() in case the view is not fully formed or has displays that are marked to be deleted.
+      // Check for !empty() in case the view is not fully formed or has displays
+      // that are marked to be deleted.
+      // phpcs:disable
       // @todo handle deleted displays
       //   if (!empty($display->deleted) || empty($display->display_options['style_plugin']) || (isset($display->display_options['enabled']) && $display->display_options['enabled'] == FALSE)) {
-      //        continue;
-      //      }
+      //     continue;
+      //   }
+      // phpcs:enable
       if ($display['display_plugin'] != 'feed' && !empty($display['display_options']['path']) && !empty($display['display_options']['arguments'])) {
 
         // Set to the default value, reset below if another value is found.

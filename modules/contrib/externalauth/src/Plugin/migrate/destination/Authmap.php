@@ -58,7 +58,7 @@ class Authmap extends DestinationBase implements ContainerFactoryPluginInterface
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration = NULL) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition, ?MigrationInterface $migration = NULL) {
     return new static(
       $configuration,
       $plugin_id,
@@ -83,7 +83,7 @@ class Authmap extends DestinationBase implements ContainerFactoryPluginInterface
   /**
    * {@inheritdoc}
    */
-  public function fields(MigrationInterface $migration = NULL): array {
+  public function fields(?MigrationInterface $migration = NULL): array {
     return [
       'uid' => 'Primary key: users.uid for user.',
       'provider' => 'The name of the authentication provider providing the authname',

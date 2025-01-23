@@ -25,7 +25,7 @@ trait ContentModerationNotificationCreateTrait {
       'subject' => $this->randomString(),
       'status' => 1,
       'body' => [
-        'value' => $this->randomGenerator->paragraphs(2),
+        'value' => $this->getRandomGenerator()->paragraphs(2),
         'format' => 'filtered_html',
       ],
       'roles' => [],

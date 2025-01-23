@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\openid_connect\Unit;
 
 use Drupal\openid_connect\OpenIDConnectSessionInterface;
-use Drupal\Tests\UnitTestCase;
 use Drupal\openid_connect\OpenIDConnectStateToken;
+use Drupal\Tests\UnitTestCase;
 
 /**
  * Test the OpenIDConnectStateToken class.

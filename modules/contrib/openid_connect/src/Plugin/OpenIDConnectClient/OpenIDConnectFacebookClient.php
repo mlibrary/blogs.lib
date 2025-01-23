@@ -81,7 +81,7 @@ class OpenIDConnectFacebookClient extends OpenIDConnectClientBase {
    * {@inheritdoc}
    */
   public function authorize(string $scope = 'openid email', array $additional_params = []): Response {
-    // Use Facebook specific authorisations.
+    // Use Facebook specific authorizations.
     return parent::authorize('public_profile email');
   }
 

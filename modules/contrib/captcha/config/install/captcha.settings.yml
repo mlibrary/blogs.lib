@@ -11,3 +11,4 @@ default_validation: 1
 persistence: 1
 enable_stats: FALSE
 log_wrong_responses: FALSE
+langcode: en

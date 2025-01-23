@@ -3,9 +3,9 @@
 namespace Drupal\Tests\content_moderation_notifications\Functional\Form;
 
 use Drupal\content_moderation_notifications\Entity\ContentModerationNotification;
+use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\content_moderation_notifications\Kernel\ContentModerationNotificationTestTrait;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
-use Drupal\Tests\BrowserTestBase;
 use Drupal\workflows\Entity\Workflow;
 
 /**
@@ -81,7 +81,7 @@ class CrudFormTest extends BrowserTestBase {
       'transitions[archived_published]' => TRUE,
       'roles[authenticated]' => TRUE,
       'subject' => $this->randomString(),
-      'body[value]' => $this->randomGenerator->paragraphs(2),
+      'body[value]' => $this->getRandomGenerator()->paragraphs(2),
     ];
     $this->submitForm($edit, t('Create Notification'));
 
@@ -116,7 +116,7 @@ class CrudFormTest extends BrowserTestBase {
     $edit = [
       'subject' => $this->randomString(),
       'body[format]' => 'full_html',
-      'body[value]' => $this->randomGenerator->paragraphs(3),
+      'body[value]' => $this->getRandomGenerator()->paragraphs(3),
       // Long adhoc email value with line breaks and commas.
       'emails' => $emails[0] . ",\r\n" . $emails[1] . "\n" . $emails[2],
     ];
@@ -177,9 +177,9 @@ class CrudFormTest extends BrowserTestBase {
     $this->drupalGet('/admin/config/workflow/notifications');
     $this->clickLink(t('Add notification'));
 
-    $this->assertSession()->pageTextContains(t('No workflows available.'));
-    $this->assertSession()->linkExists(t('Manage workflows'));
-    $this->assertSession()->buttonNotExists(t('Create Notification'));
+    $this->assertSession()->pageTextContains('No workflows available.');
+    $this->assertSession()->linkExists('Manage workflows');
+    $this->assertSession()->buttonNotExists('Create Notification');
   }
 
 }

@@ -288,7 +288,7 @@ class EasyBreadcrumbBuilder implements BreadcrumbBuilderInterface {
     // General path-based breadcrumbs. Use the actual request path, prior to
     // resolving path aliases so the breadcrumb can be defined by creating a
     // hierarchy of path aliases.
-    $path = rtrim($this->context->getPathInfo(), '/');
+    $path = trim($this->context->getPathInfo(), '/');
 
     // Ensure that Views AJAX requests do not seep into the breadcrumb.  This
     // can be a problem when the breadcrumb exists inside the view header.
@@ -351,7 +351,6 @@ class EasyBreadcrumbBuilder implements BreadcrumbBuilderInterface {
         // Get $title|[$url] pairs from $values.
         foreach ($values as $pair) {
           $settings = explode("|", $pair);
-          $title = Html::decodeEntities(Xss::filter(trim($settings[0])));
           $use_current_page_title = strpos($settings[0], '<title>') !== FALSE;
 
           // If the custom title uses the current page title, fetch it.
@@ -368,7 +367,7 @@ class EasyBreadcrumbBuilder implements BreadcrumbBuilderInterface {
                 if ($this->config->get(EasyBreadcrumbConstants::TITLE_FROM_PAGE_WHEN_AVAILABLE)) {
                   $normalized_title = $this->normalizeText($this->getTitleString($route_request, $route_match, $replacedTitles));
                   // Replace <title> tag in the text provided for the segment.
-                  $title = str_replace('<title>', $normalized_title, $settings[0]);
+                  $settings[0] = str_replace('<title>', $normalized_title, $settings[0]);
                 }
               }
             }
@@ -380,9 +379,11 @@ class EasyBreadcrumbBuilder implements BreadcrumbBuilderInterface {
           // substitute them out for the corresponding matched strings.
           elseif ($is_regex) {
             foreach ($regex_group_matches as $group_num => $captured_str) {
-              $title = str_replace('$' . ($group_num + 1), urlencode($captured_str), $title);
+              $settings[0] = str_replace('$' . ($group_num + 1), urlencode($captured_str), $settings[0]);
             }
           }
+
+          $title = Html::decodeEntities(Xss::filter(trim($settings[0])));
 
 //add this to alter group breadcrumb titles
 if (strpos($title, '-get_title') !== false) {

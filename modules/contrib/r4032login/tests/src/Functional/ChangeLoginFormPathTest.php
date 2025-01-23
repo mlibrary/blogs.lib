@@ -47,7 +47,7 @@ class ChangeLoginFormPathTest extends BrowserTestBase {
   /**
    * Data provider for testChangeLoginFormPath.
    */
-  public function changeLoginFormPathDataProvider() {
+  public static function changeLoginFormPathDataProvider() {
     return [
       [
         '/user/customLogin',

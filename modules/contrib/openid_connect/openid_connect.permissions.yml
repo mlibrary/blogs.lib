@@ -2,6 +2,10 @@ administer openid connect clients:
   title: 'Administer OpenID Connect clients'
   restrict access: TRUE
 
+disconnect openid connected accounts:
+  title: 'Disconnect OpenID connected accounts'
+  restrict access: TRUE
+
 manage own openid connect accounts:
   title: 'Manage own connected accounts'
   restrict access: TRUE

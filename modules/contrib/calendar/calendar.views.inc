@@ -32,9 +32,12 @@ function calendar_views_data_alter(array &$data) {
  * Create all the granularity arguments for a field.
  *
  * @param mixed $field_id
+ *   The ID of the field to create arguments for.
  * @param string $group
+ *   The group to add the arguments to.
  *
- * @return mixed
+ * @return array
+ *   An array of granularity arguments for the specified field.
  */
 function _calendar_create_field_arguments($field_id, $group = '') {
   $granularity_args = [];

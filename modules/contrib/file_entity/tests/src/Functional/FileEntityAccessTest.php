@@ -6,6 +6,7 @@ use Drupal\file\FileInterface;
 use Drupal\file_entity\FileEntityAccessControlHandler;
 use Drupal\node\Entity\Node;
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\user\Entity\Role;
 
 /**
  * Tests the access aspects of file entity.
@@ -36,7 +37,7 @@ class FileEntityAccessTest extends FileEntityTestBase {
     // Unset the fact that file_entity_install() adds the 'view files'
     // permission to all user roles. This messes with being able to fully unit
     // test the file_entity_access() function.
-    $roles = user_roles();
+    $roles = Role::loadMultiple();
     foreach ($roles as $rid => $role) {
       user_role_revoke_permissions($rid, array('view files'));
     }

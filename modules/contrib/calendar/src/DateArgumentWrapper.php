@@ -78,24 +78,36 @@ class DateArgumentWrapper {
    * Get the argument date format for the handler.
    *
    * \Drupal\views\Plugin\views\argument\Date has no getter for
-   * protected argFormat member.
-   *
-   * @return string
+   * protected argFormat member variable until #2325899.
    */
-  public function getArgFormat() {
+  public function getArgFormat(): string {
     $class = get_class($this->dateArg);
-    if (stripos($class, 'YearMonthDate') !== FALSE) {
-      return 'Ym';
+
+    // Remove method_exists() check once committed in
+    // https://www.drupal.org/project/drupal/issues/2325899#comment-15653541.
+    if (method_exists($class, 'getFormat')) {
+      return $this->dateArg->getArgFormat();
     }
-    if (stripos($class, 'FullDate') !== FALSE) {
-      return 'Ymd';
+
+    $formats = [
+      'YearMonthDate' => 'Ym',
+      'YearDate' => 'Y',
+      // @todo Consider reverting b387a84 to 'YW' but with tests to cover the
+      // bug it fixes.
+      'YearWeekDate' => 'oW',
+      'WeekDate' => 'W',
+      'MonthDate' => 'm',
+      'DayDate' => 'd',
+    ];
+
+    foreach ($formats as $classSubstring => $format) {
+      if (stripos($class, $classSubstring) !== FALSE) {
+        return $format;
+      }
     }
-    if (stripos($class, 'YearDate') !== FALSE) {
-      return 'Y';
-    }
-    if (stripos($class, 'YearWeekDate') !== FALSE) {
-      return 'oW';
-    }
+
+    // Default if not using other core date argument classes.
+    return 'Y-m-d';
   }
 
   /**
@@ -149,32 +161,19 @@ class DateArgumentWrapper {
     $plugin_id = $this->dateArg->getPluginId();
     $plugin_granularity = str_replace('datetime_', '', $plugin_id);
     $plugin_granularity = str_replace('date_', '', $plugin_granularity);
-    switch ($plugin_granularity) {
-      case 'year_month':
-        return 'month';
-
-      break;
-      // Views and Datetime module don't use same suffix :(.
-      case 'full_date':
-      case 'fulldate':
-        return 'day';
-
-      break;
-      case 'year':
-        return 'year';
-
-      break;
-      case 'year_week';
-        return 'week';
-
-      break;
-    }
+    return match ($plugin_granularity) {
+      'full_date', 'fulldate' => 'day',
+      'year' => 'year',
+      'year_week' => 'week',
+      default => 'month',
+    };
   }
 
   /**
    * Function to get min date.
    *
-   * @return \DateTime
+   * @return \DateTime|null
+   *   Returns the minimum date as a DateTime object or NULL if not set.
    */
   public function getMinDate() {
     if (!$this->minDate) {
@@ -198,7 +197,8 @@ class DateArgumentWrapper {
   /**
    * Function to get max date.
    *
-   * @return \DateTime
+   * @return \DateTime|null
+   *   Returns the maximum date as a DateTime object or NULL if not set.
    */
   public function getMaxDate() {
     if (!$this->maxDate) {
@@ -225,9 +225,8 @@ class DateArgumentWrapper {
    * \DateTime::createFromFormat will not throw an error but try to make a date
    * \DateTime::getLastErrors() is also not reliable.
    *
-   * @param string $value
-   *
    * @return bool
+   *   Returns TRUE if the value is valid, FALSE otherwise.
    */
   public function validateValue() {
     $value = $this->dateArg->getValue();
@@ -255,7 +254,13 @@ class DateArgumentWrapper {
   }
 
   /**
-   * {@inheritdoc}
+   * Check if a string value is valid for this format.
+   *
+   * @param string $value
+   *   The date string to validate.
+   *
+   * @return array|bool
+   *   Returns an array with 'year' and 'week' if valid, FALSE otherwise.
    */
   protected function getYearWeek($value) {
     if (is_numeric($value) && strlen($value) == 6) {

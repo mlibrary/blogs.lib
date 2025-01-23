@@ -174,7 +174,7 @@ class OpenIDConnect {
     LoggerChannelFactoryInterface $logger,
     FileSystemInterface $fileSystem,
     OpenIDConnectSessionInterface $session,
-    FileRepositoryInterface $fileRepository
+    FileRepositoryInterface $fileRepository,
   ) {
     $this->configFactory = $config_factory;
     $this->authmap = $authmap;
@@ -271,7 +271,7 @@ class OpenIDConnect {
     }
 
     if ($userinfo && empty($userinfo['email'])) {
-      $this->logger->error('No e-mail address provided by @provider', ['@provider' => $provider]);
+      $this->logger->error('No email address provided by @provider', ['@provider' => $provider]);
       return FALSE;
     }
 
@@ -353,16 +353,16 @@ class OpenIDConnect {
       }
     }
     else {
-      // Check whether the e-mail address is valid.
+      // Check whether the email address is valid.
       $email = $context['userinfo']['email'] ?? '';
       if (!$this->emailValidator->isValid($email)) {
-        $this->messenger->addError($this->t('The e-mail address is not valid: @email', [
+        $this->messenger->addError($this->t('The email address is not valid: @email', [
           '@email' => $email,
         ]));
         return FALSE;
       }
 
-      // Check whether there is an e-mail address conflict.
+      // Check whether there is an email address conflict.
       $accounts = $this->userStorage->loadByProperties([
         'mail' => $email,
       ]);
@@ -375,7 +375,7 @@ class OpenIDConnect {
           $this->externalAuth->linkExistingAccount($context['sub'], 'openid_connect.' . $client->id(), $account);
         }
         else {
-          $this->messenger->addError($this->t('The e-mail address is already taken: @email', ['@email' => $email]));
+          $this->messenger->addError($this->t('The email address is already taken: @email', ['@email' => $email]));
           return FALSE;
         }
       }
@@ -430,6 +430,12 @@ class OpenIDConnect {
     }
     if (isset($tokens['access_token'])) {
       $this->session->saveAccessToken($tokens['access_token']);
+    }
+    if (isset($tokens['refresh_token'])) {
+      $this->session->saveRefreshToken($tokens['refresh_token']);
+    }
+    if (isset($tokens['expire'])) {
+      $this->session->saveExpireToken($tokens['expire']);
     }
 
     $this->moduleHandler
@@ -500,7 +506,7 @@ class OpenIDConnect {
    * @return bool
    *   TRUE if access is granted, FALSE otherwise.
    */
-  public function hasSetPasswordAccess(AccountInterface $account = NULL): bool {
+  public function hasSetPasswordAccess(?AccountInterface $account = NULL): bool {
     if (empty($account)) {
       $account = $this->currentUser;
     }
@@ -655,8 +661,7 @@ class OpenIDConnect {
 
                 $file = $this->fileRepository->writeData(
                   $data,
-                  "public://user-picture-{$account->id()}-{$basename}",
-                  FileSystemInterface::EXISTS_RENAME
+                  "public://user-picture-{$account->id()}-{$basename}"
                 );
 
                 // Cleanup the old file.
@@ -706,17 +711,16 @@ class OpenIDConnect {
     }
 
     // Map groups to Drupal roles.
-    if (isset($userinfo['groups'])) {
-      $role_mappings = $this->configFactory->get('openid_connect.settings')->get('role_mappings') ?? [];
-      foreach ($role_mappings as $role => $mappings) {
-        if (!empty(array_intersect($mappings, $userinfo['groups']))) {
-          // User has a mapped role. Add it to their account.
-          $account->addRole($role);
-        }
-        else {
-          // User doesn't have a mapped role. Remove it from their account.
-          $account->removeRole($role);
-        }
+    $role_mappings = $this->configFactory->get('openid_connect.settings')->get('role_mappings') ?? [];
+    $user_groups = $userinfo['groups'] ?? [];
+    foreach ($role_mappings as $role => $mappings) {
+      if (empty(array_intersect($mappings, $user_groups))) {
+        // User doesn't have a mapped role. Remove it from their account.
+        $account->removeRole($role);
+      }
+      else {
+        // User has a mapped role. Add it to their account.
+        $account->addRole($role);
       }
     }
 

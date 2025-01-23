@@ -2,27 +2,24 @@
 
 namespace Drupal\calendar\Plugin\views\row;
 
-use Drupal\calendar\CalendarEvent;
-use Drupal\calendar\CalendarHelper;
-use Drupal\calendar\CalendarViewsTrait;
 use Drupal\Core\Datetime\DateFormatter;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\calendar\CalendarEvent;
+use Drupal\calendar\CalendarHelper;
+use Drupal\calendar\CalendarViewsTrait;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\views\Plugin\views\argument\Date;
-use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\row\RowPluginBase;
-use Drupal\views\ViewExecutable;
 use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Plugin which creates a view on the resulting object and formats it as a
- * Calendar entity.
+ * Plugin that creates a view and formats it as a Calendar entity.
  *
  * @ViewsRow(
  *   id = "calendar_row",
@@ -62,10 +59,12 @@ class Calendar extends RowPluginBase {
   protected $entities = [];
 
   /**
-   * The datafields variable declaration.
+   * The date fields variable declaration.
    *
-   * @var dateFields
-   *   @todo document.
+   * @var array
+   *   An array of date fields used in the calendar.
+   *
+   * @todo document.
    */
   protected $dateFields = [];
 
@@ -82,17 +81,6 @@ class Calendar extends RowPluginBase {
    * @var \Drupal\Core\Entity\EntityFieldManagerInterface
    */
   protected $fieldManager;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
-    parent::init($view, $display, $options);
-
-    // @todo needed?
-    // $this->base_table = $view->base_table;
-    // $this->baseField = $view->base_field;.
-  }
 
   /**
    * Constructs a Calendar row plugin object.
@@ -164,7 +152,7 @@ class Calendar extends RowPluginBase {
     ];
 
     $options = [];
-    // @todo Allow strip options for any bundes of any entity type
+    // @todo Allow strip options for any bundles of any entity type.
     if ($this->view->getBaseTables()['node_field_data']) {
       $options['type'] = $this->t('Based on Content Type');
     }
@@ -503,7 +491,7 @@ class Calendar extends RowPluginBase {
         $event->setTimezone(new \DateTimeZone(timezone_name_get($dateInfo->getTimezone())));
         $event->setGranularity($granularity);
 
-        // @todo remove while properties get transfered to the new object
+        // @todo remove while properties get transferred to the new object
         //   $event_container = new stdClass();
         //   $event_container->db_tz = $db_tz;
         //   $event_container->to_zone = $to_zone;
@@ -561,12 +549,16 @@ class Calendar extends RowPluginBase {
   }
 
   /**
+   * Explodes date values for a calendar event into multiple calendar rows.
+   *
    * @param \Drupal\calendar\CalendarEvent $event
    *   A calendar event to explode date values.
    *
    * @return array
    *   Return an array of calendar rows.
+   *
    * @throws \Exception
+   *
    * @todo rename and document
    */
   public function explodeValues(CalendarEvent $event) {
@@ -702,7 +694,6 @@ class Calendar extends RowPluginBase {
         $event->addStripeHex($colors[$tid]);
       }
     }
-    return;
   }
 
   /**

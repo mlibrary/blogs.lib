@@ -163,9 +163,9 @@ class FileDownloadLinkFormatter extends FileFormatterBase implements ContainerFa
           '#theme' => 'file_entity_download_link',
           '#file' => $file,
           '#download_link' => Link::fromTextAndUrl($link_text, $download_url),
-          '#icon' => file_icon_class($mime_type),
+          '#icon' => \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.3.0', fn() => \Drupal\file\IconMimeTypes::getIconClass($mime_type), fn() => file_icon_class($mime_type)),
           '#attributes' => $attributes,
-          '#file_size' => format_size($file->getSize()),
+          '#file_size' => \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.2.0', fn() => \Drupal\Core\StringTranslation\ByteSizeMarkup::create($file->getSize()), fn() => format_size($file->getSize())),
         ];
       }
       else {

@@ -120,7 +120,7 @@ class Authmap implements AuthmapInterface {
   /**
    * {@inheritdoc}
    */
-  public function delete(int $uid, string $provider = NULL) {
+  public function delete(int $uid, ?string $provider = NULL) {
     $query = $this->connection->delete('authmap')
       ->condition('uid', $uid);
 

@@ -2,6 +2,7 @@
 
 namespace Drupal\views_bulk_operations\Form;
 
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
@@ -16,6 +17,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ConfigureAction extends FormBase {
 
   use ViewsBulkOperationsFormTrait;
+
+  // We need this if we want to keep the readonly in constructor property
+  // promotion and not have errors in plugins that use AJAX in their
+  // buildConfigurationForm() method.
+  use DependencySerializationTrait;
 
   /**
    * Constructor.

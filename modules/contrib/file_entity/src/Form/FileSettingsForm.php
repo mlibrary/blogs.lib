@@ -5,6 +5,7 @@ namespace Drupal\file_entity\Form;
 use Drupal\Component\Utility\Environment;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 
 /**
  * Class FileSettingsForm
@@ -39,7 +40,7 @@ class FileSettingsForm extends ConfigFormBase {
       '#type' => 'textfield',
       '#title' => t('Maximum upload size'),
       '#default_value' => \Drupal::config('file_entity.settings')->get('max_filesize'),
-      '#description' => t('Enter a value like "512" (bytes), "80 KB" (kilobytes) or "50 MB" (megabytes) in order to restrict the allowed file size. If left empty the file sizes will be limited only by PHP\'s maximum post and file upload sizes (current max limit <strong>%limit</strong>).', array('%limit' => format_size(Environment::getUploadMaxSize()))),
+      '#description' => t('Enter a value like "512" (bytes), "80 KB" (kilobytes) or "50 MB" (megabytes) in order to restrict the allowed file size. If left empty the file sizes will be limited only by PHP\'s maximum post and file upload sizes (current max limit <strong>%limit</strong>).', ['%limit' => ByteSizeMarkup::create(Environment::getUploadMaxSize())]),
       '#element_validate' => ['\Drupal\file\Plugin\Field\FieldType\FileItem::validateMaxFilesize'],
       '#size' => 10,
     );

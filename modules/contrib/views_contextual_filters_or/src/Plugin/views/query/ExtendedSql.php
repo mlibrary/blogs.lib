@@ -2,20 +2,23 @@
 
 namespace Drupal\views_contextual_filters_or\Plugin\views\query;
 
-use Drupal\views\Plugin\views\query\Sql;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\Plugin\views\query\Sql;
 
 /**
  * Object used to create a SELECT query.
  */
 class ExtendedSql extends Sql {
 
+  /**
+   *
+   */
   protected function defineOptions() {
     $options = parent::defineOptions();
 
-    $options['contextual_filters_or'] = array(
+    $options['contextual_filters_or'] = [
       'default' => FALSE,
-    );
+    ];
 
     return $options;
   }
@@ -26,12 +29,12 @@ class ExtendedSql extends Sql {
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
 
-    $form['contextual_filters_or'] = array(
+    $form['contextual_filters_or'] = [
       '#title' => t('Contextual filters OR'),
       '#description' => t('Contextual filters applied to OR logic.'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['contextual_filters_or']),
-    );
+    ];
   }
 
   /**
@@ -81,11 +84,11 @@ class ExtendedSql extends Sql {
       $this->setWhereGroup($op, $group);
     }
 
-    $this->where[$group]['conditions'][] = array(
+    $this->where[$group]['conditions'][] = [
       'field' => $field,
       'value' => $value,
       'operator' => $operator,
-    );
+    ];
   }
 
   /**
@@ -107,7 +110,7 @@ class ExtendedSql extends Sql {
    *
    * @see QueryConditionInterface::where()
    */
-  public function addWhereExpression($group, $snippet, $args = array()) {
+  public function addWhereExpression($group, $snippet, $args = []) {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
     // the default group.
     if (empty($group)) {
@@ -120,11 +123,11 @@ class ExtendedSql extends Sql {
       $this->setWhereGroup($op, $group);
     }
 
-    $this->where[$group]['conditions'][] = array(
+    $this->where[$group]['conditions'][] = [
       'field' => $snippet,
       'value' => $args,
       'operator' => 'formula',
-    );
+    ];
   }
 
   /**
@@ -145,7 +148,7 @@ class ExtendedSql extends Sql {
    *
    * @see QueryConditionInterface::having()
    */
-  public function addHavingExpression($group, $snippet, $args = array()) {
+  public function addHavingExpression($group, $snippet, $args = []) {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
     // the default group.
     if (empty($group)) {
@@ -159,10 +162,11 @@ class ExtendedSql extends Sql {
     }
 
     // Add the clause and the args.
-    $this->having[$group]['conditions'][] = array(
+    $this->having[$group]['conditions'][] = [
       'field' => $snippet,
       'value' => $args,
       'operator' => 'formula',
-    );
+    ];
   }
+
 }

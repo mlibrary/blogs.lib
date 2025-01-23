@@ -2,11 +2,11 @@
 
 namespace Drupal\Tests\captcha\Functional;
 
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Tests\BrowserTestBase;
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
 use Drupal\comment\Tests\CommentTestTrait;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\field\Entity\FieldConfig;
-use Drupal\Tests\BrowserTestBase;
 
 /**
  * Base class for CAPTCHA tests.

@@ -2,9 +2,9 @@
 
 namespace Drupal\captcha\Form;
 
-use Drupal\captcha\Service\CaptchaService;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\captcha\Service\CaptchaService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 

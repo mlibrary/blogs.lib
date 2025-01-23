@@ -91,7 +91,7 @@ class CalendarEvent {
   /**
    * Getter for the entity id.
    *
-   * @return intmixed
+   * @return int
    *   The entity id.
    */
   public function getEntityId() {
@@ -114,6 +114,7 @@ class CalendarEvent {
    * Function to get entity.
    *
    * @return \Drupal\Core\Entity\ContentEntityInterface
+   *   The content entity interface object.
    */
   public function getEntity() {
     return $this->entity;
@@ -331,7 +332,8 @@ class CalendarEvent {
   /**
    * Add a single strip hex.
    *
-   * @param $stripeHex
+   * @param string $stripeHex
+   *   The hex code to add.
    */
   public function addStripeHex($stripeHex) {
     $this->stripeHexes[] = $stripeHex;
@@ -340,7 +342,8 @@ class CalendarEvent {
   /**
    * Add a single strip label.
    *
-   * @param $stripeLabel
+   * @param string $stripeLabel
+   *   The label to add.
    */
   public function addStripeLabel($stripeLabel) {
     $this->stripeLabels[] = $stripeLabel;
@@ -350,6 +353,7 @@ class CalendarEvent {
    * The getter which indicates whether an event covers multiple days.
    *
    * @return bool
+   *   TRUE if the event covers multiple days, FALSE otherwise.
    */
   public function getIsMultiDay() {
     return $this->isMultiDay;

@@ -11,6 +11,7 @@ use Drupal\views\Plugin\views\display\EntityReference;
  * @ingroup views_display_plugins
  */
 class ExtendedEntityReference extends EntityReference {
+
   /**
    * Overrides \Drupal\views\Plugin\views\display\DisplayPluginBase::optionsSummary().
    */
@@ -18,4 +19,5 @@ class ExtendedEntityReference extends EntityReference {
     DisplayPluginBase::optionsSummary($categories, $options);
     unset($options['title']);
   }
+
 }

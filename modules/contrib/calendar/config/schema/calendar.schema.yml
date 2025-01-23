@@ -8,3 +8,139 @@ calendar.settings:
       type: integer
     add_colorbox:
       type: integer
+
+views.pager.calendar:
+  type: views_pager
+  label: 'Calendar Pager'
+  mapping:
+    exclude_display:
+      type: boolean
+
+views.row.calendar_row:
+  type: views_row
+  label: 'Calendar entities'
+  mapping:
+    colors:
+      type: mapping
+      label: 'Legend Colors'
+      mapping:
+        legend:
+          type: string
+          label: 'Stripes'
+        calendar_colors_type:
+          type: sequence
+          label: 'Content Type Colors'
+          sequence:
+            type: string
+            label: 'Hex Color'
+        taxonomy_field:
+          type: string
+          label: 'Term field'
+        calendar_colors_vocabulary:
+          type: sequence
+          label: 'Vocabulary Legend Types'
+          sequence:
+            type: mapping
+            mapping:
+              field_name:
+                type: string
+                label: 'Field Name'
+              vid:
+                type: string
+                label: 'Vocabulary ID'
+        calendar_colors_taxonomy:
+          type: sequence
+          label: 'Taxonomy Term Colors'
+          sequence:
+            type: mapping
+            mapping:
+              tid:
+                type: integer
+                label: 'Term ID'
+              color:
+                type: string
+                label: 'Hex Color'
+
+views.style.calendar:
+  type: views_style
+  label: 'Calendar'
+  mapping:
+    calendar_type:
+      type: string
+      label: 'Calendar type'
+    mini:
+      type: integer
+      label: 'Display as mini calendar'
+    link_to_date:
+      type: boolean
+      label: 'Link to date'
+    month_name_size:
+      type: integer
+      label: 'Calendar month names'
+    name_size:
+      type: integer
+      label: 'Calendar day of week names'
+    with_weekno:
+      type: boolean
+      label: 'Show week numbers'
+    max_items:
+      type: integer
+      label: 'Maximum items'
+    max_items_behavior:
+      type: string
+      label: 'Too many items behavior'
+    groupby_times:
+      type: string
+      label: 'Time grouping'
+    groupby_times_custom:
+      type: text
+      label: 'Custom time grouping'
+    theme_style:
+      type: integer
+      label: 'Overlapping time style'
+    groupby_field:
+      type: string
+      label: 'Field grouping'
+    multiday_theme:
+      type: integer
+      label: 'Multi-day style'
+    multiday_hidden:
+      type: sequence
+      label: 'Fields to hide in Multi-day rows'
+      sequence:
+        type: string
+    granularity_links:
+      type: mapping
+      label: 'Granularity links'
+      mapping:
+        day:
+          type: string
+          label: 'Day link display'
+        week:
+          type: string
+          label: 'Week link display'
+        month:
+          type: string
+          label: 'Month link display'
+
+views.argument_validator.calendar:
+  type: mapping
+  label: 'Calendar Date Format'
+  mapping:
+    replacement_format:
+      type: string
+      label: 'Replacement date pattern'
+
+views.area.calendar_header:
+  type: views_area
+  label: 'Default area'
+  mapping:
+    content:
+      type: string
+      label: 'Heading'
+    pager_embed:
+      type: boolean
+      label: 'Use Pager'
+    tokenize:
+      type: boolean
+      label: 'Should replacement tokens be used from the first row'

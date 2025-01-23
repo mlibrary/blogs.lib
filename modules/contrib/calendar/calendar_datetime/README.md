@@ -16,5 +16,5 @@ other programming changes**.
 ## Current Core Patches
 ~
 1. [#2325899] Error when setting current day as default argument.
- *Patch*: https://www.drupal.org/files/issues/views_argument_handlers-2325899-39.patch
+ *Patch*: https://www.drupal.org/files/issues/2024-06-24/2325899-212.patch
  *Purpose*: Allow current date to be default argument.

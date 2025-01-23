@@ -106,7 +106,7 @@ class OpenIDConnectAccountsForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, AccountInterface $user = NULL): array {
+  public function buildForm(array $form, FormStateInterface $form_state, ?AccountInterface $user = NULL): array {
     $form_state->set('account', $user);
 
     /** @var \Drupal\openid_connect\OpenIDConnectClientEntityInterface[] $clients */
@@ -168,12 +168,12 @@ class OpenIDConnectAccountsForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    if ($this->currentUser->id() !== $form_state->get('account')->id()) {
+    [$op, $client_name] = explode('__', $form_state->getTriggeringElement()['#name'], 2);
+    if ($op === 'connect' && !$this->access($this->currentUser)->isAllowed()) {
       $this->messenger()->addError($this->t("You cannot connect another user's account."));
       return;
     }
 
-    [$op, $client_name] = explode('__', $form_state->getTriggeringElement()['#name'], 2);
     /** @var \Drupal\openid_connect\OpenIDConnectClientEntityInterface $client */
     $client = $this->entityTypeManager->getStorage('openid_connect_client')->loadByProperties(['id' => $client_name])[$client_name];
 
@@ -206,6 +206,10 @@ class OpenIDConnectAccountsForm extends FormBase {
    */
   public function access(AccountInterface $user): AccessResultInterface {
     if ($this->currentUser->hasPermission('administer users')) {
+      return AccessResult::allowed();
+    }
+
+    if ($this->currentUser->hasPermission('disconnect openid connected accounts')) {
       return AccessResult::allowed();
     }
 

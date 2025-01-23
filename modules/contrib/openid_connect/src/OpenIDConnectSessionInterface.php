@@ -61,7 +61,7 @@ interface OpenIDConnectSessionInterface extends ContainerInjectionInterface {
    * @param int|null $uid
    *   The user ID.
    */
-  public function saveOp(string $op, int $uid = NULL);
+  public function saveOp(string $op, ?int $uid = NULL);
 
   /**
    * Get the id token from the session.
@@ -100,6 +100,44 @@ interface OpenIDConnectSessionInterface extends ContainerInjectionInterface {
    *   The access token.
    */
   public function saveAccessToken(string $token);
+
+  /**
+   * Get the refresh token from the session.
+   *
+   * @param bool $clear
+   *   The value is cleared from the session, if this is set to TRUE.
+   *
+   * @return string|null
+   *   The refresh token.
+   */
+  public function retrieveRefreshToken(bool $clear = FALSE): ?string;
+
+  /**
+   * Save the refresh token in the session.
+   *
+   * @param string $token
+   *   The refresh token.
+   */
+  public function saveRefreshToken(string $token);
+
+  /**
+   * Get the token expire timestamp from the session.
+   *
+   * @param bool $clear
+   *   The value is cleared from the session, if this is set to TRUE.
+   *
+   * @return int|null
+   *   The token expire timestamp.
+   */
+  public function retrieveExpireToken(bool $clear = FALSE): ?int;
+
+  /**
+   * Save the token expire timestamp in the session.
+   *
+   * @param int $timestamp
+   *   The token expire timestamp.
+   */
+  public function saveExpireToken(int $timestamp);
 
   /**
    * Get the state token from the session.

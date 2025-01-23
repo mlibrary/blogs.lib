@@ -4,8 +4,8 @@ namespace Drupal\Tests\scheduler\Traits;
 
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
-use Drupal\Tests\node\Traits\NodeCreationTrait;
 use Drupal\Tests\Traits\Core\CronRunTrait;
+use Drupal\Tests\node\Traits\NodeCreationTrait;
 
 /**
  * Generic setup for all Scheduler tests.
@@ -244,7 +244,7 @@ trait SchedulerSetupTrait {
    * @return \Drupal\Core\Entity\EntityInterface
    *   The created entity object.
    */
-  public function createEntity(string $entityTypeId, string $bundle = NULL, array $values = []) {
+  public function createEntity(string $entityTypeId, ?string $bundle = NULL, array $values = []) {
 
     switch ($entityTypeId) {
       case 'node':
@@ -329,7 +329,7 @@ trait SchedulerSetupTrait {
    * @return \Drupal\Core\Entity\EntityTypeInterface
    *   The stored entity type object.
    */
-  public function entityTypeObject(string $entityTypeId, string $bundle = NULL) {
+  public function entityTypeObject(string $entityTypeId, ?string $bundle = NULL) {
     if (empty($bundle) || $bundle == 'non-enabled') {
       $default_types = [
         'node' => $this->type,
@@ -350,7 +350,7 @@ trait SchedulerSetupTrait {
     if (!$entity_type = $entityTypeManager->getStorage($bundleEntityType)->load($bundle)) {
       // Incorrect parameter values.
       throw new \Exception(sprintf('Unrecognized combination of entityTypeId "%s" and bundle "%s" passed to entityTypeObject()', $entityTypeId, $bundle));
-    };
+    }
     return $entity_type;
   }
 
@@ -448,7 +448,7 @@ trait SchedulerSetupTrait {
    * @return \Drupal\Core\Url
    *   The url object for adding the required entity.
    */
-  public function entityAddUrl(string $entityTypeId, string $bundle = NULL) {
+  public function entityAddUrl(string $entityTypeId, ?string $bundle = NULL) {
     switch ($entityTypeId) {
       case 'node':
         $bundle = ($bundle == 'non-enabled') ? $this->nonSchedulerType : ($bundle ?? $this->type);

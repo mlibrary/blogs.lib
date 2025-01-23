@@ -46,7 +46,7 @@ class OpenIDConnectGoogleClient extends OpenIDConnectClientBase {
   /**
    * {@inheritdoc}
    */
-  public function retrieveUserInfo(string $access_token = NULL): ?array {
+  public function retrieveUserInfo(?string $access_token = NULL): ?array {
     $userinfo = parent::retrieveUserInfo($access_token);
     if ($userinfo) {
       // For some reason Google returns the URI of the profile picture in a

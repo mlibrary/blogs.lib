@@ -2,11 +2,11 @@ name: Views Contextual Filters OR
 type: module
 description: 'Modify views query to support OR conditions for contextual filters.'
 package: Views
-core_version_requirement: ^8 || ^9 || ^10
+core_version_requirement: ^10 || ^11
 dependencies:
   - drupal:views
 
-# Information added by Drupal.org packaging script on 2022-12-22
-version: '8.x-1.4'
+# Information added by Drupal.org packaging script on 2025-01-13
+version: '8.x-1.5'
 project: 'views_contextual_filters_or'
-datestamp: 1671734085
+datestamp: 1736804234

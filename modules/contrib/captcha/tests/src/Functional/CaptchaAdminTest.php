@@ -2,10 +2,10 @@
 
 namespace Drupal\Tests\captcha\Functional;
 
-use Drupal\captcha\Constants\CaptchaConstants;
-use Drupal\captcha\Entity\CaptchaPoint;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
+use Drupal\captcha\Constants\CaptchaConstants;
+use Drupal\captcha\Entity\CaptchaPoint;
 
 /**
  * Tests CAPTCHA admin settings.

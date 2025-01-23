@@ -2,10 +2,10 @@
 
 namespace Drupal\openid_connect;
 
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\Http\ClientFactory;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use GuzzleHttp\Exception\RequestException;
-use Drupal\Component\Serialization\Json;
 
 /**
  * OpenID Connect well-known URI discovery service.

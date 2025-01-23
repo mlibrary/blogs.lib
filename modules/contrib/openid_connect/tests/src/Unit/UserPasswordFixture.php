@@ -5,7 +5,7 @@
  * UserPasswordFixture.php
  */
 
-use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\File\FileExists;
 use Drupal\user\UserInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -41,6 +41,6 @@ function user_login_finalize(UserInterface $account) {
  * @return \PHPUnit\Framework\MockObject\MockObject
  *   Return a mock object that mimics the file_save_data.
  */
-function file_save_data(string $data, ?string $destination = NULL, int $replace = FileSystemInterface::EXISTS_RENAME): MockObject {
+function file_save_data(string $data, ?string $destination = NULL, int $replace = FileExists::Rename): MockObject {
   return $GLOBALS['oldFileMock'];
 }

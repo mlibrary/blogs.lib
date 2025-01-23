@@ -10,15 +10,11 @@
         "drupal/devel_generate": ">=4",
         "drupal/workbench_moderation": "*",
         "drupal/workbench_moderation_actions": "dev-3435732-automated-drupal-11",
-        "drupal/entity": "dev-3465393-EntityDuplicateSubscriber-array-return as 1.0",
+        "drupal/entity": "1.x-dev as 1.0",
         "drupal/inline_entity_form": "dev-3438428-automated-drupal-11 as 3.1.0",
         "drupal/commerce": "^2 || ^3"
     },
     "repositories": {
-        "entity": {
-            "type": "vcs",
-            "url": "https://git.drupalcode.org/issue/entity-3465393.git"
-        },
         "inline_entity_form": {
             "type": "vcs",
             "url": "https://git.drupalcode.org/issue/inline_entity_form-3438428.git"

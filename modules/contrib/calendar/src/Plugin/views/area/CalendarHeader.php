@@ -2,8 +2,8 @@
 
 namespace Drupal\calendar\Plugin\views\area;
 
-use Drupal\calendar\CalendarHelper;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\calendar\CalendarHelper;
 use Drupal\views\Plugin\views\area\TokenizeAreaPluginBase;
 
 /**

@@ -2,12 +2,12 @@
 
 namespace Drupal\captcha\Element;
 
-use Drupal\captcha\Constants\CaptchaConstants;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\Element\FormElement;
+use Drupal\captcha\Constants\CaptchaConstants;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**

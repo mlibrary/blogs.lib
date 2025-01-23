@@ -2,6 +2,7 @@
 
 namespace Drupal\file_entity\Normalizer;
 
+use Drupal\file\Plugin\Field\FieldType\FileItem;
 use Drupal\hal\Normalizer\EntityReferenceItemNormalizer;
 
 /**
@@ -13,6 +14,15 @@ class FileItemNormalizer extends EntityReferenceItemNormalizer {
    * {@inheritdoc}
    */
   protected $supportedInterfaceOrClass = 'Drupal\file\Plugin\Field\FieldType\FileItem';
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSupportedTypes(?string $format): array {
+    return [
+      FileItem::class => TRUE,
+    ];
+  }
 
   /**
    * {@inheritdoc}

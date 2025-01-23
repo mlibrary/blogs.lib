@@ -6,6 +6,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file_entity\Entity\FileEntity;
 use Drupal\node\Entity\Node;
+use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
 use Drupal\views\Entity\View;
 
@@ -50,7 +51,7 @@ class FileEntityAdminTest extends FileEntityTestBase {
     // Remove the "view files" permission which is set
     // by default for all users so we can test this permission
     // correctly.
-    $roles = user_roles();
+    $roles = Role::loadMultiple();
     foreach ($roles as $rid => $role) {
       user_role_revoke_permissions($rid, array('view files'));
     }

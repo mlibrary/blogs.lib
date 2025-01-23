@@ -2,10 +2,10 @@
 
 namespace Drupal\calendar\Plugin\views\argument_validator;
 
-use Drupal\calendar\DateArgumentWrapper;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextDefinition;
+use Drupal\calendar\DateArgumentWrapper;
 use Drupal\views\Plugin\views\argument\ArgumentPluginBase;
 use Drupal\views\Plugin\views\argument\Date;
 use Drupal\views\Plugin\views\argument_validator\ArgumentValidatorPluginBase;
@@ -29,7 +29,7 @@ class CalendarValidator extends ArgumentValidatorPluginBase {
   protected $argumentWrapper;
 
   /**
-   * The dateformatter service.
+   * The date formatter service.
    *
    * @var \Drupal\Core\Datetime\DateFormatterInterface
    */
@@ -97,6 +97,7 @@ class CalendarValidator extends ArgumentValidatorPluginBase {
    * Get default format value for the options form.
    *
    * @return string
+   *   The default date format based on the granularity.
    */
   protected function getDefaultReplacementFormat() {
 

@@ -175,7 +175,9 @@ class CalendarHelper extends DateHelper {
               $date1->modify('-1 year');
               // @todo self::daysInYear() throws a warning when used with a
               // \DateTime object. See https://www.drupal.org/node/2596043
+              // phpcs:disable
               // $item_diff -= self::daysInYear($date1);
+              // phpcs:enable
               $item_diff -= 365;
             }
             // Return $item_diff - (self::daysInYear($date2) - $item2);.
@@ -184,7 +186,9 @@ class CalendarHelper extends DateHelper {
           else {
             // @todo self::daysInYear() throws a warning when used with a
             // \DateTime object. See https://www.drupal.org/node/2596043
+            // phpcs:disable
             // $item_diff = self::daysInYear($date1) - $item1;
+            // phpcs:enabled
             $item_diff = 365 - $item1;
             for ($i = 1; $i < $year_diff; $i++) {
               $date1->modify('+1 year');
@@ -252,6 +256,7 @@ class CalendarHelper extends DateHelper {
    *   An integer value to increment the values. Defaults to 1.
    *
    * @return bool
+   *   TRUE if the event covers the entire day, FALSE otherwise.
    */
   public static function dateIsAllDay($start, $end, $granularity = 'second', $increment = 1) {
     if (empty($start) || empty($end)) {
@@ -400,8 +405,10 @@ class CalendarHelper extends DateHelper {
    * D7.
    *
    * @param string $base
+   *   The base type for which to fetch date fields (e.g., 'node').
    *
    * @return array
+   *   An array of date fields available for the specified base type.
    */
   public static function dateViewFields($base = 'node') {
 
@@ -441,7 +448,7 @@ class CalendarHelper extends DateHelper {
         continue;
       }
 
-      $fromto = [$name, $name];
+      $from_to = [$name, $name];
 
       // If we don't have a filter handler, we don't need to do anything more.
       $filterHandler = Views::handlerManager('filter');
@@ -489,14 +496,18 @@ class CalendarHelper extends DateHelper {
             continue 2;
         }
 
-        // $revision = in_array($base, array('node_revision')) ? FIELD_LOAD_REVISION : FIELD_LOAD_CURRENT;
-        // @todo find database info
+        // phpcs:disable
+        // $revision = in_array($base, array('node_revision')) ?
+        // FIELD_LOAD_REVISION : FIELD_LOAD_CURRENT;
+        // @todo Find database info.
         //   $db_info = date_api_database_info($field, $revision);
+        // phpcs:enable
         $name = $table_name . "." . $field_name;
         $grans = ['year', 'month', 'day', 'hour', 'minute', 'second'];
         $granularity = !empty($field['granularity']) ? $field['granularity'] : $grans;
 
-        // $fromto = [
+        // phpcs:disable
+        // $from_to = [
         //          $table_name . '.' . $db_info['columns'][$table_name]['value'],
         //          $table_name . '.' . (!empty($field['settings']['todate']) ? $db_info['columns'][$table_name]['value2'] : $db_info['columns'][$table_name]['value']),
         //        ];
@@ -526,10 +537,14 @@ class CalendarHelper extends DateHelper {
         //   array_push($related_fields, "$table_name.delta");
         //   $delta_field = $table_name . '_delta';
         // }
+
+        // phpcs:enable
       }
 
       // Allow custom modules to provide date fields.
       else {
+
+        // phpcs:disable
         // Foreach (module_implements('date_views_fields') as $module) {
         //   $function = $module . '_date_views_fields';
         //   if ($custom = $function("$table_name.$field_name")) {
@@ -537,6 +552,7 @@ class CalendarHelper extends DateHelper {
         //     break;
         //    }
         // }.
+        // phpcs:enable
       }
       // Don't do anything if this is not a date field we can handle.
       if (!empty($type) || empty($custom)) {
@@ -544,13 +560,15 @@ class CalendarHelper extends DateHelper {
         $fields['name'][$name] = [
           'is_field' => $is_field,
           'sql_type' => $sql_type,
-        // 'label' => $val['group'] . ': ' . $val['title'],
+          // phpcs:disable
+          // 'label' => $val['group'] . ': ' . $val['title'],
+          // phpcs:enable
           'granularity' => $granularity,
           'fullname' => $name,
           'table_name' => $table_name,
           'field_name' => $field_name,
           'query_name' => substr($alias, 0, 60),
-          'fromto' => $fromto,
+          'from_to' => $from_to,
           'tz_handling' => $tz_handling,
           'offset_field' => $offset_field,
           'timezone_field' => $timezone_field,
@@ -569,7 +587,10 @@ class CalendarHelper extends DateHelper {
         $fields['alias'][$alias] = $fields['name'][$name];
       }
     }
-    // cache_set($cid, $fields, 'cache_views');.
+    // phpcs:disable
+    // cache_set($cid, $fields, 'cache_views');
+    // phpcs:enable
+
     return $fields;
   }
 
@@ -579,17 +600,21 @@ class CalendarHelper extends DateHelper {
    * This is a ported version of  views_fetch_fields() in date_views module in
    * D7.
    *
-   * @param $base
-   * @param $type
-   * @param bool|false $grouping
+   * @param string $base
+   *   The base type for which to fetch fields (e.g., 'node').
+   * @param string $type
+   *   The type of fields to fetch (e.g., 'filter', 'sort').
+   * @param bool $grouping
+   *   (optional) Whether to group the fields. Defaults to FALSE.
    *
    * @return array
+   *   An array of fields available for the specified base type.
    */
   private static function viewsFetchFields($base, $type, $grouping = FALSE) {
     static $fields = [];
     if (empty($fields)) {
       $data = Views::viewsData()->getAll();
-      $start = microtime(TRUE);
+
       // This constructs this ginormous multi dimensional array to
       // collect the important data about fields. In the end,
       // the structure looks a bit like this (using nid as an example)
@@ -665,7 +690,6 @@ class CalendarHelper extends DateHelper {
           }
         }
       }
-      // vsm('Views UI data build time: ' . (views_microtime() - $start) * 1000 . ' ms');.
     }
 
     // If we have an array of base tables available, go through them
@@ -683,10 +707,13 @@ class CalendarHelper extends DateHelper {
     }
 
     // @todo find out if this hack is right
+    // phpcs:disable
     //   if (isset($fields[$base][$type])) {
     //   uasort($fields[$base][$type], '_views_sort_types');
     //   return $fields[$base][$type];
     //   }
+    // phpcs:enable
+
     $all_fields = [];
     foreach ($fields as $key => $field) {
       if ($base == substr($key, 0, strlen($base))) {
@@ -707,6 +734,7 @@ class CalendarHelper extends DateHelper {
    *   The argument base object.
    *
    * @return bool
+   *   TRUE if the argument can be used as a calendar argument, FALSE otherwise.
    */
   public static function isCalendarArgument(ArgumentPluginBase $arg) {
     return $arg instanceof ViewsDateArg;
@@ -718,6 +746,7 @@ class CalendarHelper extends DateHelper {
    * @param \Drupal\views\ViewExecutable $view
    *   The view executable object.
    * @param null $display_id
+   *   The ID of the display, or NULL if not specified.
    *
    * @return \Drupal\calendar\DateArgumentWrapper|false
    *   Returns the Date handler if one is found, or FALSE otherwise.
@@ -725,7 +754,8 @@ class CalendarHelper extends DateHelper {
   public static function getDateArgumentHandler(ViewExecutable $view, $display_id = NULL) {
     $all_arguments = [];
     if ($display_id) {
-      // If we aren't dealing with current display we have to load the argument handlers.
+      // If we aren't dealing with current display we have to load the argument
+      // handlers.
       /** @var \Drupal\views\Plugin\ViewsHandlerManager $argument_manager */
       $argument_manager = \Drupal::getContainer()->get('plugin.manager.views.argument');
 
@@ -741,8 +771,8 @@ class CalendarHelper extends DateHelper {
     if ($all_arguments) {
       $current_position = 0;
       /**
-       * @var  $name
        * @var \Drupal\views\Plugin\views\argument\ArgumentPluginBase $handler
+       * @var string $name
        */
       foreach ($all_arguments as $name => $handler) {
         if (static::isCalendarArgument($handler)) {
@@ -757,7 +787,7 @@ class CalendarHelper extends DateHelper {
   }
 
   /**
-   * Limits a date format to include only elements from a given granularity array.
+   * Limits date format to include only elements from a given granularity array.
    *
    * Example:
    *   DateGranularity::limitFormat('F j, Y - H:i', ['year', 'month', 'day']);
@@ -854,9 +884,12 @@ class CalendarHelper extends DateHelper {
    *
    * @param \Drupal\views\ViewExecutable $view
    *   The view executable service.
-   * @param $granularity
+   * @param string $granularity
+   *   The granularity level for the view.
    *
    * @return mixed
+   *   The display ID that handles the specified granularity, or NULL if
+   *    not found.
    */
   public static function getDisplayForGranularity(ViewExecutable $view, $granularity) {
     $displays = &drupal_static(__FUNCTION__, []);
@@ -886,24 +919,31 @@ class CalendarHelper extends DateHelper {
   }
 
   /**
-   * Get the Url object that will link to the view for the given granularity and arguments.
+   * Retrieves the Url object for the view.
+   *
+   * This method links to the view for the given granularity and arguments.
    *
    * @todo Allow a View to link to other Views by itself for a certain granularity.
    *
    * @param \Drupal\views\ViewExecutable $view
    *   The view executable service.
-   * @param $granularity
-   * @param $arguments
+   * @param string $granularity
+   *   The granularity level for the view.
+   * @param array $arguments
+   *   The arguments to pass to the URL.
    *
    * @return \Drupal\Core\Url|null
+   *   The Url object for the specified granularity and arguments, or NULL if
+   *   not found.
    */
-  public static function getURLForGranularity(ViewExecutable $view, $granularity, $arguments) {
+  public static function getUrlForGranularity(ViewExecutable $view, string $granularity, array $arguments) {
     $granularity_links = $view->getStyle()->options['granularity_links'];
     if ($granularity_links[$granularity]) {
       /** @var \Drupal\Core\Routing\RouteProvider $router */
       $router = \Drupal::getContainer()->get('router.route_provider');
       $route_name = $granularity_links[$granularity];
-      // Check if route exists. $router->getRoutesByName will throw error if no match.
+      // Check if route exists. $router->getRoutesByName will throw error if no
+      // match.
       $routes = $router->getRoutesByNames([$route_name]);
       if ($routes) {
         return Url::fromRoute($route_name, static::getViewRouteParameters($arguments, $view));
@@ -912,7 +952,7 @@ class CalendarHelper extends DateHelper {
     if ($display_id = static::getDisplayForGranularity($view, $granularity)) {
       // @todo Handle arguments in different positions
       // @todo Handle query string parameters.
-      return static::getViewsURL($view, $display_id, $arguments);
+      return static::getViewsUrl($view, $display_id, $arguments);
     }
 
     return NULL;
@@ -923,13 +963,15 @@ class CalendarHelper extends DateHelper {
    *
    * @param \Drupal\views\ViewExecutable $view
    *   The view executable service.
-   * @param $display_id
+   * @param string $display_id
+   *   The ID of the display.
    * @param array $args
+   *   An array of arguments to pass to the URL.
    *
    * @return \Drupal\Core\Url
    *   Returns url.
    */
-  public static function getViewsURL(ViewExecutable $view, $display_id, array $args = []) {
+  public static function getViewsUrl(ViewExecutable $view, string $display_id, array $args = []): Url {
     $route_parameters = static::getViewRouteParameters($args, $view);
     $route_name = static::getDisplayRouteName($view->id(), $display_id);
     return Url::fromRoute($route_name, $route_parameters);
@@ -941,24 +983,30 @@ class CalendarHelper extends DateHelper {
    * Not sure where is documented but the route names are made
    * in \Drupal\views\EventSubscriber\RouteSubscriber.
    *
-   * @param $view_id
-   * @param $display_id
+   * @param string $view_id
+   *   The ID of the view.
+   * @param string $display_id
+   *   The ID of the display.
    *
    * @return string
+   *   The route name for the specified view and display.
    */
-  public static function getDisplayRouteName($view_id, $display_id) {
+  public static function getDisplayRouteName(string $view_id, string $display_id): string {
     return 'view.' . $view_id . '.' . $display_id;
   }
 
   /**
+   * Retrieves the route parameters for a given view and its arguments.
+   *
    * @param array $args
    *   The provided arguments.
    * @param \Drupal\views\ViewExecutable $view
    *   The view.
    *
    * @return array
+   *   An associative array of route parameters for the view.
    */
-  public static function getViewRouteParameters($args, ViewExecutable $view) {
+  public static function getViewRouteParameters(array $args, ViewExecutable $view): array {
     $route_parameters = [];
     $path = $view->getPath();
     $views_arguments = $view->args;

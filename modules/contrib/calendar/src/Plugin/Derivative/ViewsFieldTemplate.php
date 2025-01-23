@@ -189,7 +189,9 @@ class ViewsFieldTemplate implements ContainerDeriverInterface {
             'view_template_id' => 'calendar_config_field',
           ];
           $this->setDerivative($derivative, $base_plugin_definition);
+          // phpcs:disable
           // $this->setDerivative($field_info, $entity_type, $field_table_data, $base_plugin_definition);
+          // phpcs:enable
         }
 
       }
@@ -244,9 +246,12 @@ class ViewsFieldTemplate implements ContainerDeriverInterface {
    * Return the default field from a View table array.
    *
    * @param array $table_data
+   *   The table data array.
    * @param mixed $entity_type_id
+   *   The entity type ID, or NULL if not applicable.
    *
    * @return null|string
+   *   The default field ID or NULL if not found.
    */
   private function getTableDefaultField(array $table_data, $entity_type_id = NULL) {
     $default_field_id = NULL;
@@ -263,11 +268,13 @@ class ViewsFieldTemplate implements ContainerDeriverInterface {
   }
 
   /**
-   * Return the base field from a View tabel array.
+   * Return the base field from a View table array.
    *
    * @param array $table_data
+   *   The table data array.
    *
    * @return null|string
+   *   The base field ID or NULL if not found.
    */
   private function getTableBaseField(array $table_data) {
     if (!empty($table_data['table']['base']['field'])) {

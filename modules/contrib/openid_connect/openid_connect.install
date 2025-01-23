@@ -334,3 +334,16 @@ function openid_connect_update_8210() {
 function openid_connect_update_30001() {
   \Drupal::service('module_installer')->install(['file']);
 }
+
+/**
+ * Clean-up role_mappings in openid_connect.settings.
+ */
+function openid_connect_update_30002() {
+  $config = \Drupal::configFactory()->getEditable('openid_connect.settings');
+  $role_mappings = $config->get('role_mappings') ?? [];
+  $role_mappings = array_filter($role_mappings, function ($value) {
+    return !($value === []);
+  });
+  $config->set('role_mappings', $role_mappings);
+  $config->save(TRUE);
+}

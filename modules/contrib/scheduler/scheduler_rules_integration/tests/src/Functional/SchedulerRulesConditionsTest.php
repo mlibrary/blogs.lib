@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\scheduler_rules_integration\Functional;
 
-use Drupal\rules\Context\ContextConfig;
 use Drupal\Tests\scheduler\Functional\SchedulerBrowserTestBase;
+use Drupal\rules\Context\ContextConfig;
 
 /**
  * Tests the four conditions that Scheduler provides for use in Rules module.

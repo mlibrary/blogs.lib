@@ -122,7 +122,7 @@ class CalendarStyleInfo {
    * Defines what the multi day theme is.
    *
    * @var int
-   *   The index number of the multiday theme.
+   *   The index number of the multi-day theme.
    */
   protected $multiDayTheme;
 
@@ -387,10 +387,10 @@ class CalendarStyleInfo {
   }
 
   /**
-   * Getter for the multiday theme.
+   * Getter for the multi-day theme.
    *
    * @return int
-   *   The index number of the multiday theme.
+   *   The index number of the multi-day theme.
    */
   public function getMultiDayTheme() {
     return $this->multiDayTheme;
@@ -400,7 +400,7 @@ class CalendarStyleInfo {
    * Setter for the multi day theme variable.
    *
    * @param int $multiDayTheme
-   *   The index number of the multiday theme.
+   *   The index number of the multi-day theme.
    */
   public function setMultiDayTheme($multiDayTheme) {
     $this->multiDayTheme = $multiDayTheme;

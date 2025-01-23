@@ -52,11 +52,22 @@ class AuthmapDeleteLink extends LinkBase {
    * {@inheritdoc}
    */
   protected function getUrlInfo(ResultRow $row): ?Url {
-    if (isset($row->authmap_provider, $row->uid)) {
-      return Url::fromRoute('externalauth.authmap_delete_form', [
-        'provider' => $row->authmap_provider,
-        'uid' => $row->uid,
-      ]);
+    if (!empty($row->authmap_provider)) {
+      // Cater for possible changes in views data definitions. (authmap_uid
+      // has changed to uid at some point.)
+      $properties = [
+        'uid',
+        'users_field_data_authmap_uid',
+        'authmap_uid',
+      ];
+      foreach ($properties as $property) {
+        if (!empty($row->$property)) {
+          return Url::fromRoute('externalauth.authmap_delete_form', [
+            'provider' => $row->authmap_provider,
+            'uid' => $row->$property,
+          ]);
+        }
+      }
     }
     return NULL;
   }

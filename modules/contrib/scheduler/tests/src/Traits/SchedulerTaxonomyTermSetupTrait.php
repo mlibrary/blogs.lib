@@ -152,7 +152,7 @@ trait SchedulerTaxonomyTermSetupTrait {
    * @return \Drupal\taxonomy\Entity\Term
    *   The taxonomy term object.
    */
-  public function getTaxonomyTerm(string $name = NULL) {
+  public function getTaxonomyTerm(?string $name = NULL) {
     $query = $this->taxonomyTermStorage->getQuery()
       ->accessCheck(FALSE)
       ->sort('tid', 'DESC');

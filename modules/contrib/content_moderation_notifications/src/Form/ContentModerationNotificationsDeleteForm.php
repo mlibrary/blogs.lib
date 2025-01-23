@@ -3,8 +3,8 @@
 namespace Drupal\content_moderation_notifications\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
-use Drupal\Core\Url;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
  * Class ContentModerationNotificationDeleteForm.

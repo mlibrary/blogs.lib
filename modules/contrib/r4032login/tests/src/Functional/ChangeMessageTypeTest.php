@@ -45,7 +45,7 @@ class ChangeMessageTypeTest extends BrowserTestBase {
   /**
    * Data provider for testChangeMessageType.
    */
-  public function changeMessageTypeDataProvider() {
+  public static function changeMessageTypeDataProvider() {
     return [
       [
         'error',

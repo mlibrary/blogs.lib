@@ -184,7 +184,7 @@ trait SchedulerCommerceProductSetupTrait {
    * @return \Drupal\commerce_product\Entity\ProductInterface
    *   The commerce product object.
    */
-  public function getProduct(string $name = NULL) {
+  public function getProduct(?string $name = NULL) {
     $query = $this->productStorage->getQuery()
       ->accessCheck(FALSE)
       ->sort('product_id', 'DESC');

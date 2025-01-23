@@ -2,9 +2,9 @@
 
 namespace Drupal\calendar\Plugin\views\pager;
 
-use Drupal\calendar\CalendarHelper;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\calendar\CalendarHelper;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\pager\PagerPluginBase;
 use Drupal\views\ViewExecutable;
@@ -37,7 +37,7 @@ class CalendarPager extends PagerPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
+  public function init(ViewExecutable $view, DisplayPluginBase $display, ?array &$options = NULL) {
     parent::init($view, $display, $options);
     $this->argument = CalendarHelper::getDateArgumentHandler($this->view);
     $this->setItemsPerPage(0);
@@ -94,16 +94,16 @@ class CalendarPager extends PagerPluginBase {
   protected function getPagerUrl($mode, array $input) {
     $value = $this->getPagerArgValue($mode);
     $current_position = 0;
-    $arg_vals = [];
+    $args = [];
     /**
      * @var \Drupal\views\Plugin\views\argument\ArgumentPluginBase $handler
      */
     foreach ($this->view->argument as $name => $handler) {
       if ($current_position != $this->argument->getPosition()) {
-        $arg_vals["arg_$current_position"] = $handler->getValue();
+        $args["arg_$current_position"] = $handler->getValue();
       }
       else {
-        $arg_vals["arg_$current_position"] = $value;
+        $args["arg_$current_position"] = $value;
       }
       $current_position++;
     }
@@ -111,7 +111,7 @@ class CalendarPager extends PagerPluginBase {
     $display_handler = $this->view->displayHandlers->get($this->view->current_display)
       ->getRoutedDisplay();
     if ($display_handler) {
-      $url = $this->view->getUrl($arg_vals, $this->view->current_display);
+      $url = $this->view->getUrl($args, $this->view->current_display);
     }
     else {
       $url = Url::fromRoute('<current>', [], []);
@@ -135,6 +135,13 @@ class CalendarPager extends PagerPluginBase {
       '#default_value' => $this->options['exclude_display'],
       '#description' => $this->t('Use this option if you only want to display the pager in Calendar Header area.'),
     ];
+  }
+
+  /**
+   * Returns a string to display as the clickable title for the pager plugin.
+   */
+  public function summaryTitle() {
+    return $this->t('Settings');
   }
 
   /**

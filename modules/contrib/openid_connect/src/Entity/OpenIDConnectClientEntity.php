@@ -4,8 +4,8 @@ namespace Drupal\openid_connect\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\openid_connect\OpenIDConnectClientEntityInterface;
-use Drupal\openid_connect\Plugin\OpenIDConnectClientInterface;
 use Drupal\openid_connect\Plugin\OpenIDConnectClientCollection;
+use Drupal\openid_connect\Plugin\OpenIDConnectClientInterface;
 
 /**
  * Defines the OpenID Connect client entity.

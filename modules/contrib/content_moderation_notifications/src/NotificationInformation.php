@@ -2,10 +2,10 @@
 
 namespace Drupal\content_moderation_notifications;
 
+use Drupal\content_moderation\ModerationInformationInterface;
 use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\content_moderation\ModerationInformationInterface;
 use Drupal\Core\Entity\RevisionableStorageInterface;
 
 /**
@@ -137,6 +137,7 @@ class NotificationInformation implements NotificationInformationInterface {
         // Find out if we have a config entity that contains this transition.
         $query = $this->entityTypeManager->getStorage('content_moderation_notification')
           ->getQuery()
+          ->accessCheck(FALSE)
           ->condition('workflow', $workflow->id())
           ->condition('status', 1)
           ->condition('transitions.' . $transition->id(), $transition->id());

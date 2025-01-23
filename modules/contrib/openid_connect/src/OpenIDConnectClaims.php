@@ -113,7 +113,7 @@ class OpenIDConnectClaims implements ContainerInjectionInterface {
    *
    * @see http://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims
    */
-  public function getScopes(OpenIDConnectClientInterface $client = NULL): string {
+  public function getScopes(?OpenIDConnectClientInterface $client = NULL): string {
     // If a client was provided, get the scopes from it.
     $scopes = !empty($client) ? $client->getClientScopes() : $this->defaultScopes;
 
@@ -193,13 +193,13 @@ class OpenIDConnectClaims implements ContainerInjectionInterface {
         'scope' => 'email',
         'title' => $this->t('Email'),
         'type' => 'string',
-        'description' => $this->t('Preferred e-mail address'),
+        'description' => $this->t('Preferred email address'),
       ],
       'email_verified' => [
         'scope' => 'email',
         'title' => $this->t('Email verified'),
         'type' => 'boolean',
-        'description' => $this->t('True if the e-mail address has been verified; otherwise false'),
+        'description' => $this->t('True if the email address has been verified; otherwise false'),
       ],
       'gender' => [
         'scope' => 'profile',

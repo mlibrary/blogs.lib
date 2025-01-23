@@ -2,10 +2,10 @@
 
 namespace Drupal\Tests\captcha\Kernel\Migrate\d7;
 
+use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
 use Drupal\captcha\CaptchaPointInterface;
 use Drupal\captcha\Constants\CaptchaConstants;
 use Drupal\captcha\Entity\CaptchaPoint;
-use Drupal\Tests\migrate_drupal\Kernel\d7\MigrateDrupal7TestBase;
 
 /**
  * Migrates various configuration objects owned by the captcha module.

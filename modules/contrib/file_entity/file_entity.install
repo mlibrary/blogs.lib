@@ -6,6 +6,8 @@
  */
 
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\user\Entity\Role;
+use Drupal\user\RoleInterface;
 use Drupal\views\Entity\View;
 
 /**
@@ -69,7 +71,7 @@ function file_entity_install() {
   \Drupal::entityDefinitionUpdateManager()->installFieldStorageDefinition('type', 'file', 'file_entity', $type_storage_definition);
 
   // Set permissions.
-  $roles = user_roles();
+  $roles = Role::loadMultiple();
   foreach ($roles as $rid => $role) {
     user_role_grant_permissions($rid, array('view files'));
   }
@@ -205,5 +207,3 @@ function file_entity_update_8005() {
 function file_entity_update_8201() {
   // Due to reverting 2655844, need to go forward from here, cannot go backwards.
 }
-
-

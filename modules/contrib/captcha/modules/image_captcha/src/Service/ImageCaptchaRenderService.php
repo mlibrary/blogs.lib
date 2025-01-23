@@ -400,29 +400,32 @@ class ImageCaptchaRenderService {
    * @see image_captcha_element_info_alter()
    */
   public static function imageCaptchaAfterBuildProcess(array $element) {
+    $isCaptchaType = !empty($element['#captcha_type']) ?
+    $element['#captcha_type'] == ImageCaptchaConstants::IMAGE_CAPTCHA_CAPTCHA_TYPE : NULL;
     // Only proceed, if we can determine the form_id and the captcha type:
-    if (!empty($element['#captcha_info']['form_id']) && !empty($element['#captcha_type'])) {
-      // We need the form_id for regenerating the image captcha:
-      $form_id = $element['#captcha_info']['form_id'];
-      // Check if this is an image_captcha:
-      $isImageCaptcha = $element['#captcha_type'] == ImageCaptchaConstants::IMAGE_CAPTCHA_CAPTCHA_TYPE;
-      if ($isImageCaptcha && isset($element['captcha_widgets']['captcha_image_wrapper']['captcha_image'])) {
-        $uri = Link::fromTextAndUrl(t('Get new captcha!'),
-          new Url('image_captcha.refresh',
-            ['form_id' => $form_id],
-            ['attributes' => ['class' => ['reload-captcha']]]
-          )
-        );
-        $element['captcha_widgets']['captcha_image_wrapper']['captcha_refresh'] = [
-          '#theme' => 'image_captcha_refresh',
-          '#captcha_refresh_link' => $uri,
-        ];
+    if (!empty($element['#captcha_type']) && !empty($isCaptchaType)) {
+      if (!empty($element['#captcha_info']['form_id']) && !empty($element['#captcha_type'])) {
+        // We need the form_id for regenerating the image captcha:
+        $form_id = $element['#captcha_info']['form_id'];
+        // Check if this is an image_captcha:
+        if (isset($element['captcha_widgets']['captcha_image_wrapper']['captcha_image'])) {
+          $uri = Link::fromTextAndUrl(t('Get new captcha!'),
+            new Url('image_captcha.refresh',
+              ['form_id' => $form_id],
+              ['attributes' => ['class' => ['reload-captcha']]]
+            )
+          );
+          $element['captcha_widgets']['captcha_image_wrapper']['captcha_refresh'] = [
+            '#theme' => 'image_captcha_refresh',
+            '#captcha_refresh_link' => $uri,
+          ];
+        }
       }
-    }
-    else {
-      \Drupal::service('logger.factory')->get('image_captcha')->error('Missing required form ID on route @route', [
-        '@route' => \Drupal::routeMatch()->getRouteName() ?? 'Unknown',
-      ]);
+      else {
+        \Drupal::service('logger.factory')->get('image_captcha')->error('Missing required form ID on route @route', [
+          '@route' => \Drupal::routeMatch()->getRouteName() ?? 'Unknown',
+        ]);
+      }
     }
     return $element;
   }

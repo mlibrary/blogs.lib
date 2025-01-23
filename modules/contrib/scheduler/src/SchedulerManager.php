@@ -962,7 +962,7 @@ class SchedulerManager {
    * @return array
    *   Array of plugin objects, keyed by the entity type the plugin supports.
    */
-  public function getPlugins(string $provider = NULL) {
+  public function getPlugins(?string $provider = NULL) {
     $cache = \Drupal::cache()->get('scheduler.plugins');
     if (!empty($cache) && !empty($cache->data) && empty($provider)) {
       return $cache->data;
@@ -1008,7 +1008,7 @@ class SchedulerManager {
    * @return array
    *   A list of the entity type ids.
    */
-  public function getPluginEntityTypes(string $provider = NULL) {
+  public function getPluginEntityTypes(?string $provider = NULL) {
     return array_keys($this->getPlugins($provider));
   }
 
@@ -1044,7 +1044,7 @@ class SchedulerManager {
   public function getEnabledTypes($entityTypeId, $process) {
     if (!$plugin = $this->getPlugin($entityTypeId)) {
       return [];
-    };
+    }
     $types = $plugin->getTypes();
     $types = array_filter($types, function ($bundle) use ($process) {
       return $bundle->getThirdPartySetting('scheduler', $process . '_enable', $this->setting('default_' . $process . '_enable'));

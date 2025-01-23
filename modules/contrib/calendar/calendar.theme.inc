@@ -5,10 +5,10 @@
  * Theme functions for the Calendar module.
  */
 
-use Drupal\calendar\CalendarHelper;
 use Drupal\Component\Datetime\DateTimePlus;
 use Drupal\Core\Datetime\Entity\DateFormat;
 use Drupal\Core\Link;
+use Drupal\calendar\CalendarHelper;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
 use Drupal\views\Views;
 
@@ -81,7 +81,7 @@ function template_preprocess_calendar_mini(&$vars) {
   // Make sure that the calendar title links go to the month view,
   // not the year view (if this is embedded in a year display).
   $full_date_arg = str_replace('-', '', $date);
-  $view->override_path = CalendarHelper::getURLForGranularity($view, 'month', [$full_date_arg]);
+  $view->override_path = CalendarHelper::getUrlForGranularity($view, 'month', [$full_date_arg]);
 
   $vars['view'] = $view;
 }
@@ -101,16 +101,19 @@ function template_preprocess_calendar_year(&$vars) {
   foreach ($rows as $month => $month_rows) {
     // Set the month name.
     $month_format = ($vars['options']['month_name_size'] == 1) ? "M" : "F";
-    $vars['options']['month_name'] = t(date($month_format, mktime(0, 0, 0, $month, 10)));
+    $month_name = date($month_format, mktime(0, 0, 0, $month, 10));
+    $vars['options']['month_name'] = $month_name;
 
     $view->dateInfo->setMinMonth($month);
     $view->dateInfo->setGranularity('month');
     $view->styleInfo->setMini(TRUE);
     $view->styleInfo->setShowNavigation(FALSE);
     $view->styleInfo->setShowTitle(TRUE);
+    // phpcs:disable
     // @todo implement
     // $view->dateInfo->url = date_pager_url($view, NULL, \Drupal\Component\Datetime\DateTimePlus::datePad($year, 4) . '-' . \Drupal\Component\Datetime\DateTimePlus::datePad($month));
     // @todo handle timezone.
+    // phpcs:enable
     $view->dateInfo->setMinDate(new DateTime($view->dateInfo->getMinYear() . '-' . DateTimePlus::datePad($month) . '-01 00:00:00', new DateTimeZone('europe/brussels')));
     $maxDate = clone($view->dateInfo->getMinDate());
     $maxDate->modify('+1 month');
@@ -155,8 +158,8 @@ function template_preprocess_calendar_day(&$vars) {
   $display_overlap = !empty($styleInfo->getThemeStyle()) && !empty($styleInfo->getGroupByTimes());
   $vars['scroll_content'] = !empty($styleInfo->getThemeStyle()) && $styleInfo->getThemeStyle() == 1;
 
+  $overlapped_items = [];
   if ($display_overlap) {
-    $overlapped_items = [];
     $vars['#attached']['library'][] = 'calendar/calendar.overlapcss';
     if ((empty($vars['view']->live_preview) || !$vars['view']->live_preview) && !empty($vars['scroll_content'])) {
       $vars['#attached']['library'][] = 'calendar/calendar.overlapjs';
@@ -373,10 +376,10 @@ function template_preprocess_calendar_week(&$vars) {
 
   $grouped_items = [];
 
-  // Pass the multiday buckets.
+  // Pass the multi-day buckets.
   $vars['all_day'] = $rows['multiday_buckets'];
 
-  // Remove the count for singleday.
+  // Remove the count for single day.
   $vars['multiday_rows'] = max(0, $rows['total_rows'] - 1);
   $display_overlap = ($view->styleInfo->getMultiDayTheme() == '1' && !empty($view->styleInfo->getThemeStyle()));
   $vars['display_overlap'] = $display_overlap;
@@ -596,10 +599,14 @@ function template_preprocess_calendar_datebox(&$vars) {
   $vars['day'] = intval(substr($date, 8, 2));
   $vars['mini'] = !empty($view->styleInfo->isMini());
   $link_to_day = !empty($view->style_plugin->options["link_to_date"]);
+  // phpcs:disable
   // $force_view_url = !empty($view->dateInfo->block) ? TRUE : FALSE;
+  // phpcs:enable
   $full_date_arg = str_replace('-', '', $date);
-  $day_url = CalendarHelper::getURLForGranularity($view, 'day', [$full_date_arg]);
+  $day_url = CalendarHelper::getUrlForGranularity($view, 'day', [$full_date_arg]);
+  // phpcs:disable
   // $vars['url'] = str_replace([$month_path, $year_path], $day_path, date_pager_url($view, NULL, $date, $force_view_url));
+  // phpcs:enable
   if ($day_url) {
     if (!$link_to_day) {
       $vars['link'] = $vars['day'];
@@ -630,7 +637,7 @@ function template_preprocess_calendar_datebox(&$vars) {
  * Format an calendar month node for display.
  */
 function template_preprocess_calendar_month_multiple_entity(&$vars) {
-  // @todo Fix when multiday events are supported again.
+  // @todo Fix when multi-day events are supported again.
   $view = $vars['view'];
   $curday = $vars['curday'];
   $count = $vars['count'];
@@ -645,20 +652,21 @@ function template_preprocess_calendar_month_multiple_entity(&$vars) {
 
   // Create the link to the day.
   $full_date_arg = str_replace('-', '', $date);
-  $month_path = CalendarHelper::getURLForGranularity($view, 'month', [$full_date_arg]);
-  $day_path = CalendarHelper::getURLForGranularity($view, 'day', [$full_date_arg]);
+  $month_path = CalendarHelper::getUrlForGranularity($view, 'month', [$full_date_arg]);
+  $day_path = CalendarHelper::getUrlForGranularity($view, 'day', [$full_date_arg]);
   $vars['link'] = str_replace($month_path, $day_path, date_pager_url($view, NULL, DateTimePlus::datePad($year, 4) . '-' . DateTimePlus::datePad($month) . '-' . DateTimePlus::datePad($day)));
 }
 
 /**
  * Theme function for rendering views fields as a calendar 'item'.
  *
- * $vars['rendered_fields'] = An array of the rendered display of each field in the View.
+ * $vars['rendered_fields'] = An array of the rendered display of each field in
+ *   the View.
  * $vars['item'] = The source data for this item.
  * $vars['view'] = The view that this item is displayed on.
  *
  * @todo We need some options about how to combine rendered fields.
- * Fields rendered in multiday containers need to be inline.
+ * Fields rendered in multi-day containers need to be inline.
  */
 
 /**
@@ -680,7 +688,7 @@ function template_preprocess_calendar_time_row_heading($vars) {
       $limit = ['hour', 'minute'];
     }
 
-    $granularities = [
+    $granularity = [
       'year',
       'month',
       'day',
@@ -689,7 +697,7 @@ function template_preprocess_calendar_time_row_heading($vars) {
       'second',
       'timezone',
     ];
-    $reversedLimit = array_diff($granularities, $limit);
+    $reversedLimit = array_diff($granularity, $limit);
 
     $format_hour = str_replace(['a', 'A'], '', CalendarHelper::limitFormat($format, $reversedLimit));
     $format_ampm = strstr($format, 'a') ? 'a' : (strstr($format, 'A') ? 'A' : '');
@@ -794,7 +802,7 @@ function template_preprocess_calendar_stripe_legend(array &$vars) {
  * @param date $start
  *   Start time of the event.
  * @param date $end
- *   End tiem of the event.
+ *   End time of the event.
  * @param array $item
  *   The event to add to the tree.
  * @param int $depth
@@ -812,8 +820,8 @@ function _calc_indents(array &$overlapped_items, $start, $end, &$item, $depth = 
     // Iterate for each item as this depth and see if we overlap.
     foreach ($overlapped_items as $index => &$entry) {
 
-      // We search depth-first, so if there are children for this item, recurse into
-      // each child tree looking for an overlap.
+      // We search depth-first, so if there are children for this item, recurse
+      // into each child tree looking for an overlap.
       if (!empty($entry['children'])) {
         $rc = _calc_indents($entry['children'], $start, $end, $item, $depth + 1);
 
@@ -907,8 +915,7 @@ function _calc_indents(array &$overlapped_items, $start, $end, &$item, $depth = 
 }
 
 /**
- * Calculates the indent based of the current depth and the depth of this branch
- * in the tree.
+ * Calculates the indent based on the current depth and branch depth.
  *
  * @param int $cur_depth
  *   Current depth to calculate indent.

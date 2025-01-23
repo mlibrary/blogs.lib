@@ -27,6 +27,25 @@ use Drupal\workbench_moderation\Plugin\Action\ModerationOptOutPublishNode;
 use Drupal\workbench_moderation\Plugin\Action\ModerationOptOutUnpublishNode;
 
 /**
+ * Create class aliases to maintain backwards-compatibility.
+ *
+ * Scheduler 2.x supports non-node entities and each entity type has to have its
+ * own specific event class named 'Scheduler{Type}Events'. These are now located
+ * in the Drupal\scheduler\Event\ namespace, with all event files being stored
+ * in a src/Event folder.
+ *
+ * The event classes in 8.x-1.x were just for nodes, and they were named
+ * Drupal\scheduler\SchedulerEvent and Drupal\scheduler\SchedulerEvents. These
+ * namespaces must remain for backwards-compatibility with existing
+ * implementations of event subscribers for Node events. The namespace should
+ * have been Drupal\scheduler\Event in the first place.
+ *
+ * These two aliases allow existing event subscribers to continue unchanged.
+ */
+class_alias('Drupal\scheduler\Event\SchedulerEvent', 'Drupal\scheduler\SchedulerEvent');
+class_alias('Drupal\scheduler\Event\SchedulerNodeEvents', 'Drupal\scheduler\SchedulerEvents');
+
+/**
  * Implements hook_help().
  */
 function scheduler_help($route_name, RouteMatchInterface $route_match) {
@@ -909,7 +928,8 @@ function scheduler_entity_presave(EntityInterface $entity) {
       $unpublishing_percent = @$entity->devel_generate['scheduler_unpublishing'] ?: 0;
       $entity_created = isset($entity->created) ? $entity->created->value : $request_time;
       // Reuse the selected 'creation' time range for our future date span.
-      $time_range = $entity->devel_generate['time_range'];
+      // If not set, default to 1 week (60 * 60 * 24 * 7 seconds).
+      $time_range = @$entity->devel_generate['time_range'] ?: 604800;
     }
     if ($publishing_percent && $publishing_enabled) {
       if (rand(1, 100) <= $publishing_percent) {

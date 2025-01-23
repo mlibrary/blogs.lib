@@ -2,9 +2,9 @@
 
 namespace Drupal\captcha_test\Form;
 
-use Drupal\captcha\Constants\CaptchaConstants;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\captcha\Constants\CaptchaConstants;
 
 /**
  * Provides a Captcha test form.

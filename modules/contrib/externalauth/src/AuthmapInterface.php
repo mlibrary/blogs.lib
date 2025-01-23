@@ -87,7 +87,7 @@ interface AuthmapInterface {
    * @param string|null $provider
    *   (optional) The name of the service providing external authentication.
    */
-  public function delete(int $uid, string $provider = NULL);
+  public function delete(int $uid, ?string $provider = NULL);
 
   /**
    * Delete all authmap entries for a given provider.

@@ -131,6 +131,7 @@ abstract class OpenIDConnectClientFormBase extends EntityForm {
    */
   public function exists($entity_id, array $element, FormStateInterface $form_state): bool {
     $result = $this->entityTypeManager->getStorage('openid_connect_client')->getQuery()
+      ->accessCheck(FALSE)
       ->condition('id', $element['#field_prefix'] . $entity_id)
       ->execute();
     return (bool) $result;

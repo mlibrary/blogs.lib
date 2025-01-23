@@ -22,7 +22,7 @@ class BulkFormTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'action_bulk_test',
     'node',
     'override_node_options',

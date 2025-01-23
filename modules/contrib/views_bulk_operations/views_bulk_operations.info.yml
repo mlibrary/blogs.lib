@@ -6,7 +6,7 @@ core_version_requirement: ^10.3 || ^11
 dependencies:
   - drupal:views
 
-# Information added by Drupal.org packaging script on 2024-10-23
-version: '4.3.1'
+# Information added by Drupal.org packaging script on 2024-11-08
+version: '4.3.2'
 project: 'views_bulk_operations'
-datestamp: 1729683246
+datestamp: 1731070021

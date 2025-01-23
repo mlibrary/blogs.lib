@@ -2,10 +2,10 @@
 
 namespace Drupal\calendar\Plugin\Block;
 
-use Drupal\calendar\CalendarHelper;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Block\BlockPluginInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\calendar\CalendarHelper;
 
 /**
  * Provides a "Calendar legend" block.

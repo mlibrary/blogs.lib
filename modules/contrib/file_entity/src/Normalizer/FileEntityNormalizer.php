@@ -4,6 +4,7 @@ namespace Drupal\file_entity\Normalizer;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\file\FileInterface;
 use Drupal\hal\Normalizer\ContentEntityNormalizer;
 
 /**
@@ -15,6 +16,15 @@ class FileEntityNormalizer extends ContentEntityNormalizer {
    * {@inheritdoc}
    */
   protected $supportedInterfaceOrClass = 'Drupal\file\FileInterface';
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSupportedTypes(?string $format): array {
+    return [
+      FileInterface::class => TRUE,
+    ];
+  }
 
   /**
    * {@inheritdoc}
