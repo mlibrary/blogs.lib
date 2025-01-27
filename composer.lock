@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d1c0ba2187f360b6ec48dbefe695a3cf",
+    "content-hash": "d5aac370a3b97abc26eef9d8f3239cdb",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -872,16 +872,16 @@
         },
         {
             "name": "cweagans/composer-patches",
-            "version": "1.x-dev",
+            "version": "1.7.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cweagans/composer-patches.git",
-                "reference": "37e1b296d8100845c7b10c143cc3e96552d41ab1"
+                "reference": "e190d4466fe2b103a55467dfa83fc2fecfcaf2db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/37e1b296d8100845c7b10c143cc3e96552d41ab1",
-                "reference": "37e1b296d8100845c7b10c143cc3e96552d41ab1",
+                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/e190d4466fe2b103a55467dfa83fc2fecfcaf2db",
+                "reference": "e190d4466fe2b103a55467dfa83fc2fecfcaf2db",
                 "shasum": ""
             },
             "require": {
@@ -914,9 +914,9 @@
             "description": "Provides a way to patch Composer packages.",
             "support": {
                 "issues": "https://github.com/cweagans/composer-patches/issues",
-                "source": "https://github.com/cweagans/composer-patches/tree/1.x"
+                "source": "https://github.com/cweagans/composer-patches/tree/1.7.3"
             },
-            "time": "2023-01-26T17:59:26+00:00"
+            "time": "2022-12-20T22:53:13+00:00"
         },
         {
             "name": "dekor/php-array-table",
@@ -11167,7 +11167,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "cweagans/composer-patches": 20,
         "drupal/calendar": 10,
         "drupal/entity_reference_exposed_filters": 15,
         "drupal/file_entity": 10,

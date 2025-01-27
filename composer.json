@@ -67,7 +67,7 @@
     },
     "require": {
         "composer/installers": "^1.9",
-        "cweagans/composer-patches": "1.x-dev",
+        "cweagans/composer-patches": "^1.7",
         "drupal/allowed_formats": "3.x",
         "drupal/better_exposed_filters": "^6.0.3",
         "drupal/block_class": "^3.0",

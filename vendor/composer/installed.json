@@ -905,17 +905,17 @@
         },
         {
             "name": "cweagans/composer-patches",
-            "version": "1.x-dev",
-            "version_normalized": "1.9999999.9999999.9999999-dev",
+            "version": "1.7.3",
+            "version_normalized": "1.7.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cweagans/composer-patches.git",
-                "reference": "37e1b296d8100845c7b10c143cc3e96552d41ab1"
+                "reference": "e190d4466fe2b103a55467dfa83fc2fecfcaf2db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/37e1b296d8100845c7b10c143cc3e96552d41ab1",
-                "reference": "37e1b296d8100845c7b10c143cc3e96552d41ab1",
+                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/e190d4466fe2b103a55467dfa83fc2fecfcaf2db",
+                "reference": "e190d4466fe2b103a55467dfa83fc2fecfcaf2db",
                 "shasum": ""
             },
             "require": {
@@ -926,12 +926,12 @@
                 "composer/composer": "~1.0 || ~2.0",
                 "phpunit/phpunit": "~4.6"
             },
-            "time": "2023-01-26T17:59:26+00:00",
+            "time": "2022-12-20T22:53:13+00:00",
             "type": "composer-plugin",
             "extra": {
                 "class": "cweagans\\Composer\\Patches"
             },
-            "installation-source": "source",
+            "installation-source": "dist",
             "autoload": {
                 "psr-4": {
                     "cweagans\\Composer\\": "src"
@@ -950,7 +950,7 @@
             "description": "Provides a way to patch Composer packages.",
             "support": {
                 "issues": "https://github.com/cweagans/composer-patches/issues",
-                "source": "https://github.com/cweagans/composer-patches/tree/1.x"
+                "source": "https://github.com/cweagans/composer-patches/tree/1.7.3"
             },
             "install-path": "../cweagans/composer-patches"
         },
