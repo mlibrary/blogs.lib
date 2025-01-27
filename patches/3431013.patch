@@ -1,0 +1,30 @@
+diff --git a/modules/contrib/image_resize_filter/composer.json b/modules/contrib/image_resize_filter/composer.json
+index f441368cd388d6215ddb6cf8c89999d95d4f54a6..e66def72d37060dab61b9780d8f9468eb8aa1d46 100644
+--- a/modules/contrib/image_resize_filter/composer.json
++++ b/modules/contrib/image_resize_filter/composer.json
+@@ -19,8 +19,5 @@
+         "issues": "https://www.drupal.org/project/issues/image_resize_filter",
+         "source": "https://git.drupalcode.org/project/image_resize_filter"
+     },
+-    "license": "GPL-2.0-or-later",
+-    "require": {
+-        "drupal/ckeditor": "^1.0"
+-    }
++    "license": "GPL-2.0-or-later"
+ }
+diff --git a/modules/contrib/image_resize_filter/image_resize_filter.info.yml b/modules/contrib/image_resize_filter/image_resize_filter.info.yml
+index 61df5a434e846017375848f8b282c8ec0d5f2aa5..f24537c29cd986bf4da51f0d43ec54bb093f0533 100644
+--- a/modules/contrib/image_resize_filter/image_resize_filter.info.yml
++++ b/modules/contrib/image_resize_filter/image_resize_filter.info.yml
+@@ -1,9 +1,8 @@
+ name: Image Resize Filter
+ type: module
+ description: Resizes images based on width and height attributes and optionally link to the original image.
+-core_version_requirement: ^9.3 || ^10
++core_version_requirement: ^9.3 || ^10 || ^11
+ package: Filters
+ configure: filter.admin_overview
+ dependencies:
+   - drupal:filter
+-  - ckeditor:ckeditor
+

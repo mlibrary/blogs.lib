@@ -90,7 +90,7 @@
         "drupal/force_users_logout": "^2.0",
         "drupal/google_analytics": "^4.0",
         "drupal/group": "^1.4",
-        "drupal/image_resize_filter": "^1.x-dev",
+        "drupal/image_resize_filter": "^1.2",
         "drupal/jquery_ui_accordion": "^2.0",
         "drupal/jquery_ui_datepicker": "^2.0",
         "drupal/jquery_ui_slider": "^2.0",
@@ -219,6 +219,9 @@
           "drupal/reroute_email": {
             "fix error": "patches/reroute_email-fix.patch",
             "fix header in body for symfony mailer lite": "patches/fix-reroute-email-for-symfony-mailer.patch"
+          },
+          "drupal/image_resize_filter": {
+            "https://www.drupal.org/node/3431013": "patches/3431013.patch"
           },
           "jackmoore/colorbox": {
             "add aria-label to colorbox": "patches/add-aria-label-to-colorbox.patch"

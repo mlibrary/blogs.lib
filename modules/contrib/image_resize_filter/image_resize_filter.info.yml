@@ -1,9 +1,8 @@
 name: Image Resize Filter
 type: module
 description: Resizes images based on width and height attributes and optionally link to the original image.
-core_version_requirement: ^9.3 || ^10
+core_version_requirement: ^9.3 || ^10 || ^11
 package: Filters
 configure: filter.admin_overview
 dependencies:
   - drupal:filter
-  - ckeditor:ckeditor

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d5aac370a3b97abc26eef9d8f3239cdb",
+    "content-hash": "ade2e31b498def89d879b03ae4bea7c1",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1978,8 +1978,8 @@
                     "version": "1.0.2",
                     "datestamp": "1695740655",
                     "security-coverage": {
-                        "status": "covered",
-                        "message": "Covered by Drupal's security advisory policy"
+                        "status": "not-covered",
+                        "message": "Project has not opted into security advisory coverage!"
                     }
                 }
             },
@@ -1988,10 +1988,6 @@
                 "GPL-2.0-or-later"
             ],
             "authors": [
-                {
-                    "name": "dczepierga",
-                    "homepage": "https://www.drupal.org/user/911466"
-                },
                 {
                     "name": "hass",
                     "homepage": "https://www.drupal.org/user/85918"
@@ -2009,12 +2005,8 @@
                     "homepage": "https://www.drupal.org/user/1078742"
                 },
                 {
-                    "name": "Magnus",
+                    "name": "magnus",
                     "homepage": "https://www.drupal.org/user/73919"
-                },
-                {
-                    "name": "mkesicki",
-                    "homepage": "https://www.drupal.org/user/922884"
                 },
                 {
                     "name": "nod_",
@@ -2029,7 +2021,7 @@
                     "homepage": "https://www.drupal.org/user/2793801"
                 },
                 {
-                    "name": "Wim Leers",
+                    "name": "wim leers",
                     "homepage": "https://www.drupal.org/user/99777"
                 },
                 {
@@ -3403,11 +3395,17 @@
         },
         {
             "name": "drupal/image_resize_filter",
-            "version": "dev-1.x",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/image_resize_filter.git",
-                "reference": "324db7c59567e0a9e3511d0e8b8b54245043f2f7"
+                "reference": "8.x-1.2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/image_resize_filter-8.x-1.2.zip",
+                "reference": "8.x-1.2",
+                "shasum": "4d42350e60a3b60d6510fdde2e3a7fff17108ed8"
             },
             "require": {
                 "drupal/ckeditor": "^1.0",
@@ -3415,15 +3413,12 @@
             },
             "type": "drupal-module",
             "extra": {
-                "branch-alias": {
-                    "dev-1.x": "1.x-dev"
-                },
                 "drupal": {
-                    "version": "8.x-1.1+3-dev",
-                    "datestamp": "1698272491",
+                    "version": "8.x-1.2",
+                    "datestamp": "1698272648",
                     "security-coverage": {
-                        "status": "not-covered",
-                        "message": "Dev releases are not covered by Drupal security advisories."
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
                     }
                 }
             },
@@ -11170,7 +11165,6 @@
         "drupal/calendar": 10,
         "drupal/entity_reference_exposed_filters": 15,
         "drupal/file_entity": 10,
-        "drupal/image_resize_filter": 20,
         "drupal/label_help": 5,
         "drupal/openid_connect": 15,
         "drupal/passwordless": 15

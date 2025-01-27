@@ -3,7 +3,7 @@
         'name' => 'drupal/recommended-project',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'b593749dd0172fbc8ba7f96c76862f35ca1fb454',
+        'reference' => 'e72213b9b49609c74f869bd9bcfa70b44be7673b',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -587,14 +587,12 @@
             'dev_requirement' => false,
         ),
         'drupal/image_resize_filter' => array(
-            'pretty_version' => 'dev-1.x',
-            'version' => 'dev-1.x',
-            'reference' => '324db7c59567e0a9e3511d0e8b8b54245043f2f7',
+            'pretty_version' => '1.2.0',
+            'version' => '1.2.0.0',
+            'reference' => '8.x-1.2',
             'type' => 'drupal-module',
             'install_path' => __DIR__ . '/../../modules/contrib/image_resize_filter',
-            'aliases' => array(
-                0 => '1.x-dev',
-            ),
+            'aliases' => array(),
             'dev_requirement' => false,
         ),
         'drupal/jquery_ui' => array(
@@ -807,7 +805,7 @@
         'drupal/recommended-project' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'b593749dd0172fbc8ba7f96c76862f35ca1fb454',
+            'reference' => 'e72213b9b49609c74f869bd9bcfa70b44be7673b',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
