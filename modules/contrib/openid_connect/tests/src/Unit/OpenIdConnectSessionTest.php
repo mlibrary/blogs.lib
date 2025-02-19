@@ -145,6 +145,11 @@ class OpenIdConnectSessionTest extends UnitTestCase {
    * Test the saveDestination() method with the /user/login path.
    */
   public function testSaveDestinationUserPath(): void {
+    $this->urlGenerator->expects($this->once())
+      ->method('generateFromRoute')
+      ->with('user.login', [], [], FALSE)
+      ->willReturn('/user/login');
+
     // Setup our expected results.
     $expectedDestination = 'user';
 
@@ -248,7 +253,7 @@ class OpenIdConnectSessionTest extends UnitTestCase {
    * @return array
    *   An array of test cases.
    */
-  public function dataProviderForRetrievalMethods(): array {
+  public static function dataProviderForRetrievalMethods(): array {
     return [
       'Clear the value' => [TRUE],
       'Do not clear the value' => [FALSE],

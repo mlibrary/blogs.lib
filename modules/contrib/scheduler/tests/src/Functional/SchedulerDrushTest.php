@@ -42,7 +42,7 @@ class SchedulerDrushTest extends SchedulerBrowserTestBase {
   /**
    * Tests scheduled publishing and unpublishing of entities via Drush.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testDrushCronPublishing($entityTypeId, $bundle) {
     // Create an entity which is scheduled for publishing.

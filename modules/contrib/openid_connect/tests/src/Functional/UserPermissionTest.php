@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\openid_connect\Functional;
 
-use Drupal\openid_connect\OpenIDConnectClientEntityInterface;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -13,6 +12,8 @@ use Drupal\Tests\BrowserTestBase;
  * @group openid_connect
  */
 class UserPermissionTest extends BrowserTestBase {
+
+  use OpenIdClientTestTrait;
 
   const CLIENT_LABEL = 'Test OIDC Client';
 
@@ -24,13 +25,6 @@ class UserPermissionTest extends BrowserTestBase {
    * @var \Drupal\externalauth\AuthmapInterface
    */
   protected $authmap;
-
-  /**
-   * The OpenID Connect client entity storage taken from the container.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
-   */
-  protected $openIdEntityStorage;
 
   /**
    * {@inheritdoc}
@@ -51,7 +45,6 @@ class UserPermissionTest extends BrowserTestBase {
   protected function setUp(): void {
     parent::setUp();
     $this->authmap = \Drupal::service('externalauth.authmap');
-    $this->openIdEntityStorage = \Drupal::service('entity_type.manager')->getStorage('openid_connect_client');
   }
 
   /**
@@ -70,36 +63,6 @@ class UserPermissionTest extends BrowserTestBase {
   }
 
   /**
-   * Create a test client.
-   *
-   * @return \Drupal\openid_connect\OpenIDConnectClientEntityInterface
-   *   The test client.
-   *
-   * @throws \Drupal\Core\Entity\EntityStorageException
-   */
-  private function createTestClient(): OpenIDConnectClientEntityInterface {
-    $client = $this->openIdEntityStorage->create(
-      [
-        'id' => self::CLIENT_ID,
-        'label' => self::CLIENT_LABEL,
-        'plugin' => 'generic',
-        'redirect_uri' => 'http://localhost',
-        'grant_type' => 'authorization_code',
-        'response_type' => 'code',
-        'authorization_endpoint' => 'http://localhost/authorize',
-        'token_endpoint' => 'http://localhost/token',
-        'userinfo_endpoint' => 'http://localhost/userinfo',
-        'jwks_uri' => 'http://localhost/jwks',
-        'scopes' => ['openid email'],
-        'client_secret' => 'test',
-      ]
-    );
-    $client->save();
-
-    return $client;
-  }
-
-  /**
    * Test the disconnect connected accounts for others form submission.
    *
    * @dataProvider dataProviderForTestDisconnectFormSubmissionsForOthers
@@ -111,7 +74,7 @@ class UserPermissionTest extends BrowserTestBase {
     $subjectId = $this->randomMachineName();
 
     // Create a client.
-    $this->createTestClient();
+    $this->createTestClient(self::CLIENT_ID, self::CLIENT_LABEL);
 
     $account = $this->createUser([$permission]);
     $target = $this->createUser([]);
@@ -149,7 +112,7 @@ class UserPermissionTest extends BrowserTestBase {
    * @return array[]
    *   Parameters for the testDisconnectFormSubmissionsForOthers test.
    */
-  public function dataProviderForTestDisconnectFormSubmissionsForOthers(): array {
+  public static function dataProviderForTestDisconnectFormSubmissionsForOthers(): array {
     return [
       'administer openid connect clients permission' => ['administer openid connect clients', FALSE],
       'disconnect openid connected accounts permission' => ['disconnect openid connected accounts', TRUE],
@@ -170,7 +133,7 @@ class UserPermissionTest extends BrowserTestBase {
     $subjectId = $this->randomMachineName();
 
     // Create a client.
-    $this->createTestClient();
+    $this->createTestClient(self::CLIENT_ID, self::CLIENT_LABEL);
     // Create a user.
     $target = $this->createUser([$permission]);
 
@@ -207,7 +170,7 @@ class UserPermissionTest extends BrowserTestBase {
    * @return array[]
    *   Parameters for the testDisconnectFormSubmissionsForOthers test.
    */
-  public function dataProviderForTestDisconnectFormSubmissionsForSelf(): array {
+  public static function dataProviderForTestDisconnectFormSubmissionsForSelf(): array {
     return [
       'administer openid connect clients permission' => ['administer openid connect clients', FALSE],
       'disconnect openid connected accounts permission' => ['disconnect openid connected accounts', TRUE],

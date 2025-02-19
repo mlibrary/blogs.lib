@@ -37,6 +37,7 @@ entity.openid_connect_client.enable:
     _title: 'Enable an OpenID Connect client'
   requirements:
     _permission: 'administer openid connect clients'
+    _csrf_token: 'TRUE'
 
 entity.openid_connect_client.disable:
   path: '/admin/config/people/openid-connect/{openid_connect_client}/disable'
@@ -45,6 +46,7 @@ entity.openid_connect_client.disable:
     _title: 'Disable an OpenID Connect client'
   requirements:
     _permission: 'administer openid connect clients'
+    _csrf_token: 'TRUE'
 
 openid_connect.admin_settings:
   path: '/admin/config/people/openid-connect/settings'

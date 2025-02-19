@@ -4,11 +4,11 @@ namespace Drupal\Tests\scheduler_content_moderation_integration\Kernel;
 
 use Drupal\Core\Datetime\Entity\DateFormat;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\node\Entity\NodeType;
-use Drupal\system\Entity\Action;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 use Drupal\Tests\scheduler\Traits\SchedulerMediaSetupTrait;
 use Drupal\Tests\scheduler\Traits\SchedulerSetupTrait;
+use Drupal\node\Entity\NodeType;
+use Drupal\system\Entity\Action;
 
 /**
  * Base class for the Scheduler Content Moderation tests.

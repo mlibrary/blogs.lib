@@ -1,33 +1,28 @@
 services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
   openid_connect.openid_connect:
     class: Drupal\openid_connect\OpenIDConnect
     arguments:
-      - '@config.factory'
-      - '@externalauth.authmap'
-      - '@externalauth.externalauth'
-      - '@entity_type.manager'
-      - '@entity_field.manager'
-      - '@current_user'
-      - '@user.data'
-      - '@email.validator'
-      - '@messenger'
-      - '@module_handler'
-      - '@logger.factory'
-      - '@file_system'
-      - '@openid_connect.session'
-      - '@file.repository'
+      # Wire arguments manually until externalauth provides autowiring aliases.
+      $authmap: '@externalauth.authmap'
+      $external_auth: '@externalauth.externalauth'
+  Drupal\openid_connect\OpenIDConnect: '@openid_connect.openid_connect'
 
   plugin.manager.openid_connect_client:
     class: Drupal\openid_connect\Plugin\OpenIDConnectClientManager
     parent: default_plugin_manager
+  Drupal\openid_connect\Plugin\OpenIDConnectClientManager: '@plugin.manager.openid_connect_client'
 
   openid_connect.claims:
     class: Drupal\openid_connect\OpenIDConnectClaims
-    arguments: ['@config.factory', '@module_handler']
+  Drupal\openid_connect\OpenIDConnectClaims: '@openid_connect.claims'
 
   openid_connect.state_token:
     class: Drupal\openid_connect\OpenIDConnectStateToken
-    arguments: ['@openid_connect.session']
+  Drupal\openid_connect\OpenIDConnectStateTokenInterface: '@openid_connect.state_token'
 
   openid_connect.auto_login:
     class: Drupal\openid_connect\EventSubscriber\OpenIDConnectAutoLogin
@@ -37,12 +32,8 @@ services:
 
   openid_connect.session:
     class: Drupal\openid_connect\OpenIDConnectSession
-    arguments:
-      - '@config.factory'
-      - '@redirect.destination'
-      - '@session'
-      - '@language_manager'
+  Drupal\openid_connect\OpenIDConnectSessionInterface: '@openid_connect.session'
 
   openid_connect.autodiscover:
     class: Drupal\openid_connect\OpenIDConnectAutoDiscover
-    arguments: ['@http_client_factory', '@logger.factory']
+  Drupal\openid_connect\OpenIDConnectAutoDiscover: '@openid_connect.autodiscover'

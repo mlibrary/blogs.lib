@@ -12,7 +12,7 @@ class SchedulerJavascriptVerticalTabsTest extends SchedulerJavascriptTestBase {
   /**
    * Test editing an entity.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testEditEntitySummary($entityTypeId, $bundle) {
     $this->drupalLogin($this->schedulerUser);
@@ -105,7 +105,7 @@ class SchedulerJavascriptVerticalTabsTest extends SchedulerJavascriptTestBase {
   /**
    * Test configuring an entity type.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testConfigureEntityTypeSummary($entityTypeId, $bundle) {
     /** @var \Drupal\Tests\WebAssert $assert */

@@ -444,7 +444,7 @@ class ViewsBulkOperationsActionProcessor implements ViewsBulkOperationsActionPro
     }
 
     // Process queue.
-    $results = $this->action->executeMultiple($this->queue);
+    $results = $this->action->executeMultiple($this->queue) ?? [];
 
     // Set completion messages.
     $message_override = $this->bulkFormData['preconfiguration']['message_override'] ?? '';

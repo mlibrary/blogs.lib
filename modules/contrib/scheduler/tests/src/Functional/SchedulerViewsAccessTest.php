@@ -96,7 +96,7 @@ class SchedulerViewsAccessTest extends SchedulerBrowserTestBase {
   /**
    * Tests the scheduled content tab on the user page.
    *
-   * @dataProvider dataViewScheduledContentUser()
+   * @dataProvider dataViewScheduledContentUser
    */
   public function testViewScheduledContentUser($entityTypeId, $bundle) {
     $this->createScheduledItems($entityTypeId, $bundle);
@@ -200,7 +200,7 @@ class SchedulerViewsAccessTest extends SchedulerBrowserTestBase {
   /**
    * Tests the scheduled content overview.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testViewScheduledContentOverview($entityTypeId, $bundle) {
     $this->createScheduledItems($entityTypeId, $bundle);

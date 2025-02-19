@@ -27,7 +27,7 @@ class SchedulerEventSubscriber implements EventSubscriberInterface {
    *
    * This is during the edit process, not via cron.
    *
-   * @param \Drupal\scheduler\SchedulerEvent $event
+   * @param \Drupal\scheduler\Event\SchedulerEvent $event
    *   The event being acted on.
    */
   public function publishImmediately(SchedulerEvent $event): void {

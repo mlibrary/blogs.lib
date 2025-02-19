@@ -71,7 +71,7 @@ class UnPublishedStateConstraintTest extends SchedulerContentModerationTestBase 
       // Assert that the change from draft to archived fails validation.
       $violations = $node->validate();
       $message = (count($violations) > 0) ? $violations->get(0)->getMessage() : 'No violation message found';
-      $this->assertEquals('The scheduled un-publishing state of archived is not a valid transition from the current moderation state of draft for this content.', strip_tags($message));
+      $this->assertEquals('The scheduled un-publishing state of Archived is not a valid transition from the current moderation state of Draft for this content.', strip_tags($message));
     }
   }
 
@@ -112,7 +112,7 @@ class UnPublishedStateConstraintTest extends SchedulerContentModerationTestBase 
     $violations = $node->validate();
     $this->assertCount(1, $violations, 'The transition from published 2 to archived should fail validation');
     $message = (count($violations) > 0) ? $violations->get(0)->getMessage() : 'No violation message found';
-    $this->assertEquals('The scheduled un-publishing state of archived is not a valid transition from the scheduled publishing state of published_2.', strip_tags($message));
+    $this->assertEquals('The scheduled un-publishing state of Archived is not a valid transition from the scheduled publishing state of Published 2.', strip_tags($message));
   }
 
 }

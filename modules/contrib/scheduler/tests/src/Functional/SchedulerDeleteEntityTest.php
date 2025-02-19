@@ -21,7 +21,7 @@ class SchedulerDeleteEntityTest extends SchedulerBrowserTestBase {
    *
    * @see https://www.drupal.org/project/scheduler/issues/1614880
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testDeleteEntityWhenSchedulingIsRequired($entityTypeId, $bundle) {
     // Log in.
@@ -67,7 +67,7 @@ class SchedulerDeleteEntityTest extends SchedulerBrowserTestBase {
    *
    * @see https://www.drupal.org/project/scheduler/issues/2627370
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testDeleteEntityWithPastDates($entityTypeId, $bundle) {
     // Log in.

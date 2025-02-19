@@ -3,7 +3,7 @@
 namespace Drupal\views_bulk_operations\Plugin\Action;
 
 use Drupal\Core\Action\Attribute\Action;
-use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -36,8 +36,8 @@ class CancelUserAction extends ViewsBulkOperationsActionBase implements Containe
    *   The current user.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
    *   Module handler service.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The config factory object.
+   * @param \Drupal\Core\Config\ImmutableConfig $userConfig
+   *   User settings config object.
    */
   public function __construct(
     array $configuration,
@@ -45,10 +45,9 @@ class CancelUserAction extends ViewsBulkOperationsActionBase implements Containe
     $plugin_definition,
     protected readonly AccountInterface $currentUser,
     protected readonly ModuleHandlerInterface $moduleHandler,
-    ConfigFactoryInterface $config_factory,
+    protected readonly ImmutableConfig $userConfig,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->userConfig = $config_factory->get('user.settings');
   }
 
   /**
@@ -61,7 +60,7 @@ class CancelUserAction extends ViewsBulkOperationsActionBase implements Containe
       $plugin_definition,
       $container->get('current_user'),
       $container->get('module_handler'),
-      $container->get('config.factory')
+      $container->get('config.factory')->get('user.settings')
     );
   }
 

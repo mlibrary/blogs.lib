@@ -61,7 +61,7 @@ class SchedulerRevisioningTest extends SchedulerBrowserTestBase {
    * because it shows that this entity type can be processed correctly even if
    * the scheduler revision option is incorrectly set on.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testNewRevision($entityTypeId, $bundle) {
     $entityType = $this->entityTypeObject($entityTypeId, $bundle);
@@ -112,7 +112,7 @@ class SchedulerRevisioningTest extends SchedulerBrowserTestBase {
   /**
    * Tests the 'touch' option to alter the created date during publishing.
    *
-   * @dataProvider dataAlterCreationDate()
+   * @dataProvider dataAlterCreationDate
    */
   public function testAlterCreationDate($entityTypeId, $bundle) {
     // Ensure entities with past dates are scheduled not published immediately.

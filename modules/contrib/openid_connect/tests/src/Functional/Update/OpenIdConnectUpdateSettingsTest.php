@@ -38,6 +38,7 @@ class OpenIdConnectUpdateSettingsTest extends UpdatePathTestBase {
   protected static $modules = [
     'externalauth',
     'file',
+    'openid_connect',
   ];
 
   /**
@@ -45,13 +46,12 @@ class OpenIdConnectUpdateSettingsTest extends UpdatePathTestBase {
    */
   protected function setDatabaseDumpFiles(): void {
     $this->databaseDumpFiles = [
-      $this->root . '/core/modules/system/tests/fixtures/update/drupal-10.3.0.filled.standard.php.gz',
-      __DIR__ . '/../../../fixtures/update/openid_connect_30001.php',
+      __DIR__ . '/../../../fixtures/update/openid_connect_30001.php.gz',
     ];
   }
 
   /**
-   * @covers \openid_connect_30002()
+   * @covers openid_connect_update_30002
    */
   public function testUpdateHookN(): void {
     $old_settings = \Drupal::config('openid_connect.settings');

@@ -532,10 +532,10 @@ class OpenIDConnect {
    * @param int $status
    *   The initial user status.
    *
-   * @return \Drupal\user\UserInterface|null
-   *   The user object or null on failure.
+   * @return \Drupal\user\UserInterface
+   *   The user object.
    */
-  public function createUser(string $sub, array $userinfo, string $client_name, int $status = 1): ?UserInterface {
+  public function createUser(string $sub, array $userinfo, string $client_name, int $status = 1): UserInterface {
     $account_data = [
       'name' => $this->generateUsername($sub, $userinfo, $client_name),
       'mail' => $userinfo['email'],

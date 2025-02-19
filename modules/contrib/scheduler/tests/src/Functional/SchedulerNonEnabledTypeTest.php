@@ -19,7 +19,7 @@ class SchedulerNonEnabledTypeTest extends SchedulerBrowserTestBase {
   /**
    * Tests the publish_enable and unpublish_enable entity type settings.
    *
-   * @dataProvider dataNonEnabledScenarios()
+   * @dataProvider dataNonEnabledScenarios
    */
   public function testNonEnabledType($id, $entityTypeId, $bundle, $description, $publishing_enabled, $unpublishing_enabled) {
     // Give adminUser the permissions to use the field_ui 'manage form display'

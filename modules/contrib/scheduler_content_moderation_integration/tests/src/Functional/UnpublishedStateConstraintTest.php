@@ -19,7 +19,7 @@ class UnpublishedStateConstraintTest extends SchedulerContentModerationBrowserTe
    *
    * @covers ::validate
    *
-   * @dataProvider dataEntityTypes()
+   * @dataProvider dataEntityTypes
    */
   public function testValidPublishStateToUnPublishStateTransition($entityTypeId, $bundle) {
     $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
@@ -43,7 +43,7 @@ class UnpublishedStateConstraintTest extends SchedulerContentModerationBrowserTe
    *
    * @cover ::validate
    *
-   * @dataProvider dataEntityTypes()
+   * @dataProvider dataEntityTypes
    */
   public function testInvalidUnPublishStateTransition($entityTypeId, $bundle) {
     $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
@@ -61,7 +61,7 @@ class UnpublishedStateConstraintTest extends SchedulerContentModerationBrowserTe
       $violations = $entity->validate();
       $this->assertCount(1, $violations, "The transition from draft to archived with publish_state='{$publish_state}' should fail validation");
       $message = (count($violations) > 0) ? $violations->get(0)->getMessage() : 'No violation message found';
-      $this->assertEquals('The scheduled un-publishing state of archived is not a valid transition from the current moderation state of draft for this content.', strip_tags($message));
+      $this->assertEquals('The scheduled un-publishing state of Archived is not a valid transition from the current moderation state of Draft for this content.', strip_tags($message));
     }
   }
 
@@ -73,7 +73,7 @@ class UnpublishedStateConstraintTest extends SchedulerContentModerationBrowserTe
    *
    * @covers ::validate
    *
-   * @dataProvider dataEntityTypes()
+   * @dataProvider dataEntityTypes
    */
   public function testInvalidPublishStateToUnPublishStateTransition($entityTypeId, $bundle) {
     // This test is not about permissions, therefore we can use the root user
@@ -104,7 +104,7 @@ class UnpublishedStateConstraintTest extends SchedulerContentModerationBrowserTe
     $violations = $entity->validate();
     $this->assertCount(1, $violations, 'The transition from published 2 to archived should fail validation');
     $message = (count($violations) > 0) ? $violations->get(0)->getMessage() : 'No violation message found';
-    $this->assertEquals('The scheduled un-publishing state of archived is not a valid transition from the scheduled publishing state of published_2.', strip_tags($message));
+    $this->assertEquals('The scheduled un-publishing state of Archived is not a valid transition from the scheduled publishing state of Published 2.', strip_tags($message));
   }
 
 }

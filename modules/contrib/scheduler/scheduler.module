@@ -41,9 +41,11 @@ use Drupal\workbench_moderation\Plugin\Action\ModerationOptOutUnpublishNode;
  * have been Drupal\scheduler\Event in the first place.
  *
  * These two aliases allow existing event subscribers to continue unchanged.
+ * They are also still defined in /src/SchedulerEvent and src/SchedulerEvents.
+ * See https://www.drupal.org/project/scheduler/issues/3498553
  */
-class_alias('Drupal\scheduler\Event\SchedulerEvent', 'Drupal\scheduler\SchedulerEvent');
-class_alias('Drupal\scheduler\Event\SchedulerNodeEvents', 'Drupal\scheduler\SchedulerEvents');
+@class_alias('Drupal\scheduler\Event\SchedulerEvent', 'Drupal\scheduler\SchedulerEvent');
+@class_alias('Drupal\scheduler\Event\SchedulerNodeEvents', 'Drupal\scheduler\SchedulerEvents');
 
 /**
  * Implements hook_help().

@@ -60,7 +60,7 @@ class PublishedStateConstraintTest extends SchedulerContentModerationTestBase {
     // Assert that the invalid publish state fails validation, we get two
     // violations since the draft state does not exist.
     $violations = $node->validate();
-    $this->assertEquals('The scheduled publishing state of archived is not a valid transition from the current moderation state of draft for this content.', strip_tags($violations->get(0)->getMessage()));
+    $this->assertEquals('The scheduled publishing state of Archived is not a valid transition from the current moderation state of Draft for this content.', strip_tags($violations->get(0)->getMessage()));
 
     // @todo Figure out how to actually test this with valid options that don't
     // break the select list widget but still test the invalid transition.

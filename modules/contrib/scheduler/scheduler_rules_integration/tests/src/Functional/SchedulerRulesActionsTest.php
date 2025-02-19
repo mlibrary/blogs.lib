@@ -50,7 +50,7 @@ class SchedulerRulesActionsTest extends SchedulerBrowserTestBase {
   /**
    * Tests the actions which set and remove the 'Publish On' date.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testPublishOnActions($entityTypeId, $enabledBundle) {
     $nonEnabledBundle = $this->entityTypeObject($entityTypeId, 'non-enabled')->id();
@@ -245,7 +245,7 @@ class SchedulerRulesActionsTest extends SchedulerBrowserTestBase {
   /**
    * Tests the actions which set and remove the 'Unpublish On' date.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testUnpublishOnActions($entityTypeId, $enabledBundle) {
     $nonEnabledBundle = $this->entityTypeObject($entityTypeId, 'non-enabled')->id();

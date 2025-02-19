@@ -102,7 +102,7 @@ class SchedulerHooksTest extends SchedulerBrowserTestBase {
    * complex data structures and/or tables from which to identify the ids to
    * add. In this test, to keep it simple, we identify entities simply by title.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testList($entityTypeId, $bundle) {
     $storage = $this->entityStorageObject($entityTypeId);
@@ -162,7 +162,7 @@ class SchedulerHooksTest extends SchedulerBrowserTestBase {
    * These hook allows other modules to add or remove entity ids from the list
    * to be processed.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testListAlter($entityTypeId, $bundle) {
     $storage = $this->entityStorageObject($entityTypeId);
@@ -259,7 +259,7 @@ class SchedulerHooksTest extends SchedulerBrowserTestBase {
    * uses the customized content type which has checkboxes 'Approved for
    * publishing' and 'Approved for unpublishing'.
    *
-   * @dataProvider dataCustomEntityTypes()
+   * @dataProvider dataCustomEntityTypes
    */
   public function testPublishingAllowed($entityTypeId, $bundle) {
     $storage = $this->entityStorageObject($entityTypeId);
@@ -329,7 +329,7 @@ class SchedulerHooksTest extends SchedulerBrowserTestBase {
    * test is simpler than the test sequence for allowed publishing, because the
    * past date 'publish' option is not applicable.
    *
-   * @dataProvider dataCustomEntityTypes()
+   * @dataProvider dataCustomEntityTypes
    */
   public function testUnpublishingAllowed($entityTypeId, $bundle) {
     $storage = $this->entityStorageObject($entityTypeId);
@@ -425,7 +425,7 @@ class SchedulerHooksTest extends SchedulerBrowserTestBase {
    *   hook_scheduler_{type}_hide_publish_date()
    *   hook_scheduler_{type}_hide_unpublish_date()
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testHideDateField($entityTypeId, $bundle) {
     $this->drupalLogin($this->schedulerUser);
@@ -481,7 +481,7 @@ class SchedulerHooksTest extends SchedulerBrowserTestBase {
    *   hook_scheduler_{type}_publish_process()
    *   hook_scheduler_{type}_unpublish_process()
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testPublishUnpublishProcess($entityTypeId, $bundle) {
     // $this->drupalLogin($this->schedulerUser);

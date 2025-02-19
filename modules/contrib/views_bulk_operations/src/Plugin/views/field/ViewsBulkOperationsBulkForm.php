@@ -91,7 +91,7 @@ class ViewsBulkOperationsBulkForm extends FieldPluginBase implements CacheableDe
     protected readonly ViewsBulkOperationsActionProcessorInterface $actionProcessor,
     protected readonly PrivateTempStoreFactory $tempStoreFactory,
     protected readonly AccountInterface $currentUser,
-    protected readonly RequestStack $requestStack
+    protected readonly RequestStack $requestStack,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
@@ -154,10 +154,10 @@ class ViewsBulkOperationsBulkForm extends FieldPluginBase implements CacheableDe
    * query has been built. Also, no point doing this on the view
    * admin page.
    *
-   * @param array $view_entity_data
+   * @param array|null $view_entity_data
    *   See ViewsBulkOperationsViewDataInterface::getViewEntityData().
    */
-  protected function updateTempstoreData(array $view_entity_data = NULL): void {
+  protected function updateTempstoreData(?array $view_entity_data = NULL): void {
     // Initialize tempstore object and get data if available.
     $this->tempStoreData = $this->getTempstoreData($this->view->id(), $this->view->current_display);
 
@@ -1037,7 +1037,7 @@ class ViewsBulkOperationsBulkForm extends FieldPluginBase implements CacheableDe
       // results selected in other requests and validate if
       // anything is selected.
       $this->tempStoreData = $this->getTempstoreData();
-      $selected = \array_filter($form_state->getValue($this->options['id']));
+      $selected = \array_filter($form_state->getValue($this->options['id']) ?? []);
       if (empty($this->tempStoreData['list']) && empty($selected)) {
         $form_state->setErrorByName('', $this->t('No items selected.'));
       }
@@ -1078,6 +1078,22 @@ class ViewsBulkOperationsBulkForm extends FieldPluginBase implements CacheableDe
    */
   protected function isActionConfigurable($action): bool {
     return \in_array('Drupal\Core\Plugin\PluginFormInterface', \class_implements($action['class']), TRUE) || \method_exists($action['class'], 'buildConfigurationForm');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validate() {
+    $errors = parent::validate();
+    if ($this->displayHandler->usesFields()) {
+      foreach ($this->displayHandler->getHandlers('field') as $field_handler) {
+        if ($field_handler instanceof BulkForm) {
+          $errors[] = $this->t("VBO and Drupal core bulk operations fields cannot be used in the same view display together.");
+          break;
+        }
+      }
+    }
+    return $errors;
   }
 
 }

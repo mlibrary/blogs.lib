@@ -37,7 +37,7 @@ class SchedulerEntityAccessTest extends SchedulerBrowserTestBase {
   /**
    * Tests Scheduler cron functionality when access to the entity is denied.
    *
-   * @dataProvider dataEntityAccess()
+   * @dataProvider dataEntityAccess
    */
   public function testEntityAccess($entityTypeId, $bundle, $field, $status) {
     $storage = $this->entityStorageObject($entityTypeId);

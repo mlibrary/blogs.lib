@@ -97,7 +97,7 @@ class SchedulerDevelGenerateTest extends SchedulerBrowserTestBase {
   /**
    * Test the functionality that Scheduler adds during entity generation.
    *
-   * @dataProvider dataDevelGenerate()
+   * @dataProvider dataDevelGenerate
    */
   public function testDevelGenerate($entityTypeId, $enabled) {
     $this->drupalLogin($this->adminUser);

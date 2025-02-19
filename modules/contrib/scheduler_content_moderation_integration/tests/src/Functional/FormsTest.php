@@ -17,7 +17,7 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
   /**
    * Tests the hook_form_alter functionality.
    *
-   * @dataProvider dataFormAlter()
+   * @dataProvider dataFormAlter
    */
   public function testEntityFormAlter($entityTypeId, $bundle, $operation) {
     $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
@@ -66,7 +66,7 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
    * version of the hook. This functional test checks that fields do actually
    * get hidden for all supported entity types.
    *
-   * @dataProvider dataFormAlter()
+   * @dataProvider dataFormAlter
    */
   public function testHideSchedulerFields($entityTypeId, $bundle, $operation) {
     $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
@@ -137,7 +137,7 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
    *
    * Covers scheduler_content_moderation_integration_form_node_form_alter.
    *
-   * @dataProvider dataFormAlter()
+   * @dataProvider dataFormAlter
    */
   public function testFormAlterWithDeniedAccess($entityTypeId, $bundle, $operation) {
     $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
@@ -197,7 +197,7 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
   /**
    * Tests the hook_form_alter functionality for entity type forms.
    *
-   * @dataProvider dataEntityTypeFormAlter()
+   * @dataProvider dataEntityTypeFormAlter
    */
   public function testEntityTypeFormAlter($entityTypeId, $bundle, $moderatable) {
     // Give adminUser the permissions to use the field_ui 'manage form display'

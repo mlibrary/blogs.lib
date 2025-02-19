@@ -63,7 +63,7 @@ class SchedulerDefaultTimeTest extends SchedulerBrowserTestBase {
    * This test covers the default scenario where the dates are optional and not
    * required. A javascript test covers the cases where the dates are required.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testDefaultTime($entityTypeId, $bundle) {
     $this->drupalLogin($this->schedulerUser);
@@ -136,7 +136,7 @@ class SchedulerDefaultTimeTest extends SchedulerBrowserTestBase {
    * This test uses the 'scheduler_extras' helper module, which hides the time
    * elements of both of the scheduler date input fields.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testDefaultWithHiddenTime($entityTypeId, $bundle) {
     \Drupal::service('module_installer')->install(['scheduler_extras']);

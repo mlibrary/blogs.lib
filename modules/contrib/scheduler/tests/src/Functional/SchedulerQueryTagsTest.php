@@ -29,7 +29,7 @@ class SchedulerQueryTagsTest extends SchedulerBrowserTestBase {
    * benefit (and a certain amount of overhead) in testing on any more than two
    * entity types.
    *
-   * @dataProvider dataQueryTags()
+   * @dataProvider dataQueryTags
    */
   public function testPublishingQueryTags($entityTypeId, $bundle) {
     $this->drupalLogin($this->schedulerUser);
@@ -108,7 +108,7 @@ class SchedulerQueryTagsTest extends SchedulerBrowserTestBase {
    *   hook_query_scheduler_unpublish_alter()
    *   hook_query_scheduler_{entityTypeId}_unpublish_alter()
    *
-   * @dataProvider dataQueryTags()
+   * @dataProvider dataQueryTags
    */
   public function testUnpublishingQueryTags($entityTypeId, $bundle) {
     $this->drupalLogin($this->schedulerUser);

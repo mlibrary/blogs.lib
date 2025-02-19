@@ -19,7 +19,7 @@ class SchedulerValidationTest extends SchedulerBrowserTestBase {
    *   $messageUnpublishOnRequiredIfPublishing
    *   $messageUnpublishOnTooEarly.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testValidationDuringEdit($entityTypeId, $bundle) {
     $this->drupalLogin($this->adminUser);

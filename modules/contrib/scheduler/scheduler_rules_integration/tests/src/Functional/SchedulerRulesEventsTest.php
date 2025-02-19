@@ -139,7 +139,7 @@ class SchedulerRulesEventsTest extends SchedulerBrowserTestBase {
   /**
    * Tests that no events are triggered when there are no scheduling dates.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testRulesEventsNone($entityTypeId, $bundle) {
     // Add and save an entity without any scheduled dates and check that no
@@ -160,7 +160,7 @@ class SchedulerRulesEventsTest extends SchedulerBrowserTestBase {
   /**
    * Tests the three events related to publishing an entity.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testRulesEventsPublish($entityTypeId, $bundle) {
     // Allow dates in the past.
@@ -195,7 +195,7 @@ class SchedulerRulesEventsTest extends SchedulerBrowserTestBase {
   /**
    * Tests the three events related to unpublishing an entity.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testRulesEventsUnpublish($entityTypeId, $bundle) {
     // Create an entity with an unpublish-on date, and check that only event 4
@@ -228,7 +228,7 @@ class SchedulerRulesEventsTest extends SchedulerBrowserTestBase {
   /**
    * Tests all six events related to publishing and unpublishing an entity.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testRulesEventsBoth($entityTypeId, $bundle) {
     // Allow dates in the past.

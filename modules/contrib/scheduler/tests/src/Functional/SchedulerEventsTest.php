@@ -27,7 +27,7 @@ class SchedulerEventsTest extends SchedulerBrowserTestBase {
    * The API test implementations of the event listeners alter the nodes
    * 'promote' and 'sticky' settings and changes the title.
    *
-   * @dataProvider dataNodeEvents()
+   * @dataProvider dataNodeEvents
    */
   public function testNodeEvents($legacyNamespace = FALSE) {
     $this->drupalLogin($this->schedulerUser);
@@ -108,7 +108,7 @@ class SchedulerEventsTest extends SchedulerBrowserTestBase {
   /**
    * Tests six scheduler events for entity types other than node.
    *
-   * @dataProvider dataSchedulerEvents()
+   * @dataProvider dataSchedulerEvents
    */
   public function testSchedulerEvents($entityTypeId, $bundle) {
     $this->drupalLogin($this->schedulerUser);

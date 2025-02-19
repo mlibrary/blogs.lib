@@ -5,26 +5,26 @@
  * Read a PHPSTAN baseline file and summarize the ignored messages.
  *
  * Arguments:
- *   -p --path     path to the input file, defaults to the current directory
  *   -v --verbose  show verbose debug output
+ *   -m --more     more details in debug output
  *   filename      (positional) defaults to phpstan-baseline.neon.
  */
 
 // Get the options.
 $rest_index = NULL;
-$options = getopt('p:v', ['path:', 'verbose'], $rest_index);
+$options = getopt('vm', ['verbose', 'more'], $rest_index);
 $quiet = !array_key_exists('v', $options) && !array_key_exists('verbose', $options);
-$quiet ?: print "quiet=$quiet\noptions=" . print_r($options, TRUE) . "\n";
+$nodetails = !array_key_exists('m', $options) && !array_key_exists('more', $options);
+$quiet = $quiet && $nodetails;
+$quiet ?: print "quiet=$quiet\nnodetails=$nodetails\noptions=" . print_r($options, TRUE) . "\n";
 
 // Get the positional arguments.
 $pos_args = array_slice($argv, $rest_index);
 $quiet ?: print "pos_args=" . print_r($pos_args, TRUE) . "\n";
 
 // The filename is the first (and only) positional argument.
-$filename = $pos_args[0] ?? 'phpstan-baseline.neon';
-$path = $options['p'] ?? $options['path'] ?? '.';
-$input_file = $path . '/' . $filename;
-$quiet ?: print "path=$path\nfilename=$filename\nfull input_path=$input_file\n";
+$filename = $pos_args[0] ?? getenv('_PHPSTAN_BASELINE_FILENAME') ?? 'phpstan-baseline.neon';
+$quiet ?: print "filename=$filename\n";
 
 $trim_chars = " #^\"\'$\n";
 $summary = $overall = [];
@@ -32,21 +32,21 @@ $total = $count = 0;
 $msg = '';
 
 // Read the file into an array.
-$baseline = @file($input_file) ?: [];
+$baseline = @file($filename) ?: [];
 if (empty($baseline)) {
-  print "\n*******\n ERROR: Could not read file $input_file\n*******\n";
+  print "\n*******\n ERROR: Could not read file $filename\n*******\n";
   exit;
 }
 
 foreach ($baseline as $row => $line) {
-  $quiet ?: print "row=$row, line=$line";
+  $nodetails ?: print "row=$row, line=$line";
 
   // Match against 'message' or 'count' or 'path' followed by :
   if (preg_match('/\s*(message|count|path)\:\s(.*)$/', $line, $matches)) {
-    $quiet ?: print_r($matches);
+    $nodetails ?: print_r($matches);
     $type = $matches[1];
     $value = stripslashes(trim($matches[2], $trim_chars));
-    $quiet ?: print "\$type=$type, \$value=$value\n";
+    $nodetails ?: print "\$type=$type, \$value=$value\n";
 
     switch ($type) {
 
@@ -54,7 +54,7 @@ foreach ($baseline as $row => $line) {
         if ($value == '') {
           // Sometimes the message is long and does not start until the next
           // line. So if empty read from $row+1.
-          $quiet ?: print "row=$row, line=$line\nnext row={$baseline[$row+1]} \n";
+          $nodetails ?: print "row=$row, line=$line\nnext row={$baseline[$row+1]} \n";
           $value = stripslashes(trim($baseline[$row + 1], $trim_chars));
         }
         // Remove all double-backslashes.
@@ -65,12 +65,12 @@ foreach ($baseline as $row => $line) {
         $count = $value;
         isset($summary[$msg]['count']) ? $summary[$msg]['count'] += $count : $summary[$msg]['count'] = $count;
         $total += $count;
-        $quiet ?: print "\$summary[$msg]['count']={$summary[$msg]['count']}\n";
+        $nodetails ?: print "\$summary[$msg]['count']={$summary[$msg]['count']}\n";
         break;
 
       case 'path':
         $summary[$msg]['paths'][] = $value;
-        $quiet ?: print "\$summary[$msg]=" . print_r($summary[$msg], TRUE) . "\n";
+        $nodetails ?: print "\$summary[$msg]=" . print_r($summary[$msg], TRUE) . "\n";
         isset($overall[$value]) ? $overall[$value] += $count : $overall[$value] = $count;
         break;
 

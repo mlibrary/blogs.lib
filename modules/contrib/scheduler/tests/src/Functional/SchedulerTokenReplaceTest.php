@@ -12,7 +12,7 @@ class SchedulerTokenReplaceTest extends SchedulerBrowserTestBase {
   /**
    * Creates a node, then tests the tokens generated from it.
    *
-   * @dataProvider dataSchedulerTokenReplacement()
+   * @dataProvider dataSchedulerTokenReplacement
    */
   public function testSchedulerTokenReplacement($entityTypeId, $bundle) {
     // For taxonomy, log in as adminUser to avoid 403 for unpublished terms.
@@ -77,7 +77,7 @@ class SchedulerTokenReplaceTest extends SchedulerBrowserTestBase {
    *
    * @see https://www.drupal.org/project/scheduler/issues/3443183
    *
-   * @dataProvider dataSchedulerWithoutTokenModule()
+   * @dataProvider dataSchedulerWithoutTokenModule
    */
   public function testSchedulerWithoutTokenModule($entityTypeId, $bundle) {
     // Commerce product requires the token module, so that has to be uninstalled

@@ -12,7 +12,7 @@ class SchedulerRequiredTest extends SchedulerBrowserTestBase {
   /**
    * Tests creating and editing nodes with required scheduling enabled.
    *
-   * @dataProvider dataRequiredScheduling()
+   * @dataProvider dataRequiredScheduling
    */
   public function testRequiredScheduling($id, $publish_required, $unpublish_required, $operation, $scheduled, $status, $publish_expected, $unpublish_expected, $message) {
 

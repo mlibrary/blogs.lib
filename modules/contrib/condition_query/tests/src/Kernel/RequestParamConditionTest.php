@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\condition_query\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 /**
  * Tests that the Request Param Condition is working properly.
@@ -41,13 +44,14 @@ class RequestParamConditionTest extends KernelTestBase {
   protected function setUp() : void {
     parent::setUp();
 
-    $this->installSchema('system', ['sequences']);
+    if (version_compare(\Drupal::VERSION, '10.2.0', '<')) {
+      $this->installSchema('system', ['sequences']);
+    }
 
     $this->pluginManager = $this->container->get('plugin.manager.condition');
 
     // Set the test request stack in the container.
-    $this->requestStack = new RequestStack();
-    $this->container->set('request_stack', $this->requestStack);
+    $this->requestStack = \Drupal::requestStack();
   }
 
   /**
@@ -64,12 +68,13 @@ class RequestParamConditionTest extends KernelTestBase {
    *   The expected return value from the evaluate() method.
    */
   public function testEvaluate(string $request_path, array $config, bool $expected) : void {
-    /* @var \Drupal\condition_query\Plugin\Condition\RequestParam $condition */
+    /** @var \Drupal\condition_query\Plugin\Condition\RequestParam $condition */
     $condition = $this->pluginManager->createInstance('request_param');
     foreach ($config as $key => $value) {
       $condition->setConfig($key, $value);
     }
     $request = Request::create($request_path);
+    $request->setSession(new Session(new MockArraySessionStorage()));
     $this->requestStack->push($request);
     $this->assertEquals($expected, $condition->execute());
     $this->requestStack->pop();
@@ -147,7 +152,7 @@ class RequestParamConditionTest extends KernelTestBase {
    *   The expected summary.
    */
   public function testSummary(array $config, string $expected) : void {
-    /* @var \Drupal\condition_query\Plugin\Condition\RequestParam $condition */
+    /** @var \Drupal\condition_query\Plugin\Condition\RequestParam $condition */
     $condition = $this->pluginManager->createInstance('request_param');
     foreach ($config as $key => $value) {
       $condition->setConfig($key, $value);

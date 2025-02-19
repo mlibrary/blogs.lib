@@ -11,7 +11,6 @@
  * @see https://www.drupal.org/project/scheduler/issues/2798689
  */
 
-use Drupal\content_moderation\ContentModerationState;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Entity\EditorialContentEntityBase;
@@ -23,6 +22,7 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\content_moderation\ContentModerationState;
 use Drupal\workflows\Transition;
 
 require_once dirname(__FILE__) . '/includes/scheduler_hooks.inc';
@@ -442,7 +442,7 @@ function _scheduler_content_moderation_integration_hide_empty_state_options(arra
  * @return array
  *   The array of allowed values.
  */
-function _scheduler_content_moderation_integration_states_values(FieldStorageDefinitionInterface $definition, FieldableEntityInterface $entity = NULL, bool &$cacheable = FALSE): array {
+function _scheduler_content_moderation_integration_states_values(FieldStorageDefinitionInterface $definition, ?FieldableEntityInterface $entity = NULL, bool &$cacheable = FALSE): array {
   $options = [];
 
   // Fetch all possible states if no entity is given.

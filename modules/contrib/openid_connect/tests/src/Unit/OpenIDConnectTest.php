@@ -566,7 +566,15 @@ class OpenIDConnectTest extends UnitTestCase {
             );
         }
 
-        if (!empty($userInfo['sub'])) {
+        if (isset($userInfo['sub']) && $userInfo['sub'] == 'TESTING') {
+          $this->oidcLogger->expects($this->once())
+            ->method('error')
+            ->with(
+              'No "sub" found from @provider',
+              ['@provider' => $clientId]
+            );
+        }
+        elseif (!empty($userInfo['sub'])) {
           $account = $this->createMock(UserInterface::class);
           $account->method('id')->willReturn(1234);
           $account->method('isNew')->willReturn(FALSE);
@@ -617,14 +625,21 @@ class OpenIDConnectTest extends UnitTestCase {
 
         $this->moduleHandler->expects($this->any())
           ->method('invokeAll')
-          ->with('openid_connect_pre_authorize')
-          ->willReturn([]);
+          ->willReturnMap([
+            ['openid_connect_pre_authorize', []],
+            ['openid_connect_userinfo_save', TRUE],
+          ]);
 
         if ($userInfo['email'] === 'invalid') {
           $this->messenger->expects($this->once())
             ->method('addError');
         }
         else {
+          $this->emailValidator->expects($this->once())
+            ->method('isValid')
+            ->with($userInfo['email'])
+            ->willReturn(TRUE);
+
           if ($userInfo['email'] === 'duplicate@valid.com') {
             $account = $this
               ->createMock(UserInterface::class);
@@ -633,11 +648,6 @@ class OpenIDConnectTest extends UnitTestCase {
               ->method('loadByProperties')
               ->with(['mail' => $userInfo['email']])
               ->willReturn([$account]);
-
-            $this->emailValidator->expects($this->once())
-              ->method('isValid')
-              ->with($userInfo['email'])
-              ->willReturn(TRUE);
 
             $immutableConfig = $this
               ->createMock(ImmutableConfig::class);
@@ -719,11 +729,10 @@ class OpenIDConnectTest extends UnitTestCase {
               }
             }
 
-            $immutableConfig = $this->createMock(ImmutableConfig::class);
-
             $ret = !(empty($userInfo['registerOverride']) && isset($userInfo['newAccount']) && $userInfo['newAccount']);
 
-            $immutableConfig->expects($this->any())
+            $oidcImmutableConfig = $this->createMock(ImmutableConfig::class);
+            $oidcImmutableConfig->expects($this->any())
               ->method('get')
               ->willReturnMap([
                 ['connect_existing_users', $ret],
@@ -731,13 +740,7 @@ class OpenIDConnectTest extends UnitTestCase {
                 ['userinfo_mappings', ['mail' => 'mail']],
               ]);
 
-            $this->configFactory->expects($this->any())
-              ->method('get')
-              ->with('openid_connect.settings')
-              ->willReturn($immutableConfig);
-
             $userImmutableConfig = $this->createMock(ImmutableConfig::class);
-
             $userImmutableConfig->expects($this->any())
               ->method('get')
               ->with('register')
@@ -745,8 +748,10 @@ class OpenIDConnectTest extends UnitTestCase {
 
             $this->configFactory->expects($this->any())
               ->method('get')
-              ->with('user.settings')
-              ->willReturn($userImmutableConfig);
+              ->willReturnMap([
+                ['openid_connect.settings', $oidcImmutableConfig],
+                ['user.settings', $userImmutableConfig],
+              ]);
           }
         }
       }
@@ -839,9 +844,7 @@ class OpenIDConnectTest extends UnitTestCase {
           'sub' => $sub,
         ], TRUE, FALSE,
       ],
-      // @todo Fix these test cases. At the moment, they throw an exception
-      // due to an unknown config get.
-      /*[FALSE, '', $tokens, $user_data,
+      [FALSE, '', $tokens, $user_data,
         [
           'email' => 'connect@valid.com',
           'sub' => $sub,
@@ -858,6 +861,12 @@ class OpenIDConnectTest extends UnitTestCase {
         [
           'email' => 'connect@valid.com',
           'blocked' => TRUE,
+          'sub' => $sub,
+        ], TRUE, TRUE,
+      ],
+      [FALSE, '', $tokens, $user_data,
+        [
+          'email' => 'connect@valid.com',
           'sub' => 'TESTING',
         ], TRUE, TRUE,
       ],
@@ -893,7 +902,7 @@ class OpenIDConnectTest extends UnitTestCase {
           'registerOverride' => TRUE,
           'sub' => $sub,
         ], TRUE, FALSE,
-      ],*/
+      ],
     ];
   }
 
@@ -1345,7 +1354,7 @@ class OpenIDConnectTest extends UnitTestCase {
    * @return array|array[]
    *   Array of parameters to pass to testRoleMappings().
    */
-  public function dataProviderForTestRoleMappings(): array {
+  public static function dataProviderForTestRoleMappings(): array {
     return [
       'add groupX, remove groupY' => [
         'userinfo' => [

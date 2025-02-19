@@ -12,7 +12,7 @@ class SchedulerPastDatesTest extends SchedulerBrowserTestBase {
   /**
    * Test the different options for past publication dates.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testSchedulerPastDates($entityTypeId, $bundle) {
     $storage = $this->entityStorageObject($entityTypeId);

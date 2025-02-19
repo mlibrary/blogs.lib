@@ -112,7 +112,7 @@ class SchedulerMultilingualTest extends SchedulerBrowserTestBase {
   /**
    * Test creating translations with independent scheduling.
    *
-   * @dataProvider dataPublishingTranslations()
+   * @dataProvider dataPublishingTranslations
    */
   public function testPublishingTranslations($publish_on_translatable, $unpublish_on_translatable, $status_translatable, array $expected_status_values_before, array $expected_status_values_after) {
     // Show the languages, this is for info and debug only.

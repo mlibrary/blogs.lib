@@ -35,10 +35,13 @@ class PublishStateConstraintValidator extends ConstraintValidatorBase {
     $publish_state = $entity->publish_state->value;
 
     if (!$this->isValidTransition($entity, $moderation_state, $publish_state)) {
+      $workflow_type = $this->getEntityWorkflowType($entity);
+      $mod_state_label = $workflow_type->hasState($moderation_state) ? $workflow_type->getState($moderation_state)->label() : 'None';
+      $pub_state_label = $workflow_type->hasState($publish_state) ? $workflow_type->getState($publish_state)->label() : 'None';
       $this->context
         ->buildViolation($constraint->invalidTransitionMessage, [
-          '%publish_state' => $publish_state,
-          '%content_state' => $moderation_state,
+          '%publish_state' => $pub_state_label,
+          '%content_state' => $mod_state_label,
         ])
         ->atPath('publish_state')
         ->addViolation();

@@ -96,7 +96,7 @@ class SchedulerPermissionsTest extends SchedulerBrowserTestBase {
   /**
    * Tests that users without permission do not see the scheduler date fields.
    *
-   * @dataProvider dataPermissionsTest()
+   * @dataProvider dataPermissionsTest
    */
   public function testUserPermissionsAdd($entityTypeId, $bundle, $user) {
     $titleField = $this->titleField($entityTypeId);
@@ -154,7 +154,7 @@ class SchedulerPermissionsTest extends SchedulerBrowserTestBase {
   /**
    * Tests that users without permission can edit existing scheduled content.
    *
-   * @dataProvider dataPermissionsTest()
+   * @dataProvider dataPermissionsTest
    */
   public function testUserPermissionsEdit($entityTypeId, $bundle, $user) {
     $storage = $this->entityStorageObject($entityTypeId);

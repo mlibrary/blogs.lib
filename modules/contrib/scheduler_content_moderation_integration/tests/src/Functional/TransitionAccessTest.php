@@ -14,7 +14,7 @@ class TransitionAccessTest extends SchedulerContentModerationBrowserTestBase {
   /**
    * Test TransitionAccessConstraintValidator.
    *
-   * @dataProvider dataEntityTypes()
+   * @dataProvider dataEntityTypes
    */
   public function testTransitionAccess($entityTypeId, $bundle) {
     $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
@@ -62,7 +62,7 @@ class TransitionAccessTest extends SchedulerContentModerationBrowserTestBase {
   /**
    * Test access to scheduled content for users without right to transition.
    *
-   * @dataProvider dataEntityTypes()
+   * @dataProvider dataEntityTypes
    */
   public function testRestrictedTransitionAccess($entityTypeId, $bundle) {
     $schedulerUser = $entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser;

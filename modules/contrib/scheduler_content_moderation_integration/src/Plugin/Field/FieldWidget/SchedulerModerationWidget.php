@@ -2,13 +2,13 @@
 
 namespace Drupal\scheduler_content_moderation_integration\Plugin\Field\FieldWidget;
 
-use Drupal\content_moderation\ModerationInformationInterface;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsSelectWidget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\content_moderation\ModerationInformationInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**

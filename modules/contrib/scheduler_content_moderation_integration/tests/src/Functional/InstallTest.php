@@ -56,7 +56,7 @@ class InstallTest extends BrowserTestBase {
   /**
    * Test the processing when SCMI is installed after Scheduler has been in use.
    *
-   * @dataProvider dataInstallTest()
+   * @dataProvider dataInstallTest
    */
   public function testInstall($entityTypeId, $bundle) {
     /** @var \Drupal\Tests\WebAssert $assert */

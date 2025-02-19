@@ -16,7 +16,7 @@ class SchedulerMetaInformationTest extends SchedulerBrowserTestBase {
    * is included, telling crawlers about when an item will expire and should be
    * removed from search results.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testMetaInformation($entityTypeId, $bundle) {
     // Log in.

@@ -1,14 +1,14 @@
 name: OpenID Connect
 type: module
 description: A pluggable client implementation for the OpenID Connect protocol.
-core_version_requirement: ^9.5 || ^10.2 || ^11
+core_version_requirement: ^10.2 || ^11
 package: 'User authentication'
 configure: entity.openid_connect_client.list
 dependencies:
   - drupal:file
   - externalauth:externalauth
 
-# Information added by Drupal.org packaging script on 2024-12-30
-version: '3.0.0-alpha5'
+# Information added by Drupal.org packaging script on 2025-02-13
+version: '3.0.0-alpha6'
 project: 'openid_connect'
-datestamp: 1735590947
+datestamp: 1739445534

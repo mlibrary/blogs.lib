@@ -49,7 +49,7 @@ class SchedulerJavascriptDefaultTimeTest extends SchedulerJavascriptTestBase {
   /**
    * Test the default time functionality when scheduling dates are required.
    *
-   * @dataProvider dataTimeWhenSchedulingIsRequired()
+   * @dataProvider dataTimeWhenSchedulingIsRequired
    */
   public function testTimeWhenSchedulingIsRequired($entityTypeId, $bundle, $field) {
     $config = $this->config('scheduler.settings');

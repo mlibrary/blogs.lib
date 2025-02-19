@@ -12,7 +12,7 @@ class SchedulerMessageTest extends SchedulerBrowserTestBase {
   /**
    * Tests the option to display or not display the confirmation message.
    *
-   * @dataProvider dataStandardEntityTypes()
+   * @dataProvider dataStandardEntityTypes
    */
   public function testConfirmationMessage($entityTypeId, $bundle) {
     // The schedulerUser is adequate for node, media and commerce_product. But
