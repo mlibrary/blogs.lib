@@ -55,10 +55,12 @@ function panels_layout_alter(&$definitions) {
     if (!($definitions[$layout_name] instanceof LayoutDefinition)) {
       continue;
     }
-    if (in_array($layout_name, $core_layouts) && empty($definitions[$layout_name]->getIcon())) {
+    $layout_definition = $layout;
+    $icon = $layout_definition->getIcon();
+    if (in_array($layout_name, $core_layouts) && $icon && empty($icon['#uri'])) {
       $definitions[$layout_name]->setIconPath($panels_path . '/layouts/' . $layout_name . '/' . $layout_name . '.png');
     }
-    if (empty($definitions[$layout_name]->getIcon())) {
+    if (empty($icon)) {
       $definitions[$layout_name]->setIconPath($panels_path . '/layouts/no-layout-preview.png');
     }
   }

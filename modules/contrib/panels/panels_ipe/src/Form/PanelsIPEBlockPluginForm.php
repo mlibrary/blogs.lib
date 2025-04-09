@@ -46,7 +46,7 @@ class PanelsIPEBlockPluginForm extends FormBase {
   protected $renderer;
 
   /**
-   * @var \Drupal\Core\TempStore\SharedTempStoreFactory
+   * @var \Drupal\Core\TempStore\SharedTempStore
    */
   protected $tempStore;
 
