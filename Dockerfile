@@ -8,7 +8,7 @@ FROM php:8.3.20-apache-bullseye
 RUN set -eux; \
 	\
 	if command -v a2enmod; then \
-		a2enmod rewrite; \
+		a2enmod expires rewrite; \
 	fi; \
 	\
 	savedAptMark="$(apt-mark showmanual)"; \
@@ -41,7 +41,7 @@ RUN set -eux; \
 	apt-mark auto '.*' > /dev/null; \
 	apt-mark manual $savedAptMark; \
 	ldd "$(php -r 'echo ini_get("extension_dir");')"/*.so \
-		| awk '/=>/ { print $3 }' \
+                | awk '/=>/ { so = $(NF-1); if (index(so, "/usr/local/") == 1) { next }; gsub("^/(usr/)?", "", so); printf "*%s\n", so }' \
 		| sort -u \
 		| xargs -r dpkg-query -S \
 		| cut -d: -f1 \
@@ -52,9 +52,15 @@ RUN set -eux; \
 	rm -rf /var/lib/apt/lists/*
 
 # set recommended PHP.ini settings
+RUN { \
+                echo 'memory_limit = 512M'; \
+        } > /usr/local/etc/php/conf.d/docker-php-memlimit.ini
+RUN { \
+                echo 'output_buffering = On'; \
+        } > /usr/local/etc/php/conf.d/docker-php-outbuf.ini
 # see https://secure.php.net/manual/en/opcache.installation.php
 RUN { \
-		echo 'opcache.memory_consumption=128'; \
+		echo 'opcache.memory_consumption=512'; \
 		echo 'opcache.interned_strings_buffer=8'; \
 		echo 'opcache.max_accelerated_files=4000'; \
 		echo 'opcache.revalidate_freq=60'; \
@@ -64,13 +70,15 @@ RUN { \
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/
 
 # https://www.drupal.org/node/3060/release
-ENV DRUPAL_VERSION 10.1.3
+ENV DRUPAL_VERSION 10.4.5
 
+ENV COMPOSER_ALLOW_SUPERUSER 1
 
 WORKDIR /opt/drupal/web
 RUN set -eux; \
 	export COMPOSER_HOME="$(mktemp -d)"; \
 	composer create-project --no-interaction "drupal/recommended-project:$DRUPAL_VERSION" ./; \
+        composer check-platform-reqs; \
 	#chown -R www-data:www-data ./sites ./modules ./themes; \
 	rmdir /var/www/html; \
 	ln -sf /opt/drupal/web /var/www/html; \
