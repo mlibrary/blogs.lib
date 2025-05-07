@@ -9,7 +9,7 @@ dependencies:
   - drupal:media
 configure: oembed_providers.settings
 
-# Information added by Drupal.org packaging script on 2024-10-25
-version: '2.2.1'
+# Information added by Drupal.org packaging script on 2025-05-06
+version: '2.2.2'
 project: 'oembed_providers'
-datestamp: 1729877999
+datestamp: 1746550623
