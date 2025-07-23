@@ -14,6 +14,7 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Url;
 use Drupal\user\Entity\User;
 use Drupal\user\Entity\UserInterface;
+use Drupal\Core\Datetime\DrupalDateTime;
 
 /**
  * Implements hook_form_FORM_ID_alter().
@@ -44,10 +45,15 @@ function custom_blogs_form_alter(&$form, FormStateInterface $form_state, $form_i
 }
 
 function _custom_blogs_form_validate(&$form, FormStateInterface $form_state) {
-  // If someone selects published and has a scheduled date in the future, ends up in limbo.
+  // If someone selects published and has a scheduled date in the future, add a warning.
   $user_input = $form_state->getValues();
   if (!empty($user_input['publish_on'][0]['value']) && $user_input['moderation_state'][0]['value'] == 'published') {
-    $form_state->setValue(['publish_on', '0', 'value'], '');
+    $scheduled_time = $user_input['publish_on'][0]['value'];
+    if (is_object($scheduled_time) && $scheduled_time instanceof DrupalDateTime) {
+      if (time() < $scheduled_time->getTimestamp()) {
+        \Drupal::messenger()->addWarning(t('You saved as published, but have a scheduled date in the future, so this is set to draft instead.'));
+      }
+    }
   }
 }
 
