@@ -18,7 +18,7 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
   /**
    * {@inheritdoc}
    */
-  public function access(EntityInterface $entity, $operation, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access(EntityInterface $entity, $operation, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     $account = $this->prepareUser($account);
     $result = AccessResult::allowedIfHasPermission($account, 'bypass file access')
       ->orIf(parent::access($entity, $operation, $account, TRUE));
@@ -28,7 +28,7 @@ class FileEntityAccessControlHandler extends FileAccessControlHandler {
   /**
    * {@inheritdoc}
    */
-  public function createAccess($entity_bundle = NULL, AccountInterface $account = NULL, array $context = array(), $return_as_object = FALSE) {
+  public function createAccess($entity_bundle = NULL, ?AccountInterface $account = NULL, array $context = array(), $return_as_object = FALSE) {
     $account = $this->prepareUser($account);
     $result = AccessResult::allowedIfHasPermission($account, 'bypass file access')
       ->orIf(parent::createAccess($entity_bundle, $account, $context, TRUE));

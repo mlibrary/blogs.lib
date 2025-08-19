@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Label Help Test module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function label_help_test_uninstall() {
+  // Delete the test content type.
+  if ($content_type = \Drupal::entityTypeManager()->getStorage('node_type')->load('test_label_help_core_fields')) {
+    $content_type->delete();
+  }
+}

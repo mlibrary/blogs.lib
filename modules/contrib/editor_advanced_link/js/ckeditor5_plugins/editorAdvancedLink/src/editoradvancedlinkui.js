@@ -1,9 +1,12 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Plugin } from 'ckeditor5/src/core';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { LabeledFieldView, createLabeledInputText } from 'ckeditor5/src/ui';
+import {
+  LabeledFieldView,
+  createLabeledInputText,
+  CollapsibleView,
+} from 'ckeditor5/src/ui';
 import { additionalFormElements, additionalFormGroups } from './utils';
-import DetailsView from './details/detailsview';
 
 export default class EditorAdvancedLinkUi extends Plugin {
   init() {
@@ -16,7 +19,6 @@ export default class EditorAdvancedLinkUi extends Plugin {
     if (this.editor.plugins.get('LinkUI')._createViews) {
       this.editor.plugins.get('LinkUI')._createViews();
     }
-    this._changeFormToVertical();
     this._addExtraFormFields();
   }
 
@@ -45,17 +47,7 @@ export default class EditorAdvancedLinkUi extends Plugin {
         this._handleExtraFormFieldSubmit(enabledModelNames);
         // Add groups to form view last to ensure they're not beetween fields.
         this._addGroupsToFormView();
-        this._moveTargetDecoratorToAdvancedGroup();
       });
-  }
-
-  _changeFormToVertical() {
-    const linkFormView = this.editor.plugins.get('LinkUI').formView;
-    linkFormView.extendTemplate({
-      attributes: {
-        class: ['ck-vertical-form', 'ck-link-form_layout-vertical'],
-      },
-    });
   }
 
   _createExtraFormField(modelName, options) {
@@ -73,8 +65,15 @@ export default class EditorAdvancedLinkUi extends Plugin {
         createLabeledInputText,
       );
       extraFieldView.label = options.label;
-      fieldParent.children.add(extraFieldView, 1);
+      // @todo Refactor to use FormRowView instead of setting
+      //       backwards-compatible class selector.
+      extraFieldView.class = 'ck-labeled-field-view--editor-advanced-link';
+      // @todo Fix the display text field from jumping above or below the
+      //       collapsible advanced section when linkTitle is not enabled or
+      //       enabled respectively.
+      fieldParent.children.add(extraFieldView, fieldParent === linkFormView ? 1 : 0);
 
+      // @todo Fix focus order of form fields in https://www.drupal.org/project/editor_advanced_link/issues/3519379.
       if (!options.group) {
         linkFormView._focusables.add(extraFieldView, 1);
         linkFormView.focusTracker.add(extraFieldView.element);
@@ -110,20 +109,6 @@ export default class EditorAdvancedLinkUi extends Plugin {
         group.added = true;
       }
     });
-
-    const buttons = [
-      linkFormView.children.find((child) => child.template.attributes.class.indexOf('ck-button-save') > -1),
-      linkFormView.children.find((child) => child.template.attributes.class.indexOf('ck-button-cancel') > -1),
-    ];
-    buttons.forEach((item, i) => {
-      linkFormView.children.remove(item);
-      linkFormView._focusables.remove(item);
-      linkFormView.focusTracker.remove(item.element);
-
-      linkFormView.children.add(item, 3 + i);
-      linkFormView._focusables.add(item, 3 + i);
-      linkFormView.focusTracker.add(item.element);
-    });
   }
 
   _getGroup(groupName) {
@@ -131,27 +116,12 @@ export default class EditorAdvancedLinkUi extends Plugin {
       const { editor } = this;
       const { locale } = editor;
 
-      this.groups[groupName] = new DetailsView(locale, {
-        label: additionalFormGroups[groupName].label,
-      });
+      const group = new CollapsibleView(locale);
+      group.label = additionalFormGroups[groupName].label;
+      group.set('isCollapsed', true);
+      this.groups[groupName] = group;
     }
     return this.groups[groupName];
-  }
-
-  _moveTargetDecoratorToAdvancedGroup() {
-    const { editor } = this;
-    const linkFormView = editor.plugins.get('LinkUI').formView;
-
-    if (linkFormView.targetMoved) {
-      return;
-    }
-
-    linkFormView._manualDecoratorSwitches._items.forEach((item) => {
-      if (item.label === Drupal.t('Open in new window')) {
-        this._getGroup('advanced').children.add(item);
-      }
-    });
-    linkFormView.targetMoved = true;
   }
 
   _handleExtraFormFieldSubmit(modelNames) {
@@ -175,16 +145,10 @@ export default class EditorAdvancedLinkUi extends Plugin {
         //   the extra attribute.
         // - The normal (default) priority listener in ckeditor5-link sets
         //   (creates) the actual link.
-        linkCommand.once(
+        linkCommand.on(
           'execute',
           (evt, args) => {
-            if (args.length < 3) {
-              args.push(values);
-            } else if (args.length === 3) {
-              Object.assign(args[2], values);
-            } else {
-              throw Error('The link command has more than 3 arguments.');
-            }
+            evt.editorAdvancedAttributes = values;
           },
           { priority: 'highest' },
         );

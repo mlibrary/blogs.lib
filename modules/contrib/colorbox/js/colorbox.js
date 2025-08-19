@@ -60,7 +60,7 @@
         // Only allow http or https protocol in hrefs.
         var href = $(this).attr('href');
         var protocolRegex = /^(https?)/;
-        if (href) {
+        if (href && href.substring(0, 1) !== '/') {
           var protocol = href.split(':')[0];
           // Use a regex to match http or https protocol.
           if (!protocolRegex.test(protocol)) {
@@ -68,7 +68,7 @@
           }
         }
         var dataHref = this.dataset.cboxHref;
-        if (dataHref) {
+        if (dataHref && dataHref.substring(0, 1) !== '/') {
           var dataProtocol = dataHref.split(':')[0];
           if (!protocolRegex.test(dataProtocol)) {
             delete this.dataset.cboxHref;

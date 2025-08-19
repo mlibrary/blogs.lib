@@ -1,0 +1,28 @@
+
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_lh_decimal
+    - node.type.test_label_help_core_fields
+  module:
+    - label_help
+third_party_settings:
+  label_help:
+    label_help_description: 'Label Help message for Number (decimal) field.'
+id: node.test_label_help_core_fields.field_lh_decimal
+field_name: field_lh_decimal
+entity_type: node
+bundle: test_label_help_core_fields
+label: 'Number (decimal)'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: decimal

@@ -16,3 +16,6 @@ ckeditor5:
     - core/drupal
     - ckeditor5/ckeditor5
     - ckeditor5/ckeditor5.link
+  css:
+    base:
+      css/editor-advanced-link.css: {}

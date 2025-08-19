@@ -21,7 +21,7 @@ class FileName extends FieldPluginBase {
   /**
    * Overrides \Drupal\views\Plugin\views\field\FieldPluginBase::init().
    */
-  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
+  public function init(ViewExecutable $view, DisplayPluginBase $display, ?array &$options = NULL) {
     parent::init($view, $display, $options);
 
     // Don't add the additional fields to groupby

@@ -159,12 +159,12 @@ class ExternalAuth implements ExternalAuthInterface {
   /**
    * {@inheritdoc}
    */
-  public function linkExistingAccount(string $authname, string $provider, UserInterface $account) {
+  public function linkExistingAccount(string $authname, string $provider, UserInterface $account, $authmap_data = NULL) {
     // If a mapping (for the same provider) to this account already exists, and
     // the authname is the same, we silently skip saving this auth mapping.
     $current_authname = $this->authmap->get($account->id(), $provider);
     if ($current_authname === $authname) {
-      return;
+      return FALSE;
     }
 
     // If we update the authmap entry, let's log the change.
@@ -178,8 +178,9 @@ class ExternalAuth implements ExternalAuthInterface {
       ]);
     }
 
-    $authmap_event = $this->eventDispatcher->dispatch(new ExternalAuthAuthmapAlterEvent($provider, $authname, $account->getAccountName(), NULL), ExternalAuthEvents::AUTHMAP_ALTER);
+    $authmap_event = $this->eventDispatcher->dispatch(new ExternalAuthAuthmapAlterEvent($provider, $authname, $account->getAccountName(), $authmap_data), ExternalAuthEvents::AUTHMAP_ALTER);
     $this->authmap->save($account, $provider, $authmap_event->getAuthname(), $authmap_event->getData());
+    return TRUE;
   }
 
 }

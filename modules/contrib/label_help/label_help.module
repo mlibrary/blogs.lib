@@ -1,8 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Primary module hooks for the Label Help module.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Site\Settings;
-use Drupal\Core\Form\FormStateInterface;
 
 /**
  * @file
@@ -42,32 +47,49 @@ function label_help_theme() {
  * Implements hook_form_alter().
  */
 function label_help_form_alter(&$form, &$form_state, $form_id) {
+  $form['#process'][] = 'label_help_process_form';
+}
+
+/**
+ * Custom process callback for modifying form elements with Label Help.
+ */
+function label_help_process_form($element, FormStateInterface $form_state, &$form) {
+  $debug = Settings::get('label_help_debug', FALSE);
+  $debug_dump = Settings::get('label_help_debug_dump', FALSE);
+  $one_time_debug_warning = &drupal_static(__FUNCTION__);
   $children = array_intersect_key($form, array_flip(Element::children($form)));
-  $form_object = $form_state->getFormObject();
-  if (!method_exists($form_object, 'getEntity')) {
-    return;
-  }
-  $method = new ReflectionMethod($form_object, 'getEntity');
-  if (!$method->isPublic()) {
-    return;
-  }
-
-  $form_entity = $form_object->getEntity();
-  if (!method_exists($form_entity, 'getFieldDefinition')) {
-    return;
-  }
-  $method = new ReflectionMethod($form_entity, 'getFieldDefinition');
-  if (!$method->isPublic()) {
-    return;
-  }
-
   foreach ($children as $key => $item) {
-    $occurrence = 0;
-    $field = $form_object->getEntity()->getFieldDefinition($key);
-
+    $use_case = 0;
     $content = NULL;
-    if ($field && method_exists($field, 'getThirdPartySetting')) {
-      $content = $field->getThirdPartySetting('label_help', 'label_help_description');
+    $fallback_use_case = FALSE;
+
+    // There are two possible ways to add text content for Label Help:
+    // Option 1) via code, using a custom #label_help Form API property.
+    if (!empty($item['#label_help'])) {
+      $content = $item['#label_help'];
+    }
+    // Option 2) via the Field UI module in the Drupal web interface.
+    else {
+      $form_object = $form_state->getFormObject();
+      if (!method_exists($form_object, 'getEntity')) {
+        return $element;
+      }
+      $method = new ReflectionMethod($form_object, 'getEntity');
+      if (!$method->isPublic()) {
+        return $element;
+      }
+      $form_entity = $form_object->getEntity();
+      if (!method_exists($form_entity, 'getFieldDefinition')) {
+        return $element;
+      }
+      $method = new ReflectionMethod($form_entity, 'getFieldDefinition');
+      if (!$method->isPublic()) {
+        return $element;
+      }
+      $field = $form_entity->getFieldDefinition($key);
+      if ($field && method_exists($field, 'getThirdPartySetting')) {
+        $content = $field->getThirdPartySetting('label_help', 'label_help_description');
+      }
     }
     if (is_null($content) || strlen($content) === 0) {
       continue;
@@ -87,13 +109,14 @@ function label_help_form_alter(&$form, &$form_state, $form_id) {
       // appears in the table header, instead of inside the draggable row.
       if (!empty($item['widget']['#cardinality_multiple'])) {
         if (!empty($form[$key]['widget']['#title'])) {
-          $occurrence = 1;
-          $form[$key]['widget']['#title'] .= _label_help_attach_message($content, '#title');
+          $use_case = 1;
+          $element = &$form[$key]['widget'];
+          _label_help_append_title($element, $content, $use_case);
         }
         elseif (!empty($form[$key]['widget']['title'])) {
-          $occurrence = 2;
+          $use_case = 2;
           $form[$key]['widget']['title']['#attributes']['class'][] = 'label';
-          $form[$key]['widget']['title']['#suffix'] = _label_help_attach_message($content, '#suffix');
+          $form[$key]['widget']['title']['#suffix'] = _label_help_attach_message($content, '#suffix', $use_case);
         }
       }
 
@@ -101,7 +124,7 @@ function label_help_form_alter(&$form, &$form_state, $form_id) {
       // a fieldset either via #type (eg, Link fields) or #theme_wrappers (eg,
       // Date fields). Drupal's fieldset.html.twig do not support the
       // #label_prefix, so use #field_prefix instead, but be careful to not
-      // overwrite content when the #field_prefix is alread defined.
+      // overwrite content when the #field_prefix is already defined.
       elseif (
         (
           !empty($item['widget'][0]['#type']) &&
@@ -115,37 +138,29 @@ function label_help_form_alter(&$form, &$form_state, $form_id) {
           $item['widget'][0]['#theme_wrappers'][0] == 'fieldset'
         )
       ) {
-        // Prepend to existing value when #field_prefix is defined.
-        if (!empty($item['widget'][0]['#field_prefix'])) {
-          $occurrence = 3;
-          $form[$key]['widget'][0]['#field_prefix'] = _label_help_attach_message($content, '#field_prefix') . $item['widget'][0]['#field_prefix'];
-        } else {
-          $occurrence = 4;
-          $form[$key]['widget'][0]['#field_prefix'] = _label_help_attach_message($content, '#field_prefix');
-        }
+        $use_case = 3;
+        $element = &$form[$key]['widget'][0];
+        _label_help_prepend_field_prefix($element, $content, $use_case);
       }
 
-      // Special case for checkboxes and radios. Drupal's fieldset.html.twig do
-      // not support the #label_prefix, so use #field_prefix instead, but be
-      // careful to not overwrite content when the #field_prefix is already
-      // defined.
+      // Special case for media, checkboxes and radios where Drupal's
+      // fieldset.html.twig does not support the #label_prefix, so use
+      // #field_prefix instead, but be careful to not overwrite content
+      // when the #field_prefix is already defined.
       elseif (
         (
           !empty($item['widget']['#type']) &&
+          !empty($item['widget']['#title']) &&
           (
+            $item['widget']['#type'] == 'fieldset' ||
             $item['widget']['#type'] == 'checkboxes' ||
             $item['widget']['#type'] == 'radios'
           )
         )
       ) {
-        // Prepend to existing value when #field_prefix is defined.
-        if (!empty($item['widget']['#field_prefix'])) {
-          $occurrence = 5;
-          $form[$key]['widget']['#field_prefix'] = _label_help_attach_message($content, '#field_prefix') . $item['widget']['#field_prefix'];
-        } else {
-          $occurrence = 6;
-          $form[$key]['widget']['#field_prefix'] = _label_help_attach_message($content, '#field_prefix');
-        }
+        $use_case = 4;
+        $element = &$form[$key]['widget'];
+        _label_help_prepend_field_prefix($element, $content, $use_case);
       }
 
       // Single on/off checkbox.
@@ -153,20 +168,16 @@ function label_help_form_alter(&$form, &$form_state, $form_id) {
         isset($item['widget']['value']) &&
         $item['widget']['value']['#type'] == 'checkbox'
       ) {
-        // Prepend to existing value when #field_prefix is defined.
-        if (!empty($item['widget']['value']['#field_prefix'])) {
-          $occurrence = 7;
-          $form[$key]['widget']['value']['#field_prefix'] = _label_help_attach_message($content, '#field_prefix') . $item['widget']['value']['#field_prefix'];
-        } else {
-          $occurrence = 8;
-          $form[$key]['widget']['value']['#field_prefix'] = _label_help_attach_message($content, '#field_prefix');
-        }
+        $use_case = 5;
+        $element = &$form[$key]['widget']['value'];
+        _label_help_prepend_field_prefix($element, $content, $use_case);
       }
+
       // Special case for containers with a details widget, specified
       // either via #type or #theme_wrappers (eg Entity Browser or Address
       // fields). Drupal's details.html.twig does not support #label_prefix,
       // so we use #description instead, but be careful to not overwrite
-      // content when the #description is alread defined.
+      // content when the #description is already defined.
       elseif (
         (
           !empty($item['widget']['#type']) &&
@@ -176,20 +187,16 @@ function label_help_form_alter(&$form, &$form_state, $form_id) {
           $item['widget']['#theme_wrappers'][0] == 'details'
         )
       ) {
-        if (!empty($item['widget']['#description'])) {
-          $occurrence = 9;
-          $form[$key]['widget']['#description'] = _label_help_attach_message($content, '#description') . $item['widget']['#description'];
-        } else {
-          $occurrence = 10;
-          $form[$key]['widget']['#description'] = _label_help_attach_message($content, '#description');
-        }
+        $use_case = 6;
+        $element = &$form[$key]['widget'];
+        _label_help_prepend_description($element, $content, $use_case);
       }
 
       // Special case for containers whose first element is rendered as a
       // details widget, specified either via #type or #theme_wrappers (eg
       // Address fields). Drupal's details.html.twig does not support
       // #label_prefix, so we use #description instead, but be careful to not
-      // overwrite content when the #description is alread defined.
+      // overwrite content when the #description is already defined.
       elseif (
         (
           !empty($item['widget'][0]['#type']) &&
@@ -199,13 +206,9 @@ function label_help_form_alter(&$form, &$form_state, $form_id) {
           && $item['widget'][0]['#theme_wrappers'][0] == 'details'
         )
       ) {
-        if (!empty($item['widget'][0]['#description'])) {
-          $occurrence = 11;
-          $form[$key]['widget'][0]['#description'] = _label_help_attach_message($content, '#description') . $item['widget'][0]['#description'];
-        } else {
-          $occurrence = 12;
-          $form[$key]['widget'][0]['#description'] = _label_help_attach_message($content, '#label_suffix');
-        }
+        $use_case = 7;
+        $element = &$form[$key]['widget'][0];
+        _label_help_prepend_description($element, $content, $use_case);
       }
 
       // Special case for datetime form elements which do not properly display
@@ -215,60 +218,102 @@ function label_help_form_alter(&$form, &$form_state, $form_id) {
       elseif (
         isset($item['widget']['#theme']) &&
         $item['widget']['#theme'] == 'field_multiple_value_form' &&
-        isset($item['widget'][0]['value']) &&
+        isset($item['widget'][0]['value']['#type']) &&
         $item['widget'][0]['value']['#type'] == 'datetime'
       ) {
-        $occurrence = 13;
-        $form[$key]['widget'][0]['value']['#title_attributes']['class'][] = 'label';
-        $form[$key]['widget'][0]['value']['#title'] = $form[$key]['widget'][0]['value']['#title'] . _label_help_attach_message($content, '#title on element');
+        $use_case = 8;
+        $element = &$form[$key]['widget'][0]['value'];
+        _label_help_append_title($element, $content, $use_case);
       }
 
       elseif (isset($item['widget'][0]['value'])) {
-        $occurrence = 14;
-        $form[$key]['widget'][0]['value']['#field_prefix'] = _label_help_attach_message($content, '#field_prefix');
+        $use_case = 9;
+        $element = &$form[$key]['widget'][0]['value'];
+        _label_help_prepend_field_prefix($element, $content, $use_case);
       }
 
-      // Format used by cshs module.
+      // Special case for link fields when 'Allow link text' option is disabled,
+      // the widget does not have any type and the field is rendered as a
+      // textfield with its field value in the 'uri' key. Therefore, we place
+      // the message in the #field_prefix.
+      elseif (isset($item['widget'][0]['uri'])) {
+        $use_case = 10;
+        $element = &$form[$key]['widget'][0]['uri'];
+        _label_help_prepend_field_prefix($element, $content, $use_case);
+      }
+
+      // Format used by Client-side Hierarchical Select module.
       elseif (isset($item['widget'][0]['target_id']['#title'])) {
-        $occurrence = 15;
-        $form[$key]['widget'][0]['target_id']['#label_suffix'] = _label_help_attach_message($content, '#label_suffix');
+        $use_case = 11;
+        $element = &$form[$key]['widget'][0]['target_id'];
+        _label_help_append_label_suffix($element, $content, $use_case);
       }
 
       elseif (isset($item['widget'][0]['#title'])) {
-        $occurrence = 16;
-        $form[$key]['widget'][0]['#label_suffix'] = _label_help_attach_message($content, '#label_suffix');
+        $use_case = 12;
+        $element = &$form[$key]['widget'][0];
+        _label_help_append_label_suffix($element, $content, $use_case);
       }
 
       // Eg, Select lists.
       elseif (isset($item['widget']['#title'])) {
-        $occurrence = 17;
-        $form[$key]['widget']['#label_suffix'] = _label_help_attach_message($content, '#label_suffix');
+        $use_case = 13;
+        $element = &$form[$key]['widget'];
+        _label_help_append_label_suffix($element, $content, $use_case);
       }
 
       elseif (isset($item['widget']['target_id']['#title'])) {
-        $occurrence = 18;
-        $form[$key]['widget']['target_id']['#label_suffix'] = _label_help_attach_message($content, '#label_suffix');
+        $use_case = 14;
+        $element = &$form[$key]['widget']['target_id'];
+        _label_help_append_label_suffix($element, $content, $use_case);
       }
 
       else {
-        $occurrence = 19;
+        $use_case = 15;
+        $fallback_use_case = TRUE;
       }
     }
-    // Move comments to the top for other field forms that
-    // are specifically configured.
+
+    // Custom fields may not be defined with a container or a widget wrapper.
+    // To keep things simple, place the label in the field prefix.
+    elseif (isset($item['#type']) && empty($item['widget'])) {
+      $use_case = 16;
+      $element = &$form[$key];
+      _label_help_append_label_suffix($element, $content, $use_case);
+    }
     else {
-      $occurrence = 20;
-      $form[$key]['widget']['#label_suffix'] = _label_help_attach_message($content, '#label_suffix');
+      $use_case = 17;
+      $fallback_use_case = TRUE;
     }
 
-    $debug = Settings::get('label_help_debug', FALSE);
-    if ($occurrence && $debug) {
-      $form["debug_$key"] = [
-        '#markup' => '<details><summary>' . "($occurrence) $key" . '</summary><pre>' . var_export($form[$key], true) . '</pre></details>',
-        '#weight' => (int) $form[$key]['#weight'] - 1,
-      ];
+    // Add a fallback use case to place message in the element label.
+    if ($fallback_use_case) {
+      $element = &$form[$key]['widget'];
+      _label_help_append_label_suffix($element, $content, $use_case);
+      if ($debug) {
+        $form["debug_$key"] = [
+          '#markup' => "Label Help Debug: Fallback placement: $key (use case $use_case)",
+          '#weight' => (int) $form[$key]['#weight'] - 1,
+        ];
+      }
+    }
+
+    if ($use_case && $debug_dump) {
+      if (empty($one_time_debug_warning)) {
+        dump("Note: the following variable dump(s) may prevent proper page rendering. This is expected behavior.");
+        $one_time_debug_warning = TRUE;
+      }
+      if ($fallback_use_case) {
+        dump("Label Help Debug: $key (use case $use_case) UNKNOWN FIELD TYPE!");
+      }
+      else {
+        dump("Label Help Debug: $key (use case $use_case)");
+      }
+      dump($item);
     }
   }
+
+  return $form;
 }
 
 /**
@@ -277,13 +322,13 @@ function label_help_form_alter(&$form, &$form_state, $form_id) {
 function label_help_form_field_config_edit_form_alter(&$form, &$form_state, $form_id) {
   $fieldConfig = $form_state->getFormObject()->getEntity();
   // Add settings for file upload widgets.
-  $form['settings']['label_help_description'] = array(
+  $form['settings']['label_help_description'] = [
     '#type' => 'textarea',
     '#rows' => 2,
     '#title' => t('Label help message'),
     '#default_value' => $fieldConfig->getThirdPartySetting('label_help', 'label_help_description'),
     '#description' => t('Help text to insert below the label and above the input form element.'),
-  );
+  ];
   $form['#entity_builders'][] = 'label_help_form_field_config_edit_form_builder';
 }
 
@@ -292,7 +337,10 @@ function label_help_form_field_config_edit_form_alter(&$form, &$form_state, $for
  */
 function label_help_form_field_config_edit_form_builder($entity_type, $field, &$form, FormStateInterface $form_state) {
   if ($form_state->getValue(['settings', 'label_help_description'])) {
-    $field->setThirdPartySetting('label_help', 'label_help_description', $form_state->getValue(['settings', 'label_help_description']));
+    $field->setThirdPartySetting('label_help', 'label_help_description', $form_state->getValue([
+      'settings',
+      'label_help_description',
+    ]));
     return;
   }
   $field->unsetThirdPartySetting('label_help', 'label_help_description');
@@ -305,7 +353,7 @@ function label_help_preprocess_form_element(&$variables) {
   if (!isset($variables['element']['#name'])) {
     return;
   }
-  // setting a label suffix/prefix
+  // Set the label suffix/prefix.
   $element = &$variables['element'];
   if (!empty($variables['label'])) {
     if (!empty($element['#label_prefix'])) {
@@ -331,20 +379,121 @@ function label_help_theme_suggestions_label_help(array $variables) {
 }
 
 /**
- * Helper function to render the message text.
+ * Appends a message to the title attribute of an element.
  *
- * Displays additional debug text when debugging enabled.
- *
- * @param string content to render
- * @param string describes how content is attached to Form API option
- * @return string content rendered with label-help wrapper
+ * @param array $element
+ *   The render array element to modify.
+ * @param string $content
+ *   The message content to append to the title.
+ * @param int $use_case
+ *   An optional parameter to specify the use case for the message.
  */
-function _label_help_attach_message($content, $placement) {
-  // Provide themable markup for the help text.
+function _label_help_append_title(&$element, $content, $use_case = 0) {
+  // Add 'label' class to the title attributes.
+  $element['#title_attributes']['class'][] = 'label';
+  // Append the message to the element's title.
+  $element['#title'] = $element['#title'] . _label_help_attach_message($content, '#title on element', $use_case);
+}
+
+/**
+ * Appends a message to the label suffix of an element.
+ *
+ * @param array $element
+ *   The render array element to modify.
+ * @param string $content
+ *   The message content to append to the label suffix.
+ * @param int $use_case
+ *   An optional parameter to specify the use case for the message.
+ */
+function _label_help_append_label_suffix(&$element, $content, $use_case = 0) {
+  // Check if the label suffix is not empty.
+  if (!empty($element['#label_suffix'])) {
+    // Append the message to the existing label suffix.
+    $element['#label_suffix'] = _label_help_attach_message($content, '#label_suffix', $use_case) . $element['#label_suffix'];
+  }
+  // If the label suffix is empty, set it with the message.
+  $element['#label_suffix'] = _label_help_attach_message($content, '#label_suffix', $use_case);
+}
+
+/**
+ * Prepends a message to the description of an element.
+ *
+ * @param array $element
+ *   The render array element to modify.
+ * @param string $content
+ *   The message content to prepend to the description.
+ * @param int $use_case
+ *   An optional parameter to specify the use case for the message.
+ */
+function _label_help_prepend_description(&$element, $content, $use_case = 0) {
+  // Convert existing description to a render array if it is not already.
+  if (!empty($element['#description']) && !is_array($element['#description'])) {
+    $element['#description'] = [
+      'existing' => [
+        '#markup' => $element['#description'],
+        '#weight' => 0,
+      ],
+    ];
+  }
+  if (!is_array($element['#description'])) {
+    $element['#description'] = [];
+  }
+  // Prepend the message to the description render array.
+  $element['#description']['label_help'] = [
+    '#markup' => _label_help_attach_message($content, '#description', $use_case),
+    '#weight' => -10,
+  ];
+}
+
+/**
+ * Prepends a message to the field prefix of an element.
+ *
+ * @param array $element
+ *   The render array element to modify.
+ * @param string $content
+ *   The message content to prepend to the field prefix.
+ * @param int $use_case
+ *   An optional parameter to specify the use case for the message.
+ */
+function _label_help_prepend_field_prefix(&$element, $content, $use_case = 0) {
+  // Convert existing field prefix to a render array if it is not already.
+  if (!empty($element['#field_prefix']) && !is_array($element['#field_prefix'])) {
+    $element['#field_prefix'] = [
+      'existing' => [
+        '#markup' => $element['#field_prefix'],
+        '#weight' => 0,
+      ],
+    ];
+  }
+  // Prepend the message to the field prefix render array.
+  $element['#field_prefix']['label_help'] = [
+    '#markup' => _label_help_attach_message($content, '#field_prefix', $use_case),
+    '#weight' => -10,
+  ];
+}
+
+/**
+ * Renders the message text with additional debug text, when debugging is on.
+ *
+ * @param string $content
+ *   The content to render.
+ * @param string $placement
+ *   The Form API property name where the label is ultimately rendered. E.g.
+ *   '#title', '#suffix', '#label_suffix', '#field_prefix', '#description'.
+ * @param int $use_case
+ *   The integer indicating which widget type was identified by the Label
+ *   Help placement logic in label_help_form_alter().
+ *
+ * @return string
+ *   The rendered content.
+ */
+function _label_help_attach_message($content, $placement, $use_case = 0) {
+  // Provide themeable markup for the help text.
   $renderer = \Drupal::service('renderer');
   $debug = Settings::get('label_help_debug', FALSE);
+  $status = ($use_case !== 20) ? '✅' : '❌';
   if ($debug) {
-    $content = '✅ ' . $content . ' ' . $placement;
+    $content = "$status $content $placement (use case $use_case)";
   }
   $element = [
     '#theme' => 'label_help',
@@ -356,10 +505,11 @@ function _label_help_attach_message($content, $placement) {
 }
 
 /**
- * Helper function to attach the proper stylesheet library
- * based on the current admin theme stack.
+ * Attaches the appropriate theme styles to the renderable element.
  *
- * @param array render element (eg $form or $variables) to attach the library
+ * @param array $element
+ *   The render element (for example, $form or $variables) to attach the
+ *   library.
  */
 function _label_help_attach_styles(array &$element) {
   $theme_stack = _label_help_get_theme_stack();
@@ -375,11 +525,12 @@ function _label_help_attach_styles(array &$element) {
 }
 
 /**
- * Helper returns a list of theme machine names in the current theme stack.
+ * Retrieves the list of theme machine names in the current theme stack.
  *
- * Theme stack is sorted by ancestor themes first, active theme last.
+ * The theme stack is sorted by ancestor themes first, and then active themes.
  *
- * @return array list of theme machine names in current theme stack.
+ * @return array
+ *   The list of theme machine names in the current theme stack.
  */
 function _label_help_get_theme_stack() {
   $themes = [];
@@ -387,7 +538,7 @@ function _label_help_get_theme_stack() {
     ->getActiveTheme()->getName();
   $active_theme_info = \Drupal::service('theme_handler')
     ->listInfo()[$active_theme];
-  $base_themes = isset($active_theme_info->base_themes) ? $active_theme_info->base_themes : null;
+  $base_themes = $active_theme_info->base_themes ?? '';
   if (!empty($active_theme)) {
     $themes = [$active_theme];
   }

@@ -5,6 +5,7 @@ namespace Drupal\linked_field\Form;
 use Drupal\Component\Serialization\Exception\InvalidDataTypeException;
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -25,15 +26,17 @@ class ConfigForm extends ConfigFormBase {
   protected $moduleHandler;
 
   /**
-   * Constructs an ConfigForm object.
+   * Constructs a ConfigForm object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The factory for configuration objects.
+   * @param \Drupal\Core\Config\TypedConfigManagerInterface $typed_config_manager
+   *   The typed configuration manager.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandlerInterface $module_handler) {
-    parent::__construct($config_factory);
+  public function __construct(ConfigFactoryInterface $config_factory, TypedConfigManagerInterface $typed_config_manager, ModuleHandlerInterface $module_handler) {
+    parent::__construct($config_factory, $typed_config_manager);
     $this->moduleHandler = $module_handler;
   }
 
@@ -43,6 +46,7 @@ class ConfigForm extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
+      $container->get('config.typed'),
       $container->get('module_handler')
     );
   }
@@ -80,9 +84,8 @@ class ConfigForm extends ConfigFormBase {
       $this->messenger()->addWarning($message);
     }
 
-    // Each attribute needs 3 rows + "attributes:" row + 3 extra lines
-    // for adding a new attribute.
-    $rows = (count($config->get('attributes')) * 3) + 4;
+    // Simplified row calculation: 3 rows per attribute + 4 extra lines.
+    $rows = (count($attributes) * 3) + 4;
 
     $form['config'] = [
       '#type' => 'textarea',

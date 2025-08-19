@@ -1,0 +1,28 @@
+
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_lh_text_with_summary
+    - node.type.test_label_help_core_fields
+  module:
+    - label_help
+    - text
+third_party_settings:
+  label_help:
+    label_help_description: 'Label Help message for Text (formatted, long, with summary) field.'
+id: node.test_label_help_core_fields.field_lh_text_with_summary
+field_name: field_lh_text_with_summary
+entity_type: node
+bundle: test_label_help_core_fields
+label: 'Text (formatted, long, with summary)'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  display_summary: false
+  required_summary: false
+  allowed_formats: {  }
+field_type: text_with_summary

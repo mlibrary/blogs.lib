@@ -50,7 +50,7 @@ class UserNotBlockedTest extends BrowserTestBase {
         'name' => $testmail,
         'pass[pass1]' => $password,
         'pass[pass2]' => $password,
-      ], $this->t('Create new account'));
+      ], 'Create new account');
       /** @var \Drupal\user\Entity\User $user */
       $user = user_load_by_mail($testmail);
       $this->assertFalse($user->isBlocked());

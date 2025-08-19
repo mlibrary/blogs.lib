@@ -95,7 +95,7 @@ export default class EditorAdvancedLinkEditing extends Plugin {
       (evt, args) => {
         // Custom handling is only required if an extra attribute was passed into
         // editor.execute( 'link', ... ).
-        if (args.length < 3) {
+        if (Object.entries(evt.editorAdvancedAttributes).length === 0) {
           return;
         }
         if (linkCommandExecuting) {
@@ -110,7 +110,7 @@ export default class EditorAdvancedLinkEditing extends Plugin {
         // Prevent infinite recursion by keeping records of when link command is
         // being executed by this function.
         linkCommandExecuting = true;
-        const extraAttributeValues = args[args.length - 1];
+        const extraAttributeValues = evt.editorAdvancedAttributes;
         const { model } = this.editor;
         const { selection } = model.document;
 

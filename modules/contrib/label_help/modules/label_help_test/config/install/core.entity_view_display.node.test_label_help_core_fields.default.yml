@@ -1,0 +1,266 @@
+
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.test_label_help_core_fields.field_lh_boolean
+    - field.field.node.test_label_help_core_fields.field_lh_date
+    - field.field.node.test_label_help_core_fields.field_lh_datetime
+    - field.field.node.test_label_help_core_fields.field_lh_decimal
+    - field.field.node.test_label_help_core_fields.field_lh_email
+    - field.field.node.test_label_help_core_fields.field_lh_file
+    - field.field.node.test_label_help_core_fields.field_lh_float
+    - field.field.node.test_label_help_core_fields.field_lh_image
+    - field.field.node.test_label_help_core_fields.field_lh_integer
+    - field.field.node.test_label_help_core_fields.field_lh_link
+    - field.field.node.test_label_help_core_fields.field_lh_link_with_title
+    - field.field.node.test_label_help_core_fields.field_lh_list_float
+    - field.field.node.test_label_help_core_fields.field_lh_list_integer
+    - field.field.node.test_label_help_core_fields.field_lh_list_string
+    - field.field.node.test_label_help_core_fields.field_lh_node_reference
+    - field.field.node.test_label_help_core_fields.field_lh_other_ref
+    - field.field.node.test_label_help_core_fields.field_lh_string
+    - field.field.node.test_label_help_core_fields.field_lh_string_long
+    - field.field.node.test_label_help_core_fields.field_lh_term_ref
+    - field.field.node.test_label_help_core_fields.field_lh_text
+    - field.field.node.test_label_help_core_fields.field_lh_text_long
+    - field.field.node.test_label_help_core_fields.field_lh_text_with_summary
+    - field.field.node.test_label_help_core_fields.field_lh_timestamp
+    - field.field.node.test_label_help_core_fields.field_lh_user_ref
+    - node.type.test_label_help_core_fields
+  module:
+    - datetime
+    - file
+    - image
+    - link
+    - options
+    - text
+    - user
+id: node.test_label_help_core_fields.default
+targetEntityType: node
+bundle: test_label_help_core_fields
+mode: default
+content:
+  field_lh_boolean:
+    type: boolean
+    label: above
+    settings:
+      format: default
+      format_custom_false: ''
+      format_custom_true: ''
+    third_party_settings: {  }
+    weight: 115
+    region: content
+  field_lh_date:
+    type: datetime_default
+    label: above
+    settings:
+      timezone_override: ''
+      format_type: medium
+    third_party_settings: {  }
+    weight: 113
+    region: content
+  field_lh_datetime:
+    type: datetime_default
+    label: above
+    settings:
+      timezone_override: ''
+      format_type: medium
+    third_party_settings: {  }
+    weight: 112
+    region: content
+  field_lh_decimal:
+    type: number_decimal
+    label: above
+    settings:
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 2
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 107
+    region: content
+  field_lh_email:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 116
+    region: content
+  field_lh_file:
+    type: file_default
+    label: above
+    settings:
+      use_description_as_link_text: true
+    third_party_settings: {  }
+    weight: 119
+    region: content
+  field_lh_float:
+    type: number_decimal
+    label: above
+    settings:
+      thousand_separator: ''
+      decimal_separator: .
+      scale: 2
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 108
+    region: content
+  field_lh_image:
+    type: image
+    label: above
+    settings:
+      image_link: ''
+      image_style: ''
+      image_loading:
+        attribute: lazy
+    third_party_settings: {  }
+    weight: 120
+    region: content
+  field_lh_integer:
+    type: number_integer
+    label: above
+    settings:
+      thousand_separator: ''
+      prefix_suffix: true
+    third_party_settings: {  }
+    weight: 106
+    region: content
+  field_lh_link:
+    type: link
+    label: above
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    weight: 117
+    region: content
+  field_lh_link_with_title:
+    type: link
+    label: above
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+    weight: 118
+    region: content
+  field_lh_list_float:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 111
+    region: content
+  field_lh_list_integer:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 110
+    region: content
+  field_lh_list_string:
+    type: list_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 109
+    region: content
+  field_lh_node_reference:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 121
+    region: content
+  field_lh_other_ref:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 124
+    region: content
+  field_lh_string:
+    type: string
+    label: above
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    weight: 101
+    region: content
+  field_lh_string_long:
+    type: basic_string
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 102
+    region: content
+  field_lh_term_ref:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 122
+    region: content
+  field_lh_text:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 103
+    region: content
+  field_lh_text_long:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 105
+    region: content
+  field_lh_text_with_summary:
+    type: text_default
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 104
+    region: content
+  field_lh_timestamp:
+    type: timestamp
+    label: above
+    settings:
+      date_format: medium
+      custom_date_format: ''
+      timezone: ''
+      tooltip:
+        date_format: long
+        custom_date_format: ''
+      time_diff:
+        enabled: false
+        future_format: '@interval hence'
+        past_format: '@interval ago'
+        granularity: 2
+        refresh: 60
+    third_party_settings: {  }
+    weight: 114
+    region: content
+  field_lh_user_ref:
+    type: entity_reference_label
+    label: above
+    settings:
+      link: true
+    third_party_settings: {  }
+    weight: 123
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden: {  }

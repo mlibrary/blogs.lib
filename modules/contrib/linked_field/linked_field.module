@@ -5,15 +5,16 @@
  * Main file of Linked Field module.
  */
 
-use Drupal\Core\Url;
-use Drupal\Core\Render\Element;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Field\FormatterInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Component\Utility\Xss;
 use Drupal\Component\Utility\Html;
-use Drupal\Component\Utility\Unicode;
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Component\Utility\Unicode;
+use Drupal\Component\Utility\Xss;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FormatterInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
 
 /**
  * Implements hook_field_formatter_settings_summary_alter().
@@ -273,7 +274,9 @@ function linked_field_field_formatter_third_party_settings_form(FormatterInterfa
     $element['token'] = [
       '#type' => 'item',
       '#theme' => 'token_tree_link',
-      '#token_types' => 'all',
+      '#token_types' => [
+        $field_definition->getTargetEntityTypeId() => $field_definition->getTargetEntityTypeId(),
+      ],
       '#states' => [
         'visible' => [
           'input[name$="[third_party_settings][linked_field][linked]"]' => ['checked' => TRUE],
@@ -359,22 +362,38 @@ function linked_field_entity_display_build_alter(array &$build, array $context) 
 
     foreach (Element::children($element) as $delta) {
       $destination = $manager->getDestination($destination_type, $destination_src, $context);
+      $attributes = [];
 
-      // We need special handling for the token destination type.
-      if ($destination_type == 'custom') {
+      // We need special handling for both destination types.
+      if ($destination_type == 'field') {
+        $attributes = $manager->getFieldItemAttributes($destination_src, $delta, $context);
+      }
+      elseif ($destination_type == 'custom') {
         $destination = $manager->replaceToken((is_array($destination) && isset($destination['custom']) ? $destination['custom'] : $destination), $replace_tokens, ['clear' => TRUE]);
         // Try to grab the href attribute if the replaced token is a link.
         preg_match('/<a.* href="([^"]+)".*>/', $destination, $match);
         $destination = $match[1] ?? $destination;
       }
 
-      $attributes = ['href' => ''];
+      $attributes = array_merge(['href' => ''], $attributes);
       foreach ($settings['advanced'] as $attribute => $value) {
         if ($attribute == 'text') {
           continue;
         }
 
-        $attributes[$attribute] = Html::escape($manager->replaceToken($value, $replace_tokens, ['clear' => TRUE]));
+        $attribute_value = Html::escape($manager->replaceToken($value, $replace_tokens, ['clear' => TRUE]));
+
+        // In order to merge 'class' and 'rel' attributes properly that could
+        // come from existing attributes we need to modify the attribute values,
+        // so we can merge and remove duplicates from it.
+        if (in_array($attribute, ['class', 'rel']) && isset($attributes[$attribute])) {
+          $attribute_value_parts = explode(' ', $attribute_value);
+          $existing_attribute_value = !is_array($attributes[$attribute]) ? [$attributes[$attribute]] : $attributes[$attribute];
+          $attribute_value = array_unique(array_merge($attribute_value_parts, $existing_attribute_value));
+          $attribute_value = implode(' ', $attribute_value);
+        }
+
+        $attributes[$attribute] = $attribute_value;
       }
 
       // Would be better to have own set with allowed tags so that only
@@ -413,7 +432,8 @@ function linked_field_entity_display_build_alter(array &$build, array $context) 
       }
 
       $build[$field_name][$delta] = [
-        '#markup' => $manager->linkHtml($rendered, $attributes),
+        '#type' => 'inline_template',
+        '#template' => $manager->linkHtml($rendered, $attributes),
       ];
     }
   }
@@ -465,5 +485,25 @@ function linked_field_element_validate_destination(array $element, FormStateInte
         $form_state->setValue('fields', $fields);
       }
     }
+  }
+}
+
+/**
+ * Implements hook_help().
+ */
+function linked_field_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.linked_field':
+      $output = '<p>' . t('The Linked Field module allows you to create links between different fields on your content types or entity bundles. This enables you to establish relationships and easily navigate between related content.') . '</p>';
+      $output .= '<h3>' . t('Using the Linked Field module') . '</h3>';
+      $output .= '<p>' . t('To use the Linked Field module, follow these steps:') . '</p>';
+      $output .= '<ol>';
+      $output .= '<li>' . t('Install and enable the Linked Field module.') . '</li>';
+      $output .= '<li>' . t('Edit the content type or entity bundle where you want to create the link.') . '</li>';
+      $output .= '<li>' . t('Add a new field or edit an existing field to make it a linked field.') . '</li>';
+      $output .= '<li>' . t('Configure the link settings for the field, such as the target entity type and display format.') . '</li>';
+      $output .= '</ol>';
+      $output .= '<p>' . t('Once the linked field is set up, you can create and manage the links between related content items.') . '</p>';
+      return $output;
   }
 }

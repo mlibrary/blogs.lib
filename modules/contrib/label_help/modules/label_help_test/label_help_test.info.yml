@@ -1,0 +1,12 @@
+name: 'Label Help Test'
+type: module
+description: 'Provides test content type, fields and formatters for Label Help.'
+package: Testing
+core_version_requirement: ^10 || ^11
+dependencies:
+  - label_help:label_help
+
+# Information added by Drupal.org packaging script on 2025-02-25
+version: '2.0.0-rc2'
+project: 'label_help'
+datestamp: 1740522416

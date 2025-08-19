@@ -1,0 +1,40 @@
+{
+    "name": "drupal/label_help",
+    "type": "drupal-module",
+    "description": "Add help text under form element labels.",
+    "license": "GPL-2.0+",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        }
+    ],
+    "require-dev": {
+        "drush/drush": "*"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "process-timeout": 36000,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "composer/installers": true,
+            "cweagans/composer-patches": true,
+            "drupal/core-composer-scaffold": true,
+            "drupalspoons/composer-plugin": true,
+            "phpstan/extension-installer": true,
+            "php-http/discovery": true
+        }
+    },
+    "homepage": "https://www.drupal.org/project/label_help",
+    "authors": [
+        {
+            "name": "See contributors",
+            "homepage": "https://www.drupal.org/node/1812408/committers"
+        }
+    ],
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/label_help",
+        "source": "https://git.drupalcode.org/project/label_help"
+    }
+}

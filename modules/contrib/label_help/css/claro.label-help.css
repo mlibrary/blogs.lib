@@ -12,12 +12,12 @@
 }
 
 /* Ensure label help does not show up between label and required indicator. */
-h4.form-item__label  {
+h4.form-item__label {
   display: flex;
   flex-wrap: wrap;
 }
 
 h4.form-item__label .form-item__description--label-help {
-  order: 1;
   flex: 0 0 100%;
+  order: 1;
 }

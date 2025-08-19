@@ -1,0 +1,25 @@
+
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_lh_list_float
+    - node.type.test_label_help_core_fields
+  module:
+    - label_help
+    - options
+third_party_settings:
+  label_help:
+    label_help_description: 'Label Help message for List (float) field.'
+id: node.test_label_help_core_fields.field_lh_list_float
+field_name: field_lh_list_float
+entity_type: node
+bundle: test_label_help_core_fields
+label: 'List (float)'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: list_float

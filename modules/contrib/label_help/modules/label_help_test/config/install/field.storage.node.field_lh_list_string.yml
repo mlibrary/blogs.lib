@@ -1,0 +1,30 @@
+
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_lh_list_string
+field_name: field_lh_list_string
+entity_type: node
+type: list_string
+settings:
+  allowed_values:
+    -
+      value: one
+      label: One
+    -
+      value: two
+      label: Two
+    -
+      value: three
+      label: Three
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: 1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

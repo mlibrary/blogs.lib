@@ -31,7 +31,7 @@ class FileSetPermanent extends ActionBase {
   /**
    * {@inheritdoc}
    */
-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     $result = AccessResult::allowedIf($object instanceof FileInterface)->andIf(AccessResult::allowedIf($object->access('update')));
     return $return_as_object ? $result : $result->isAllowed();
   }

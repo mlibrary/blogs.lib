@@ -1,0 +1,53 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for Label Help Test module.
+ */
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Adds label help text to the core Article node form title field.
+ */
+function label_help_test_form_node_article_form_alter(&$form, &$form_state, $form_id) {
+  $form['title']['#label_help'] = t('Label help message for the Title field.');
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Adds label help text to fields in our Test content type form.
+ *
+ * This hook implementation targets the test_label_help_core_fields content type
+ * forms and adds label help text to the core title field and custom fields
+ * (textfield and checkbox).
+ */
+function label_help_test_form_alter(&$form, &$form_state, $form_id) {
+  // Only affect the specified content type's add/edit forms.
+  if (!in_array($form_id, [
+    'node_test_label_help_core_fields_form',
+    'node_test_label_help_core_fields_edit_form',
+  ])) {
+    return;
+  }
+
+  // Add Label Help text to the Node Title field.
+  if (isset($form['title'])) {
+    $form['title']['#label_help'] = t('Label help message for the Title field.');
+  }
+
+  // Create a custom text field with Label Help text.
+  $form['field_lh_textfield'] = [
+    '#type' => 'textfield',
+    '#title' => t('Custom text field'),
+    '#label_help' => t('Label help message for the Custom text field.'),
+  ];
+
+  // Create a custom checkbox field with Label Help text.
+  $form['field_lh_checkbox'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Custom checkbox field'),
+    '#label_help' => t('Label help message for the Custom checkbox field.'),
+  ];
+}

@@ -6,7 +6,7 @@ table th .label-description {
 
 div.description.label-description,
 .form-item .description.label-description {
-  margin: 0 0 .2rem;
+  margin: 0 0 0.2rem;
 }
 
 /* Ensure label help does not show up between label and required indicator. */
@@ -17,6 +17,6 @@ h4.label {
 }
 
 h4.label .label-description {
-  order: 1;
   flex: 0 0 100%;
+  order: 1;
 }

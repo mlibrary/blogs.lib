@@ -1,0 +1,26 @@
+
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_lh_boolean
+    - node.type.test_label_help_core_fields
+  module:
+    - label_help
+third_party_settings:
+  label_help:
+    label_help_description: 'Label Help message for Boolean field.'
+id: node.test_label_help_core_fields.field_lh_boolean
+field_name: field_lh_boolean
+entity_type: node
+bundle: test_label_help_core_fields
+label: Boolean
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

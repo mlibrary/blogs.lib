@@ -52,7 +52,8 @@ interface LinkedFieldManagerInterface {
    * @param string $field_name
    *   The name of the field.
    *
-   * @deprecated No longer used by internal code and not recommended.
+   * @deprecated in linked_field:8.x-1.2 and is removed from linked_field:2.0.0. No longer used by internal code and not recommended.
+   * @see https://www.drupal.org/node/404
    *
    * @return array
    *   Getting linked field display settings.
@@ -86,6 +87,21 @@ interface LinkedFieldManagerInterface {
    *   Getting the destination.
    */
   public function getDestination($type, $value, array $context);
+
+  /**
+   * Get the field attributes for a set field.
+   *
+   * @param string $value
+   *   The value of the destination.
+   * @param int $delta
+   *   The delta of the field item.
+   * @param array $context
+   *   An array of context information.
+   *
+   * @return array
+   *   Getting the field attributes.
+   */
+  public function getFieldItemAttributes(string $value, int $delta, array $context);
 
   /**
    * Build the final destination URL.

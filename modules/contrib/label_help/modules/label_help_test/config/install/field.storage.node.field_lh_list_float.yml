@@ -1,0 +1,30 @@
+
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - options
+id: node.field_lh_list_float
+field_name: field_lh_list_float
+entity_type: node
+type: list_float
+settings:
+  allowed_values:
+    -
+      value: 1.0
+      label: 'One (1.0)'
+    -
+      value: 2.0
+      label: 'Two (2.0)'
+    -
+      value: 3.0
+      label: 'Three (3.0)'
+  allowed_values_function: ''
+module: options
+locked: false
+cardinality: -1
+translatable: true
+indexes: {  }
+persist_with_no_fields: false
+custom_storage: false

@@ -1,0 +1,28 @@
+
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_lh_integer
+    - node.type.test_label_help_core_fields
+  module:
+    - label_help
+third_party_settings:
+  label_help:
+    label_help_description: 'Label Help message for Number (integer) field.'
+id: node.test_label_help_core_fields.field_lh_integer
+field_name: field_lh_integer
+entity_type: node
+bundle: test_label_help_core_fields
+label: 'Number (integer)'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  min: null
+  max: null
+  prefix: ''
+  suffix: ''
+field_type: integer

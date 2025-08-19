@@ -1,0 +1,275 @@
+
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.test_label_help_core_fields.field_lh_boolean
+    - field.field.node.test_label_help_core_fields.field_lh_date
+    - field.field.node.test_label_help_core_fields.field_lh_datetime
+    - field.field.node.test_label_help_core_fields.field_lh_decimal
+    - field.field.node.test_label_help_core_fields.field_lh_email
+    - field.field.node.test_label_help_core_fields.field_lh_file
+    - field.field.node.test_label_help_core_fields.field_lh_float
+    - field.field.node.test_label_help_core_fields.field_lh_image
+    - field.field.node.test_label_help_core_fields.field_lh_integer
+    - field.field.node.test_label_help_core_fields.field_lh_link
+    - field.field.node.test_label_help_core_fields.field_lh_link_with_title
+    - field.field.node.test_label_help_core_fields.field_lh_list_float
+    - field.field.node.test_label_help_core_fields.field_lh_list_integer
+    - field.field.node.test_label_help_core_fields.field_lh_list_string
+    - field.field.node.test_label_help_core_fields.field_lh_node_reference
+    - field.field.node.test_label_help_core_fields.field_lh_other_ref
+    - field.field.node.test_label_help_core_fields.field_lh_string
+    - field.field.node.test_label_help_core_fields.field_lh_string_long
+    - field.field.node.test_label_help_core_fields.field_lh_term_ref
+    - field.field.node.test_label_help_core_fields.field_lh_text
+    - field.field.node.test_label_help_core_fields.field_lh_text_long
+    - field.field.node.test_label_help_core_fields.field_lh_text_with_summary
+    - field.field.node.test_label_help_core_fields.field_lh_timestamp
+    - field.field.node.test_label_help_core_fields.field_lh_user_ref
+    - image.style.thumbnail
+    - node.type.test_label_help_core_fields
+  module:
+    - datetime
+    - file
+    - image
+    - link
+    - path
+    - text
+id: node.test_label_help_core_fields.default
+targetEntityType: node
+bundle: test_label_help_core_fields
+mode: default
+content:
+  created:
+    type: datetime_timestamp
+    weight: 10
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_lh_boolean:
+    type: boolean_checkbox
+    weight: 135
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  field_lh_date:
+    type: datetime_datelist
+    weight: 133
+    region: content
+    settings:
+      increment: 15
+      date_order: YMD
+      time_type: '24'
+    third_party_settings: {  }
+  field_lh_datetime:
+    type: datetime_default
+    weight: 132
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_lh_decimal:
+    type: number
+    weight: 127
+    region: content
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+  field_lh_email:
+    type: email_default
+    weight: 136
+    region: content
+    settings:
+      placeholder: ''
+      size: 60
+    third_party_settings: {  }
+  field_lh_file:
+    type: file_generic
+    weight: 139
+    region: content
+    settings:
+      progress_indicator: throbber
+    third_party_settings: {  }
+  field_lh_float:
+    type: number
+    weight: 128
+    region: content
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+  field_lh_image:
+    type: image_image
+    weight: 140
+    region: content
+    settings:
+      progress_indicator: throbber
+      preview_image_style: thumbnail
+    third_party_settings: {  }
+  field_lh_integer:
+    type: number
+    weight: 126
+    region: content
+    settings:
+      placeholder: ''
+    third_party_settings: {  }
+  field_lh_link:
+    type: link_default
+    weight: 137
+    region: content
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {  }
+  field_lh_link_with_title:
+    type: link_default
+    weight: 138
+    region: content
+    settings:
+      placeholder_url: ''
+      placeholder_title: ''
+    third_party_settings: {  }
+  field_lh_list_float:
+    type: options_buttons
+    weight: 131
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_lh_list_integer:
+    type: options_buttons
+    weight: 130
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_lh_list_string:
+    type: options_select
+    weight: 129
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_lh_node_reference:
+    type: entity_reference_autocomplete
+    weight: 141
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_lh_other_ref:
+    type: options_select
+    weight: 144
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_lh_string:
+    type: string_textfield
+    weight: 121
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_lh_string_long:
+    type: string_textarea
+    weight: 122
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_lh_term_ref:
+    type: entity_reference_autocomplete_tags
+    weight: 142
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_lh_text:
+    type: text_textfield
+    weight: 123
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  field_lh_text_long:
+    type: text_textarea
+    weight: 125
+    region: content
+    settings:
+      rows: 5
+      placeholder: ''
+    third_party_settings: {  }
+  field_lh_text_with_summary:
+    type: text_textarea_with_summary
+    weight: 124
+    region: content
+    settings:
+      rows: 9
+      summary_rows: 3
+      placeholder: ''
+      show_summary: false
+    third_party_settings: {  }
+  field_lh_timestamp:
+    type: datetime_timestamp
+    weight: 134
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  field_lh_user_ref:
+    type: options_buttons
+    weight: 143
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  path:
+    type: path
+    weight: 30
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+  promote:
+    type: boolean_checkbox
+    weight: 15
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  status:
+    type: boolean_checkbox
+    weight: 120
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  sticky:
+    type: boolean_checkbox
+    weight: 16
+    region: content
+    settings:
+      display_label: true
+    third_party_settings: {  }
+  title:
+    type: string_textfield
+    weight: -5
+    region: content
+    settings:
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+  uid:
+    type: entity_reference_autocomplete
+    weight: 5
+    region: content
+    settings:
+      match_operator: CONTAINS
+      match_limit: 10
+      size: 60
+      placeholder: ''
+    third_party_settings: {  }
+hidden: {  }

@@ -1,0 +1,27 @@
+
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_lh_link
+    - node.type.test_label_help_core_fields
+  module:
+    - label_help
+    - link
+third_party_settings:
+  label_help:
+    label_help_description: 'Label Help message for Link (URL only) field.'
+id: node.test_label_help_core_fields.field_lh_link
+field_name: field_lh_link
+entity_type: node
+bundle: test_label_help_core_fields
+label: 'Link (URL only)'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  title: 0
+  link_type: 17
+field_type: link

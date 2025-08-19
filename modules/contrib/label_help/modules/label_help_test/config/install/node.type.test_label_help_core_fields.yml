@@ -1,0 +1,17 @@
+
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus: {  }
+    parent: ''
+name: 'TEST Label Help Core Fields'
+type: test_label_help_core_fields
+description: 'A custom content type used to test the "Label Help" module integration with all field types provided by Drupal core.'
+help: null
+new_revision: true
+preview_mode: 1
+display_submitted: false
