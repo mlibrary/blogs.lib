@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
@@ -53,7 +53,7 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
   /**
    * Returns a list of test entity types.
    *
-   * This mimicks the data returned by EntityTypeManager::getDefinitions().
+   * This mimics the data returned by EntityTypeManager::getDefinitions().
    *
    * @return \Drupal\Core\Entity\EntityTypeInterface[]
    *   A list of mocked entity types.
@@ -71,7 +71,7 @@ class RouteGroupResolverTest extends OgRouteGroupResolverTestBase {
    *
    * @see ::testResolve()
    */
-  public function resolveProvider() {
+  public static function resolveProvider(): array {
     return [
       // Test that no groups are returned on a path that is not associated with
       // any entities.

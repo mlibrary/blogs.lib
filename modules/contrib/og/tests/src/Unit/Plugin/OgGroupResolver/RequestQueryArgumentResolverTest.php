@@ -1,14 +1,15 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Http\InputBag;
 use Drupal\og\OgResolvedGroupCollectionInterface;
 use Drupal\og\Plugin\OgGroupResolver\RequestQueryArgumentResolver;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpFoundation\InputBag as SymfonyInputBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -76,17 +77,20 @@ class RequestQueryArgumentResolverTest extends OgGroupResolverTestBase {
       ->shouldBeCalled();
 
     // It will retrieve the query object from the request.
-    /** @var \Symfony\Component\HttpFoundation\ParameterBag|\Prophecy\Prophecy\ObjectProphecy $query */
-    $query = $this->prophesize(ParameterBag::class);
-
-    // Mock methods to check for the existence and value of the query arguments
-    // for the group entity type and ID. The plugin is allowed to call these.
-    $query->has(RequestQueryArgumentResolver::GROUP_ID_ARGUMENT)->willReturn(!empty($group_id));
-    $query->has(RequestQueryArgumentResolver::GROUP_TYPE_ARGUMENT)->willReturn(!empty($group_type));
-    $query->get(RequestQueryArgumentResolver::GROUP_ID_ARGUMENT)->willReturn($group_id);
-    $query->get(RequestQueryArgumentResolver::GROUP_TYPE_ARGUMENT)->willReturn($group_type);
-
-    $request->query = $query->reveal();
+    $bag = [];
+    if ($group_id) {
+      $bag[RequestQueryArgumentResolver::GROUP_ID_ARGUMENT] = $group_id;
+    }
+    if ($group_type) {
+      $bag[RequestQueryArgumentResolver::GROUP_TYPE_ARGUMENT] = $group_type;
+    }
+    // This class was removed in Drupal 10.
+    if (class_exists('\Drupal\Core\Http\InputBag')) {
+      $request->query = new InputBag($bag);
+    }
+    else {
+      $request->query = new SymfonyInputBag($bag);
+    }
 
     // The plugin may try to load the entity that is described in the query
     // arguments.
@@ -183,7 +187,7 @@ class RequestQueryArgumentResolverTest extends OgGroupResolverTestBase {
    *
    * @see ::testResolve()
    */
-  public function resolveProvider() {
+  public static function resolveProvider(): array {
     return [
       // Test that no group is added on a path that does not have a query
       // argument.

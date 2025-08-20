@@ -1,14 +1,14 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\EntityReference\Views;
 
+use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestMul;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
-use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\views\Tests\ViewTestData;
 use Drupal\views\Views;
 

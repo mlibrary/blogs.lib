@@ -1,15 +1,15 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
+use Drupal\entity_test\Entity\EntityTest;
 use Drupal\entity_test\Entity\EntityTestBundle;
 use Drupal\entity_test\Entity\EntityTestRev;
 use Drupal\entity_test\Entity\EntityTestWithBundle;
-use Drupal\entity_test\Entity\EntityTest;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
@@ -200,7 +200,6 @@ class GroupMembershipManagerTest extends KernelTestBase {
    *
    * @covers ::getGroupIds
    * @dataProvider groupContentProvider
-   * @doesNotPerformAssertions
    */
   public function testGetGroupIdsInvalidArguments() {
     /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
@@ -356,7 +355,7 @@ class GroupMembershipManagerTest extends KernelTestBase {
    *   - An optional string indicating the group bundle to be returned.
    *   - An array containing the expected results to be returned.
    */
-  public function groupContentProvider() {
+  public static function groupContentProvider(): array {
     return [
       [NULL, NULL, ['node' => [0, 1], 'entity_test' => [0, 1]]],
       ['node', NULL, ['node' => [0, 1]]],
@@ -382,7 +381,6 @@ class GroupMembershipManagerTest extends KernelTestBase {
    * Tests retrieval of group membership IDs filtered by role names.
    *
    * @covers ::getGroupMembershipIdsByRoleNames
-   * @doesNotPerformAssertions
    */
   public function testGetGroupMembershipIdsByRoleNames() {
     $membership_storage = $this->container->get('entity_type.manager')->getStorage('og_membership');
@@ -541,16 +539,6 @@ class GroupMembershipManagerTest extends KernelTestBase {
             'expected_memberships' => [],
           ],
         ],
-        // Check active members.
-        [
-          'roles' => [
-            OgRoleInterface::AUTHENTICATED,
-          ],
-          'states' => [
-            OgMembershipInterface::STATE_ACTIVE,
-          ],
-          'expected_memberships' => [0, 3],
-        ],
         1 => [
           // There are two blocked users in the second test entity group.
           [
@@ -636,7 +624,7 @@ class GroupMembershipManagerTest extends KernelTestBase {
     // Create a 'moderator' role in each of the test group types.
     foreach (['node', 'entity_test'] as $entity_type_id) {
       for ($i = 0; $i < 2; $i++) {
-        $bundle = "${entity_type_id}_$i";
+        $bundle = "{$entity_type_id}_$i";
         $og_role = OgRole::create();
         $og_role
           ->setName('moderator')
@@ -761,6 +749,25 @@ class GroupMembershipManagerTest extends KernelTestBase {
         }
       }
     }
+  }
+
+  /**
+   * Tests MembershipManager behavior with a new (unsaved) group entity.
+   */
+  public function testMembershipManagerWithNewGroup(): void {
+    // Create a new, unsaved group entity.
+    $bundle = "entity_test_unsaved";
+    Og::groupTypeManager()->addGroup('entity_test', $bundle);
+    $group = EntityTest::create([
+      'type' => $bundle,
+      'name' => $this->randomString(),
+    ]);
+
+    $this->assertTrue($group->isNew(), 'Group should be unsaved.');
+    $this->assertNull($this->membershipManager->getMembership($group, 1));
+    $this->assertSame(0, $this->membershipManager->getGroupMembershipCount($group));
+    $this->assertSame([], $this->membershipManager->getGroupMembershipsByRoleNames($group, ['foo']));
+    $this->assertFalse($this->membershipManager->isMember($group, 1));
   }
 
 }

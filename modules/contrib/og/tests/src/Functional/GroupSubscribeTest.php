@@ -1,9 +1,11 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Functional;
 
+use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
@@ -12,8 +14,6 @@ use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
-use Drupal\Tests\BrowserTestBase;
-use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 
 /**
  * Tests subscribe and un-subscribe to groups.

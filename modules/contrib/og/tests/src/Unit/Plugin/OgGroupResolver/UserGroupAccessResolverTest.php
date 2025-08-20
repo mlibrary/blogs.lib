@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
@@ -134,7 +134,7 @@ class UserGroupAccessResolverTest extends OgGroupResolverTestBase {
    *
    * @see ::testResolve()
    */
-  public function resolveProvider() {
+  public static function resolveProvider(): array {
     return [
       // Test that the groups to which the user does not have access are removed
       // from a collection that has both accessible and non-accessible groups.

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Access;
 
@@ -223,7 +223,7 @@ class OgAccessHookTest extends KernelTestBase {
    *   - An associative array indicating whether the user should have the right
    *     to edit content owned by the user represented by the array key.
    */
-  public function entityOperationAccessProvider() {
+  public static function entityOperationAccessProvider(): array {
     return [
       [
         // The administrator should have the right to edit group content items

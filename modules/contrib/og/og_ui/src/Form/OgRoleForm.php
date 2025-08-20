@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og_ui\Form;
 
@@ -102,7 +102,7 @@ class OgRoleForm extends EntityForm {
     $og_role->set('name', trim($og_role->get('name')));
     $status = $og_role->save();
 
-    $edit_link = $this->entity->toLink($this->t('Edit'))->toString();
+    $edit_link = $this->entity->toLink($this->t('Edit'), 'edit-form')->toString();
     if ($status == SAVED_UPDATED) {
       $this->messenger()->addMessage($this->t('OG role %label has been updated.', ['%label' => $og_role->label()]));
       $this->logger('user')->notice('OG role %label has been updated.', [
@@ -122,6 +122,8 @@ class OgRoleForm extends EntityForm {
       'entity_type_id' => $og_role->getGroupType(),
       'bundle_id' => $og_role->getGroupBundle(),
     ]);
+
+    return $status;
   }
 
   /**

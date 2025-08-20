@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Action;
 
@@ -49,7 +49,7 @@ class RemoveSingleOgMembershipRoleActionTest extends ChangeOgMembershipActionTes
   /**
    * Data provider for testExecute().
    */
-  public function executeProvider() {
+  public static function executeProvider(): array {
     return [
       // If no default role is passed, the plugin should default to the first
       // available role (administrator).

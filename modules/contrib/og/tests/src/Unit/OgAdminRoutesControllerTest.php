@@ -1,10 +1,9 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit;
 
-use Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher;
 use Drupal\Core\Access\AccessManagerInterface;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
@@ -16,6 +15,7 @@ use Drupal\og\Event\OgAdminRoutesEvent;
 use Drupal\og\Event\OgAdminRoutesEventInterface;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -109,13 +109,14 @@ class OgAdminRoutesControllerTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    parent::setUp();
 
     $this->accessManager = $this->prophesize(AccessManagerInterface::class);
     $this->routeMatch = $this->prophesize(RouteMatchInterface::class);
 
     $this->group = $this->prophesize(EntityInterface::class);
     $this->event = $this->prophesize(OgAdminRoutesEvent::class);
-    $this->eventDispatcher = $this->prophesize(ContainerAwareEventDispatcher::class);
+    $this->eventDispatcher = $this->prophesize(EventDispatcher::class);
     $this->route = $this->prophesize(Route::class);
     $this->entityTypeId = $this->randomMachineName();
     $this->entityId = rand(20, 30);

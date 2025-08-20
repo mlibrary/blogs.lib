@@ -1,17 +1,29 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og\Plugin\Validation\Constraint;
 
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\og\Og;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
 /**
  * Checks if referenced entities are valid.
  */
-class ValidOgMembershipReferenceConstraintValidator extends ConstraintValidator {
+class ValidOgMembershipReferenceConstraintValidator extends ConstraintValidator implements ContainerInjectionInterface {
+
+  public function __construct(protected readonly EntityTypeManagerInterface $entityTypeManager) {}
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): self {
+    return new static($container->get('entity_type.manager'));
+  }
 
   /**
    * {@inheritdoc}
@@ -22,7 +34,7 @@ class ValidOgMembershipReferenceConstraintValidator extends ConstraintValidator 
       return;
     }
 
-    $entity = \Drupal::entityTypeManager()
+    $entity = $this->entityTypeManager
       ->getStorage($value->getFieldDefinition()->getFieldStorageDefinition()->getSetting('target_type'))
       ->load($value->get('target_id')->getValue());
 

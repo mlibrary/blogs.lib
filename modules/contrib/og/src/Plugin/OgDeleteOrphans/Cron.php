@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og\Plugin\OgDeleteOrphans;
 
@@ -32,7 +32,7 @@ class Cron extends OgDeleteOrphansBase implements QueueWorkerInterface {
    */
   public function processItem($data) {
     // Orphans are processed one by one by the QueueWorker during cron runs
-    // until the alotted time expires.
+    // until the allotted time expires.
     // @see \Drupal\og\Plugin\QueueWorker\DeleteOrphan
     $this->deleteOrphan($data['type'], $data['id']);
   }

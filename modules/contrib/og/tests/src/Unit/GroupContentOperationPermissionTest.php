@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit;
 
@@ -385,13 +385,13 @@ class GroupContentOperationPermissionTest extends UnitTestCase {
    *   An array of test data, each data set consisting of an associative array
    *   of permission values, keyed by property name.
    */
-  public function groupContentOperationPermissionProvider() {
+  public static function groupContentOperationPermissionProvider() {
     return [
       [
         [
           'name' => 'edit own article content',
-          'title' => $this->t('Article: Edit own content'),
-          'description' => $this->t('Allows to update own article content'),
+          'title' => t('Article: Edit own content'),
+          'description' => t('Allows to update own article content'),
           'default roles' => [OgRoleInterface::ADMINISTRATOR],
           'restrict access' => FALSE,
           'entity type' => 'node',

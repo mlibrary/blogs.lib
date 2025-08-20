@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Access;
 
@@ -32,7 +32,7 @@ class RolesAndPermissionsUiAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'block_content',
     'og',
     'og_ui',
@@ -65,7 +65,7 @@ class RolesAndPermissionsUiAccessTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
 
     $this->installEntitySchema('block_content');
@@ -201,7 +201,7 @@ class RolesAndPermissionsUiAccessTest extends KernelTestBase {
    *     representing whether or not the user is expected to have access to the
    *     routes.
    */
-  public function routeAccessDataProvider() {
+  public static function routeAccessDataProvider() {
     return [
       [
         [

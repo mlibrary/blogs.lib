@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit\Cache\Context;
 
@@ -58,7 +58,8 @@ abstract class OgContextCacheContextTestBase extends OgCacheContextTestBase {
    *   The cache context string which is expected to be returned by the service
    *   under test.
    *
-   * @covers ::getContext
+   * @covers \Drupal\og\Cache\Context\OgMembershipStateCacheContext::getContext
+   * @covers \Drupal\og\Cache\Context\OgGroupContextCacheContext::getContext
    * @dataProvider contextProvider
    */
   public function testWithContext($context, $expected_result) {
@@ -71,7 +72,6 @@ abstract class OgContextCacheContextTestBase extends OgCacheContextTestBase {
   /**
    * Tests the result of the cache context service without active context.
    *
-   * @covers ::getContext
    * @doesNotPerformAssertions
    */
   abstract public function testWithoutContext();
@@ -87,7 +87,7 @@ abstract class OgContextCacheContextTestBase extends OgCacheContextTestBase {
    *
    * @see ::testWithContext()
    */
-  abstract public function contextProvider();
+  abstract public static function contextProvider();
 
   /**
    * Set up expectations for tests that have an active context object.

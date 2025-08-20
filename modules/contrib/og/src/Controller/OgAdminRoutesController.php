@@ -1,10 +1,9 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og\Controller;
 
-use Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher;
 use Drupal\Core\Access\AccessManagerInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Routing\RouteMatchInterface;
@@ -12,38 +11,17 @@ use Drupal\Core\Url;
 use Drupal\og\Event\OgAdminRoutesEvent;
 use Drupal\og\Event\OgAdminRoutesEventInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * The OG admin routes controller.
  */
 class OgAdminRoutesController extends ControllerBase {
 
-  /**
-   * The event dispatcher service.
-   *
-   * @var \Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher
-   */
-  protected $eventDispatcher;
-
-  /**
-   * The access manager service.
-   *
-   * @var \Drupal\Core\Access\AccessManagerInterface
-   */
-  protected $accessManager;
-
-  /**
-   * Constructs an OgAdminController object.
-   *
-   * @param \Drupal\Component\EventDispatcher\ContainerAwareEventDispatcher $event_dispatcher
-   *   The event dispatcher service.
-   * @param \Drupal\Core\Access\AccessManagerInterface $access_manager
-   *   The access manager service.
-   */
-  public function __construct(ContainerAwareEventDispatcher $event_dispatcher, AccessManagerInterface $access_manager) {
-    $this->eventDispatcher = $event_dispatcher;
-    $this->accessManager = $access_manager;
-  }
+  public function __construct(
+    protected readonly EventDispatcherInterface $eventDispatcher,
+    protected readonly AccessManagerInterface $accessManager,
+  ) {}
 
   /**
    * {@inheritdoc}

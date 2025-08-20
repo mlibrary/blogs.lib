@@ -1,9 +1,10 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit;
 
+use Drupal\Component\Utility\Random;
 use Drupal\Tests\UnitTestCase;
 use Drupal\og\Event\PermissionEvent;
 use Drupal\og\GroupContentOperationPermission;
@@ -18,6 +19,34 @@ use Drupal\og\OgRoleInterface;
  * @coversDefaultClass \Drupal\og\Event\PermissionEvent
  */
 class PermissionEventTest extends UnitTestCase {
+
+  /**
+   * An instance of the Random class.
+   *
+   * @var \Drupal\Component\Utility\Random
+   */
+  protected static Random $myRandomGenerator;
+
+  /**
+   * Generates a unique random string containing letters and numbers.
+   *
+   * We can't use the method and object from \Drupal\Tests\UnitTestCase
+   * because we need it for static data provider methods.
+   *
+   * @param int $length
+   *   Length of random string to generate.
+   *
+   * @return string
+   *   Randomly generated unique string.
+   *
+   * @see \Drupal\Component\Utility\Random::name()
+   */
+  protected static function myRandomMachineName($length = 8): string {
+    if (!isset(self::$myRandomGenerator)) {
+      self::$myRandomGenerator = new Random();
+    }
+    return self::$myRandomGenerator->name($length, TRUE);
+  }
 
   /**
    * Tests getting a single group permission.
@@ -459,13 +488,13 @@ class PermissionEventTest extends UnitTestCase {
    *   - The array key to use when setting the permission though ArrayAccess.
    *   - The permission to set.
    */
-  public function offsetSetInvalidPermissionProvider() {
+  public static function offsetSetInvalidPermissionProvider() {
     return [
       // Test that an exception is thrown when setting a nameless permission.
       [
         '',
         new GroupPermission([
-          'title' => $this->t('A permission without a machine name.'),
+          'title' => t('A permission without a machine name.'),
         ]),
       ],
 
@@ -483,7 +512,7 @@ class PermissionEventTest extends UnitTestCase {
         'a non-matching key',
         new GroupPermission([
           'name' => 'a different key',
-          'title' => $this->t('This permission has a name that differs from the array key that is used to set it.'),
+          'title' => t('This permission has a name that differs from the array key that is used to set it.'),
         ]),
       ],
       // Test that an exception is thrown when an object is passed which is not
@@ -664,14 +693,14 @@ class PermissionEventTest extends UnitTestCase {
    *   - An array of group content bundle IDs to which these permissions apply,
    *     keyed by group content entity type ID.
    */
-  public function permissionsProvider() {
+  public static function permissionsProvider(): array {
     $permissions = [
       // A simple permission with only the required option.
       [
         [
           'appreciate nature' => new GroupPermission([
             'name' => 'appreciate nature',
-            'title' => $this->t('Allows the member to go outdoors and appreciate the landscape.'),
+            'title' => t('Allows the member to go outdoors and appreciate the landscape.'),
           ]),
         ],
       ],
@@ -680,8 +709,8 @@ class PermissionEventTest extends UnitTestCase {
         [
           OgAccess::ADMINISTER_GROUP_PERMISSION => new GroupPermission([
             'name' => OgAccess::ADMINISTER_GROUP_PERMISSION,
-            'title' => $this->t('Administer group'),
-            'description' => $this->t('Manage group members and content in the group.'),
+            'title' => t('Administer group'),
+            'description' => t('Manage group members and content in the group.'),
             'default roles' => [OgRoleInterface::ADMINISTRATOR],
             'restrict access' => TRUE,
           ]),
@@ -692,8 +721,8 @@ class PermissionEventTest extends UnitTestCase {
         [
           'unsubscribe' => new GroupPermission([
             'name' => 'unsubscribe',
-            'title' => $this->t('Unsubscribe from group'),
-            'description' => $this->t('Allow members to unsubscribe themselves from a group, removing their membership.'),
+            'title' => t('Unsubscribe from group'),
+            'description' => t('Allow members to unsubscribe themselves from a group, removing their membership.'),
             'roles' => [OgRoleInterface::AUTHENTICATED],
             'default roles' => [OgRoleInterface::AUTHENTICATED],
           ]),
@@ -704,21 +733,21 @@ class PermissionEventTest extends UnitTestCase {
         [
           'subscribe' => new GroupPermission([
             'name' => 'subscribe',
-            'title' => $this->t('Subscribe to group'),
-            'description' => $this->t('Allow non-members to request membership to a group (approval required).'),
+            'title' => t('Subscribe to group'),
+            'description' => t('Allow non-members to request membership to a group (approval required).'),
             'roles' => [OgRoleInterface::ANONYMOUS],
             'default roles' => [OgRoleInterface::ANONYMOUS],
           ]),
           'subscribe without approval' => new GroupPermission([
             'name' => 'subscribe without approval',
-            'title' => $this->t('Subscribe to group (no approval required)'),
-            'description' => $this->t('Allow non-members to join a group without an approval from group administrators.'),
+            'title' => t('Subscribe to group (no approval required)'),
+            'description' => t('Allow non-members to join a group without an approval from group administrators.'),
             'roles' => [OgRoleInterface::ANONYMOUS],
           ]),
           'unsubscribe' => new GroupPermission([
             'name' => 'unsubscribe',
-            'title' => $this->t('Unsubscribe from group'),
-            'description' => $this->t('Allow members to unsubscribe themselves from a group, removing their membership.'),
+            'title' => t('Unsubscribe from group'),
+            'description' => t('Allow members to unsubscribe themselves from a group, removing their membership.'),
             'roles' => [OgRoleInterface::AUTHENTICATED],
             'default roles' => [OgRoleInterface::AUTHENTICATED],
           ]),
@@ -729,11 +758,11 @@ class PermissionEventTest extends UnitTestCase {
         [
           'appreciate nature' => new GroupPermission([
             'name' => 'appreciate nature',
-            'title' => $this->t('Allows the member to go outdoors and appreciate the landscape.'),
+            'title' => t('Allows the member to go outdoors and appreciate the landscape.'),
           ]),
           'create article content' => new GroupContentOperationPermission([
             'name' => 'create article content',
-            'title' => $this->t('Article: Create new content'),
+            'title' => t('Article: Create new content'),
             'entity type' => 'node',
             'bundle' => 'article',
             'operation' => 'create',
@@ -745,9 +774,9 @@ class PermissionEventTest extends UnitTestCase {
     // Supply a random entity type ID, bundle ID and array of group content
     // bundle IDs for each data set.
     foreach ($permissions as &$item) {
-      $item[] = $this->randomMachineName();
-      $item[] = $this->randomMachineName();
-      $item[] = [$this->randomMachineName() => [$this->randomMachineName()]];
+      $item[] = self::myRandomMachineName();
+      $item[] = self::myRandomMachineName();
+      $item[] = [self::myRandomMachineName() => [self::myRandomMachineName()]];
     }
 
     return $permissions;
@@ -764,13 +793,13 @@ class PermissionEventTest extends UnitTestCase {
    *   - An array of group content bundle IDs to which these permissions apply,
    *     keyed by group content entity type ID.
    */
-  public function invalidPermissionsProvider() {
+  public static function invalidPermissionsProvider(): array {
     $permissions = [
       // A permission without a machine name.
       [
         [
           new GroupPermission([
-            'title' => $this->t('This permission does not have a title.'),
+            'title' => t('This permission does not have a title.'),
           ]),
         ],
       ],
@@ -786,7 +815,7 @@ class PermissionEventTest extends UnitTestCase {
       [
         [
           new GroupContentOperationPermission([
-            'title' => $this->t('This is an invalid permission.'),
+            'title' => t('This is an invalid permission.'),
             'entity type' => 'node',
             'bundle' => 'article',
             'operation' => 'create',
@@ -809,7 +838,7 @@ class PermissionEventTest extends UnitTestCase {
         [
           new GroupContentOperationPermission([
             'name' => 'invalid permission',
-            'title' => $this->t('This is an invalid permission.'),
+            'title' => t('This is an invalid permission.'),
             'bundle' => 'article',
             'operation' => 'create',
           ]),
@@ -820,7 +849,7 @@ class PermissionEventTest extends UnitTestCase {
         [
           new GroupContentOperationPermission([
             'name' => 'invalid permission',
-            'title' => $this->t('This is an invalid permission.'),
+            'title' => t('This is an invalid permission.'),
             'entity type' => 'node',
             'operation' => 'create',
           ]),
@@ -831,7 +860,7 @@ class PermissionEventTest extends UnitTestCase {
         [
           new GroupContentOperationPermission([
             'name' => 'invalid permission',
-            'title' => $this->t('This is an invalid permission.'),
+            'title' => t('This is an invalid permission.'),
             'entity type' => 'node',
             'bundle' => 'article',
           ]),
@@ -842,15 +871,15 @@ class PermissionEventTest extends UnitTestCase {
         [
           'subscribe' => new GroupPermission([
             'name' => 'subscribe',
-            'title' => $this->t('Subscribe to group'),
-            'description' => $this->t('Allow non-members to request membership to a group (approval required).'),
+            'title' => t('Subscribe to group'),
+            'description' => t('Allow non-members to request membership to a group (approval required).'),
             'roles' => [OgRoleInterface::ANONYMOUS],
             'default roles' => [OgRoleInterface::ANONYMOUS],
           ]),
           'unsubscribe' => new GroupPermission([
             'name' => 'unsubscribe',
-            'title' => $this->t('Unsubscribe from group'),
-            'description' => $this->t('Allow members to unsubscribe themselves from a group, removing their membership.'),
+            'title' => t('Unsubscribe from group'),
+            'description' => t('Allow members to unsubscribe themselves from a group, removing their membership.'),
             'roles' => [OgRoleInterface::AUTHENTICATED],
             'default roles' => [OgRoleInterface::AUTHENTICATED],
           ]),
@@ -864,9 +893,9 @@ class PermissionEventTest extends UnitTestCase {
     // Supply a random entity type ID, bundle ID and array of group content
     // bundle IDs for each data set.
     foreach ($permissions as &$item) {
-      $item[] = $this->randomMachineName();
-      $item[] = $this->randomMachineName();
-      $item[] = [$this->randomMachineName() => [$this->randomMachineName()]];
+      $item[] = self::myRandomMachineName();
+      $item[] = self::myRandomMachineName();
+      $item[] = [self::myRandomMachineName() => [self::myRandomMachineName()]];
     }
 
     return $permissions;
@@ -883,14 +912,14 @@ class PermissionEventTest extends UnitTestCase {
    *   - An array of group content bundle IDs to which these permissions apply,
    *     keyed by group content entity type ID.
    */
-  public function groupContentOperationPermissionsProvider() {
+  public static function groupContentOperationPermissionsProvider(): array {
     $permissions = [
       // A simple permission with only the required parameters.
       [
         [
           new GroupContentOperationPermission([
             'name' => 'paint yak wool',
-            'title' => $this->t('Paint yak wool'),
+            'title' => t('Paint yak wool'),
             'entity type' => 'wool',
             'bundle' => 'yak fibre',
             'operation' => 'paint',
@@ -902,8 +931,8 @@ class PermissionEventTest extends UnitTestCase {
         [
           new GroupContentOperationPermission([
             'name' => 'shave any wild yak',
-            'title' => $this->t('Shave any wild yaks'),
-            'description' => $this->t('Whether the user has the right to shave wild yaks. This is usually limited to administrators since it is more dangerous than shaving domesticated yaks.'),
+            'title' => t('Shave any wild yaks'),
+            'description' => t('Whether the user has the right to shave wild yaks. This is usually limited to administrators since it is more dangerous than shaving domesticated yaks.'),
             'entity type' => 'yak',
             'bundle' => 'bos mutus',
             'operation' => 'shave',
@@ -917,8 +946,8 @@ class PermissionEventTest extends UnitTestCase {
         [
           new GroupContentOperationPermission([
             'name' => 'shave own domesticated yak',
-            'title' => $this->t('Shave own domesticated yaks'),
-            'description' => $this->t('Whether the user has the right to their own domesticated yaks. This is granted by default to all members since it is expected that everyone knows how to take care of their own yaks.'),
+            'title' => t('Shave own domesticated yaks'),
+            'description' => t('Whether the user has the right to their own domesticated yaks. This is granted by default to all members since it is expected that everyone knows how to take care of their own yaks.'),
             'entity type' => 'yak',
             'bundle' => 'bos grunniens',
             'operation' => 'shave',
@@ -935,7 +964,7 @@ class PermissionEventTest extends UnitTestCase {
         [
           new GroupContentOperationPermission([
             'name' => 'spin any yak fibre',
-            'title' => $this->t('Spin any yak fibre'),
+            'title' => t('Spin any yak fibre'),
             'entity type' => 'wool',
             'bundle' => 'yak fibre',
             'operation' => 'spin',
@@ -943,7 +972,7 @@ class PermissionEventTest extends UnitTestCase {
           ]),
           new GroupContentOperationPermission([
             'name' => 'weave own yak fibre',
-            'title' => $this->t('Weave own yak fibre'),
+            'title' => t('Weave own yak fibre'),
             'entity type' => 'wool',
             'bundle' => 'yak fibre',
             'operation' => 'weave',
@@ -951,7 +980,7 @@ class PermissionEventTest extends UnitTestCase {
           ]),
           new GroupContentOperationPermission([
             'name' => 'dye any yak fibre',
-            'title' => $this->t('Dye any yak fibre'),
+            'title' => t('Dye any yak fibre'),
             'entity type' => 'wool',
             'bundle' => 'yak fibre',
             'operation' => 'dye',
@@ -963,9 +992,9 @@ class PermissionEventTest extends UnitTestCase {
     // Supply a random entity type ID, bundle ID and array of group content
     // bundle IDs for each data set.
     foreach ($permissions as &$item) {
-      $item[] = $this->randomMachineName();
-      $item[] = $this->randomMachineName();
-      $item[] = [$this->randomMachineName() => [$this->randomMachineName()]];
+      $item[] = self::myRandomMachineName();
+      $item[] = self::myRandomMachineName();
+      $item[] = [self::myRandomMachineName() => [self::myRandomMachineName()]];
     }
 
     return $permissions;

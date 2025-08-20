@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og_test\EventSubscriber;
 
@@ -33,7 +33,7 @@ class OgTestEventSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     return [
       GroupContentEntityOperationAccessEventInterface::EVENT_NAME => [['moderatorsCanManageComments']],
     ];

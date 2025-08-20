@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit;
 
@@ -35,7 +35,7 @@ class OgRoleTest extends UnitTestCase {
   /**
    * Provides boolean data.
    */
-  public function booleanProvider() {
+  public static function booleanProvider() {
     return [[TRUE], [FALSE]];
   }
 

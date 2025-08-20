@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit;
 
@@ -49,6 +49,8 @@ class OgLocalTaskTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    parent::setUp();
+
     $this->groupTypeManager = $this->prophesize(GroupTypeManagerInterface::class);
     $this->routeProvider = $this->prophesize(RouteProvider::class);
     $this->route = $this->prophesize(Route::class);

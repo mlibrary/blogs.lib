@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og\Form;
 
@@ -123,6 +123,8 @@ class OgMembershipTypeForm extends BundleEntityFormBase {
 
     $this->entityFieldManager->clearCachedFieldDefinitions();
     $form_state->setRedirectUrl($type->toUrl('collection'));
+
+    return $status;
   }
 
 }

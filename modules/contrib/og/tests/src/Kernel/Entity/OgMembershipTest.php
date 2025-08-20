@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
@@ -258,8 +258,6 @@ class OgMembershipTest extends KernelTestBase {
    *
    * @todo This test is not related to the OgMembership entity. It should be
    *   moved to a more appropriate test class.
-   *
-   * @doesNotPerformAssertions
    */
   public function testNoOwnerException() {
     // Create a bundle and add as a group.
@@ -357,7 +355,7 @@ class OgMembershipTest extends KernelTestBase {
    *   1. The entity type ID of the role to add to the membership.
    *   2. The bundle ID of the role to add to the membership.
    */
-  public function saveRoleWithWrongGroupTypeProvider() {
+  public static function saveRoleWithWrongGroupTypeProvider(): array {
     return [
       // Try saving a membership containing a role with the wrong entity type.
       [
@@ -406,7 +404,7 @@ class OgMembershipTest extends KernelTestBase {
    *   3. The role name.
    *   4. A boolean indicating whether or not this role is expected to be valid.
    */
-  public function isRoleValidProvider() {
+  public static function isRoleValidProvider(): array {
     return [
       // A valid role.
       [
@@ -511,7 +509,7 @@ class OgMembershipTest extends KernelTestBase {
    *     'different_bundle', or 'different_entity_type'.
    *   - role_name: the role name.
    */
-  public function saveMembershipWithInvalidRolesProvider(): array {
+  public static function saveMembershipWithInvalidRolesProvider(): array {
     return [
       // A membership can not be saved for an anonymous user.
       [
@@ -584,7 +582,7 @@ class OgMembershipTest extends KernelTestBase {
     $membership = OgMembership::create();
 
     // If a membership doesn't have a group yet it is not possible to determine
-    // wheter a role is valid.
+    // whether a role is valid.
     $this->expectException(\LogicException::class);
     $membership->isRoleValid($role);
   }
@@ -593,7 +591,6 @@ class OgMembershipTest extends KernelTestBase {
    * Tests re-saving a membership.
    *
    * @covers ::preSave
-   * @doesNotPerformAssertions
    */
   public function testSaveSameMembershipTwice() {
     $group = EntityTest::create([
@@ -845,7 +842,7 @@ class OgMembershipTest extends KernelTestBase {
    * @return array
    *   Array with the state names and the method to check their flags.
    */
-  public function statesProvider() {
+  public static function statesProvider(): array {
     return [
       [OgMembershipInterface::STATE_ACTIVE, 'isActive'],
       [OgMembershipInterface::STATE_PENDING, 'isPending'],

@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel;
 
-use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\entity_test\Entity\EntityTest;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
@@ -179,7 +179,7 @@ class GetMembershipsTest extends KernelTestBase {
    *   - An array of membership states to filter on.
    *   - An array containing the expected results to be returned.
    */
-  public function membershipDataProvider() {
+  public static function membershipDataProvider(): array {
     return [
       // The first user is an active member of the first group.
       // Query default values. The group should be returned.

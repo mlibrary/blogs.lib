@@ -1,19 +1,19 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Access;
 
+use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\comment\Entity\CommentType;
 use Drupal\entity_test\Entity\EntityTest;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Entity\OgRole;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\OgMembershipInterface;
 use Drupal\og\OgRoleInterface;
-use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\user\Entity\User;
 
 /**
@@ -285,7 +285,7 @@ class OgGroupContentOperationAccessTest extends KernelTestBase {
    *     whether or not the user is expected to be granted access to this
    *     operation, depending on whether they own the content or not.
    */
-  public function accessProvider() {
+  public static function accessProvider(): array {
     return [
       [
         'newsletter',

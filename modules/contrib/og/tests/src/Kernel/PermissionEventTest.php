@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel;
 
@@ -62,9 +62,33 @@ class PermissionEventTest extends KernelTestBase {
       'type' => 'test_group_content',
       'name' => 'Test Group Content',
     ])->save();
+
     // Create two entity_test bundles to test a mixed entity type case.
-    entity_test_create_bundle('a_bundle', 'A bundle');
-    entity_test_create_bundle('other_bundle', 'Other bundle');
+    $this->createBundle('a_bundle', 'A bundle');
+    $this->createBundle('other_bundle', 'Other bundle');
+  }
+
+  /**
+   * Creates a new bundle for entity_test entities.
+   *
+   * @param string $bundle
+   *   The machine-readable name of the bundle.
+   * @param string $text
+   *   (optional) The human-readable name of the bundle. If none is provided,
+   *   the machine name will be used.
+   * @param string $entity_type
+   *   (optional) The entity type for which the bundle is created. Defaults to
+   *    'entity_test'.
+   *
+   * @todo Replace helper when minimum supported version is 11.2 or greater
+   *    with \Drupal\entity_test\EntityTestHelper::createBundle().
+   */
+  protected function createBundle($bundle, $text = NULL, $entity_type = 'entity_test'): void {
+    $bundles = \Drupal::state()->get($entity_type . '.bundles', [$entity_type => ['label' => 'Entity Test Bundle']]);
+    $bundles += [$bundle => ['label' => $text ? $text : $bundle]];
+    \Drupal::state()->set($entity_type . '.bundles', $bundles);
+
+    \Drupal::service('entity_bundle.listener')->onBundleCreate($bundle, $entity_type);
   }
 
   /**
@@ -131,7 +155,7 @@ class PermissionEventTest extends KernelTestBase {
    *     permission data for each entry, testing the data for only 1 or 2
    *     permissions is sufficient.
    */
-  public function permissionEventDataProvider() {
+  public static function permissionEventDataProvider(): array {
     // Test permissions that should be available for both test groups.
     $default_permissions = [
       'add user',
@@ -157,8 +181,8 @@ class PermissionEventTest extends KernelTestBase {
     // used to test that all properties are correctly applied.
     $group_level_permission = new GroupPermission([
       'name' => OgAccess::ADMINISTER_GROUP_PERMISSION,
-      'title' => $this->t('Administer group'),
-      'description' => $this->t('Manage group members and content in the group.'),
+      'title' => t('Administer group'),
+      'description' => t('Manage group members and content in the group.'),
       'default roles' => [OgRoleInterface::ADMINISTRATOR],
       'restrict access' => TRUE,
     ]);
@@ -166,7 +190,7 @@ class PermissionEventTest extends KernelTestBase {
     // has group content.
     $group_content_operation_permission = new GroupContentOperationPermission([
       'name' => 'create test_group_content content',
-      'title' => $this->t('%bundle: Create new content', [
+      'title' => t('%bundle: Create new content', [
         '%bundle' => 'Test Group Content',
       ]),
       'entity type' => 'node',

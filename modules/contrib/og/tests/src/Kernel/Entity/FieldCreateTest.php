@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\node\Entity\NodeType;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\og\Og;
 use Drupal\og\OgGroupAudienceHelperInterface;
 use Drupal\og\Plugin\OgFields\AccessField;
@@ -97,8 +97,6 @@ class FieldCreateTest extends KernelTestBase {
 
   /**
    * Testing invalid field creation.
-   *
-   * @doesNotPerformAssertions
    */
   public function testInvalidFields() {
     // Unknown plugin.

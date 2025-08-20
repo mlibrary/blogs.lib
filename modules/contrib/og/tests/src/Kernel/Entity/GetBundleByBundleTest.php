@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Entity;
 
@@ -91,12 +91,12 @@ class GetBundleByBundleTest extends KernelTestBase {
   }
 
   /**
-   * Tests retrieval of bundles that are referenc[ed|ing] bundles.
+   * Tests retrieval of bundles that are referenced/referencing bundles.
    *
    * This tests the retrieval of the relations between groups and group content
    * and vice versa. The retrieval of groups that are referenced by group
    * content is done by
-   * GroupTypeManagerInterface::getGroupBundleIdsByGroupContenBundle()
+   * GroupTypeManagerInterface::getGroupBundleIdsByGroupContentBundle()
    * while GroupTypeManagerInterface::getGroupContentBundleIdsByGroupBundle()
    * handles the opposite case.
    *
@@ -196,7 +196,7 @@ class GetBundleByBundleTest extends KernelTestBase {
    *     getGroupContentBundleIdsByGroupBundle() that will be made in the test.
    *     If an empty array is expected to be returned, this result is omitted.
    */
-  public function getBundleIdsByBundleProvider() {
+  public static function getBundleIdsByBundleProvider(): array {
     return [
       // Test the simplest case: a single group content type that references a
       // single group type.

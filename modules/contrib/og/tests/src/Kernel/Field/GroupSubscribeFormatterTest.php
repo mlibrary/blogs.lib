@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Field;
 
@@ -45,9 +45,9 @@ class GroupSubscribeFormatterTest extends EntityKernelTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
-    $mymodules = ['node', 'field', 'og', 'options'];
+    $my_modules = ['node', 'field', 'og', 'options'];
     // This $modules property goes from public to private in Drupal 8 to 9.
-    static::$modules = array_merge(static::$modules, $mymodules);
+    static::$modules = array_merge(static::$modules, $my_modules);
     parent::setUp();
     $this->installEntitySchema('og_membership');
     // Create bundle.

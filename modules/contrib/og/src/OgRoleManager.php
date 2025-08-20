@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og;
 
@@ -139,7 +139,7 @@ class OgRoleManager implements OgRoleManagerInterface {
    */
   public function getRolesByPermissions(array $permissions, $entity_type_id = NULL, $bundle = NULL, $require_all = TRUE): array {
     $role_storage = $this->ogRoleStorage();
-    $query = $role_storage->getQuery();
+    $query = $role_storage->getQuery()->accessCheck();
     if ($require_all) {
       // If all permissions are requested, we need to add an AND condition for
       // each permission because there is not an easy way to explicitly request

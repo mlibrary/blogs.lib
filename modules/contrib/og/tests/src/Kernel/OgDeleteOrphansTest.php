@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel;
 
@@ -218,7 +218,7 @@ class OgDeleteOrphansTest extends KernelTestBase {
    *     process.
    *   - A string defining the queue that is used by the plugin.
    */
-  public function ogDeleteOrphansPluginProvider() {
+  public static function ogDeleteOrphansPluginProvider(): array {
     return [
       ['batch', FALSE, FALSE, TRUE, 'og_orphaned_group_content'],
       ['cron', TRUE, FALSE, FALSE, 'og_orphaned_group_content_cron'],

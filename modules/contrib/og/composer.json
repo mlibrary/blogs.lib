@@ -6,7 +6,6 @@
     "homepage": "https://drupal.org/project/og",
     "support": {
         "issues": "https://drupal.org/project/issues/og",
-        "irc": "irc://irc.freenode.org/drupal-og",
         "slack": "https://drupal.slack.com/messages/CELR48EA0",
         "source": "https://git.drupalcode.org/project/og"
     },
@@ -26,12 +25,16 @@
     ],
     "require-dev": {
         "drupal/coder": "^8.3.16",
-        "phpunit/phpunit": "^7 || ^8 || ^9"
+        "drush/drush": "^11 || ^12.5 || ^13.3",
+        "phpunit/phpunit": "^7 || ^8 || ^9 || ^10.5"
     },
-    "minimum-stability": "RC",
+    "minimum-stability": "dev",
     "config": {
+        "sort-packages": true,
         "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "php-http/discovery": true,
+            "tbachert/spi": true
         }
     }
 }

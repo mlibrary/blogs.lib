@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Action;
 
@@ -49,7 +49,7 @@ class AddSingleOgMembershipRoleActionTest extends ChangeOgMembershipActionTestBa
   /**
    * Data provider for testExecute().
    */
-  public function executeProvider() {
+  public static function executeProvider(): array {
     // It should be possible to add roles to any membership, regardless if they
     // are pending or blocked, or have any other membership.
     return [

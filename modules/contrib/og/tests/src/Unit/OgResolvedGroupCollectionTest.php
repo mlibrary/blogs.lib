@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit;
 
@@ -362,7 +362,7 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
    *     present in the collection after all votes are added, in the order they
    *     are expected to be according to their votes.
    */
-  public function groupVotesProvider() {
+  public static function groupVotesProvider() {
     return [
       // A simple vote for a group.
       [
@@ -540,7 +540,7 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
   /**
    * Provides mixed data for testing data types.
    */
-  public function mixedDataProvider() {
+  public static function mixedDataProvider() {
     return [
       [NULL],
       [TRUE],
@@ -561,7 +561,6 @@ class OgResolvedGroupCollectionTest extends UnitTestCase {
       ['😍'],
       [['foo', 'bar']],
       [new \stdClass()],
-      [$this],
     ];
   }
 

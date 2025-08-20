@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
@@ -83,7 +83,7 @@ class RouteGroupContentResolverTest extends OgRouteGroupResolverTestBase {
    *
    * @see ::testResolve()
    */
-  public function resolveProvider() {
+  public static function resolveProvider() {
     return [
       // Test that no groups are found on a path that is not associated with any
       // entities.

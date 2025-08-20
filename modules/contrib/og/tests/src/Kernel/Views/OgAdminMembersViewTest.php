@@ -1,14 +1,14 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Views;
 
+use Drupal\Tests\user\Traits\UserCreationTrait;
+use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\og\Og;
-use Drupal\Tests\user\Traits\UserCreationTrait;
-use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\views\Views;
 
 /**

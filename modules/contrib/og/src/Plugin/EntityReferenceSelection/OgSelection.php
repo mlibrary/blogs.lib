@@ -1,11 +1,21 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og\Plugin\EntityReferenceSelection;
 
+use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface;
+use Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginManagerInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\og\MembershipManagerInterface;
 use Drupal\og\Og;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provide default OG selection handler.
@@ -26,10 +36,45 @@ use Drupal\og\Og;
  */
 class OgSelection extends DefaultSelection {
 
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    EntityTypeManagerInterface $entity_type_manager,
+    ModuleHandlerInterface $module_handler,
+    AccountInterface $current_user,
+    EntityFieldManagerInterface $entity_field_manager,
+    EntityTypeBundleInfoInterface $entity_type_bundle_info,
+    EntityRepositoryInterface $entity_repository,
+    protected SelectionPluginManagerInterface $selectionManager,
+    protected MembershipManagerInterface $membershipManager,
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $module_handler, $current_user, $entity_field_manager, $entity_type_bundle_info, $entity_repository);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): self {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('entity_type.manager'),
+      $container->get('module_handler'),
+      $container->get('current_user'),
+      $container->get('entity_field.manager'),
+      $container->get('entity_type.bundle.info'),
+      $container->get('entity.repository'),
+      $container->get('plugin.manager.entity_reference_selection'),
+      $container->get('og.membership_manager'),
+    );
+  }
+
   /**
    * Get the selection handler of the field.
    *
-   * @return \Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection
+   * @return \Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface
    *   Returns the selection handler.
    */
   public function getSelectionHandler() {
@@ -43,7 +88,11 @@ class OgSelection extends DefaultSelection {
     // deprecation notice.
     // @see \Drupal\Core\Entity\EntityReferenceSelection\SelectionPluginBase::resolveBackwardCompatibilityConfiguration()
     unset($options['handler_settings']);
-    return \Drupal::service('plugin.manager.entity_reference_selection')->getInstance($options);
+
+    $plugin = $this->selectionManager->getInstance($options);
+    assert($plugin instanceof SelectionInterface);
+
+    return $plugin;
   }
 
   /**
@@ -69,7 +118,7 @@ class OgSelection extends DefaultSelection {
     // bundle defined as group.
     $query = $this->getSelectionHandler()->buildEntityQuery($match, $match_operator);
     $target_type = $this->configuration['target_type'];
-    $definition = \Drupal::entityTypeManager()->getDefinition($target_type);
+    $definition = $this->entityTypeManager->getDefinition($target_type);
 
     if ($bundle_key = $definition->getKey('bundle')) {
       $bundles = Og::groupTypeManager()->getGroupBundleIdsByEntityType($target_type);
@@ -124,9 +173,7 @@ class OgSelection extends DefaultSelection {
    *   Array with the user's group, or an empty array if none found.
    */
   protected function getUserGroups() {
-    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
-    $membership_manager = \Drupal::service('og.membership_manager');
-    $other_groups = $membership_manager->getUserGroups($this->currentUser->id());
+    $other_groups = $this->membershipManager->getUserGroups($this->currentUser->id());
     return $other_groups[$this->configuration['target_type']] ?? [];
   }
 

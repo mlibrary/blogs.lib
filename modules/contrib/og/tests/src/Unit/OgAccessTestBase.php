@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit;
 
@@ -128,6 +128,8 @@ class OgAccessTestBase extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    parent::setUp();
+
     $this->groupId = $this->randomMachineName();
     $this->entityTypeId = $this->randomMachineName();
     $this->bundle = $this->randomMachineName();
@@ -254,7 +256,7 @@ class OgAccessTestBase extends UnitTestCase {
    * @return array
    *   An array of test permissions.
    */
-  public function permissionsProvider() {
+  public static function permissionsProvider(): array {
     return [
       // In the unit tests we don't really care about the permission name - it
       // can be an arbitrary string; except for

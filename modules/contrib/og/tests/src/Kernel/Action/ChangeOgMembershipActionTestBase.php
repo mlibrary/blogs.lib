@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Action;
 
@@ -12,7 +12,7 @@ abstract class ChangeOgMembershipActionTestBase extends ActionTestBase {
   /**
    * {@inheritdoc}
    */
-  public function accessProvider() {
+  public static function accessProvider(): array {
     return [
       // The super user has access to this action for all member types.
       ['uid1', 'member'],
@@ -51,7 +51,7 @@ abstract class ChangeOgMembershipActionTestBase extends ActionTestBase {
   /**
    * {@inheritdoc}
    */
-  public function noAccessProvider() {
+  public static function noAccessProvider(): array {
     return [
       // An anonymous user doesn't have access to this action.
       ['anonymous', 'member'],

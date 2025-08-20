@@ -5,8 +5,9 @@
  * Integration with the Views module.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\field\FieldStorageConfigInterface;
 
@@ -32,7 +33,19 @@ function og_views_data_alter(array &$data) {
  * field type check.
  */
 function og_field_views_data(FieldStorageConfigInterface $field_storage) {
-  $data = views_field_default_views_data($field_storage);
+  if (class_exists('\Drupal\Component\Utility\DeprecationHelper')) {
+    $data = DeprecationHelper::backwardsCompatibleCall(
+      currentVersion: \Drupal::VERSION,
+      deprecatedVersion: '11.2.0',
+      currentCallable: fn() => \Drupal::service('views.field_data_provider')->defaultFieldImplementation($field_storage),
+      deprecatedCallable: fn() => views_field_default_views_data($field_storage),
+    );
+  }
+  else {
+    // @phpstan-ignore-next-line
+    $data = views_field_default_views_data($field_storage);
+  }
+
   // This is the same as entity reference integration as the OG standard
   // reference item is no different really.
   switch ($field_storage->getType()) {

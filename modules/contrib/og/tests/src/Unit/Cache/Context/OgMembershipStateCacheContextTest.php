@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit\Cache\Context;
 
@@ -54,6 +54,8 @@ class OgMembershipStateCacheContextTest extends OgContextCacheContextTestBase {
 
   /**
    * {@inheritdoc}
+   *
+   * @covers ::getContext
    */
   public function testWithoutContext() {
     $this->expectGroupContext();
@@ -108,7 +110,7 @@ class OgMembershipStateCacheContextTest extends OgContextCacheContextTestBase {
   /**
    * {@inheritdoc}
    */
-  public function contextProvider() {
+  public static function contextProvider() {
     return [
       [
         FALSE,

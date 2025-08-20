@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og\Entity;
 
@@ -46,8 +46,8 @@ use Drupal\og\OgMembershipTypeInterface;
  *     "description"
  *   },
  *   links = {
- *     "edit-form" = "/admin/structure/membership-types/manage/{membership_type}",
- *     "delete-form" = "/admin/structure/membership-types/manage/{membership_type}/delete",
+ *     "edit-form" = "/admin/structure/membership-types/manage/{og_membership_type}",
+ *     "delete-form" = "/admin/structure/membership-types/manage/{og_membership_type}/delete",
  *     "collection" = "/admin/structure/membership-types",
  *   }
  * )
@@ -102,7 +102,15 @@ class OgMembershipType extends ConfigEntityBase implements OgMembershipTypeInter
    */
   public function delete() {
     if ($this->id() === OgMembershipInterface::TYPE_DEFAULT) {
-      throw new \Exception('The default OG membership type cannot be deleted.');
+      // Remove the default OG membership type only if there no other types.
+      $query = $this->entityTypeManager()
+        ->getStorage('og_membership_type')
+        ->getQuery()
+        ->accessCheck(FALSE);
+      $membership_types = $query->execute();
+      if (count($membership_types) > 1) {
+        throw new \Exception('The default OG membership type cannot be deleted.');
+      }
     }
     parent::delete();
   }

@@ -1,22 +1,19 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og_ui\Functional;
 
-use Drupal\Core\Form\FormState;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
-use Drupal\node\Entity\NodeType;
-use Drupal\og\Og;
-use Drupal\og_ui\BundleFormAlter;
 
 /**
  * Test making a bundle a group and a group content.
  *
  * @group og
  */
-class BundleFormAlterTest extends BrowserTestBase {
+class BundleEntityFormAlterTest extends BrowserTestBase {
 
   /**
    * {@inheritdoc}
@@ -49,10 +46,12 @@ class BundleFormAlterTest extends BrowserTestBase {
     parent::setUp();
 
     $this->entityTypeManager = \Drupal::entityTypeManager();
-
+    $available_perms = \Drupal::service('user.permissions')->getPermissions();
+    // Permission 'administer block types' was added in Drupal 10.
+    $block_perm = isset($available_perms['administer block types']) ? 'administer block types' : 'administer blocks';
     // Log in as an administrator that can manage blocks and content types.
     $this->adminUser = $this->drupalCreateUser([
-      'administer blocks',
+      $block_perm,
       'administer content types',
       'bypass node access',
     ]);
@@ -71,8 +70,8 @@ class BundleFormAlterTest extends BrowserTestBase {
       'id' => 'school',
       'og_is_group' => 1,
     ];
-    $this->drupalGet('admin/structure/block/block-content/types/add');
-    $this->submitForm($edit, new TranslatableMarkup('Save'));
+    $this->drupalGet(Url::fromRoute('block_content.type_add'));
+    $this->submitForm($edit, 'Save');
 
     $edit = [
       'name' => 'class',
@@ -82,8 +81,8 @@ class BundleFormAlterTest extends BrowserTestBase {
       'og_target_bundles[]' => ['school'],
     ];
     $this->drupalGet('admin/structure/types/add');
-    $this->submitForm($edit, new TranslatableMarkup('Save content type'));
-    $this->content = $this->drupalGet('admin/structure/types/manage/class');
+    $this->submitForm($edit, new TranslatableMarkup('Save'));
+    $this->drupalGet('admin/structure/types/manage/class');
     $this->assertTrue($this->assertSession()->optionExists('edit-og-target-bundles', 'school')->isSelected());
     $this->assertTargetType('block_content', 'The target type is set to the "Custom Block" entity type.');
     $this->assertTargetBundles(['school' => 'school'], 'The target bundles are set to the "school" bundle.');
@@ -100,7 +99,7 @@ class BundleFormAlterTest extends BrowserTestBase {
       'og_target_bundles[]' => [],
     ];
     $this->drupalGet('admin/structure/types/manage/class');
-    $this->submitForm($edit, new TranslatableMarkup('Save content type'));
+    $this->submitForm($edit, new TranslatableMarkup('Save'));
     $this->assertTargetBundles(NULL, 'When the target bundle field is cleared from all values, it takes on the value NULL.');
 
     // The altered fields should not appear on OG Membership types.
@@ -111,29 +110,6 @@ class BundleFormAlterTest extends BrowserTestBase {
     $this->assertSession()->fieldExists('name');
     $this->assertSession()->fieldNotExists('og_is_group');
     $this->assertSession()->fieldNotExists('og_group_content_bundle');
-  }
-
-  /**
-   * Tests AJAX behavior for selecting group content entity types and bundles.
-   */
-  public function testGroupContentAjax() {
-    // Create two group bundles of different entity types.
-    NodeType::create(['name' => 'group node', 'type' => 'group'])->save();
-    Og::groupTypeManager()->addGroup('node', 'group');
-    Og::groupTypeManager()->addGroup('entity_test', 'entity_test');
-
-    // BrowserTestBase doesn't support JavaScript yet. Replace the following
-    // unit test with a functional test once JavaScript support is added.
-    // @see https://www.drupal.org/node/2469713
-    $form = [];
-    $form_state = new FormState();
-    // Set the form state as if the 'entity_test' option was chosen with AJAX.
-    $form_state->setValue('og_target_type', 'entity_test');
-    $entity = $this->entityTypeManager->getStorage('node_type')->create([]);
-    (new BundleFormAlter($entity))->formAlter($form, $form_state);
-
-    // Check that the target bundles are set to the test entity bundle.
-    $this->assertEquals(['entity_test' => 'Entity Test Bundle'], $form['og']['og_target_bundles']['#options']);
   }
 
   /**

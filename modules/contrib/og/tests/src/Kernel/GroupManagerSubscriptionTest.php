@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel;
 
@@ -148,7 +148,7 @@ class GroupManagerSubscriptionTest extends KernelTestBase {
    * @return bool
    *   Whether or not the membership is overridden.
    */
-  protected function isMembershipOverridden(OgMembershipInterface $membership = NULL) {
+  protected function isMembershipOverridden(?OgMembershipInterface $membership = NULL) {
     // If the membership doesn't exist it is not overridden.
     if (empty($membership)) {
       return FALSE;

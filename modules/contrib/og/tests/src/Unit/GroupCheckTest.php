@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit;
 
@@ -8,6 +8,7 @@ use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -123,6 +124,8 @@ class GroupCheckTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    parent::setUp();
+
     $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::class);
     $this->entityType = $this->prophesize(EntityTypeInterface::class);
     $this->entityStorage = $this->prophesize(EntityStorageInterface::class);
@@ -278,7 +281,7 @@ class GroupCheckTest extends UnitTestCase {
    *   Array with the permission names, and the expected access result as
    *   boolean.
    */
-  public function permissionsProvider() {
+  public static function permissionsProvider(): array {
     return [
       ['foo', FALSE],
       ['foo', TRUE],

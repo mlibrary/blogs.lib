@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og;
 
@@ -37,19 +37,17 @@ class OgMembershipAccessControlHandler extends EntityAccessControlHandler implem
   protected $membershipManager;
 
   /**
-   * Constructs a OgMembershipAccessControllHandler object.
+   * Instance of the OgContext service.
    *
-   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
-   *   The entity type definition.
-   * @param \Drupal\og\OgAccessInterface $og_access
-   *   The OG access service.
-   * @param \Drupal\og\MembershipManagerInterface $membership_manager
-   *   The OG Membership Manager service.
+   * @var \Drupal\og\ContextProvider\OgContext
    */
-  public function __construct(EntityTypeInterface $entity_type, OgAccessInterface $og_access, MembershipManagerInterface $membership_manager) {
+  protected $ogContext;
+
+  public function __construct(EntityTypeInterface $entity_type, OgAccessInterface $og_access, MembershipManagerInterface $membership_manager, OgContextInterface $ogContext) {
     parent::__construct($entity_type);
     $this->ogAccess = $og_access;
     $this->membershipManager = $membership_manager;
+    $this->ogContext = $ogContext;
   }
 
   /**
@@ -59,7 +57,8 @@ class OgMembershipAccessControlHandler extends EntityAccessControlHandler implem
     return new static(
       $entity_type,
       $container->get('og.access'),
-      $container->get('og.membership_manager')
+      $container->get('og.membership_manager'),
+      $container->get('og.context')
     );
   }
 
@@ -98,21 +97,15 @@ class OgMembershipAccessControlHandler extends EntityAccessControlHandler implem
   /**
    * {@inheritdoc}
    */
-  public function createAccess($entity_bundle = NULL, AccountInterface $account = NULL, array $context = [], $return_as_object = FALSE) {
+  public function createAccess($entity_bundle = NULL, ?AccountInterface $account = NULL, array $context = [], $return_as_object = FALSE) {
     $account = $this->prepareUser($account);
     $context += [
       'entity_type_id' => $this->entityTypeId,
       'langcode' => LanguageInterface::LANGCODE_DEFAULT,
+      'group' => NULL,
     ];
-
-    $cid = 'create:' . $context['group']->getEntityTypeId() . ':' . $context['group']->id();
-    if ($entity_bundle) {
-      $cid .= ':' . $entity_bundle;
-    }
-
-    if (($access = $this->getCache($cid, 'create', $context['langcode'], $account)) !== NULL) {
-      // Cache hit, no work necessary.
-      return $return_as_object ? $access : $access->isAllowed();
+    if (empty($context['group'])) {
+      $context['group'] = $this->ogContext->getGroup();
     }
 
     // Invoke hook_entity_create_access() and hook_ENTITY_TYPE_create_access().
@@ -136,8 +129,7 @@ class OgMembershipAccessControlHandler extends EntityAccessControlHandler implem
     if (!$return->isForbidden()) {
       $return = $return->orIf($this->checkCreateAccess($account, $context, $entity_bundle));
     }
-    $result = $this->setCache($return, $cid, 'create', $context['langcode'], $account);
-    return $return_as_object ? $result : $result->isAllowed();
+    return $return_as_object ? $return : $return->isAllowed();
   }
 
   /**
@@ -175,7 +167,7 @@ class OgMembershipAccessControlHandler extends EntityAccessControlHandler implem
   /**
    * {@inheritdoc}
    */
-  protected function checkFieldAccess($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL) {
+  protected function checkFieldAccess($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, ?FieldItemListInterface $items = NULL) {
     /** @var \Drupal\og\OgMembershipInterface $membership */
     $membership = $items ? $items->getEntity() : NULL;
 

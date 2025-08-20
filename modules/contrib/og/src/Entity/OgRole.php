@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og\Entity;
 
@@ -244,7 +244,7 @@ class OgRole extends Role implements OgRoleInterface {
       $this->setId($prefix . $this->getName());
     }
 
-    parent::save();
+    return parent::save();
   }
 
   /**
@@ -366,6 +366,8 @@ class OgRole extends Role implements OgRoleInterface {
     // Create a dependency on the group bundle.
     $bundle_config_dependency = \Drupal::entityTypeManager()->getDefinition($this->getGroupType())->getBundleConfigDependency($this->getGroupBundle());
     $this->addDependency($bundle_config_dependency['type'], $bundle_config_dependency['name']);
+
+    return $this;
   }
 
   /**

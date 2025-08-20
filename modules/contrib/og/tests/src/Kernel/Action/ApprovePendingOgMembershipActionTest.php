@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Action;
 
@@ -40,7 +40,7 @@ class ApprovePendingOgMembershipActionTest extends ActionTestBase {
   /**
    * {@inheritdoc}
    */
-  public function executeProvider() {
+  public static function executeProvider(): array {
     return [
       ['pending'],
     ];
@@ -49,7 +49,7 @@ class ApprovePendingOgMembershipActionTest extends ActionTestBase {
   /**
    * {@inheritdoc}
    */
-  public function accessProvider() {
+  public static function accessProvider(): array {
     return [
       // Access should only be provided if the membership is in pending state
       // and the user executing the action is a privileged user.
@@ -64,7 +64,7 @@ class ApprovePendingOgMembershipActionTest extends ActionTestBase {
   /**
    * {@inheritdoc}
    */
-  public function noAccessProvider() {
+  public static function noAccessProvider(): array {
     return [
       // Access is denied to users that are not privileged, and if the
       // membership is in any state other than 'pending'.

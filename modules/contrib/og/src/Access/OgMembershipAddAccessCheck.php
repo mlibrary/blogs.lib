@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og\Access;
 
@@ -51,7 +51,7 @@ class OgMembershipAddAccessCheck implements AccessInterface {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function access(RouteMatchInterface $route_match, AccountInterface $account, EntityInterface $group = NULL, OgMembershipTypeInterface $og_membership_type = NULL) {
+  public function access(RouteMatchInterface $route_match, AccountInterface $account, ?EntityInterface $group = NULL, ?OgMembershipTypeInterface $og_membership_type = NULL) {
     // The $group param will be null if it is from the
     // Drupal\og\Event\OgAdminRoutesEvent rather than the routing.yml version.
     if (is_null($group)) {

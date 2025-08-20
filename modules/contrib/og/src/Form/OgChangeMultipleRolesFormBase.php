@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og\Form;
 
@@ -54,14 +54,6 @@ class OgChangeMultipleRolesFormBase extends FormBase {
    */
   protected $ogAccess;
 
-  /**
-   * Constructs a OgChangeMultipleRolesFormbase object.
-   *
-   * @param \Drupal\Core\TempStore\PrivateTempStoreFactory $temp_store_factory
-   *   The tempstore factory.
-   * @param \Drupal\og\OgAccessInterface $og_access
-   *   The OG access service.
-   */
   public function __construct(PrivateTempStoreFactory $temp_store_factory, OgAccessInterface $og_access) {
     $this->tempStoreFactory = $temp_store_factory;
     $this->ogAccess = $og_access;

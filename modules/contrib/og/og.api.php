@@ -5,7 +5,7 @@
  * Hooks provided by the Organic Groups module.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Entity\EntityPublishedInterface;
@@ -34,7 +34,7 @@ function hook_og_user_access_alter(array &$permissions, CacheableMetadata $cache
   // builders to toggle a configuration setting that will prevent groups to be
   // deleted if they are published.
   // Retrieve the module configuration.
-  $config = \Drupal::config('mymodule.settings');
+  $config = \Drupal::config('my_module.settings');
 
   // Check if the site is configured to allow deletion of published groups.
   $published_groups_can_be_deleted = $config->get('delete_published_groups');

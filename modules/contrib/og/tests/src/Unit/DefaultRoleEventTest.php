@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit;
 
@@ -45,7 +45,7 @@ class DefaultRoleEventTest extends UnitTestCase {
     $entity_type_manager = $this->prophesize(EntityTypeManagerInterface::class);
     $this->ogRoleStorage = $this->prophesize(EntityStorageInterface::class);
     $entity_type_manager->getStorage('og_role')->willReturn($this->ogRoleStorage->reveal());
-    $this->defaultRoleEvent = new DefaultRoleEvent($entity_type_manager->reveal());
+    $this->defaultRoleEvent = new DefaultRoleEvent();
   }
 
   /**
@@ -422,7 +422,7 @@ class DefaultRoleEventTest extends UnitTestCase {
    *   An array of test data arrays, each test data array containing an array of
    *   test default roles, keyed by default role name.
    */
-  public function defaultRoleProvider() {
+  public static function defaultRoleProvider() {
     return [
       // Test adding a single administrator role with only the required
       // properties.
@@ -430,7 +430,7 @@ class DefaultRoleEventTest extends UnitTestCase {
         [
           OgRoleInterface::ADMINISTRATOR => [
             'name' => OgRoleInterface::ADMINISTRATOR,
-            'label' => $this->t('Administrator'),
+            'label' => t('Administrator'),
           ],
         ],
       ],
@@ -439,7 +439,7 @@ class DefaultRoleEventTest extends UnitTestCase {
         [
           OgRoleInterface::ADMINISTRATOR => [
             'name' => OgRoleInterface::ADMINISTRATOR,
-            'label' => $this->t('Administrator'),
+            'label' => t('Administrator'),
             'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
           ],
         ],
@@ -449,17 +449,17 @@ class DefaultRoleEventTest extends UnitTestCase {
         [
           OgRoleInterface::ADMINISTRATOR => [
             'name' => OgRoleInterface::ADMINISTRATOR,
-            'label' => $this->t('Administrator'),
+            'label' => t('Administrator'),
             'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
           ],
           'moderator' => [
             'name' => 'moderator',
-            'label' => $this->t('Moderator'),
+            'label' => t('Moderator'),
             'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
           ],
           'contributor' => [
             'name' => 'contributor',
-            'label' => $this->t('Contributor'),
+            'label' => t('Contributor'),
           ],
         ],
       ],
@@ -473,12 +473,12 @@ class DefaultRoleEventTest extends UnitTestCase {
    *   An array of test data arrays, each test data array containing an array of
    *   invalid test default roles, keyed by default role name.
    */
-  public function invalidDefaultRoleProvider() {
+  public static function invalidDefaultRoleProvider() {
     return [
       // A role with a missing name.
       [
         [
-          '' => ['label' => $this->t('Administrator')],
+          '' => ['label' => t('Administrator')],
         ],
       ],
       // An array of multiple correct roles, with one invalid role type sneaked
@@ -487,16 +487,16 @@ class DefaultRoleEventTest extends UnitTestCase {
         [
           OgRoleInterface::ADMINISTRATOR => [
             'name' => OgRoleInterface::ADMINISTRATOR,
-            'label' => $this->t('Administrator'),
+            'label' => t('Administrator'),
             'role_type' => OgRoleInterface::ROLE_TYPE_REQUIRED,
           ],
           'moderator' => [
             'name' => 'moderator',
-            'label' => $this->t('Moderator'),
+            'label' => t('Moderator'),
             'role_type' => OgRoleInterface::ROLE_TYPE_STANDARD,
           ],
           'role with missing name' => [
-            'label' => $this->t('Invalid role'),
+            'label' => t('Invalid role'),
           ],
         ],
       ],

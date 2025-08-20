@@ -5,7 +5,7 @@
  * Install, update, and uninstall functions for the Organic groups module.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -33,7 +33,7 @@ function og_update_8001(&$sandbox) {
     $sandbox['#finished'] = 0;
     $sandbox['batch_size'] = 500;
     $sandbox['current'] = 0;
-    $sandbox['total'] = $storage->getQuery()->count()->execute();
+    $sandbox['total'] = $storage->getQuery()->accessCheck(FALSE)->count()->execute();
 
     if (!$sandbox['total']) {
       $sandbox['#finished'] = 1;
@@ -42,7 +42,7 @@ function og_update_8001(&$sandbox) {
   }
 
   // Update the existing memberships to include the group bundle ID.
-  $membership_ids = $storage->getQuery()
+  $membership_ids = $storage->getQuery()->accessCheck(FALSE)
     ->range($sandbox['current'], $sandbox['batch_size'])
     ->sort('id')
     ->execute();

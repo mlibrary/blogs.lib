@@ -1,11 +1,13 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Action;
 
 /**
  * Base class for tests for plugins that change multiple roles at once.
+ *
+ * @coversDefaultClass \Drupal\og\Plugin\Action\ChangeMultipleOgMembershipRolesBase
  */
 class ChangeMultipleOgMembershipRolesActionTestBase extends ChangeOgMembershipActionTestBase {
 
@@ -71,7 +73,7 @@ class ChangeMultipleOgMembershipRolesActionTestBase extends ChangeOgMembershipAc
   /**
    * Data provider for testExecuteMultiple().
    */
-  public function executeMultipleProvider() {
+  public static function executeMultipleProvider(): array {
     // Test a few combinations of different memberships.
     return [
       [
@@ -105,7 +107,7 @@ class ChangeMultipleOgMembershipRolesActionTestBase extends ChangeOgMembershipAc
    * @param string $membership
    *   The membership on which to perform the action.
    *
-   * @covers ::execute
+   * @covers ::executeMultiple
    * @dataProvider executeProvider
    */
   public function testExecute($membership) {
@@ -129,7 +131,7 @@ class ChangeMultipleOgMembershipRolesActionTestBase extends ChangeOgMembershipAc
   /**
    * Data provider for testExecute().
    */
-  public function executeProvider() {
+  public static function executeProvider(): array {
     // Test each membership.
     return [
       ['member'],

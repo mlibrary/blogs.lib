@@ -1,11 +1,12 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og_ui\Form;
 
 use Drupal\Component\Plugin\PluginManagerInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -15,24 +16,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class AdminSettingsForm extends ConfigFormBase {
 
-  /**
-   * The manager for OgDeleteOrphans plugins.
-   *
-   * @var \Drupal\Component\Plugin\PluginManagerInterface
-   */
-  protected $ogDeleteOrphansPluginManager;
-
-  /**
-   * Constructs an AdminSettingsForm object.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The factory for configuration objects.
-   * @param \Drupal\Component\Plugin\PluginManagerInterface $delete_orphans_plugin_manager
-   *   The manager for OgDeleteOrphans plugins.
-   */
-  public function __construct(ConfigFactoryInterface $config_factory, PluginManagerInterface $delete_orphans_plugin_manager) {
-    parent::__construct($config_factory);
-    $this->ogDeleteOrphansPluginManager = $delete_orphans_plugin_manager;
+  public function __construct(
+    ConfigFactoryInterface $config_factory,
+    TypedConfigManagerInterface $typedConfigManager,
+    protected PluginManagerInterface $ogDeleteOrphansPluginManager,
+  ) {
+    parent::__construct($config_factory, $typedConfigManager);
   }
 
   /**
@@ -41,7 +30,8 @@ class AdminSettingsForm extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
-      $container->get('plugin.manager.og.delete_orphans')
+      $container->get('config.typed'),
+      $container->get('plugin.manager.og.delete_orphans'),
     );
   }
 

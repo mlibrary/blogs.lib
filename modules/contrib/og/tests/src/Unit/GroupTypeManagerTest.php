@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit;
 
@@ -130,6 +130,8 @@ class GroupTypeManagerTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    parent::setUp();
+
     $this->config = $this->prophesize(Config::class);
     $this->configFactory = $this->prophesize(ConfigFactoryInterface::class);
     $this->entityTypeBundleInfo = $this->prophesize(EntityTypeBundleInfoInterface::class);
@@ -181,7 +183,7 @@ class GroupTypeManagerTest extends UnitTestCase {
    *   array with the entity type ID, bundle ID and boolean indicating the
    *   expected result.
    */
-  public function providerTestIsGroup() {
+  public static function providerTestIsGroup() {
     return [
       ['test_entity', 'a', TRUE],
       ['test_entity', 'b', TRUE],

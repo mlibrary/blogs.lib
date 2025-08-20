@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og\Event;
 
@@ -108,7 +108,7 @@ interface PermissionEventInterface extends \ArrayAccess, \IteratorAggregate {
    * Returns whether or not the given permission exists.
    *
    * @param string $name
-   *   The name of the permission for which to verify the existance.
+   *   The name of the permission for which to verify the existence.
    *
    * @return bool
    *   TRUE if the permission exists, FALSE otherwise.

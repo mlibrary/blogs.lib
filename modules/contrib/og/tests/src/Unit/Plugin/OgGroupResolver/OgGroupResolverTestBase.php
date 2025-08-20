@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
@@ -15,6 +15,7 @@ use Prophecy\PhpUnit\ProphecyTrait;
 /**
  * Base class for testing OgGroupResolver plugins.
  *
+ * @coversDefaultClass \Drupal\og\OgGroupResolverBase
  * @group og
  */
 abstract class OgGroupResolverTestBase extends UnitTestCase {
@@ -119,8 +120,6 @@ abstract class OgGroupResolverTestBase extends UnitTestCase {
   /**
    * Tests the groups that are resolved by the plugin.
    *
-   * @dataProvider resolveProvider
-   * @covers ::resolve()
    * @doesNotPerformAssertions
    */
   abstract public function testResolve();

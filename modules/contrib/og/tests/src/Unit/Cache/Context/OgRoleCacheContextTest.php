@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit\Cache\Context;
 
@@ -138,7 +138,7 @@ class OgRoleCacheContextTest extends OgCacheContextTestBase {
    * @dataProvider membershipsProvider
    */
   public function testMembershipsNoSql(array $group_memberships, array $expected_identical_role_groups): void {
-    // 'Mock' the unmockable singleton that holds the Drupal settings array by
+    // 'Mock' the un-mockable singleton that holds the Drupal settings array by
     // instantiating it and populating it with a random salt.
     new Settings(['hash_salt' => $this->randomMachineName()]);
 

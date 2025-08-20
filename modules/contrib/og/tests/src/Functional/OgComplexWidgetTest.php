@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Functional;
 
@@ -121,7 +121,7 @@ class OgComplexWidgetTest extends BrowserTestBase {
    * @return array
    *   Array with the field human readable name, and the field's HTML name.
    */
-  public function ogComplexFieldsProvider() {
+  public static function ogComplexFieldsProvider(): array {
     return [
       ['Groups audience', 'og_audience[0][target_id]'],
       ['Other groups', 'other_groups[0][target_id]'],

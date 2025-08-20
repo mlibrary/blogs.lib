@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Action;
 
@@ -45,7 +45,7 @@ class DeleteOgMembershipActionTest extends ChangeOgMembershipActionTestBase {
   /**
    * {@inheritdoc}
    */
-  public function executeProvider() {
+  public static function executeProvider(): array {
     return [
       ['member'],
       ['pending'],

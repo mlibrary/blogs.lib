@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit\Plugin\OgGroupResolver;
 
@@ -71,8 +71,7 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
    *
    * @todo Update documentation.
    *
-   * @covers ::resolve
-   * @dataProvider resolveProvider
+   * @covers \Drupal\og\OgGroupResolverBase::resolve
    */
   public function testResolve($path = NULL, $route_object_id = NULL, array $expected_added_groups = [], array $expected_removed_groups = []) {
     if ($path) {
@@ -135,7 +134,7 @@ abstract class OgRouteGroupResolverTestBase extends OgGroupResolverTestBase {
   /**
    * Returns a set of entity link templates for testing.
    *
-   * This mimicks the data returned by EntityTypeInterface::getLinkTemplates().
+   * This mimics the data returned by EntityTypeInterface::getLinkTemplates().
    *
    * @param string $entity_type
    *   The entity type for which to return the link templates.

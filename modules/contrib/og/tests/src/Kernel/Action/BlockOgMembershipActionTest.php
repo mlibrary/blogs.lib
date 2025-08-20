@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Action;
 
@@ -40,7 +40,7 @@ class BlockOgMembershipActionTest extends ActionTestBase {
   /**
    * {@inheritdoc}
    */
-  public function executeProvider() {
+  public static function executeProvider(): array {
     return [
       ['member'],
       ['pending'],
@@ -52,7 +52,7 @@ class BlockOgMembershipActionTest extends ActionTestBase {
   /**
    * {@inheritdoc}
    */
-  public function accessProvider() {
+  public static function accessProvider(): array {
     return [
       // Access should be provided if the membership is not already blocked and
       // does not belong to the group owner, and the user executing the action
@@ -83,7 +83,7 @@ class BlockOgMembershipActionTest extends ActionTestBase {
   /**
    * {@inheritdoc}
    */
-  public function noAccessProvider() {
+  public static function noAccessProvider(): array {
     return [
       // Access is denied to users that are not privileged, and if the
       // membership is already blocked, or if it belongs to the group owner.

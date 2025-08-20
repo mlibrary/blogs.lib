@@ -30,7 +30,7 @@ members:
 
 ```php
 <?php
-
+// phpcs:ignoreFile
 namespace Drupal\my_module\EventSubscriber;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -43,7 +43,7 @@ class OgEventSubscriber implements EventSubscriberInterface {
 
   use StringTranslationTrait;
 
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     return [
       PermissionEventInterface::EVENT_NAME => [['provideGroupLevelPermissions']],
     ];
@@ -298,9 +298,9 @@ result is different if this option is turned on or off, so this needs to be
 included in the cache metadata.
 
 ```php
-function mymodule_og_user_access_alter(array &$permissions, CacheableMetadata $cacheable_metadata, array $context): void {
+function my_module_og_user_access_alter(array &$permissions, CacheableMetadata $cacheable_metadata, array $context): void {
   // Retrieve the module configuration.
-  $config = \Drupal::config('mymodule.settings');
+  $config = \Drupal::config('my_module.settings');
 
   // Check if the site is configured to allow deletion of published groups.
   $published_groups_can_be_deleted = $config->get('delete_published_groups');
@@ -337,7 +337,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class MyModuleEventSubscriber implements EventSubscriberInterface {
 
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     return [
       GroupContentEntityOperationAccessEventInterface::EVENT_NAME => [['moderatorsCanManageComments']],
     ];

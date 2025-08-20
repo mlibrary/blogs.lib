@@ -1,17 +1,17 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Plugin\Block;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\og\OgContextInterface;
-use Drupal\og\OgMembershipInterface;
 use Drupal\Tests\og\Traits\OgMembershipCreationTrait;
 use Drupal\Tests\user\Traits\UserCreationTrait;
+use Drupal\entity_test\Entity\EntityTest;
+use Drupal\og\OgContextInterface;
+use Drupal\og\OgMembershipInterface;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Promise\CallbackPromise;
 

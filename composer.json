@@ -101,7 +101,7 @@
         "drupal/metatag": "^2",
         "drupal/mimemail": "^1.0-alpha",
         "drupal/oembed_providers": "^2.1",
-        "drupal/og": "1.0-alpha10",
+        "drupal/og": "^1.0-alpha10",
         "drupal/openid_connect": "^3.0@alpha",
         "drupal/override_node_options": "^2.7",
         "drupal/panels": "^4.7",
@@ -201,7 +201,6 @@
             "https://www.drupal.org/node/3011413": "https://www.drupal.org/files/issues/2023-06-05/openid_connect-autologin-3011413-94.patch"
           },
           "drupal/og": {
-            "https://github.com/zerolab/og/tree/196-redux": "patches/zerolab-og-196-redux-branch.patch",
             "allow membership lookup in hooks": "patches/og-get-memberships.patch",
             "add word email to subscribe": "patches/add-word-email-to-og-subscribe.patch",
             "change word group to blog in message": "patches/change-word-group-to-blog-in-message.patch",

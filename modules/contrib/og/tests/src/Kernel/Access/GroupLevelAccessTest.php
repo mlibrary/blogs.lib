@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Access;
 
@@ -334,7 +334,7 @@ class GroupLevelAccessTest extends KernelTestBase {
    *
    * @see ::testDefaultGroupPermissions()
    */
-  public function groupEntityOperationPermissionsTestProvider(): array {
+  public static function groupEntityOperationPermissionsTestProvider(): array {
     return [
       [
         // The user performing the entity operations.

@@ -1,16 +1,21 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og\Plugin\Field\FieldWidget;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\EntityReferenceAutocompleteWidget;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\Utility\Token;
+use Drupal\og\MembershipManagerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the 'entity_reference autocomplete' widget.
@@ -18,7 +23,7 @@ use Drupal\Core\Form\FormStateInterface;
  * @FieldWidget(
  *   id = "og_complex",
  *   label = @Translation("OG reference"),
- *   description = @Translation("An autocompletewidget for OG"),
+ *   description = @Translation("An autocomplete widget for OG"),
  *   field_types = {
  *     "og_standard_reference",
  *     "og_membership_reference"
@@ -26,6 +31,35 @@ use Drupal\Core\Form\FormStateInterface;
  * )
  */
 class OgComplex extends EntityReferenceAutocompleteWidget {
+
+  public function __construct(
+    $plugin_id,
+    $plugin_definition,
+    FieldDefinitionInterface $field_definition,
+    array $settings,
+    array $third_party_settings,
+    protected MembershipManagerInterface $membershipManager,
+    protected AccountProxyInterface $currentUser,
+    protected Token $token,
+  ) {
+    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): self {
+    return new static(
+      $plugin_id,
+      $plugin_definition,
+      $configuration['field_definition'],
+      $configuration['settings'],
+      $configuration['third_party_settings'],
+      $container->get('og.membership_manager'),
+      $container->get('current_user'),
+      $container->get('token'),
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -70,9 +104,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
 
     $target_type = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type');
 
-    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
-    $membership_manager = \Drupal::service('og.membership_manager');
-    $user_groups = $membership_manager->getUserGroups(\Drupal::currentUser()->id());
+    $user_groups = $this->membershipManager->getUserGroups($this->currentUser->id());
     $user_groups_target_type = $user_groups[$target_type] ?? [];
     $user_group_ids = array_map(function ($group) {
       return $group->id();
@@ -93,7 +125,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
     }
 
     $title = $this->fieldDefinition->getLabel();
-    $description = FieldFilteredMarkup::create(\Drupal::token()->replace($this->fieldDefinition->getDescription()));
+    $description = FieldFilteredMarkup::create($this->token->replace($this->fieldDefinition->getDescription()));
 
     $elements = [];
 
@@ -236,9 +268,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
 
     $target_type = $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type');
 
-    /** @var \Drupal\og\MembershipManagerInterface $membership_manager */
-    $membership_manager = \Drupal::service('og.membership_manager');
-    $user_groups = $membership_manager->getUserGroups(\Drupal::currentUser()->id());
+    $user_groups = $this->membershipManager->getUserGroups($this->currentUser->id());
     $user_groups_target_type = $user_groups[$target_type] ?? [];
     $user_group_ids = array_map(function ($group) {
       return $group->id();
@@ -356,8 +386,7 @@ class OgComplex extends EntityReferenceAutocompleteWidget {
    *   TRUE if the user is a group admin.
    */
   protected function isGroupAdmin() {
-    // @todo Inject current user service as a dependency.
-    return \Drupal::currentUser()->hasPermission('administer organic groups');
+    return $this->currentUser->hasPermission('administer organic groups');
   }
 
 }

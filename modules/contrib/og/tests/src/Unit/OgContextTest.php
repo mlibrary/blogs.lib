@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit;
 
@@ -227,7 +227,7 @@ class OgContextTest extends UnitTestCase {
    * @return array
    *   An array of test data.
    */
-  public function getRuntimeContextsProvider() {
+  public static function getRuntimeContextsProvider() {
     return [
       // When 'og' is not present in the list of requested context IDs, then it
       // should not return any context.

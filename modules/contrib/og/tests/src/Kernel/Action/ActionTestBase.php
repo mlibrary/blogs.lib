@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Action;
 
@@ -203,7 +203,6 @@ abstract class ActionTestBase extends KernelTestBase {
    * @param string $membership
    *   The membership on which to perform the action.
    *
-   * @covers ::execute
    * @dataProvider executeProvider
    * @doesNotPerformAssertions
    */
@@ -211,8 +210,6 @@ abstract class ActionTestBase extends KernelTestBase {
 
   /**
    * Checks that the user can perform the action on the membership.
-   *
-   * @covers ::access
    */
   public function testAccess() {
     // Dramatically improve testing speed by looping over all test cases in a
@@ -238,8 +235,6 @@ abstract class ActionTestBase extends KernelTestBase {
 
   /**
    * Checks that the user cannot perform the action on the membership.
-   *
-   * @covers ::access
    */
   public function testNoAccess() {
     // Dramatically improve testing speed by looping over all test cases in a
@@ -266,16 +261,16 @@ abstract class ActionTestBase extends KernelTestBase {
   /**
    * Data provider for testExecute().
    */
-  abstract public function executeProvider();
+  abstract public static function executeProvider(): array;
 
   /**
    * Data provider for testAccess().
    */
-  abstract public function accessProvider();
+  abstract public static function accessProvider(): array;
 
   /**
    * Data provider for testNoAccess().
    */
-  abstract public function noAccessProvider();
+  abstract public static function noAccessProvider(): array;
 
 }

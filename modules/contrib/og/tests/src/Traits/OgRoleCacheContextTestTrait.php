@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Traits;
 
@@ -20,7 +20,7 @@ trait OgRoleCacheContextTestTrait {
    * @return string
    *   The context result.
    */
-  protected function getContextResult(AccountInterface $user = NULL): string {
+  protected function getContextResult(?AccountInterface $user = NULL): string {
     return $this->getCacheContext($user)->getContext();
   }
 
@@ -50,7 +50,7 @@ trait OgRoleCacheContextTestTrait {
    *
    * @see ::testMemberships()
    */
-  public function membershipsProvider(): array {
+  public static function membershipsProvider(): array {
     return [
       [
         // Set up a number of users with different roles within different

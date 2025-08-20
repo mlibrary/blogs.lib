@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og\Form;
 
@@ -20,28 +20,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class OgMembershipForm extends ContentEntityForm {
 
-  /**
-   * The OG access service.
-   *
-   * @var \Drupal\og\OgAccess
-   */
-  protected $ogAccess;
-
-  /**
-   * Constructs a MessageForm object.
-   *
-   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
-   *   The entity repository.
-   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entity_type_bundle_info
-   *   The entity type bundle service.
-   * @param \Drupal\Component\Datetime\TimeInterface $time
-   *   The time service.
-   * @param \Drupal\og\OgAccessInterface $og_access
-   *   The OG access service.
-   */
-  public function __construct(EntityRepositoryInterface $entity_repository, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL, OgAccessInterface $og_access) {
+  public function __construct(
+    EntityRepositoryInterface $entity_repository,
+    EntityTypeBundleInfoInterface $entity_type_bundle_info,
+    TimeInterface $time,
+    protected OgAccessInterface $ogAccess,
+  ) {
     parent::__construct($entity_repository, $entity_type_bundle_info, $time);
-    $this->ogAccess = $og_access;
   }
 
   /**
@@ -124,11 +109,13 @@ class OgMembershipForm extends ContentEntityForm {
     if ($insert) {
       $this->logger('og')->notice('OG Membership: added the @membership_type membership for the use uid @uid to the group of the entity-type @group_type and ID @gid.', $context);
       $this->messenger()->addMessage($this->t('Added %user to %group.', $t_args));
-      return;
+      return $insert;
     }
 
     $this->logger('og')->notice('OG Membership: updated the @membership_type membership for the use uid @uid to the group of the entity-type @group_type and ID @gid.', $context);
     $this->messenger()->addMessage($this->t('Updated the membership for %user to %group.', $t_args));
+
+    return $insert;
   }
 
 }

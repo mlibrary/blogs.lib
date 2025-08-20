@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Kernel\Access;
 
@@ -131,7 +131,7 @@ class GroupContentOperationAccessAlterTest extends KernelTestBase {
   /**
    * Tests that modules can alter group content entity operation access.
    *
-   * This mimicks a use case where a moderator has access to edit and delete
+   * This mimics a use case where a moderator has access to edit and delete
    * comments in all groups.
    *
    * @see \og_test_og_user_access_entity_operation_alter()
@@ -170,7 +170,7 @@ class GroupContentOperationAccessAlterTest extends KernelTestBase {
    * @return string[][]
    *   Test cases for the 'update' and 'delete' entity operations.
    */
-  public function groupContentEntityOperationAccessAlterHookTestProvider(): array {
+  public static function groupContentEntityOperationAccessAlterHookTestProvider(): array {
     return [
       ['update'],
       ['delete'],

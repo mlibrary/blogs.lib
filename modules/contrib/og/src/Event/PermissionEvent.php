@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\og\Event;
 
@@ -227,7 +227,7 @@ class PermissionEvent extends Event implements PermissionEventInterface {
     if ($value->getName() !== $key) {
       throw new \InvalidArgumentException('The key and the permission name must be identical.');
     }
-    $this->setpermission($value);
+    $this->setPermission($value);
   }
 
   /**

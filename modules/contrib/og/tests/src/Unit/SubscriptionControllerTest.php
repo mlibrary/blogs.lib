@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\og\Unit;
 
@@ -104,6 +104,8 @@ class SubscriptionControllerTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    parent::setUp();
+
     $this->entityFormBuilder = $this->prophesize(EntityFormBuilderInterface::class);
     $this->group = $this->prophesize(ContentEntityInterface::class);
     $this->membershipManager = $this->prophesize(MembershipManagerInterface::class);
@@ -212,7 +214,7 @@ class SubscriptionControllerTest extends UnitTestCase {
    * @return array
    *   Array with the membership state.
    */
-  public function memberProvider() {
+  public static function memberProvider() {
     return [
       [OgMembershipInterface::STATE_ACTIVE],
       [OgMembershipInterface::STATE_PENDING],
