@@ -9,6 +9,43 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\node\Entity\Node;
 
+function _custom_blogs_og_verify_all_users() {
+  $query = \Drupal::entityQuery('node')
+    ->accessCheck(FALSE)
+    ->condition('type', 'blog')
+    ->condition('status', 1);
+  $nids = $query->execute();
+  $removed = [];
+  foreach ($nids as $nid) {
+   $removed[$nid] = _custom_blogs_og_verify_users($nid);
+  }
+
+  return $removed;
+}
+
+function _custom_blogs_og_verify_users($nid) {
+  $members = [];
+  $query = \Drupal::database()->select('og_membership', 'fields')
+    ->fields('fields', ['id', 'uid', 'entity_id'])
+    ->condition('fields.entity_id', $nid);
+  $memberships = $query->execute();
+  foreach ($memberships as $member) {
+    $user = User::load($member->uid);
+    $name = $user->getDisplayName();
+    $user_data = _get_mcommunity_user($name);
+    if (strpos($name, '@') === FALSE && empty($user_data)) {
+      $roles['remove'] = _custom_blogs_get_all_roles();
+      $memberships = \Drupal::service('og.membership_manager')->getMemberships($user->id());
+      foreach ($memberships as $membership) {
+        $membership->delete();
+      }
+      $members[] = 'Removed '.$user->getDisplayName().' from blog id '.$nid;
+    }
+  }
+
+  return $members;
+}
+
 /**
  * Implements hook_form_FORM_ID_alter().
  */

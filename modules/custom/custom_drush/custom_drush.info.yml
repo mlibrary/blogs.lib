@@ -1,0 +1,4 @@
+name: Custom Drush
+type: module
+description: UM Blogs custom drush commands.
+core_version_requirement: ^10 || ^11

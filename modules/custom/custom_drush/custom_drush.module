@@ -1,0 +1,122 @@
+<?php
+
+function _custom_drush_send_membership_mail($memberships) {
+  $message = [];
+  foreach ($memberships as $nid => $blog_members) {
+    if (empty($blog_members)) { continue; }
+    foreach ($blog_members as $member) {
+      $message[] = \Drupal\Core\Render\Markup::create('<p>'.$member.'</p>');
+    }
+  }
+  if (empty($message)) { $message[] = \Drupal\Core\Render\Markup::create('<p>no removals</p>'); }
+  $from_name = \Drupal::config('system.site')->get('name');
+  $from_email = \Drupal::config('system.site')->get('mail');
+  $from = $from_name.'<'.$from_email.'>';
+  $reply_to = $from;
+  $key = 'membership_removals';
+  $recipient = 'eliotwsc@umich.edu';
+  $subject = 'Blogs Membership Removals';
+  $cc = '';
+  $files = [];
+  $language = \Drupal::languageManager()->getDefaultLanguage()->getId();
+  custom_drush_send_mail($recipient, $reply_to, $subject, $message, $key, $files, $cc, $from_name, $from_email);
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ *
+ * Ensure custom_drush runs last when hook_mail_alter is invoked.
+ */
+function custom_drush_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'mail') {
+    $group = $implementations['custom_drush'];
+    unset($implementations['custom_drush']);
+    $implementations['custom_drush'] = $group;
+    // If the reroute_email module is installed, ensure that comes after ours so
+    // rerouted emails are still rerouted.
+    if (isset($implementations['reroute_email'])) {
+      $group = $implementations['reroute_email'];
+      unset($implementations['reroute_email']);
+      $implementations['reroute_email'] = $group;
+    }
+  }
+}
+
+function custom_drush_send_mail($recipient, $reply_to, $subject, $message, $key, $files = array(), $cc = '', $from_name = '', $from_email = '', $bcc = ''){
+  if (empty($message)) { $message[] = \Drupal\Core\Render\Markup::create('no error'); }
+  if (empty($from_name)) { $from_name = \Drupal::config('system.site')->get('name'); }
+  if (empty($from_email) || \Drupal::service('email.validator')->isValid($from_email) != TRUE) {
+    $from_email = \Drupal::config('system.site')->get('mail');
+  }
+  $from = $from_name.'<'.$from_email.'>';
+  $params = [
+    'from' => $from,
+    'subject' => $subject,
+    'message' => $message,
+    'Cc'      => $cc,
+    'Bcc'     => $bcc,
+  ];
+  foreach ($files as $file){
+    if (isset($file['file']) && $file['file'] instanceof \Drupal\file\Entity\File) {
+      $load_file = $file['file'];
+    }
+    else {
+      //stupid swiftmailer doesnt read the public directory with file loaded by drupal. so we'll just do this manually
+      $load_file = \Drupal\file\Entity\File::load($file['target_id']);
+    }
+    $file_attach = new stdClass();
+    $file_attach->uri = $load_file->getFileUri();
+    $file_attach->filename = $load_file->getFilename();
+    $file_attach->filemime = $load_file->getMimeType();
+    if(is_array($file) && isset($file['cid'])){
+      $file_attach->cid = $file['cid'];
+      $params['images'][] = $file_attach;
+    }
+    else {
+      $params['files'][] = $file_attach;
+    }
+  }
+  $language = \Drupal::languageManager()->getDefaultLanguage()->getId();
+  \Drupal::service('plugin.manager.mail')->mail('custom_drush', $key, $recipient, $language, $params, $reply_to, TRUE);
+  $recipients = $recipient;
+  if ($cc) {
+    $recipients = $recipient.','.$cc;
+  }
+  \Drupal::messenger()->addStatus(t('Email sent to '.$recipients));
+  \Drupal::logger('custom_uml_mail')->notice('Email sent<br>key %key<br>from %from<br>to %recipients<br>bcc to %bcc<br>subject %subject<br>message %message',
+    [
+      '%key' => $key,
+      '%from' => $from,
+      '%recipients' => $recipients,
+      '%bcc' => $bcc,
+      '%subject' => $subject,
+      '%message' => $message[0],
+    ]);
+}
+
+/**
+ * Implements hook_mail().
+ */
+function custom_drush_mail($key, &$message, $params){
+  $message['from'] = $params['from'];
+  $message['subject'] = $params['subject'];
+  foreach ($params['message'] as $m) {
+    $message['body'][] = $m;
+  }
+  if (isset($params['images'])) {
+    $message['images'] = $params['images'];
+  }
+  if (isset($params['files'])) {
+    $message['files'] = $params['files'];
+  }
+  if (isset($params['Cc']) && !empty($params['Cc'])) {
+    $message['headers']['Cc'] = trim($params['Cc'], ',');
+  }
+  if (isset($params['Bcc']) && !empty($params['Bcc'])) {
+    $message['headers']['Bcc'] = trim($params['Bcc'], ',');
+  }
+  $message['headers']['From'] = $params['from'];
+  //$message['headers']['Sender'] = $params['from'];
+  //$message['headers']['Reply-to'] = $params['from'];
+
+}

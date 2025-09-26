@@ -105,14 +105,23 @@ function _get_mcommunity_user($name) {
   $user_data = [];
   if ($mcomm = Settings::get('mcommunity')) {
     $ldap_config = parse_ini_file($mcomm, TRUE);
-    $ldap_resource = ldap_connect($ldap_config['connect']['uri']);
-    ldap_bind($ldap_resource, $ldap_config['bind']['dn'], $ldap_config['bind']['pw']);
-    $ldap_result = ldap_search(
-      $ldap_resource,
-      "ou=People,dc=umich,dc=edu",
-      "(uid=".$name.")",
-      ['entityid','displayName','title','mail','givenname','umichdisplaysn','umichtitle',]
-    );
+    $ldap_resource = NULL;
+    $attempts = 0;
+    $ldap_result = FALSE;
+    while ($attempts < 5 && !$ldap_result) {
+      $ldap_resource = ldap_connect($ldap_config['connect']['uri']);
+      ldap_bind($ldap_resource, $ldap_config['bind']['dn'], $ldap_config['bind']['pw']);
+      $ldap_result = ldap_search(
+        $ldap_resource,
+        "ou=People,dc=umich,dc=edu",
+        "(uid=".$name.")",
+        ['entityid','displayName','title','mail','givenname','umichdisplaysn','umichtitle','umichInstRoles','umichHR']
+      );
+      if (!$ldap_result) {
+        sleep(5);
+      }
+      $attempts++;
+    }
     $ldap_entries = ldap_get_entries($ldap_resource, $ldap_result);
     if ($ldap_entries['count'] != 0) {
       $raw_data = array_filter($ldap_entries[0], function($k) { return !is_numeric($k); }, ARRAY_FILTER_USE_KEY);
@@ -167,7 +176,7 @@ function custom_blogs_user_presave($user) {
     if (!empty($user_data['givenname'])) {
       $user->get('field_user_first')->setValue([['value' => $user_data['givenname']]]);
     }
-    if (!empty(trim($user_data['displayname']))) {
+    if (isset($user_data['displayname']) && !empty(trim($user_data['displayname']))) {
       $user->get('field_user_display')->setValue([['value' => $user_data['displayname']]]);
     }
     else if (!empty($user_data['umichdisplaysn']) && !empty($user_data['givenname'])) {
