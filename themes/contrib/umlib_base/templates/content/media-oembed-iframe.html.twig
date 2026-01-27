@@ -5,11 +5,13 @@
  */
 #}
 <!DOCTYPE html>
-<html>
+<html lang="">
   <head>
+    <title>{{ resource.title }} | Media | Blogs</title>
     <css-placeholder token="{{ placeholder_token }}">
   </head>
   <body style="margin: 0">
+    <h1 style="visibility: hidden">{{ resource.title }}</h1>
     {{ media|raw }}
   </body>
 </html>
