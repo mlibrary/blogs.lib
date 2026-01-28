@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * Implements hook_preprocess_HOOK() for media-oembed-iframe.html.twig.
+ */
+function umlib_blogs_preprocess_media_oembed_iframe(&$variables) {
+  $variables['video_langcode'] = 'und';
+  $request = \Drupal::request();
+  $url = $request->query->get('url');
+  $media_entities = \Drupal::entityTypeManager()
+    ->getStorage('media')
+    ->loadByProperties(['field_media_oembed_video' => $url]);
+  if (!empty($media_entities)) {
+    $media = reset($media_entities);
+    if ($media->hasField('field_langcode')) {
+      $variables['video_langcode'] = $media->get('field_langcode')->value;
+    }
+  }
+}

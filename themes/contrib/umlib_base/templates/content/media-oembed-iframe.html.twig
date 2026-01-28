@@ -4,8 +4,11 @@
  * Theme override to display an oEmbed resource in an iframe.
  */
 #}
+{% if video_langcode is empty %}
+{% set video_langcode = 'und' %}
+{% endif %}
 <!DOCTYPE html>
-<html lang="">
+<html lang="{{ video_langcode }}">
   <head>
     <title>{{ resource.title }} | Media | Blogs</title>
     <css-placeholder token="{{ placeholder_token }}">
