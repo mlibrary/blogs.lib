@@ -72,7 +72,6 @@
         "drupal/better_exposed_filters": "^6.0.3",
         "drupal/block_class": "^3.0",
         "drupal/calendar": "^1.0@beta",
-        "drupal/captcha": "^1.2",
         "drupal/colorbox": "^2.0",
         "drupal/condition_query": "^1.4",
         "drupal/config_devel": "^1.8",
