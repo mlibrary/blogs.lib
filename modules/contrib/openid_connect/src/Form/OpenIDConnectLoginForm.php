@@ -2,6 +2,8 @@
 
 namespace Drupal\openid_connect\Form;
 
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -38,6 +40,13 @@ class OpenIDConnectLoginForm extends FormBase {
   protected $session;
 
   /**
+   * The config factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
    * The constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
@@ -46,11 +55,19 @@ class OpenIDConnectLoginForm extends FormBase {
    *   The OpenID Connect claims.
    * @param \Drupal\openid_connect\OpenIDConnectSessionInterface $session
    *   The OpenID Connect session service.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config.factory service.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, OpenIDConnectClaims $claims, OpenIDConnectSessionInterface $session) {
+  public function __construct(
+    EntityTypeManagerInterface $entity_type_manager,
+    OpenIDConnectClaims $claims,
+    OpenIDConnectSessionInterface $session,
+    ConfigFactoryInterface $config_factory,
+  ) {
     $this->entityTypeManager = $entity_type_manager;
     $this->claims = $claims;
     $this->session = $session;
+    $this->configFactory = $config_factory;
   }
 
   /**
@@ -60,7 +77,8 @@ class OpenIDConnectLoginForm extends FormBase {
     return new static(
       $container->get('entity_type.manager'),
       $container->get('openid_connect.claims'),
-      $container->get('openid_connect.session')
+      $container->get('openid_connect.session'),
+      $container->get('config.factory')
     );
   }
 
@@ -75,6 +93,7 @@ class OpenIDConnectLoginForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
+    $tags = $form['#cache']['tags'] ?? [];
     $clients = $this->entityTypeManager->getStorage('openid_connect_client')->loadByProperties(['status' => TRUE]);
     foreach ($clients as $client_id => $client) {
       /** @var \Drupal\openid_connect\OpenIDConnectClientEntityInterface $client */
@@ -87,7 +106,11 @@ class OpenIDConnectLoginForm extends FormBase {
         '#prefix' => '<div>',
         '#suffix' => '</div>',
       ];
+      $tags = Cache::mergeTags($tags, $client->getCacheTags());
     }
+
+    $tags = Cache::mergeTags($tags, $this->configFactory->get('openid_connect.settings')->getCacheTags());
+    $form['#cache']['tags'] = $tags;
     return $form;
   }
 

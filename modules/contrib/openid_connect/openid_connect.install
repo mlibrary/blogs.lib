@@ -29,6 +29,32 @@ function openid_connect_requirements($phase) {
         'severity' => REQUIREMENT_WARNING,
       ];
     }
+
+    // Check if any enabled client has 'prompt' set to 'none'.
+    $entity_storage = \Drupal::entityTypeManager()->getStorage('openid_connect_client');
+    /** @var \Drupal\openid_connect\OpenIDConnectClientEntityInterface[] $clients */
+    $clients = $entity_storage->loadByProperties(['status' => TRUE]);
+
+    foreach ($clients as $client) {
+      $settings = $client->getPlugin()->getConfiguration();
+
+      $prompts = !empty($settings['prompt']) ? array_filter($settings['prompt']) : [];
+      // Check if 'prompt' is set to 'none'.
+      if (
+        empty($prompts) ||
+        (in_array('none', $prompts) && count($prompts) === 1)
+      ) {
+        $requirements['openid_connect_prompt_none'] = [
+          'title' => t('OpenID Connect'),
+          'value' => t('Client "prompt" may be misconfigured'),
+          'description' => t('At least one OpenID Connect client is configured with the "prompt" parameter set to "none" or without a "prompt". This can lead to security vulnerabilities. It is <strong>highly recommended</strong> to change this setting unless you are aware of the risks.'),
+          'severity' => REQUIREMENT_WARNING,
+        ];
+
+        // No need to check other clients once we've found one with prompt=none.
+        break;
+      }
+    }
   }
   return $requirements;
 }
@@ -346,4 +372,67 @@ function openid_connect_update_30002() {
   });
   $config->set('role_mappings', $role_mappings);
   $config->save(TRUE);
+}
+
+/**
+ * Repair incorrect Generic and Okta plugin scopes.
+ */
+function openid_connect_update_30003() {
+  $storage = \Drupal::entityTypeManager()->getStorage('openid_connect_client');
+
+  $clients = [];
+  $clients += $storage->loadByProperties(['plugin' => 'generic']);
+  $clients += $storage->loadByProperties(['plugin' => 'okta']);
+
+  foreach ($clients as $client) {
+    $config = $client->getPlugin()->getConfiguration();
+    if ($config['scopes'] === '') {
+      $client->getPlugin()->setConfiguration(['scopes' => []]);
+      $client->save();
+    }
+  }
+}
+
+/**
+ * Update plugins with "iss_allowed_domains" if it is missing.
+ */
+function openid_connect_update_30004() {
+  $definitions = \Drupal::service('plugin.manager.openid_connect_client')->getDefinitions();
+
+  foreach ($definitions as $plugin) {
+    /** @var \Drupal\openid_connect\OpenIDConnectClientEntityInterface[] $clients */
+    $clients = \Drupal::entityTypeManager()
+      ->getStorage('openid_connect_client')
+      ->loadByProperties(['plugin' => $plugin['id']]);
+
+    foreach ($clients as $client) {
+      $config = $client->getPlugin()->getConfiguration();
+      if (empty($config['iss_allowed_domains'])) {
+        $client->getPlugin()->setConfiguration(['iss_allowed_domains' => '']);
+        $client->save();
+      }
+    }
+  }
+}
+
+/**
+ * Update all plugins to use the 'login' prompt.
+ */
+function openid_connect_update_30005() {
+  $definitions = \Drupal::service('plugin.manager.openid_connect_client')->getDefinitions();
+
+  foreach ($definitions as $plugin) {
+    /** @var \Drupal\openid_connect\OpenIDConnectClientEntityInterface[] $clients */
+    $clients = \Drupal::entityTypeManager()
+      ->getStorage('openid_connect_client')
+      ->loadByProperties(['plugin' => $plugin['id']]);
+
+    foreach ($clients as $client) {
+      $config = $client->getPlugin()->getConfiguration();
+      $config['prompt'] = ['login' => 'login'];
+      $client->getPlugin()->setConfiguration($config);
+      $client->save();
+    }
+  }
+  \Drupal::messenger()->addWarning(t('The OpenID Connect module settings have been updated. Administrators should review the OpenID Connect configuration, particularly the prompt settings for all enabled providers.'));
 }

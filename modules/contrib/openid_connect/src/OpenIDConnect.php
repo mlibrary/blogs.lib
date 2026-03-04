@@ -4,12 +4,16 @@ namespace Drupal\openid_connect;
 
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\EmailValidatorInterface;
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Image\ImageFactory;
+use Drupal\Core\Image\ImageInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountInterface;
@@ -17,9 +21,12 @@ use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\externalauth\AuthmapInterface;
 use Drupal\externalauth\ExternalAuthInterface;
+use Drupal\file\FileInterface;
 use Drupal\file\FileRepositoryInterface;
 use Drupal\user\UserDataInterface;
 use Drupal\user\UserInterface;
+use GuzzleHttp\ClientInterface;
+use Symfony\Component\Mime\MimeTypes;
 
 /**
  * Main service of the OpenID Connect module.
@@ -126,6 +133,20 @@ class OpenIDConnect {
   protected $fileRepository;
 
   /**
+   * The HTTP client.
+   *
+   * @var \GuzzleHttp\ClientInterface
+   */
+  protected $httpClient;
+
+  /**
+   * The image factory service.
+   *
+   * @var \Drupal\Core\Image\ImageFactory
+   */
+  protected $imageFactory;
+
+  /**
    * Construct an instance of the OpenID Connect service.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -156,6 +177,10 @@ class OpenIDConnect {
    *   The OpenID Connect session service.
    * @param \Drupal\file\FileRepositoryInterface $fileRepository
    *   The file.repository service.
+   * @param \GuzzleHttp\ClientInterface $httpClient
+   *   The HTTP client.
+   * @param \Drupal\Core\Image\ImageFactory $imageFactory
+   *   The image.factory service.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
@@ -175,6 +200,8 @@ class OpenIDConnect {
     FileSystemInterface $fileSystem,
     OpenIDConnectSessionInterface $session,
     FileRepositoryInterface $fileRepository,
+    ClientInterface $httpClient,
+    ImageFactory $imageFactory,
   ) {
     $this->configFactory = $config_factory;
     $this->authmap = $authmap;
@@ -190,6 +217,8 @@ class OpenIDConnect {
     $this->fileSystem = $fileSystem;
     $this->session = $session;
     $this->fileRepository = $fileRepository;
+    $this->httpClient = $httpClient;
+    $this->imageFactory = $imageFactory;
   }
 
   /**
@@ -398,12 +427,24 @@ class OpenIDConnect {
           case UserInterface::REGISTER_VISITORS:
             // Create a new account if register settings is set to visitors or
             // override is active.
-            $account = $this->createUser($context['sub'], $context['userinfo'], $client->id());
+            try {
+              $account = $this->createUser($context['sub'], $context['userinfo'], $client->id());
+            }
+            catch (\RuntimeException $e) {
+              $this->messenger->addError($this->t('Account registration failed. The email address may already be in use or is invalid.'));
+              return FALSE;
+            }
             break;
 
           case UserInterface::REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL:
             // Create a new account and inform the user of the pending approval.
-            $account = $this->createUser($context['sub'], $context['userinfo'], $client->id(), 0);
+            try {
+              $account = $this->createUser($context['sub'], $context['userinfo'], $client->id(), 0);
+            }
+            catch (\RuntimeException $e) {
+              $this->messenger->addError($this->t('Account registration failed. The email address may already be in use or is invalid.'));
+              return FALSE;
+            }
             $this->messenger->addMessage($this->t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.'));
             break;
         }
@@ -534,6 +575,9 @@ class OpenIDConnect {
    *
    * @return \Drupal\user\UserInterface
    *   The user object.
+   *
+   * @throws \RuntimeException
+   *   When user validation fails (e.g., duplicate email address).
    */
   public function createUser(string $sub, array $userinfo, string $client_name, int $status = 1): UserInterface {
     $account_data = [
@@ -542,6 +586,35 @@ class OpenIDConnect {
       'init' => $userinfo['email'],
       'status' => $status,
     ];
+
+    // Validate the account data before passing to externalauth.
+    $tempAccount = $this->userStorage->create($account_data);
+    // Validate only the fields we're setting.
+    $fields_to_validate = ['name', 'mail'];
+    $violations = [];
+
+    foreach ($fields_to_validate as $field_name) {
+      if ($tempAccount->hasField($field_name)) {
+        $field_violations = $tempAccount->get($field_name)->validate();
+        if ($field_violations->count() > 0) {
+          foreach ($field_violations as $violation) {
+            $violations[] = $violation;
+          }
+        }
+      }
+    }
+
+    if (count($violations) > 0) {
+      $violation_messages = [];
+      foreach ($violations as $violation) {
+        $violation_messages[] = $violation->getMessage();
+      }
+      $this->logger->error('Failed to create user account for @email: @violations', [
+        '@email' => $userinfo['email'],
+        '@violations' => implode(', ', $violation_messages),
+      ]);
+      throw new \RuntimeException('User validation failed: ' . implode(', ', $violation_messages));
+    }
 
     return $this->externalAuth->register($sub, 'openid_connect.' . $client_name, $account_data);
   }
@@ -655,21 +728,16 @@ class OpenIDConnect {
                 break;
 
               case 'image':
-                // Create file object from remote URL.
-                $basename = explode('?', $this->fileSystem->basename($claim_value))[0];
-                $data = file_get_contents($claim_value);
+                $file = $this->getUserProfilePhoto($claim_value, $account);
+                // If the file is not valid, skip processing this claim.
+                if (is_null($file)) {
+                  continue 2;
+                }
 
-                $file = $this->fileRepository->writeData(
-                  $data,
-                  "public://user-picture-{$account->id()}-{$basename}"
-                );
-
-                // Cleanup the old file.
-                if ($file) {
-                  $old_file = $account->$property_name->entity;
-                  if ($old_file) {
-                    $old_file->delete();
-                  }
+                // Clean up the old file.
+                $old_file = $account->$property_name->entity;
+                if ($old_file instanceof FileInterface) {
+                  $old_file->delete();
                 }
 
                 $account->set($property_name, ['target_id' => $file->id()]);
@@ -762,6 +830,87 @@ class OpenIDConnect {
       }
     }
     return $token;
+  }
+
+  /**
+   * Retrieves and processes a user's profile photo from a given URL.
+   *
+   * @param string $profilePhotoUrl
+   *   The URL of the profile photo to download and process.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user account associated with the profile photo.
+   *
+   * @return \Drupal\file\FileInterface|null
+   *   A file entity representing the saved profile photo, or NULL if the
+   *   process failed or the URL is invalid.
+   */
+  protected function getUserProfilePhoto(
+    string $profilePhotoUrl,
+    AccountInterface $account,
+  ): ?FileInterface {
+    // Validate URL scheme and host.
+    UrlHelper::setAllowedProtocols(['https', 'http']);
+    $imageUrl = UrlHelper::stripDangerousProtocols($profilePhotoUrl);
+    if (!UrlHelper::isValid($imageUrl, TRUE)) {
+      $this->logger->warning('Invalid or unsafe picture URL provided: @url', ['@url' => $profilePhotoUrl]);
+      return NULL;
+    }
+
+    try {
+      $response = $this->httpClient->request('GET', $imageUrl, [
+        'timeout' => 10,
+        'connect_timeout' => 5,
+        'headers' => [
+          'User-Agent' => 'Drupal OpenID Connect',
+        ],
+        'max_redirects' => 3,
+        'allow_redirects' => [
+          'protocols' => ['https', 'http'],
+        ],
+      ]);
+
+      // Check the Content-Type header.
+      $content_type = $response->getHeaderLine('Content-Type');
+      if (!preg_match('/^image\//i', $content_type)) {
+        $this->logger->warning('Picture URL did not return an image content type: @type', ['@type' => $content_type]);
+        return NULL;
+      }
+
+      $data = $response->getBody()->getContents();
+
+      // Create a temp file and write the downloaded bytes
+      // to be able to validate the image is indeed an image.
+      $tmp_uri = 'temporary://oidc-temp-' . bin2hex(random_bytes(8));
+      $this->fileSystem->saveData($data, $tmp_uri, FileExists::Replace);
+
+      // Ask Drupal to interpret it as an image.
+      $image = $this->imageFactory->get($tmp_uri);
+
+      if (!$image instanceof ImageInterface || !$image->isValid()) {
+        $this->logger->warning('Picture URL content is not a valid image');
+        // Cleanup temp file.
+        $this->fileSystem->delete($tmp_uri);
+        return NULL;
+      }
+
+      // Get the file extension from the image mime type.
+      $extension = MimeTypes::getDefault()->getExtensions($image->getMimeType())[0] ?? 'png';
+      // Clean up the temporary file.
+      $this->fileSystem->delete($tmp_uri);
+    }
+    catch (\Exception $e) {
+      $this->logger->error('Failed to fetch picture from @url: @message', [
+        '@url' => $imageUrl,
+        '@message' => $e->getMessage(),
+      ]);
+
+      return NULL;
+    }
+
+    return $this->fileRepository->writeData(
+      $data,
+      sprintf('public://user-picture--%s.%s', $account->uuid(), $extension)
+    );
   }
 
 }

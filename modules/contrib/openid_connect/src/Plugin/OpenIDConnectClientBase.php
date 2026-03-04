@@ -199,6 +199,7 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
       'client_id' => '',
       'client_secret' => '',
       'iss_allowed_domains' => '',
+      'prompt' => ['login' => 'login'],
     ];
   }
 
@@ -245,6 +246,18 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
       '#type' => 'textarea',
       '#default_value' => $this->configuration['iss_allowed_domains'],
     ];
+    $form['prompt'] = [
+      '#title' => $this->t('Prompt'),
+      '#type' => 'checkboxes',
+      '#options' => [
+        'none' => $this->t('None'),
+        'login' => $this->t('Login'),
+        'consent' => $this->t('Consent'),
+        'select_account' => $this->t('Select account'),
+      ],
+      '#default_value' => array_filter(array_values($this->configuration['prompt'] ?? [])),
+      '#description' => $this->t('<strong><em>Please note:</em> This option has security implications.</strong><br />While valid, not selecting a prompt could lead to security issues and is discouraged in most use cases.'),
+    ];
     return $form;
   }
 
@@ -259,7 +272,15 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
-    // Empty function. Can be overridden by derived classes if required.
+    $configuration = $form_state->getValues();
+
+    // Validate that 'none' prompt is not selected with other values.
+    if (isset($configuration['prompt']) && is_array($configuration['prompt'])) {
+      $prompt_values = array_filter($configuration['prompt']);
+      if (isset($prompt_values['none']) && count($prompt_values) > 1) {
+        $form_state->setErrorByName('prompt', $this->t('The "None" option cannot be selected with other values.'));
+      }
+    }
   }
 
   /**
@@ -307,7 +328,7 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
    *   Array with URL options.
    */
   protected function getUrlOptions(string $scope, GeneratedUrl $redirect_uri): array {
-    return [
+    $return = [
       'query' => [
         'client_id' => $this->configuration['client_id'],
         'response_type' => 'code',
@@ -316,6 +337,15 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
         'state' => $this->stateToken->generateToken(),
       ],
     ];
+
+    // The prompt is optional. Only include it if settings are available.
+    if (
+      isset($this->configuration['prompt']) &&
+      count($this->configuration['prompt']) > 0
+    ) {
+      $return['query']['prompt'] = implode(' ', array_filter($this->configuration['prompt']));
+    }
+    return $return;
   }
 
   /**

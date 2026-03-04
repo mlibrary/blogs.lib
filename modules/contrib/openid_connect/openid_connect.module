@@ -8,7 +8,6 @@
 /* @noinspection PhpUnnecessaryFullyQualifiedNameInspection */
 /* @noinspection PhpUnused */
 
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
@@ -84,8 +83,18 @@ function openid_connect_user_format_name_alter(&$name, $account) {
  * Implements hook_form_FORM_ID_alter() for user_form.
  */
 function openid_connect_form_user_form_alter(&$form, &$form_state) {
+  $currentUser = \Drupal::currentUser();
+  $account = $form_state->getFormObject()->getEntity();
+
+  // Do not act when creating account for another user
+  // or when editing another user account.
+  if ($account->isNew() ||
+    $account->id() !== $currentUser->id()
+  ) {
+    return;
+  }
   // Whether the current user is allowed to change its password.
-  if (\Drupal::service('openid_connect.openid_connect')->hasSetPasswordAccess()) {
+  if (\Drupal::service('openid_connect.openid_connect')->hasSetPasswordAccess($currentUser)) {
     return;
   }
 
@@ -161,10 +170,13 @@ function _openid_connect_user_pass_form_validate(array &$form, FormStateInterfac
  * Implements hook_form_FORM_ID_alter() for user_login_form.
  */
 function openid_connect_form_user_login_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  /** @var \Drupal\Core\Render\RendererInterface $renderer */
+  $renderer = \Drupal::service('renderer');
   $openIdConfig = \Drupal::config('openid_connect.settings');
 
+  // Add cacheable dependency on the form.
+  $renderer->addCacheableDependency($form, $openIdConfig);
   $user_login_display = $openIdConfig->get('user_login_display');
-  $form['#cache']['tags'] = Cache::mergeTags($form['#cache']['tags'], $openIdConfig->getCacheTags());
 
   if ($user_login_display != 'hidden') {
     $openid_form = \Drupal::formBuilder()->getForm('Drupal\openid_connect\Form\OpenIDConnectLoginForm');
@@ -184,7 +196,17 @@ function openid_connect_form_user_login_form_alter(&$form, FormStateInterface $f
           // Replace the user login form with the IDP login button.
           $form = $openid_form;
         }
-        $form['#cache']['contexts'][] = 'url.query_args:showcore';
+
+        $form = $renderer->mergeBubbleableMetadata($form, [
+          '#cache' => [
+            'contexts' => ['url.query_args:showcore'],
+          ],
+        ]);
+        break;
+
+      case 'force_replace':
+        // Replace the user login form with the IDP login button.
+        $form = $openid_form;
         break;
     }
   }

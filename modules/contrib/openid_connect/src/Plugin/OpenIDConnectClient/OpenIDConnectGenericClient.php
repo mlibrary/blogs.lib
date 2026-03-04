@@ -133,9 +133,8 @@ class OpenIDConnectGenericClient extends OpenIDConnectClientBase {
     // value of the issuer_url setting.
     $this->unsetConfigurationKeys(['use_well_known']);
 
-    if (!empty($configuration['scopes'])) {
-      $this->setConfiguration(['scopes' => explode(' ', $configuration['scopes'])]);
-    }
+    // Ensure that the scopes are stored as an array.
+    $this->setConfiguration(['scopes' => array_filter(explode(' ', $configuration['scopes']))]);
 
     parent::submitConfigurationForm($form, $form_state);
   }

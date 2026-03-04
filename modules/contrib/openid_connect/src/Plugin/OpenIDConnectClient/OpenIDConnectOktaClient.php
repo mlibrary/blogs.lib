@@ -68,9 +68,8 @@ class OpenIDConnectOktaClient extends OpenIDConnectClientBase {
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
     $configuration = $form_state->getValues();
-    if (!empty($configuration['scopes'])) {
-      $this->setConfiguration(['scopes' => explode(' ', $configuration['scopes'])]);
-    }
+    // Ensure that the scopes are stored as an array.
+    $this->setConfiguration(['scopes' => array_filter(explode(' ', $configuration['scopes']))]);
 
     parent::submitConfigurationForm($form, $form_state);
   }

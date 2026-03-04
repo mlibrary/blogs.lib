@@ -12,7 +12,6 @@ use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Logger\LoggerChannelTrait;
 use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\Routing\Access\AccessInterface;
-use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
@@ -23,6 +22,7 @@ use Drupal\openid_connect\OpenIDConnectClientEntityInterface;
 use Drupal\openid_connect\OpenIDConnectSessionInterface;
 use Drupal\openid_connect\OpenIDConnectStateTokenInterface;
 use Drupal\openid_connect\Plugin\OpenIDConnectClientInterface;
+use Drupal\openid_connect\Service\LogoutService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -119,6 +119,13 @@ class OpenIDConnectRedirectController implements ContainerInjectionInterface, Ac
   protected $claims;
 
   /**
+   * The logout service.
+   *
+   * @var \Drupal\openid_connect\Service\LogoutService
+   */
+  protected $openIdLogoutService;
+
+  /**
    * The constructor.
    *
    * @param \Drupal\openid_connect\OpenIDConnect $openid_connect
@@ -143,8 +150,23 @@ class OpenIDConnectRedirectController implements ContainerInjectionInterface, Ac
    *   The entity type manager.
    * @param \Drupal\openid_connect\OpenIDConnectClaims $claims
    *   The OpenID claims service.
+   * @param \Drupal\openid_connect\Service\LogoutService $openid_logout_service
+   *   The logout service for openid connect.
    */
-  public function __construct(OpenIDConnect $openid_connect, OpenIDConnectStateTokenInterface $state_token, RequestStack $request_stack, OpenIDConnectSessionInterface $session, ConfigFactoryInterface $config_factory, AuthmapInterface $authmap, AccountProxyInterface $current_user, ModuleHandlerInterface $module_handler, LanguageManagerInterface $language_manager, EntityTypeManagerInterface $entity_type_manager, OpenIDConnectClaims $claims) {
+  public function __construct(
+    OpenIDConnect $openid_connect,
+    OpenIDConnectStateTokenInterface $state_token,
+    RequestStack $request_stack,
+    OpenIDConnectSessionInterface $session,
+    ConfigFactoryInterface $config_factory,
+    AuthmapInterface $authmap,
+    AccountProxyInterface $current_user,
+    ModuleHandlerInterface $module_handler,
+    LanguageManagerInterface $language_manager,
+    EntityTypeManagerInterface $entity_type_manager,
+    OpenIDConnectClaims $claims,
+    LogoutService $openid_logout_service,
+  ) {
     $this->openIDConnect = $openid_connect;
     $this->stateToken = $state_token;
     $this->requestStack = $request_stack;
@@ -156,6 +178,7 @@ class OpenIDConnectRedirectController implements ContainerInjectionInterface, Ac
     $this->languageManager = $language_manager;
     $this->entityTypeManager = $entity_type_manager;
     $this->claims = $claims;
+    $this->openIdLogoutService = $openid_logout_service;
   }
 
   /**
@@ -173,7 +196,8 @@ class OpenIDConnectRedirectController implements ContainerInjectionInterface, Ac
       $container->get('module_handler'),
       $container->get('language_manager'),
       $container->get('entity_type.manager'),
-      $container->get('openid_connect.claims')
+      $container->get('openid_connect.claims'),
+      $container->get('Drupal\openid_connect\Service\LogoutService')
     );
   }
 
@@ -408,64 +432,9 @@ class OpenIDConnectRedirectController implements ContainerInjectionInterface, Ac
   /**
    * Redirect after logout.
    */
-  public function redirectLogout() {
-    // Set default URL.
-    $language = $this->languageManager->getCurrentLanguage();
-    $default_url = Url::fromRoute('<front>', [], ['language' => $language])->toString(TRUE);
-    $response = new RedirectResponse($default_url->getGeneratedUrl());
-
-    // @todo The fact that the user has a connected account doesn't necessarily
-    //   mean that it was used for the login. This info should probably be kept
-    //   in the session.
-    // Get client names for this user based on its username.
-    $mapped_users = $this->authmap->getAll($this->currentUser->id());
-    if (is_array($mapped_users) & !empty($mapped_users)) {
-      foreach (array_keys($mapped_users) as $key) {
-        // strlen('openid_connect.') = 15.
-        $client_name = substr($key, 15);
-
-        // Perform log out.
-        if (!empty($client_name)) {
-          /** @var \Drupal\openid_connect\Entity\OpenIDConnectClientEntity $entity */
-          $entity = current($this->entityTypeManager->getStorage('openid_connect_client')->loadByProperties(['id' => $client_name]));
-          if ($entity) {
-            $endpoints = $entity->getPlugin()->getEndpoints();
-
-            $config = $this->configFactory->get('openid_connect.settings');
-
-            $redirect_logout = $config->get('redirect_logout');
-            $redirect_logout_url = empty($redirect_logout) ? FALSE : Url::fromUri('internal:/' . ltrim($redirect_logout, '/'), ['language' => $language]);
-
-            // Destroy session if provider supports it.
-            $end_session_enabled = $config->get('end_session_enabled') ?? FALSE;
-            if ($end_session_enabled && !empty($endpoints['end_session'])) {
-              $url_options = [
-                'query' => ['id_token_hint' => $this->session->retrieveIdToken()],
-              ];
-              if ($redirect_logout_url) {
-                $url_options['query']['post_logout_redirect_uri'] = $redirect_logout_url->setAbsolute()->toString(TRUE)->getGeneratedUrl();
-              }
-              $redirect = Url::fromUri($endpoints['end_session'], $url_options)->toString(TRUE);
-              $response = new TrustedRedirectResponse($redirect->getGeneratedUrl());
-              $response->addCacheableDependency($redirect);
-            }
-            else {
-              if (!$end_session_enabled) {
-                $this->messenger()->addWarning($this->t('@provider does not support log out. You are logged out of this site but not out of the OpenID Connect provider.', ['@provider' => $entity->label()]));
-              }
-              if ($redirect_logout_url) {
-                $url = $redirect_logout_url->toString(TRUE)->getGeneratedUrl();
-                $response = new TrustedRedirectResponse($url);
-                $response->addCacheableDependency($url);
-              }
-            }
-            $rsp = ['response' => &$response];
-            $context = ['client' => $client_name];
-            $this->moduleHandler->alter('openid_connect_redirect_logout', $rsp, $context);
-          }
-        }
-      }
-    }
+  public function redirectLogout(): RedirectResponse {
+    // Get the expected redirect response.
+    $response = $this->openIdLogoutService->getLogoutRedirectResponse();
     // Logout from Drupal.
     user_logout();
     return $response;

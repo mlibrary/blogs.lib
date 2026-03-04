@@ -68,6 +68,12 @@ openid_connect.client.plugin.*:
     iss_allowed_domains:
       type: string
       label: 'Domains that are allowed to initiate SSO using ISS'
+    prompt:
+      type: sequence
+      label: 'Prompt'
+      sequence:
+        type: string
+        label: 'Prompt option'
 
 openid_connect.client.plugin.facebook:
   type: mapping

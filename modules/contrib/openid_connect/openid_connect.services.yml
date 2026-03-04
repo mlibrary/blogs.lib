@@ -26,7 +26,13 @@ services:
 
   openid_connect.auto_login:
     class: Drupal\openid_connect\EventSubscriber\OpenIDConnectAutoLogin
-    arguments: ['@current_user', '@plugin.manager.openid_connect_client', '@config.factory', '@logger.factory']
+    arguments:
+      - '@current_user'
+      - '@plugin.manager.openid_connect_client'
+      - '@config.factory'
+      - '@logger.factory'
+      - '@openid_connect.claims'
+      - '@openid_connect.session'
     tags:
       - { name: event_subscriber }
 
@@ -37,3 +43,8 @@ services:
   openid_connect.autodiscover:
     class: Drupal\openid_connect\OpenIDConnectAutoDiscover
   Drupal\openid_connect\OpenIDConnectAutoDiscover: '@openid_connect.autodiscover'
+
+  Drupal\openid_connect\Service\LogoutService:
+    arguments:
+      # Wire arguments manually until externalauth provides autowiring aliases.
+      $authmap: '@externalauth.authmap'

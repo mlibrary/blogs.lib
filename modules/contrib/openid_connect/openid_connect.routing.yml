@@ -81,8 +81,17 @@ openid_connect.logout:
     _title: 'End session'
   requirements:
     _user_is_logged_in: 'TRUE'
+    _csrf_token: 'TRUE'
   options:
     no_cache: TRUE
+    _csrf_confirm_form_route: 'openid_connect.logout.confirm'
+
+openid_connect.logout.confirm:
+  path: '/user/logout/confirm'
+  defaults:
+    _form: '\Drupal\openid_connect\Form\UserLogoutConfirmation'
+  requirements:
+    _user_is_logged_in: 'TRUE'
 
 openid_connect.login:
   path: '/user/login/openid_connect'

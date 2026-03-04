@@ -142,8 +142,9 @@ class OpenIDConnectSettingsForm extends ConfigFormBase {
         'above' => $this->t('Above'),
         'below' => $this->t('Below'),
         'replace' => $this->t('Replace'),
+        'force_replace' => $this->t('Force replace'),
       ],
-      '#description' => $this->t("Modify the user login form to show the the OpenID login buttons. If the 'Replace' option is selected, only the OpenID buttons will be displayed. In this case, pass the 'showcore' URL parameter to return to a password-based login form."),
+      '#description' => $this->t("Modify the user login form to show the the OpenID login buttons. If the 'Replace' option is selected, only the OpenID buttons will be displayed. In this case, pass the 'showcore' URL parameter to return to a password-based login form. The 'Force replace' option behaves like the 'Replace' option but cannot be overridden with the 'showcore' URL parameter."),
       '#default_value' => $settings->get('user_login_display'),
     ];
 
@@ -250,7 +251,7 @@ class OpenIDConnectSettingsForm extends ConfigFormBase {
 
     $role_mappings = [];
     foreach ($form_state->getValue('role_mappings') as $role => $mapping) {
-      $values = array_values(array_filter(str_getcsv($mapping, ' ')));
+      $values = array_values(array_filter(str_getcsv($mapping, ' ', '"', "\\")));
       if (!empty($values)) {
         $role_mappings[$role] = $values;
       }

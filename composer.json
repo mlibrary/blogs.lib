@@ -196,9 +196,6 @@
             "https://www.drupal.org/node/2985168": "https://www.drupal.org/files/issues/2023-12-18/2985168-172.patch",
             "handle form validation on og_autocomplete": "patches/og_autocomplete_no_error.patch"
           },
-          "drupal/openid_connect": {
-            "https://www.drupal.org/node/3011413": "https://www.drupal.org/files/issues/2023-06-05/openid_connect-autologin-3011413-94.patch"
-          },
           "drupal/og": {
             "allow membership lookup in hooks": "patches/og-get-memberships.patch",
             "add word email to subscribe": "patches/add-word-email-to-og-subscribe.patch",
