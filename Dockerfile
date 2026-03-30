@@ -2,7 +2,7 @@
 #FROM drupal:9-apache
 
 # from https://www.drupal.org/docs/system-requirements/php-requirements
-FROM php:8.3.20-apache-bullseye
+FROM php:8.3.20-apache-bullseye@sha256:9bbb76480c98b448647e2c9099628c3240b79a28a09a5fe49d1afdfd606e17ce
 
 # install the PHP extensions we need
 RUN set -eux; \
