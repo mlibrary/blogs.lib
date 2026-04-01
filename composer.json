@@ -88,7 +88,6 @@
         "drupal/file_entity": "^2.0@beta",
         "drupal/force_users_logout": "^2.0",
         "drupal/google_analytics": "^4.0",
-        "drupal/group": "^1.4",
         "drupal/image_resize_filter": "^1.2",
         "drupal/jquery_ui_accordion": "^2.0",
         "drupal/jquery_ui_datepicker": "^2.0",

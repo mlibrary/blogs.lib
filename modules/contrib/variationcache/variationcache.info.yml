@@ -1,9 +1,0 @@
-name: 'VariationCache'
-description: 'Provides VariationCache, a redirect-aware caching implementation.'
-type: 'module'
-core_version_requirement: ^9.5 || ^10
-
-# Information added by Drupal.org packaging script on 2024-01-17
-version: '8.x-1.5'
-project: 'variationcache'
-datestamp: 1705485390
