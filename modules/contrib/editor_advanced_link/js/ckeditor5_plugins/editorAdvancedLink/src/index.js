@@ -1,14 +1,14 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Plugin } from 'ckeditor5/src/core';
 import EditorAdvancedLinkEditing from './editoradvancedlinkediting';
-import EditorAdvancedLinkUi from './editoradvancedlinkui';
+import EditorAdvancedLinkUI from './editoradvancedlinkui';
 
 class EditorAdvancedLink extends Plugin {
   /**
    * @inheritdoc
    */
   static get requires() {
-    return [EditorAdvancedLinkEditing, EditorAdvancedLinkUi];
+    return [EditorAdvancedLinkEditing, EditorAdvancedLinkUI];
   }
 
   /**

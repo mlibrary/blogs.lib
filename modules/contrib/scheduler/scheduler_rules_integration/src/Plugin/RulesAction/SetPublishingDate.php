@@ -7,6 +7,8 @@ use Drupal\Core\Entity\EntityInterface;
 /**
  * Provides a 'Set date for scheduled publishing' action.
  *
+ * SchedulerRulesActionsTest provides test coverage.
+ *
  * @RulesAction(
  *   id = "scheduler_set_publishing_date",
  *   deriver = "Drupal\scheduler_rules_integration\Plugin\RulesAction\SchedulerRulesActionDeriver"
@@ -23,9 +25,9 @@ class SetPublishingDate extends SchedulerRulesActionBase {
    *   The date for publishing.
    */
   public function doExecute(EntityInterface $entity, $date) {
-    $config = \Drupal::config('scheduler.settings');
+    $default_publish_enable = $this->schedulerManager->setting('default_publish_enable');
     $bundle_field = $entity->getEntityType()->get('entity_keys')['bundle'];
-    if ($entity->$bundle_field->entity->getThirdPartySetting('scheduler', 'publish_enable', $config->get('default_publish_enable'))) {
+    if ($entity->$bundle_field->entity->getThirdPartySetting('scheduler', 'publish_enable', $default_publish_enable)) {
       $entity->set('publish_on', $date);
       // When this action is invoked and it operates on the entity being edited
       // then hook_entity_presave() will be executed automatically. But if this

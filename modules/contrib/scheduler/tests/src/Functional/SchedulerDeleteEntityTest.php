@@ -2,6 +2,9 @@
 
 namespace Drupal\Tests\scheduler\Functional;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+
 /**
  * Tests deletion of entities enabled for Scheduler.
  *
@@ -10,6 +13,7 @@ namespace Drupal\Tests\scheduler\Functional;
  *
  * @group scheduler
  */
+#[Group('scheduler')]
 class SchedulerDeleteEntityTest extends SchedulerBrowserTestBase {
 
   /**
@@ -23,6 +27,7 @@ class SchedulerDeleteEntityTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataStandardEntityTypes
    */
+  #[DataProvider('dataStandardEntityTypes')]
   public function testDeleteEntityWhenSchedulingIsRequired($entityTypeId, $bundle) {
     // Log in.
     $this->drupalLogin($this->adminUser);
@@ -69,6 +74,7 @@ class SchedulerDeleteEntityTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataStandardEntityTypes
    */
+  #[DataProvider('dataStandardEntityTypes')]
   public function testDeleteEntityWithPastDates($entityTypeId, $bundle) {
     // Log in.
     $this->drupalLogin($this->adminUser);

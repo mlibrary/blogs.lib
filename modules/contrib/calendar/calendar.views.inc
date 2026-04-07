@@ -43,7 +43,7 @@ function _calendar_create_field_arguments($field_id, $group = '') {
   $granularity_args = [];
   // All other granularity types are added by core.
   $granularity_types = [
-    'year_week' => t('Date in the form of YYYYW'),
+    'year_week' => t('Date using ISO week year format (oW)'),
   ];
   foreach ($granularity_types as $granularity_type => $granularity_label) {
 
@@ -75,7 +75,7 @@ function calendar_field_views_data_alter(array &$data, FieldStorageConfigInterfa
       $group = $data[$table_name][$field_storage->getName() . '_value']['group'];
       $arguments = [
         // Argument type => help text.
-        'year_week' => t('Calendar Date in the form of CCYYW.'),
+        'year_week' => t('Calendar date using ISO week year format (oW).'),
       ];
       foreach ($arguments as $argument_type => $help_text) {
         $data[$table_name][$field_storage->getName() . '_value_' . $argument_type] = [

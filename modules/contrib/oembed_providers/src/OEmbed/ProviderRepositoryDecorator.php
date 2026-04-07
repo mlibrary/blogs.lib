@@ -113,7 +113,7 @@ final class ProviderRepositoryDecorator implements ProviderRepositoryInterface {
    * @param int $max_age
    *   (optional) How long the cache data should be kept. Defaults to a week.
    */
-  public function __construct(ProviderRepositoryInterface $decorated, EntityTypeManagerInterface $entity_type_manager, ClientInterface $http_client, ConfigFactoryInterface $config_factory, TimeInterface $time, KeyValueFactoryInterface $key_value_factory = NULL, LoggerChannelFactoryInterface $logger_factory = NULL, ModuleHandlerInterface $module_handler, $max_age = 604800) {
+  public function __construct(ProviderRepositoryInterface $decorated, EntityTypeManagerInterface $entity_type_manager, ClientInterface $http_client, ConfigFactoryInterface $config_factory, TimeInterface $time, KeyValueFactoryInterface $key_value_factory, LoggerChannelFactoryInterface $logger_factory, ModuleHandlerInterface $module_handler, $max_age = 604800) {
     $this->decorated = $decorated;
     $this->oembedProviderStorage = $entity_type_manager->getStorage('oembed_provider');
     $this->httpClient = $http_client;

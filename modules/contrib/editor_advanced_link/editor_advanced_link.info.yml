@@ -7,7 +7,7 @@ dependencies:
 test_dependencies:
   - drupal:ckeditor
 
-# Information added by Drupal.org packaging script on 2025-07-08
-version: '2.3.1'
+# Information added by Drupal.org packaging script on 2026-01-19
+version: '2.3.4'
 project: 'editor_advanced_link'
-datestamp: 1751979924
+datestamp: 1768830977

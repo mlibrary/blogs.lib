@@ -599,6 +599,7 @@ function _custom_blogs_remove_membership_roles($memberships, $roles, $gid, $user
     }
   }
   $all_roles = array_unique($all_roles);
+  $roles ??= [];
   $user_roles = array_diff($roles, $all_roles);
   foreach ($user_roles as $role) {
     $user->removeRole($role);

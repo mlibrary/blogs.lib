@@ -2,11 +2,14 @@
 
 namespace Drupal\Tests\scheduler\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+
 /**
  * Tests the modules primary functions with a Media entity type.
  *
  * @group scheduler
  */
+#[Group('scheduler')]
 class SchedulerBasicMediaTest extends SchedulerBrowserTestBase {
 
   /**

@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\scheduler\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+
 /**
  * Tests the admin settings page of Scheduler.
  *
@@ -11,10 +13,18 @@ namespace Drupal\Tests\scheduler\Functional;
  *
  * @group scheduler
  */
+#[Group('scheduler')]
 class SchedulerAdminSettingsTest extends SchedulerBrowserTestBase {
 
   /**
-   * Test the admin settings page.
+   * Additional modules required.
+   *
+   * @var array
+   */
+  protected static $modules = ['language'];
+
+  /**
+   * Test the Scheduler admin settings page.
    */
   public function testAdminSettings() {
     $this->drupalLogin($this->adminUser);
@@ -94,6 +104,18 @@ class SchedulerAdminSettingsTest extends SchedulerBrowserTestBase {
 
     // Show the status report, which includes the Scheduler timecheck.
     $this->drupalGet('admin/reports/status');
+  }
+
+  /**
+   * Test the Content Language form.
+   */
+  public function testContentLanguage() {
+    $this->drupalLogin($this->adminUser);
+    $this->addPermissionsToUser($this->adminUser, ['administer languages']);
+    $this->drupalGet('/admin/config/regional/content-language');
+    $this->assertSession()->statusCodeEquals(200);
+    $this->submitForm([], 'Save configuration');
+    $this->assertSession()->pageTextNotContains('error');
   }
 
 }

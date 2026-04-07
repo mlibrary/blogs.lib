@@ -64,10 +64,29 @@ class LinkAttributesManager extends DefaultPluginManager implements PluginManage
     }
     // Translate options.
     if (!empty($definition['options'])) {
-      foreach ($definition['options'] as $property => $option) {
-        $definition['options'][$property] = new TranslatableMarkup($option); // phpcs:ignore
-      }
+      $definition['options'] = $this->translateOptions($definition['options']);
     }
+  }
+
+  /**
+   * Translate options, preserving optgroups.
+   *
+   * @param array<string,mixed> $options
+   *   Array of options, possibly grouped.
+   *
+   * @return array<string,mixed>
+   *   Array with optgroups and option values translated.
+   */
+  private function translateOptions(array $options): array {
+    $translated = [];
+    foreach ($options as $property => $option) {
+      if (is_array($option)) {
+        $translated[(string) new TranslatableMarkup($property)] = $this->translateOptions($option); // phpcs:ignore
+        continue;
+      }
+      $translated[$property] = new TranslatableMarkup($option); // phpcs:ignore
+    }
+    return $translated;
   }
 
 }

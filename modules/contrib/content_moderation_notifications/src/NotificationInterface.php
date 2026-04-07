@@ -24,9 +24,6 @@ interface NotificationInterface {
    *   The entity we may be moderating.
    * @param \Drupal\content_moderation_notifications\ContentModerationNotificationInterface[] $notifications
    *   List of content moderation notification entities.
-   *
-   * @return bool
-   *   TRUE if this entity is moderated, FALSE otherwise.
    */
   public function sendNotification(EntityInterface $entity, array $notifications);
 

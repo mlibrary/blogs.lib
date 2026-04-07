@@ -39,6 +39,7 @@ return array(
     'Drupal\\Core\\DrupalKernelInterface' => $baseDir . '/core/lib/Drupal/Core/DrupalKernelInterface.php',
     'Drupal\\Core\\Installer\\InstallerRedirectTrait' => $baseDir . '/core/lib/Drupal/Core/Installer/InstallerRedirectTrait.php',
     'Drupal\\Core\\Site\\Settings' => $baseDir . '/core/lib/Drupal/Core/Site/Settings.php',
+    'NoDiscard' => $vendorDir . '/symfony/polyfill-php85/Resources/stubs/NoDiscard.php',
     'Normalizer' => $vendorDir . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
     'OS_Guess' => $vendorDir . '/pear/pear-core-minimal/src/OS/Guess.php',
     'Override' => $vendorDir . '/symfony/polyfill-php83/Resources/stubs/Override.php',

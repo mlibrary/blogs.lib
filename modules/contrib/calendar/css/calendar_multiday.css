@@ -122,8 +122,9 @@
   margin: 0;
   padding: 0.125em 0.25em 0 0.25em;
   text-align: center;
-  border: 1px solid gray;
   border-width: 0 0 1px 1px;
+  border-style: solid;
+  border-color: gray;
   background-color: #f3f3f3;
 }
 /**
@@ -546,12 +547,7 @@ table.calendar-legend tr.even .stripe {
   padding: 0 3px;
   background: #ffc;
 }
-.calendar-calendar
-  .month-view
-  .full
-  td.single-day
-  .calendar-more
-  div.monthview {
+.calendar-calendar .month-view .full td.single-day .calendar-more div.monthview {
   background: none;
 }
 .calendar-calendar .day-view td div.dayview {
@@ -583,22 +579,12 @@ table.calendar-legend tr.even .stripe {
 .calendar-calendar .week-view .full td.multi-day div.weekview {
   margin-bottom: 2px;
 }
-.calendar-calendar
-  .month-view
-  .full
-  td.multi-day
-  .calendar.monthview
-  .view-field {
+.calendar-calendar .month-view .full td.multi-day .calendar.monthview .view-field {
   float: left;
   margin-right: 3px;
   white-space: nowrap;
 }
-.calendar-calendar
-  .week-view
-  .full
-  td.multi-day
-  .calendar.weekview
-  .view-field {
+.calendar-calendar .week-view .full td.multi-day .calendar.weekview .view-field {
   display: inline;
   margin-right: 3px;
   white-space: nowrap;
@@ -628,31 +614,13 @@ table.calendar-legend tr.even .stripe {
 .calendar-calendar .full td.single-day .cutoff {
   display: none;
 }
-.calendar-calendar
-  .month-view
-  .full
-  td.multi-day
-  .inner
-  .monthview
-  .continuation,
-.calendar-calendar
-  .week-view
-  .full
-  td.multi-day
-  .inner
-  .weekview
-  .continuation {
+.calendar-calendar .month-view .full td.multi-day .inner .monthview .continuation,
+.calendar-calendar .week-view .full td.multi-day .inner .weekview .continuation {
   float: left;
   height: 1.9em;
   margin-right: 3px;
 }
-.calendar-calendar
-  .week-view
-  .full
-  td.multi-day
-  .inner
-  .weekview
-  .continuation {
+.calendar-calendar .week-view .full td.multi-day .inner .weekview .continuation {
   height: 2.75em;
   margin-right: 8px;
   padding-top: 0.75em;
@@ -706,7 +674,6 @@ table.calendar-legend tr.even .stripe {
 }
 .view .date-nav-wrapper .date-nav {
   position: relative;
-  height: 30px;
   height: auto;
   min-height: 30px;
   margin-bottom: 10px;

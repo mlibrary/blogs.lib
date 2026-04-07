@@ -46,10 +46,10 @@ Visit https://www.drupal.org/node/1897420 for further information.
 
 ## CONFIGURATION
 
-Install module and follow the insturctions:
+Install module and follow the instructions:
 
 - go to the "Text formats and editor" admin page (admin/config/content/formats)
 - manage text format
 - if the "Limit allowed HTML tags and correct faulty HTML" filter is enabled, 
   add the "title", "class", "id", "target" and/or the "rel" attributes to the
-  "allowed HTML tags" field (only those whitelisted will show up in the dialog).
+  "allowed HTML tags" field (only those allowed will show up in the dialog).

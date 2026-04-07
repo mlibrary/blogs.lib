@@ -2,13 +2,43 @@
 
 namespace Drupal\scheduler\Plugin\Validation\Constraint;
 
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\scheduler\SchedulerManager;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
 /**
  * Validates the SchedulerUnpublishOn constraint.
+ *
+ * SchedulerPastDatesTest, SchedulerRequiredTest and SchedulerValidationTest
+ * provide test coverage.
  */
-class SchedulerUnpublishOnConstraintValidator extends ConstraintValidator {
+class SchedulerUnpublishOnConstraintValidator extends ConstraintValidator implements ContainerInjectionInterface {
+
+  /**
+   * The Scheduler manager service.
+   *
+   * @var \Drupal\scheduler\SchedulerManager
+   */
+  protected $schedulerManager;
+
+  /**
+   * Constructs a ConfigExistsConstraintValidator object.
+   *
+   * @param \Drupal\scheduler\SchedulerManager $scheduler_manager
+   *   The Scheduler manager service.
+   */
+  public function __construct(SchedulerManager $scheduler_manager) {
+    $this->schedulerManager = $scheduler_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static($container->get('scheduler.manager'));
+  }
 
   /**
    * {@inheritdoc}
@@ -16,12 +46,12 @@ class SchedulerUnpublishOnConstraintValidator extends ConstraintValidator {
   public function validate($entity, Constraint $constraint) {
 
     // If the content type is not enabled for unpublishing then exit early.
-    if (!\Drupal::service('scheduler.manager')->getThirdPartySetting($entity->getEntity(), 'unpublish_enable', FALSE)) {
+    if (!$this->schedulerManager->getThirdPartySetting($entity->getEntity(), 'unpublish_enable', FALSE)) {
       return;
     }
 
-    $default_unpublish_required = \Drupal::config('scheduler.settings')->get('default_unpublish_required');
-    $scheduler_unpublish_required = \Drupal::service('scheduler.manager')->getThirdPartySetting($entity->getEntity(), 'unpublish_required', $default_unpublish_required);
+    $default_unpublish_required = $this->schedulerManager->setting('default_unpublish_required');
+    $scheduler_unpublish_required = $this->schedulerManager->getThirdPartySetting($entity->getEntity(), 'unpublish_required', $default_unpublish_required);
     $publish_on = $entity->getEntity()->publish_on->value;
     $unpublish_on = $entity->value;
     $status = $entity->getEntity()->status->value;
@@ -46,7 +76,7 @@ class SchedulerUnpublishOnConstraintValidator extends ConstraintValidator {
     // Check that the unpublish-on date is in the future. Unlike the publish-on
     // field, there is no option to use a past date, as this is not relevant for
     // unpublishing. The date must ALWAYS be in the future if it is entered.
-    if ($unpublish_on && $unpublish_on < \Drupal::time()->getRequestTime()) {
+    if ($unpublish_on && $unpublish_on < $this->schedulerManager->time->getRequestTime()) {
       $this->context->buildViolation($constraint->messageUnpublishOnDateNotInFuture)
         ->atPath('unpublish_on')
         ->addViolation();

@@ -2,10 +2,12 @@
 
 namespace Drupal\file_entity\Plugin\Field\FieldFormatter;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Render\Element;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 
 /**
  * Implementation of the 'filesize' formatter for the file_entity files.
@@ -40,9 +42,15 @@ class FileSizeFormatter extends FormatterBase {
       return $elements;
     }
 
+    $is_newer = version_compare(\Drupal::VERSION, '10.2.0', '>=');
     foreach ($files as $delta => $file) {
+      $size = (int) $file->getSize();
+      $langcode = $file->language()->getId();
+
       $elements[$delta] = [
-        '#markup' => \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.2.0', fn() => \Drupal\Core\StringTranslation\ByteSizeMarkup::create($file->getSize(), $file->language()->getId()), fn() => format_size($file->getSize(), $file->language()->getId())),
+        '#markup' => $is_newer
+          ? ByteSizeMarkup::create($size, $langcode)
+          : format_size($size, $langcode),
       ];
     }
 

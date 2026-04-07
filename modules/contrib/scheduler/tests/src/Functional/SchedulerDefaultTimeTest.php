@@ -2,6 +2,9 @@
 
 namespace Drupal\Tests\scheduler\Functional;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+
 /**
  * Tests the default time functionality.
  *
@@ -12,6 +15,7 @@ namespace Drupal\Tests\scheduler\Functional;
  *
  * @group scheduler
  */
+#[Group('scheduler')]
 class SchedulerDefaultTimeTest extends SchedulerBrowserTestBase {
 
   /**
@@ -65,6 +69,7 @@ class SchedulerDefaultTimeTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataStandardEntityTypes
    */
+  #[DataProvider('dataStandardEntityTypes')]
   public function testDefaultTime($entityTypeId, $bundle) {
     $this->drupalLogin($this->schedulerUser);
     $config = $this->config('scheduler.settings');
@@ -138,6 +143,7 @@ class SchedulerDefaultTimeTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataStandardEntityTypes
    */
+  #[DataProvider('dataStandardEntityTypes')]
   public function testDefaultWithHiddenTime($entityTypeId, $bundle) {
     \Drupal::service('module_installer')->install(['scheduler_extras']);
     $titleField = $this->titleField($entityTypeId);

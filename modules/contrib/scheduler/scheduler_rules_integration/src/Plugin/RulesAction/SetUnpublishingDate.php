@@ -7,6 +7,8 @@ use Drupal\Core\Entity\EntityInterface;
 /**
  * Provides a 'Set date for scheduled unpublishing' action.
  *
+ * SchedulerRulesActionsTest provides test coverage.
+ *
  * @RulesAction(
  *   id = "scheduler_set_unpublishing_date",
  *   deriver = "Drupal\scheduler_rules_integration\Plugin\RulesAction\SchedulerRulesActionDeriver"
@@ -23,9 +25,9 @@ class SetUnpublishingDate extends SchedulerRulesActionBase {
    *   The date for unpublishing.
    */
   public function doExecute(EntityInterface $entity, $date) {
-    $config = \Drupal::config('scheduler.settings');
+    $default_unpublish_enable = $this->schedulerManager->setting('default_unpublish_enable');
     $bundle_field = $entity->getEntityType()->get('entity_keys')['bundle'];
-    if ($entity->$bundle_field->entity->getThirdPartySetting('scheduler', 'unpublish_enable', $config->get('default_unpublish_enable'))) {
+    if ($entity->$bundle_field->entity->getThirdPartySetting('scheduler', 'unpublish_enable', $default_unpublish_enable)) {
       $entity->set('unpublish_on', $date);
       // When this action is invoked and it operates on the entity being edited
       // then hook_entity_presave() will be executed automatically. But if this

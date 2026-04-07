@@ -4,92 +4,104 @@
  */
 
 (function ($) {
-  'use strict';
-
   Drupal.behaviors.calendarSetScroll = {
-    attach: function (context) {
-      $('#single-day-container').css('visibility', 'hidden');
+    attach(context) {
+      document.getElementById('single-day-container').style.visibility =
+        'hidden';
 
-    // Make multi-day resizable - stolen/borrowed from textarea.js.
-      $('.header-body-divider:not(.header-body-divider-processed)').each(function () {
-        var divider = $(this).addClass('header-body-divider-processed');
-        var start_y = divider.offset().top;
-
-      // Add the grippie icon.
-        $(this).prepend('<div class="grippie"></div>').mousedown(startDrag);
-
-        function startDrag(e) {
-          start_y = divider.offset().top;
-          $(document).mousemove(performDrag).mouseup(endDrag);
-          return false;
-        }
+      // Make multi-day resizable - adapted from textarea.js.
+      $(
+        '.header-body-divider:not(.header-body-divider-processed)',
+        context,
+      ).each(function () {
+        const divider = $(this).addClass('header-body-divider-processed');
+        let startY = divider.offset().top;
 
         function performDrag(e) {
-          var offset = e.pageY - start_y;
-          var mwc = $('#multi-day-container');
-          var sdc = $('#single-day-container');
-          var mwc_height = mwc.height();
-          var sdc_height = sdc.height();
-          var max_height = mwc_height + sdc_height;
-          mwc.height(Math.min(max_height, Math.max(0, mwc_height + offset)));
-          sdc.height(Math.min(max_height, Math.max(0, sdc_height - offset)));
-          start_y = divider.offset().top;
+          const offset = e.pageY - startY;
+          const mwc = $('#multi-day-container');
+          const sdc = $('#single-day-container');
+          const mwcHeight = mwc.height();
+          const sdcHeight = sdc.height();
+          const maxHeight = mwcHeight + sdcHeight;
+
+          mwc.height(Math.min(maxHeight, Math.max(0, mwcHeight + offset)));
+          sdc.height(Math.min(maxHeight, Math.max(0, sdcHeight - offset)));
+          startY = divider.offset().top;
           return false;
         }
 
-        function endDrag(e) {
-          $(document).unbind('mousemove', performDrag).unbind('mouseup', endDrag);
+        function endDrag() {
+          $(document).off('mousemove', performDrag).off('mouseup', endDrag);
         }
-      });
-
-      $('.single-day-footer:not(.single-day-footer-processed)').each(function () {
-        var divider = $(this).addClass('single-day-footer-processed');
-        var start_y = divider.offset().top;
-
-      // Add the grippie icon.
-        $(this).prepend('<div class="grippie"></div>').mousedown(startDrag);
 
         function startDrag(e) {
-          start_y = divider.offset().top;
-          $(document).mousemove(performDrag).mouseup(endDrag);
+          startY = divider.offset().top;
+          $(document).on('mousemove', performDrag).on('mouseup', endDrag);
           return false;
         }
 
-        function performDrag(e) {
-          var offset = e.pageY - start_y;
-          var sdc = $('#single-day-container');
-          sdc.height(Math.max(0, sdc.height() + offset));
-          start_y = divider.offset().top;
-          return false;
-        }
-
-        function endDrag(e) {
-          $(document).unbind('mousemove', performDrag).unbind('mouseup', endDrag);
-        }
+        // Add the grippie icon.
+        divider
+          .prepend('<div class="grippie"></div>')
+          .on('mousedown', startDrag);
       });
 
-      calendar_resizeViewport();
-      calendar_scrollToFirst();
+      $('.single-day-footer:not(.single-day-footer-processed)', context).each(
+        function () {
+          const divider = $(this).addClass('single-day-footer-processed');
+          let startY = divider.offset().top;
 
-      $('#single-day-container').css('visibility', 'visible');
+          function performDrag(e) {
+            const offset = e.pageY - startY;
+            const sdc = $('#single-day-container');
+            sdc.height(Math.max(0, sdc.height() + offset));
+            startY = divider.offset().top;
+            return false;
+          }
 
-    // Scroll the viewport to the first item.
-      function calendar_scrollToFirst() {
-        if ($('div.first_item').length > 0) {
-          var y = $('div.first_item').offset().top - $('#single-day-container').offset().top;
+          function endDrag() {
+            $(document).off('mousemove', performDrag).off('mouseup', endDrag);
+          }
+
+          function startDrag(e) {
+            startY = divider.offset().top;
+            $(document).on('mousemove', performDrag).on('mouseup', endDrag);
+            return false;
+          }
+
+          // Add the grippie icon.
+          divider
+            .prepend('<div class="grippie"></div>')
+            .on('mousedown', startDrag);
+        },
+      );
+
+      // Scroll the viewport to the first item.
+      function calendarScrollToFirst() {
+        const firstItem = $('div.first_item');
+        if (firstItem.length > 0) {
+          const y =
+            firstItem.offset().top - $('#single-day-container').offset().top;
           $('#single-day-container').scrollTop(y);
         }
       }
 
-    // Size the single day view.
-      function calendar_resizeViewport() {
-      // Size of the browser window.
-        var viewportHeight = window.innerHeight ? window.innerHeight : $(window).height();
-        var top = $('#single-day-container').offset().top;
+      // Size the single-day view.
+      function calendarResizeViewport() {
+        // Size of the browser window.
+        const viewportHeight = window.innerHeight || $(window).height();
+        const top = $('#single-day-container').offset().top;
 
-      // Give it a 20 pixel margin at the bottom.
+        // Give it a 20-pixel margin at the bottom.
         $('#single-day-container').height(viewportHeight - top - 20);
       }
-    }
+
+      calendarResizeViewport();
+      calendarScrollToFirst();
+
+      document.getElementById('single-day-container').style.visibility =
+        'visible';
+    },
   };
 })(jQuery);

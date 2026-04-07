@@ -38,7 +38,7 @@ function openid_connect_requirements($phase) {
     foreach ($clients as $client) {
       $settings = $client->getPlugin()->getConfiguration();
 
-      $prompts = !empty($settings['prompt']) ? array_filter($settings['prompt']) : [];
+      $prompts = !empty($settings['prompt']) && is_array($settings['prompt']) ? array_filter($settings['prompt']) : [];
       // Check if 'prompt' is set to 'none'.
       if (
         empty($prompts) ||
@@ -419,20 +419,66 @@ function openid_connect_update_30004() {
  * Update all plugins to use the 'login' prompt.
  */
 function openid_connect_update_30005() {
-  $definitions = \Drupal::service('plugin.manager.openid_connect_client')->getDefinitions();
+  // Superseded by openid_connect_update_30006.
+}
 
-  foreach ($definitions as $plugin) {
-    /** @var \Drupal\openid_connect\OpenIDConnectClientEntityInterface[] $clients */
-    $clients = \Drupal::entityTypeManager()
-      ->getStorage('openid_connect_client')
-      ->loadByProperties(['plugin' => $plugin['id']]);
+/**
+ * Update all plugins to use the 'login' prompt.
+ */
+function openid_connect_update_30006() {
+  $configFactory = \Drupal::configFactory();
+  $updatedConfigNames = [];
+  foreach ($configFactory->listAll('openid_connect.client.') as $configName) {
+    $config = $configFactory->getEditable($configName);
+    $settings = $config->get('settings');
+    $prompt = $settings['prompt'] ?? NULL;
 
-    foreach ($clients as $client) {
-      $config = $client->getPlugin()->getConfiguration();
-      $config['prompt'] = ['login' => 'login'];
-      $client->getPlugin()->setConfiguration($config);
-      $client->save();
+    // Default the new value to the correct OIDC default.
+    $newOidcPromptValue = ['login'];
+
+    // If the old openid_connect_update_30005 ran successfully, this will be a
+    // non-empty associative array. It could have also been updated since
+    // that run, so, migrate that value across to the proper sequence.
+    // Otherwise, if it doesn't exist, its probably because 30005 didn't run, or
+    // the plugin doesn't have a 'prompt' key.
+    // This could also be a string, in the case of windows_aad, in which case,
+    // we should convert it to an array.
+    if (is_string($prompt)) {
+      // This was likely provided by another plugin (openid_connect_windows_aad)
+      // Let's convert their string value to an array to match our upstream
+      // schema.
+      // Explode the value based on space, as that _should_ be the value if this
+      // setting was following OpenId Spec.
+      $newOidcPromptValue = explode(' ', trim($prompt));
     }
+    elseif (is_array($prompt)) {
+      // If the array is not empty and is associative, then 30005 likely ran or
+      // the value was updated by an admin. We need to convert this to
+      // a sequence instead of an associative array.
+      if (
+        !empty($prompt) &&
+        array_keys($prompt) !== range(0, count($prompt) - 1)
+      ) {
+        $newOidcPromptValue = array_values($prompt);
+      }
+      else {
+        $newOidcPromptValue = $prompt;
+      }
+    }
+    elseif (
+      is_null($prompt) &&
+      $config->get('plugin') === 'windows_aad'
+    ) {
+      // If the prompt is null and the plugin is windows_aad, default to
+      // the original default of the openid_connect_windows_aad, which was
+      // <noprompt>. This becomes an empty array in this structure.
+      $newOidcPromptValue = [];
+    }
+
+    $config->set('settings.prompt', $newOidcPromptValue)
+      ->save(TRUE);
+    $updatedConfigNames[] = $configName;
   }
-  \Drupal::messenger()->addWarning(t('The OpenID Connect module settings have been updated. Administrators should review the OpenID Connect configuration, particularly the prompt settings for all enabled providers.'));
+
+  return new TranslatableMarkup('OpenID Connect client plugins updated: @plugins', ['@plugins' => implode(', ', $updatedConfigNames)]);
 }

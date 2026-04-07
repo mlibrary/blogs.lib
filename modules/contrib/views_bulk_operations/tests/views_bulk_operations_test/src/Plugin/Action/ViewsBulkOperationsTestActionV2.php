@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\views_bulk_operations_test\Plugin\Action;
 
 use Drupal\Core\Action\Attribute\Action;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
@@ -17,13 +20,13 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
   label: new TranslatableMarkup('VBO V2 API test action'),
   type: ''
 )]
-class ViewsBulkOperationsTestActionV2 extends ViewsBulkOperationsActionBase {
+final class ViewsBulkOperationsTestActionV2 extends ViewsBulkOperationsActionBase {
   use MessengerTrait;
 
   /**
    * {@inheritdoc}
    */
-  public function execute($entity = NULL) {
+  public function execute(?EntityInterface $entity = NULL): mixed {
     if ($entity->label() === 'Title 1') {
       $output = [
         'message' => $this->t('A warning message.'),
@@ -47,7 +50,7 @@ class ViewsBulkOperationsTestActionV2 extends ViewsBulkOperationsActionBase {
    * {@inheritdoc}
    */
   public static function finished($success, array $results, array $operations): ?RedirectResponse {
-    // Let's return a bit different message. We don't except faliures
+    // Let's return a bit different message. We don't except failures
     // in tests as well so no need to check for a success.
     $details = [];
     foreach ($results['operations'] as $operation) {

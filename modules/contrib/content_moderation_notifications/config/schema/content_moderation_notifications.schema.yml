@@ -28,6 +28,11 @@ content_moderation_notifications.content_moderation_notification.*:
     site_mail:
       type: boolean
       label: Disable site mail
+    user_fields:
+      type: sequence
+      sequence:
+        type: string
+        label: 'Entity Reference User Fields'
     emails:
       type: string
       label: 'Emails'

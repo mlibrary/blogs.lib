@@ -3,7 +3,7 @@ status: true
 id: content___FIELD_ID_on_calendar
 label: '__ENTITY_LABEL Field __FIELD_LABEL on Calendar'
 module: views
-description: 'A calendar view of the ''__FIELD_LABEL'' field in the ''__ENTITY_LABEL'' base table'
+description: "A calendar view of the '__FIELD_LABEL' field in the '__ENTITY_LABEL' base table"
 tag: ''
 base_table: __BASE_TABLE
 base_field: __BASE_FIELD
@@ -21,7 +21,7 @@ display:
           perm: 'access content'
       cache:
         type: tag
-        options: {  }
+        options: {}
       query:
         type: views_query
         options:
@@ -29,7 +29,7 @@ display:
           distinct: false
           replica: false
           query_comment: ''
-          query_tags: {  }
+          query_tags: {}
       exposed_form:
         type: basic
         options:
@@ -58,7 +58,7 @@ display:
           theme_style: '1'
           groupby_field: ''
           multiday_theme: '1'
-          multiday_hidden: {  }
+          multiday_hidden: {}
       row:
         type: calendar_row
         options:
@@ -68,7 +68,7 @@ display:
               article: '#ffffff'
               page: '#ffffff'
             taxonomy_field: ''
-            calendar_colors_vocabulary: {  }
+            calendar_colors_vocabulary: {}
       fields:
         __DEFAULT_FIELD_ID:
           id: __DEFAULT_FIELD_ID
@@ -120,7 +120,7 @@ display:
           hide_alter_empty: true
           click_sort_column: value
           group_column: value
-          group_columns: {  }
+          group_columns: {}
           group_rows: true
           delta_limit: 0
           delta_offset: 0
@@ -186,7 +186,7 @@ display:
             timezone_override: ''
             format_type: medium
           group_column: value
-          group_columns: {  }
+          group_columns: {}
           group_rows: true
           delta_limit: 0
           delta_offset: 0
@@ -222,12 +222,12 @@ display:
             label: ''
           granularity: second
           plugin_id: datetime
-      header: {  }
-      footer: {  }
-      empty: {  }
-      relationships: {  }
-      arguments: {  }
-      display_extenders: {  }
+      header: {}
+      footer: {}
+      empty: {}
+      relationships: {}
+      arguments: {}
+      display_extenders: {}
     cache_metadata:
       max-age: -1
       contexts:
@@ -244,7 +244,7 @@ display:
     display_title: Month
     position: 1
     display_options:
-      display_extenders: {  }
+      display_extenders: {}
       path: __BASE_PATH
       display_description: ''
       menu:
@@ -277,7 +277,7 @@ display:
           title_enable: false
           title: ''
           default_argument_type: date
-          default_argument_options: {  }
+          default_argument_options: {}
           default_argument_skip_url: false
           summary_options:
             base_path: ''
@@ -339,7 +339,7 @@ display:
     display_title: Week
     position: 2
     display_options:
-      display_extenders: {  }
+      display_extenders: {}
       display_description: ''
       style:
         type: calendar
@@ -355,7 +355,7 @@ display:
           theme_style: '1'
           groupby_field: ''
           multiday_theme: '1'
-          multiday_hidden: {  }
+          multiday_hidden: {}
       defaults:
         style: false
         row: false
@@ -370,7 +370,7 @@ display:
               article: '#ffffff'
               page: '#ffffff'
             taxonomy_field: ''
-            calendar_colors_vocabulary: {  }
+            calendar_colors_vocabulary: {}
       path: __BASE_PATH/week
       menu:
         type: tab
@@ -397,7 +397,7 @@ display:
           title_enable: false
           title: ''
           default_argument_type: date
-          default_argument_options: {  }
+          default_argument_options: {}
           default_argument_skip_url: false
           summary_options:
             base_path: ''
@@ -456,7 +456,7 @@ display:
     display_title: Day
     position: 3
     display_options:
-      display_extenders: {  }
+      display_extenders: {}
       display_description: ''
       style:
         type: calendar
@@ -472,7 +472,7 @@ display:
           theme_style: '1'
           groupby_field: ''
           multiday_theme: '1'
-          multiday_hidden: {  }
+          multiday_hidden: {}
       defaults:
         style: false
         row: false
@@ -487,7 +487,7 @@ display:
               article: '#ffffff'
               page: '#ffffff'
             taxonomy_field: ''
-            calendar_colors_vocabulary: {  }
+            calendar_colors_vocabulary: {}
       path: __BASE_PATH/day
       menu:
         type: tab
@@ -514,7 +514,7 @@ display:
           title_enable: false
           title: ''
           default_argument_type: date
-          default_argument_options: {  }
+          default_argument_options: {}
           default_argument_skip_url: false
           summary_options:
             base_path: ''
@@ -573,7 +573,7 @@ display:
     display_title: Year
     position: 4
     display_options:
-      display_extenders: {  }
+      display_extenders: {}
       display_description: ''
       style:
         type: calendar
@@ -589,7 +589,7 @@ display:
           theme_style: '1'
           groupby_field: ''
           multiday_theme: '1'
-          multiday_hidden: {  }
+          multiday_hidden: {}
       defaults:
         style: false
         row: false
@@ -604,7 +604,7 @@ display:
               article: '#ffffff'
               page: '#ffffff'
             taxonomy_field: ''
-            calendar_colors_vocabulary: {  }
+            calendar_colors_vocabulary: {}
       arguments:
         __FIELD_ID_value_year:
           id: __FIELD_ID_value_year
@@ -621,7 +621,7 @@ display:
           title_enable: false
           title: ''
           default_argument_type: date
-          default_argument_options: {  }
+          default_argument_options: {}
           default_argument_skip_url: false
           summary_options:
             base_path: ''

@@ -34,6 +34,14 @@ interface ContentModerationNotificationInterface extends ConfigEntityInterface {
   public function disableSiteMail();
 
   /**
+   * Get the user reference fields.
+   *
+   * @return array
+   *   Returns field IDs in {entity_type}:{field_name} format.
+   */
+  public function getUserFields(): array;
+
+  /**
    * Gets the workflow ID.
    *
    * @return string

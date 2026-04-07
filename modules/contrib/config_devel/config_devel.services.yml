@@ -13,6 +13,7 @@ services:
       - '@theme_handler'
       - '@string_translation'
       - '@extension.list.module'
+      - '@extension.list.theme'
   config_devel.writeback_subscriber:
     class: Drupal\config_devel\EventSubscriber\ConfigDevelAutoExportSubscriber
     arguments: ['@config.factory', '@config.manager', '@event_dispatcher']

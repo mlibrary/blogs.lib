@@ -7,6 +7,8 @@ use Drupal\Core\Entity\EntityInterface;
 /**
  * Provides a 'Remove date for scheduled unpublishing' action.
  *
+ * SchedulerRulesActionsTest provides test coverage.
+ *
  * @RulesAction(
  *   id = "scheduler_remove_unpublishing_date",
  *   deriver = "Drupal\scheduler_rules_integration\Plugin\RulesAction\SchedulerRulesActionDeriver"
@@ -21,9 +23,9 @@ class RemoveUnpublishingDate extends SchedulerRulesActionBase {
    *   The entity from which to remove the scheduled date.
    */
   public function doExecute(EntityInterface $entity) {
-    $config = \Drupal::config('scheduler.settings');
+    $default_unpublish_enable = $this->schedulerManager->setting('default_unpublish_enable');
     $bundle_field = $entity->getEntityType()->get('entity_keys')['bundle'];
-    if ($entity->$bundle_field->entity->getThirdPartySetting('scheduler', 'unpublish_enable', $config->get('default_unpublish_enable'))) {
+    if ($entity->$bundle_field->entity->getThirdPartySetting('scheduler', 'unpublish_enable', $default_unpublish_enable)) {
       $entity->set('unpublish_on', NULL);
       scheduler_entity_presave($entity);
     }

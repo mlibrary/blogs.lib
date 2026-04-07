@@ -2,9 +2,14 @@
 
 namespace Drupal\calendar\Plugin\views\pager;
 
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 use Drupal\calendar\CalendarHelper;
+use Drupal\calendar\DateArgumentWrapper;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\GeneratedUrl;
+use Drupal\Core\Logger\LoggerChannelTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Url;
+use Drupal\views\Attribute\ViewsPager;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\pager\PagerPluginBase;
 use Drupal\views\ViewExecutable;
@@ -13,26 +18,25 @@ use Drupal\views\ViewExecutable;
  * The plugin to handle calendar pager.
  *
  * @ingroup views_pager_plugins
- *
- * @ViewsPager(
- *   id = "calendar",
- *   title = @Translation("Calendar Pager"),
- *   short_title = @Translation("Calendar"),
- *   help = @Translation("Calendar Pager"),
- *   theme = "calendar_pager",
- *   register_theme = FALSE
- * )
  */
+#[ViewsPager(
+  id: 'calendar',
+  title: new TranslatableMarkup('Calendar Pager'),
+  short_title: new TranslatableMarkup('Calendar'),
+  help: new TranslatableMarkup('Calendar Pager'),
+  theme: 'calendar_pager',
+  register_theme: FALSE,
+)]
 class CalendarPager extends PagerPluginBase {
+  use LoggerChannelTrait;
 
   const NEXT = '+';
   const PREVIOUS = '-';
+
   /**
    * The Date argument wrapper object.
-   *
-   * @var \Drupal\calendar\DateArgumentWrapper
    */
-  protected $argument;
+  protected ?DateArgumentWrapper $argument = NULL;
 
   /**
    * {@inheritdoc}
@@ -47,7 +51,6 @@ class CalendarPager extends PagerPluginBase {
    * {@inheritdoc}
    */
   public function render($input) {
-    // The $this->argument may be FALSE.
     if (!$this->argument || !$this->argument->validateValue()) {
       return [];
     }
@@ -66,15 +69,18 @@ class CalendarPager extends PagerPluginBase {
 
   /**
    * Get the date argument value for the pager link.
-   *
-   * @param string $mode
-   *   Either '-' or '+' to determine which direction.
-   *
-   * @return string
-   *   Formatted date time.
    */
-  protected function getPagerArgValue($mode) {
+  protected function getPagerArgValue(string $mode): string {
     $datetime = $this->argument->createDateTime();
+    if (!$datetime) {
+      $view_id = $this->view->id() ?? $this->view->storage->id();
+      $this->getLogger('calendar')->notice('Unable to build calendar pager argument from contextual filter value for view %view.', [
+        '%view' => $view_id ?? 'unknown',
+      ]);
+
+      // Fallback to the raw argument value to avoid rendering pager errors.
+      return (string) ($this->argument->getDateArg()->getValue() ?? '');
+    }
     $datetime->modify($mode . '1 ' . $this->argument->getGranularity());
     return $datetime->format($this->argument->getArgFormat());
   }
@@ -87,18 +93,12 @@ class CalendarPager extends PagerPluginBase {
    * @param array $input
    *   Any extra GET parameters that should be retained, such as exposed
    *   input.
-   *
-   * @return string
-   *   Url.
    */
-  protected function getPagerUrl($mode, array $input) {
+  protected function getPagerUrl(string $mode, array $input): GeneratedUrl|string {
     $value = $this->getPagerArgValue($mode);
     $current_position = 0;
     $args = [];
-    /**
-     * @var \Drupal\views\Plugin\views\argument\ArgumentPluginBase $handler
-     */
-    foreach ($this->view->argument as $name => $handler) {
+    foreach ($this->view->argument as $handler) {
       if ($current_position != $this->argument->getPosition()) {
         $args["arg_$current_position"] = $handler->getValue();
       }
@@ -138,7 +138,7 @@ class CalendarPager extends PagerPluginBase {
   }
 
   /**
-   * Returns a string to display as the clickable title for the pager plugin.
+   * {@inheritdoc}
    */
   public function summaryTitle() {
     return $this->t('Settings');

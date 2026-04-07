@@ -3,6 +3,7 @@
 namespace Drupal\Tests\scheduler\Functional;
 
 use Drupal\node\Entity\NodeType;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the legacy API hook functions of the Scheduler module.
@@ -12,6 +13,7 @@ use Drupal\node\Entity\NodeType;
  *
  * @group scheduler_api
  */
+#[Group('scheduler_api')]
 class SchedulerHooksLegacyTest extends SchedulerBrowserTestBase {
 
   /**

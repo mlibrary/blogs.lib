@@ -40,7 +40,7 @@
       {{ item | calendar_stripe }}
       <div class="{{ item.date_id }} contents">
         {% for field in rendered_fields %}
-          {% if (index + 1) == 0 and item.continuation %}
+          {% if loop.first and item.continuation %}
             <div class="continuation">&laquo;</div>
           {% endif %}
           {% for field_html in field %}

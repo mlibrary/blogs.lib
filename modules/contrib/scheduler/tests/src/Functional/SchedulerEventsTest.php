@@ -2,11 +2,15 @@
 
 namespace Drupal\Tests\scheduler\Functional;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+
 /**
  * Tests the six generic events that Scheduler dispatches.
  *
  * @group scheduler_api
  */
+#[Group('scheduler_api')]
 class SchedulerEventsTest extends SchedulerBrowserTestBase {
 
   /**
@@ -29,6 +33,7 @@ class SchedulerEventsTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataNodeEvents
    */
+  #[DataProvider('dataNodeEvents')]
   public function testNodeEvents($legacyNamespace = FALSE) {
     $this->drupalLogin($this->schedulerUser);
 
@@ -110,6 +115,7 @@ class SchedulerEventsTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataSchedulerEvents
    */
+  #[DataProvider('dataSchedulerEvents')]
   public function testSchedulerEvents($entityTypeId, $bundle) {
     $this->drupalLogin($this->schedulerUser);
     $storage = $this->entityStorageObject($entityTypeId);

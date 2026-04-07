@@ -1,11 +1,11 @@
 <?php
 
+// phpcs:disable
 declare(strict_types=1);
 
 namespace Drupal\editor_advanced_link\Plugin\CKEditor4To5Upgrade;
 
 use Drupal\ckeditor5\HTMLRestrictions;
-use Drupal\ckeditor5\Plugin\CKEditor4To5UpgradePluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\editor_advanced_link\Plugin\CKEditor5Plugin\AdvancedLink as CKEditor5Plugin;
 use Drupal\filter\FilterFormatInterface;
@@ -21,8 +21,12 @@ use Drupal\filter\FilterFormatInterface;
  *    "editor_advanced_link_link",
  *   }
  * )
+ *
+ * @deprecated in editor_advanced_link:2.2.8 and is removed from
+ *    editor_advanced_link:2.4.0. There is no replacement.
+ * @see https://www.drupal.org/project/drupal/issues/3239012
  */
-class AdvancedLink extends PluginBase implements CKEditor4To5UpgradePluginInterface {
+class AdvancedLink extends PluginBase implements AdvancedLinkInterface {
 
   /**
    * {@inheritdoc}

@@ -29,14 +29,14 @@ class SchedulerCommands extends DrushCommands {
   /**
    * SchedulerCommands constructor.
    *
-   * @param \Drupal\scheduler\SchedulerManager $schedulerManager
+   * @param \Drupal\scheduler\SchedulerManager $scheduler_manager
    *   Scheduler manager service.
    * @param \Drupal\Core\Messenger\MessengerInterface $messenger
    *   Messenger service.
    */
-  public function __construct(SchedulerManager $schedulerManager, MessengerInterface $messenger) {
+  public function __construct(SchedulerManager $scheduler_manager, MessengerInterface $messenger) {
     parent::__construct();
-    $this->schedulerManager = $schedulerManager;
+    $this->schedulerManager = $scheduler_manager;
     $this->messenger = $messenger;
   }
 

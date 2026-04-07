@@ -2,11 +2,15 @@
 
 namespace Drupal\Tests\scheduler\Functional;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+
 /**
  * Tests meta information output by scheduler.
  *
  * @group scheduler
  */
+#[Group('scheduler')]
 class SchedulerMetaInformationTest extends SchedulerBrowserTestBase {
 
   /**
@@ -18,6 +22,7 @@ class SchedulerMetaInformationTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataStandardEntityTypes
    */
+  #[DataProvider('dataStandardEntityTypes')]
   public function testMetaInformation($entityTypeId, $bundle) {
     // Log in.
     $this->drupalLogin($this->schedulerUser);

@@ -10,7 +10,7 @@ use Drupal\externalauth\Event\ExternalAuthRegisterEvent;
 use Drupal\externalauth\Exception\ExternalAuthRegisterException;
 use Drupal\user\UserInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Service to handle external authentication logic.
@@ -41,7 +41,7 @@ class ExternalAuth implements ExternalAuthInterface {
   /**
    * The event dispatcher.
    *
-   * @var \Symfony\Component\EventDispatcher\EventDispatcherInterface
+   * @var \Symfony\Contracts\EventDispatcher\EventDispatcherInterface
    */
   protected $eventDispatcher;
 
@@ -54,7 +54,7 @@ class ExternalAuth implements ExternalAuthInterface {
    *   The authmap service.
    * @param \Psr\Log\LoggerInterface $logger
    *   A logger instance.
-   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $event_dispatcher
+   * @param \Symfony\Contracts\EventDispatcher\EventDispatcherInterface $event_dispatcher
    *   The event dispatcher.
    */
   public function __construct(EntityTypeManagerInterface $entity_type_manager, AuthmapInterface $authmap, LoggerInterface $logger, EventDispatcherInterface $event_dispatcher) {

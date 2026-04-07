@@ -11,6 +11,9 @@ services:
       - '@datetime.time'
       - '@entity_field.manager'
       - '@plugin.manager.scheduler'
+      - '@cache.discovery'
+      - '@messenger'
+      - '@entity.definition_update_manager'
 
   logger.channel.scheduler:
     class: Drupal\Core\Logger\LoggerChannel
@@ -19,6 +22,10 @@ services:
 
   theme.negotiator.scheduler:
     class: Drupal\scheduler\Theme\SchedulerThemeNegotiator
+    arguments:
+      - '@scheduler.manager'
+      - '@config.factory'
+      - '@current_user'
     tags:
       - { name: theme_negotiator, priority: 10 }
 
@@ -30,6 +37,8 @@ services:
 
   scheduler.route_subscriber:
     class: Drupal\scheduler\Routing\SchedulerRouteSubscriber
+    arguments:
+      - '@scheduler.manager'
     tags:
       - { name: event_subscriber }
 

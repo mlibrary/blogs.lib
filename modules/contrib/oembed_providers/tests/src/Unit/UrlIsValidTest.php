@@ -40,7 +40,7 @@ class UrlIsValidTest extends UnitTestCase {
    * @return array
    *   An array of test values.
    */
-  public function providerTestValidAbsoluteData() {
+  public static function providerTestValidAbsoluteData() {
     $urls = [
       'example.com/asset/*',
       'www.example.com/asset/*',
@@ -56,8 +56,7 @@ class UrlIsValidTest extends UnitTestCase {
       '[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:8085/path/*',
       'example.com/asset/*#*',
     ];
-    return $this
-      ->dataEnhanceWithScheme($urls);
+    return self::dataEnhanceWithScheme($urls);
   }
 
   /**
@@ -83,7 +82,7 @@ class UrlIsValidTest extends UnitTestCase {
    * @return array
    *   An array of test values.
    */
-  public function providerTestInvalidAbsolute() {
+  public static function providerTestInvalidAbsolute() {
     $data = [
       '',
       'ex!ample.com',
@@ -94,8 +93,7 @@ class UrlIsValidTest extends UnitTestCase {
       '*.com/path/*',
       'user:pass@example.com/asset/*',
     ];
-    return $this
-      ->dataEnhanceWithScheme($data);
+    return self::dataEnhanceWithScheme($data);
   }
 
   /**
@@ -124,7 +122,7 @@ class UrlIsValidTest extends UnitTestCase {
    * @return array
    *   A list of provider data with schemes.
    */
-  protected function dataEnhanceWithScheme(array $urls) {
+  protected static function dataEnhanceWithScheme(array $urls) {
     $url_schemes = [
       'http',
       'https',

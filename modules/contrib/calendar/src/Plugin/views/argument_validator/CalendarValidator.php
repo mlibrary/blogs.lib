@@ -2,10 +2,12 @@
 
 namespace Drupal\calendar\Plugin\views\argument_validator;
 
+use Drupal\calendar\DateArgumentWrapper;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\Context\ContextDefinition;
-use Drupal\calendar\DateArgumentWrapper;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\views\Attribute\ViewsArgumentValidator;
 use Drupal\views\Plugin\views\argument\ArgumentPluginBase;
 use Drupal\views\Plugin\views\argument\Date;
 use Drupal\views\Plugin\views\argument_validator\ArgumentValidatorPluginBase;
@@ -13,27 +15,22 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines a argument validator plugin for Date arguments used in Calendar.
- *
- * @ViewsArgumentValidator(
- *   id = "calendar",
- *   title = @Translation("Calendar Date Format"),
- * )
  */
+#[ViewsArgumentValidator(
+  id: 'calendar',
+  title: new TranslatableMarkup('Calendar Date Format'),
+)]
 class CalendarValidator extends ArgumentValidatorPluginBase {
 
   /**
    * The date argument wrapper object.
-   *
-   * @var \Drupal\calendar\DateArgumentWrapper
    */
-  protected $argumentWrapper;
+  protected DateArgumentWrapper $argumentWrapper;
 
   /**
    * The date formatter service.
-   *
-   * @var \Drupal\Core\Datetime\DateFormatterInterface
    */
-  protected $dateFormatter;
+  protected DateFormatterInterface $dateFormatter;
 
   /**
    * {@inheritdoc}
@@ -56,7 +53,7 @@ class CalendarValidator extends ArgumentValidatorPluginBase {
    */
   public function validateArgument($arg) {
     if (isset($this->argumentWrapper) && $this->argumentWrapper->validateValue($arg)) {
-      $date = $this->argumentWrapper->createDateTime();
+      $date = $this->argumentWrapper->createDateTime($arg);
       // Adds 'January' to year to get correct header on Year calendars
       // to avoid problem defined on third note at
       // http://www.php.net/manual/en/datetime.formats.date.php
@@ -95,29 +92,14 @@ class CalendarValidator extends ArgumentValidatorPluginBase {
 
   /**
    * Get default format value for the options form.
-   *
-   * @return string
-   *   The default date format based on the granularity.
    */
-  protected function getDefaultReplacementFormat() {
-
-    switch ($this->argumentWrapper->getGranularity()) {
-      case 'month':
-        return 'F Y';
-
-      case 'year':
-        return 'Y';
-
-      case 'week':
-        return 'F j, Y';
-
-      case 'day':
-        return 'l, F j, Y';
-
-      default:
-        // @todo Load format used for medium here
-        return 'F j, Y';
-    }
+  protected function getDefaultReplacementFormat(): string {
+    return match ($this->argumentWrapper->getGranularity()) {
+      'month' => 'F Y',
+      'year' => 'Y',
+      'day' => 'l, F j, Y',
+      default => 'F j, Y',
+    };
   }
 
   /**
@@ -139,8 +121,7 @@ class CalendarValidator extends ArgumentValidatorPluginBase {
       '#type' => 'textfield',
       '#title' => $this->t('Replacement date pattern'),
       '#default_value' => $default,
-      // @todo Better description and link
-      '#description' => $this->t('Provide a date pattern to be used when replace this arguments as a title.'),
+      '#description' => $this->t('Enter a PHP date format string (e.g., "F j, Y") to use when replacing this argument as a title. See <a href="https://www.php.net/datetime.format" target="_blank">PHP date formats</a> for available options.'),
     ];
   }
 

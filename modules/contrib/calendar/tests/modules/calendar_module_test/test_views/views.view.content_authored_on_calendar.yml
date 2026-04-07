@@ -58,7 +58,7 @@ display:
           settings:
             link_to_entity: true
           group_column: value
-          group_columns: {  }
+          group_columns: {}
           group_rows: true
           delta_limit: 0
           delta_offset: 0
@@ -120,7 +120,7 @@ display:
           hide_alter_empty: true
           click_sort_column: value
           group_column: value
-          group_columns: {  }
+          group_columns: {}
           group_rows: true
           delta_limit: 0
           delta_offset: 0
@@ -149,8 +149,8 @@ display:
           perm: 'access content'
       cache:
         type: tag
-        options: {  }
-      empty: {  }
+        options: {}
+      empty: {}
       sorts:
         created:
           id: created
@@ -167,7 +167,7 @@ display:
             label: ''
           exposed: false
           granularity: second
-      arguments: {  }
+      arguments: {}
       filters:
         status:
           id: status
@@ -194,7 +194,7 @@ display:
           theme_style: '1'
           groupby_field: ''
           multiday_theme: '1'
-          multiday_hidden: {  }
+          multiday_hidden: {}
       row:
         type: calendar_row
         options:
@@ -204,7 +204,7 @@ display:
               article: '#ffffff'
               page: '#ffffff'
             taxonomy_field: ''
-            calendar_colors_vocabulary: {  }
+            calendar_colors_vocabulary: {}
       query:
         type: views_query
         options:
@@ -212,11 +212,11 @@ display:
           disable_sql_rewrite: false
           distinct: false
           replica: false
-          query_tags: {  }
-      relationships: {  }
-      header: {  }
-      footer: {  }
-      display_extenders: {  }
+          query_tags: {}
+      relationships: {}
+      header: {}
+      footer: {}
+      display_extenders: {}
     cache_metadata:
       max-age: -1
       contexts:
@@ -224,7 +224,7 @@ display:
         - 'languages:language_interface'
         - 'user.node_grants:view'
         - user.permissions
-      tags: {  }
+      tags: {}
   page_day:
     id: page_day
     display_title: Day
@@ -249,7 +249,7 @@ display:
           title_enable: false
           title: ''
           default_argument_type: date
-          default_argument_options: {  }
+          default_argument_options: {}
           summary_options:
             base_path: ''
             count: true
@@ -279,7 +279,7 @@ display:
           theme_style: '1'
           groupby_field: ''
           multiday_theme: '1'
-          multiday_hidden: {  }
+          multiday_hidden: {}
       row:
         type: calendar_row
         options:
@@ -289,7 +289,7 @@ display:
               article: '#ffffff'
               page: '#ffffff'
             taxonomy_field: ''
-            calendar_colors_vocabulary: {  }
+            calendar_colors_vocabulary: {}
       defaults:
         style: false
         row: false
@@ -321,7 +321,7 @@ display:
           tokenize: 1
           content: ''
           pager_embed: 1
-      display_extenders: {  }
+      display_extenders: {}
       path: calendar-created/day
       menu:
         type: tab
@@ -340,7 +340,7 @@ display:
         - url
         - 'user.node_grants:view'
         - user.permissions
-      tags: {  }
+      tags: {}
   page_month:
     id: page_month
     display_title: Month
@@ -365,7 +365,7 @@ display:
           title_enable: false
           title: ''
           default_argument_type: date
-          default_argument_options: {  }
+          default_argument_options: {}
           summary_options:
             base_path: ''
             count: true
@@ -410,7 +410,7 @@ display:
           tokenize: 1
           content: ''
           pager_embed: 1
-      display_extenders: {  }
+      display_extenders: {}
       path: calendar-created/month
       menu:
         type: tab
@@ -434,7 +434,7 @@ display:
         - url
         - 'user.node_grants:view'
         - user.permissions
-      tags: {  }
+      tags: {}
   page_week:
     id: page_week
     display_title: Week
@@ -459,7 +459,7 @@ display:
           title_enable: false
           title: ''
           default_argument_type: date
-          default_argument_options: {  }
+          default_argument_options: {}
           summary_options:
             base_path: ''
             count: true
@@ -489,7 +489,7 @@ display:
           theme_style: '1'
           groupby_field: ''
           multiday_theme: '1'
-          multiday_hidden: {  }
+          multiday_hidden: {}
       row:
         type: calendar_row
         options:
@@ -499,7 +499,7 @@ display:
               article: '#ffffff'
               page: '#ffffff'
             taxonomy_field: ''
-            calendar_colors_vocabulary: {  }
+            calendar_colors_vocabulary: {}
       defaults:
         style: false
         row: false
@@ -531,7 +531,7 @@ display:
           tokenize: 1
           content: ''
           pager_embed: 1
-      display_extenders: {  }
+      display_extenders: {}
       path: calendar-created/week
       menu:
         type: tab
@@ -550,7 +550,7 @@ display:
         - url
         - 'user.node_grants:view'
         - user.permissions
-      tags: {  }
+      tags: {}
   page_year:
     id: page_year
     display_title: Year
@@ -575,7 +575,7 @@ display:
           title_enable: false
           title: ''
           default_argument_type: date
-          default_argument_options: {  }
+          default_argument_options: {}
           summary_options:
             base_path: ''
             count: true
@@ -605,7 +605,7 @@ display:
           theme_style: '1'
           groupby_field: ''
           multiday_theme: '1'
-          multiday_hidden: {  }
+          multiday_hidden: {}
       row:
         type: calendar_row
         options:
@@ -615,7 +615,7 @@ display:
               article: '#ffffff'
               page: '#ffffff'
             taxonomy_field: ''
-            calendar_colors_vocabulary: {  }
+            calendar_colors_vocabulary: {}
       defaults:
         style: false
         row: false
@@ -647,7 +647,7 @@ display:
           tokenize: 1
           content: ''
           pager_embed: 1
-      display_extenders: {  }
+      display_extenders: {}
       path: calendar-created/year
       menu:
         type: tab
@@ -666,4 +666,4 @@ display:
         - url
         - 'user.node_grants:view'
         - user.permissions
-      tags: {  }
+      tags: {}

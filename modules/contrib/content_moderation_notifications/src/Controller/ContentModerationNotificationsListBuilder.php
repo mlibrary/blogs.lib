@@ -4,6 +4,9 @@ namespace Drupal\content_moderation_notifications\Controller;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a listing of content_moderation_notification entities.
@@ -27,6 +30,22 @@ use Drupal\Core\Entity\EntityInterface;
  * @ingroup content_moderation_notifications
  */
 class ContentModerationNotificationsListBuilder extends ConfigEntityListBuilder {
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * {@inheritDoc}
+   */
+  public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
+    $list_builder = parent::createInstance($container, $entity_type);
+    $list_builder->entityTypeManager = $container->get('entity_type.manager');
+    return $list_builder;
+  }
 
   /**
    * Builds the header row for the entity listing.
@@ -60,9 +79,9 @@ class ContentModerationNotificationsListBuilder extends ConfigEntityListBuilder 
    */
   public function buildRow(EntityInterface $entity) {
 
-    // Load the workflow @todo change to dependency injection.
+    // Load the workflow.
     /** @var \Drupal\workflows\WorkflowInterface $workflow */
-    $workflow = \Drupal::entityTypeManager()->getStorage('workflow')->load($entity->workflow);
+    $workflow = $this->entityTypeManager->getStorage('workflow')->load($entity->workflow);
 
     // Load the transitions in this workflow.
     $workflow_transitions = $workflow->getTypePlugin()->getTransitions();
@@ -75,10 +94,11 @@ class ContentModerationNotificationsListBuilder extends ConfigEntityListBuilder 
     // Loop through the saved transitions.
     if ($entity->transitions) {
       $transitions = array_keys(array_filter($entity->transitions));
-    }
-    foreach ($transitions as $transition) {
-      if (!empty($workflow_transitions[$transition])) {
-        $transition_strings[] = $workflow_transitions[$transition]->label();
+
+      foreach ($transitions as $transition) {
+        if (!empty($workflow_transitions[$transition])) {
+          $transition_strings[] = $workflow_transitions[$transition]->label();
+        }
       }
     }
 

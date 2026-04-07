@@ -14,6 +14,7 @@ trait CalendarViewsTrait {
    * {@inheritdoc}
    */
   protected function getTableEntityType($table) {
+    /** @var int $recursion */
     static $recursion = 0;
     if ($table = Views::viewsData()->get($table)) {
       if (!empty($table['table']['entity type'])) {
@@ -23,7 +24,8 @@ trait CalendarViewsTrait {
       }
       elseif (!empty($table['table']['join']) && count($table['table']['join']) == 1) {
         if (empty($recursion)) {
-          $join_table = array_pop(array_keys($table['table']['join']));
+          $array = array_keys($table['table']['join']);
+          $join_table = array_pop($array);
           $recursion++;
           return $this->getTableEntityType($join_table);
         }
@@ -33,21 +35,9 @@ trait CalendarViewsTrait {
   }
 
   /**
-   * Determine if this field is an Entity Reference field.
-   *
-   * Checks if the field references a taxonomy term.
-   *
-   * @todo Change to a more generic is Content Entity Reference.
-   *
-   * @param array $field_info
-   *   The field information array.
-   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $field_manager
-   *   The entity field manager service.
-   *
-   * @return bool
-   *   TRUE if the field is a taxonomy term reference, FALSE otherwise.
+   * Determine if this field is a taxonomy term Entity Reference field.
    */
-  protected function isTermReferenceField($field_info, EntityFieldManagerInterface $field_manager) {
+  protected function isTermReferenceField(array $field_info, EntityFieldManagerInterface $field_manager): bool {
     if (!empty($field_info['type']) && $field_info['type'] == 'entity_reference_label') {
       if ($entity_type = $this->getTableEntityType($field_info['table'])) {
         $field_definitions = $field_manager->getFieldStorageDefinitions($entity_type);

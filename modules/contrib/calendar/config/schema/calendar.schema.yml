@@ -6,8 +6,14 @@ calendar.settings:
   mapping:
     track_date:
       type: integer
-    add_colorbox:
-      type: integer
+
+block.settings.calendar_legend_block:
+  type: block_settings
+  label: 'Calendar legend block settings'
+  mapping:
+    calendar_legend_view_settings_view:
+      type: string
+      label: 'Legend View'
 
 views.pager.calendar:
   type: views_pager

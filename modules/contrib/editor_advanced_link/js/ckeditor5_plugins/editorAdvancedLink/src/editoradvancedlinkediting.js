@@ -31,138 +31,218 @@ export default class EditorAdvancedLinkEditing extends Plugin {
         );
       },
     );
+
+    // Setup link attribute on all inline nodes.
     this.enabledModelNames.forEach((modelName) => {
       this._allowAndConvertExtraAttribute(
         modelName,
         additionalFormElements[modelName].viewAttribute,
       );
-      this._removeExtraAttributeOnUnlinkCommandExecute(modelName);
+      this._registerUnlinkCommand(modelName);
       this._refreshExtraAttributeValue(modelName);
     });
 
-    this._addExtraAttributeOnLinkCommandExecute(
+    // Update linking commands.
+    this._registerLinkCommand(
       Object.keys(additionalFormElements),
     );
   }
 
-  _allowAndConvertExtraAttribute(modelName, viewName) {
+  _allowAndConvertExtraAttribute(modelName, attributeName) {
     const { editor } = this;
 
+    // Allow link attribute on all inline nodes.
     editor.model.schema.extend('$text', { allowAttributes: modelName });
 
     // Model -> View (DOM)
     editor.conversion.for('downcast').attributeToElement({
       model: modelName,
       view: (value, { writer }) => {
+        if (!value) {
+          return;
+        }
+
         const linkViewElement = writer.createAttributeElement(
           'a',
           {
-            [viewName]: value,
+            [attributeName]: value,
           },
           { priority: 5 },
         );
 
-        // Without it the isLinkElement() will not recognize the link and the UI will not show up
-        // when the user clicks a link.
         writer.setCustomProperty('link', true, linkViewElement);
-
         return linkViewElement;
       },
     });
 
     // View (DOM/DATA) -> Model
-    editor.conversion.for('upcast').elementToAttribute({
-      view: {
-        name: 'a',
-        attributes: {
-          [viewName]: true,
-        },
+    let view = {
+      name: 'a',
+      attributes: {
+        [attributeName]: true,
       },
+    };
+
+    // Fixes warning: https://ckeditor.com/docs/ckeditor5/latest/support/error-codes.html#error-matcher-pattern-deprecated-attributes-class-key.
+    if (attributeName === 'class') {
+      view = {
+        name: 'a',
+        classes: true
+      };
+    }
+
+    editor.conversion.for('upcast').elementToAttribute({
+      view,
       model: {
         key: modelName,
-        value: (viewElement) => viewElement.getAttribute(viewName),
+        value: (viewElement) => {
+          return viewElement.getAttribute(attributeName);
+        }
       },
     });
   }
 
-  _addExtraAttributeOnLinkCommandExecute(modelNames) {
+  _registerLinkCommand(modelNames) {
     const { editor } = this;
     const linkCommand = editor.commands.get('link');
     let linkCommandExecuting = false;
 
-    linkCommand.on(
-      'execute',
-      (evt, args) => {
-        // Custom handling is only required if an extra attribute was passed into
-        // editor.execute( 'link', ... ).
-        if (Object.entries(evt.editorAdvancedAttributes).length === 0) {
-          return;
+    linkCommand.on('execute', (evt, args) => {
+      if (linkCommandExecuting) {
+        linkCommandExecuting = false;
+        return;
+      }
+
+      // If the additional attribute was passed, we stop the default execution
+      // of the LinkCommand. We're going to create Model#change() block for undo
+      // and execute the LinkCommand together with setting the extra attribute.
+      evt.stop();
+
+      // Prevent infinite recursion by keeping records of when link command is
+      // being executed by this function.
+      linkCommandExecuting = true;
+
+      // If no advanced_attributes passed in event arguments (eg decorator updated), then get values from state.
+      let advancedAttributeValues = [];
+      const decoratorsArgIndex = 1;
+      if (args && args[decoratorsArgIndex] && !args[decoratorsArgIndex]['advanced_attributes']) {
+          this.enabledModelNames.forEach((attribute) => {
+          advancedAttributeValues[attribute] = evt.source[attribute];
+        });
+        args[decoratorsArgIndex]['advanced_attributes'] = advancedAttributeValues;
+      }
+      else {
+        advancedAttributeValues = args[decoratorsArgIndex]['advanced_attributes'];
+      }
+      args[decoratorsArgIndex]['advanced_attributes'] = advancedAttributeValues;
+
+      const model = this.editor.model;
+      const selection = model.document.selection;
+      const displayedText = args[args.length - 1] || args[decoratorsArgIndex]['advanced_attributes']['displayedText'];
+
+      // Wrapping the original command execution in a model.change() block to make sure there's a single undo step
+      // when the extra attribute is added.
+      model.change((writer) => {
+
+        // Returns a link range based on selection:
+        // Selection.getAttribute('linkHref') or
+        // Based on finding a link range by href attribute at selection's first position.
+        const getCurrentLinkRange = (model, selection, hrefSourceValue) => {
+          const position = selection.getFirstPosition();
+
+          // When selection is inside text with `linkHref` attribute or text of link.
+          const range = findAttributeRange(position, 'linkHref', hrefSourceValue, model);
+          return range;
+        };
+
+        // Returns a text of a link range.
+        // If the returned value is `undefined`, the range contains elements other than text nodes.
+        const extractTextFromLinkRange = (range) => {
+          let text = '';
+          for (const item of range.getItems()) {
+            if (!item.is('$text') && !item.is('$textProxy')) {
+              return;
+            }
+            text += item.data;
+          }
+          return text;
         }
-        if (linkCommandExecuting) {
-          linkCommandExecuting = false;
-          return;
-        }
 
-        // If the additional attribute was passed, we stop the default execution
-        // of the LinkCommand. We're going to create Model#change() block for undo
-        // and execute the LinkCommand together with setting the extra attribute.
-        evt.stop();
-        // Prevent infinite recursion by keeping records of when link command is
-        // being executed by this function.
-        linkCommandExecuting = true;
-        const extraAttributeValues = evt.editorAdvancedAttributes;
-        const { model } = this.editor;
-        const { selection } = model.document;
+        const updateLinkTextIfNeeded = (range, displayedText) => {
+          const linkText = extractTextFromLinkRange(range);
+          if (!linkText || typeof displayedText == "object") {
+            // In case 'target' attribute is updated, args do no pass any values
+            // for displayed text.
+            return range;
+          }
 
-        // Wrapping the original command execution in a model.change() block to make sure there's a single undo step
-        // when the extra attribute is added.
-        model.change((writer) => {
-          editor.execute('link', ...args);
+          // In a scenario where the displayedText is blank, fall back on the
+          // linkText, and if that is empty, use the href from args[0].
+          let newText = displayedText || linkText || args[0];
+          let newRange = writer.createRange(range.start, range.start.getShiftedBy(newText.length));
+          return newRange;
+        };
 
-          const firstPosition = selection.getFirstPosition();
-
-          modelNames.forEach((modelName) => {
-            if (selection.isCollapsed) {
-              const node = firstPosition.textNode || firstPosition.nodeBefore;
-
-              if (extraAttributeValues[modelName]) {
-                writer.setAttribute(
-                  modelName,
-                  extraAttributeValues[modelName],
-                  writer.createRangeOn(node),
-                );
-              } else {
-                writer.removeAttribute(modelName, writer.createRangeOn(node));
-              }
-
-              writer.removeSelectionAttribute(modelName);
+        const updateAttributes = (range, removeSelection) => {
+          this.enabledModelNames.forEach((attribute) => {
+            if (advancedAttributeValues[attribute]) {
+              writer.setAttribute(attribute, advancedAttributeValues[attribute], range);
             } else {
-              const ranges = model.schema.getValidRanges(
-                selection.getRanges(),
-                modelName,
-              );
+              writer.removeAttribute(attribute, range);
+            }
 
-              for (const range of ranges) {
-                if (extraAttributeValues[modelName]) {
-                  writer.setAttribute(
-                    modelName,
-                    extraAttributeValues[modelName],
-                    range,
-                  );
-                }
-                else {
-                  writer.removeAttribute(modelName, range);
-                }
+            if (removeSelection) {
+              writer.setSelection(range.end);
+              const { plugins } = this.editor;
+              if (plugins.has('TwoStepCaretMovement')) {
+                // After replacing the text of the link, we need to move the caret to the end of the link,
+                // override it's gravity to forward to prevent keeping e.g. bold attribute on the caret
+                // which was previously inside the link.
+                //
+                // If the plugin is not available, the caret will be placed at the end of the link and the
+                // bold attribute will be kept even if command moved caret outside the link.
+                plugins.get('TwoStepCaretMovement')._handleForwardMovement();
+              } else {
+                // Remove any attributes to prevent link splitting.
+                writer.removeSelectionAttribute(attribute);
               }
             }
           });
-        });
-      },
-      { priority: 'high' },
-    );
+        };
+
+        editor.execute('link', ...args);
+
+        if (selection.isCollapsed) {
+          // The user has clicked somewhere within the link, so we need to
+          // calculate the range of characters the attributes should apply
+          // to.
+          const currentHref = args[0] || evt.source.value;
+
+          let range = getCurrentLinkRange(model, selection, currentHref);
+          if (!range) {
+            console.info('No link range found');
+            return;
+          }
+
+          // In CKEditor v45, a new displayText input is present in the
+          // link widget. So we need to recalculate the range in case the
+          // text has changed.
+          range = updateLinkTextIfNeeded(range, displayedText);
+          updateAttributes(range, true);
+        } else {
+          if (this.enabledModelNames.length > 0) {
+            const ranges = model.schema.getValidRanges(selection.getRanges(), this.enabledModelNames[0]);
+            for (const range of ranges) {
+              updateAttributes(range);
+            }
+          }
+        }
+      });
+    },
+    { priority: 'high' });
   }
 
-  _removeExtraAttributeOnUnlinkCommandExecute(modelName) {
+  _registerUnlinkCommand(modelName) {
     const { editor } = this;
     const unlinkCommand = editor.commands.get('unlink');
     const { model } = this.editor;
@@ -171,26 +251,9 @@ export default class EditorAdvancedLinkEditing extends Plugin {
     let isUnlinkingInProgress = false;
 
     // Make sure all changes are in a single undo step so cancel the original unlink first in the high priority.
-    unlinkCommand.on(
-      'execute',
-      (evt) => {
-        if (isUnlinkingInProgress) {
-          return;
-        }
-
-        evt.stop();
-
+    unlinkCommand.on('execute', (evt) => {
         // This single block wraps all changes that should be in a single undo step.
         model.change(() => {
-          // Now, in this single "undo block" let the unlink command flow naturally.
-          isUnlinkingInProgress = true;
-
-          // Do the unlinking within a single undo step.
-          editor.execute('unlink');
-
-          // Let's make sure the next unlinking will also be handled.
-          isUnlinkingInProgress = false;
-
           // The actual integration that removes the extra attribute.
           model.change((writer) => {
             // Get ranges to unlink.
@@ -214,13 +277,13 @@ export default class EditorAdvancedLinkEditing extends Plugin {
 
             // Remove the extra attribute from specified ranges.
             // eslint-disable-next-line max-nested-callbacks
-            for (const range of ranges) {
+            ranges.forEach((range) => {
               writer.removeAttribute(modelName, range);
-            }
+            });
           });
         });
       },
-      { priority: 'high' },
+      { priority: 'highest' },
     );
   }
 
@@ -231,8 +294,7 @@ export default class EditorAdvancedLinkEditing extends Plugin {
     const { selection } = model.document;
 
     linkCommand.set(modelName, null);
-
-    model.document.on('change', () => {
+    model.document.on('change', (event, args) => {
       linkCommand[modelName] = selection.getAttribute(modelName);
     });
   }

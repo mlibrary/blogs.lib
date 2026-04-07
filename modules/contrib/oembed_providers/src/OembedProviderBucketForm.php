@@ -7,7 +7,6 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Render\Element\Checkboxes;
-use Drupal\oembed_providers\Helper;
 use Drupal\oembed_providers\OEmbed\ProviderRepositoryDecorator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 

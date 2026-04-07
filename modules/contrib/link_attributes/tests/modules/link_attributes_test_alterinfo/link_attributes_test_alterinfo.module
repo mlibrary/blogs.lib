@@ -36,6 +36,9 @@ function link_attributes_test_alterinfo_alter_type_one(array &$definitions) {
   $definitions['class']['options'] = [
     'link' => 'Link',
     'button' => 'Button',
+    'Group' => [
+      'grouped' => 'Group',
+    ],
   ];
   $definitions['class']['default_value'] = 'button';
   $definitions['target']['default_value'] = '_blank';

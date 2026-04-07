@@ -1,16 +1,17 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\editor_advanced_link\Kernel\CKEditor4To5Upgrade;
 
+use Drupal\ckeditor5\Plugin\CKEditor4To5UpgradePluginInterface;
 use Drupal\editor\Entity\Editor;
 use Drupal\editor_advanced_link\Plugin\CKEditor5Plugin\AdvancedLink;
 use Drupal\filter\Entity\FilterFormat;
 use Drupal\Tests\ckeditor5\Kernel\SmartDefaultSettingsTest;
 
 /**
- * @covers \Drupal\linkit\Plugin\CKEditor4To5Upgrade\AdvancedLink
+ * @covers \Drupal\editor_advanced_link\Plugin\CKEditor4To5Upgrade\AdvancedLink
  * @group editor_advanced_link
  * @group ckeditor5
  * @requires module ckeditor5
@@ -31,12 +32,16 @@ class UpgradePathTest extends SmartDefaultSettingsTest {
   protected function setUp(): void {
     parent::setUp();
 
+    if (!interface_exists(CKEditor4To5UpgradePluginInterface::class)) {
+      $this->markTestSkipped('CKEditor 4 to 5 upgrade path not available anymore, skipping test.');
+    }
+
     // Create test FilterFormat config entities: one per option to test in
     // isolation, plus one to test with the default configuration (no attributes
     // enabled), plus one with ALL attributes enabled but with additional
     // attributes not supported by AdvancedLink.
     $options = AdvancedLink::SUPPORTED_ATTRIBUTES;
-    $get_filter_config = function(string $allowed_html_addition): array {
+    $get_filter_config = function (string $allowed_html_addition): array {
       return [
         'filter_html' => [
           'status' => 1,
@@ -89,7 +94,7 @@ class UpgradePathTest extends SmartDefaultSettingsTest {
               'items' => [
                 'Bold',
                 'Format',
-                'DrupalLink'
+                'DrupalLink',
               ],
             ],
           ],

@@ -3,7 +3,6 @@
 namespace Drupal\Tests\content_moderation_notifications\Kernel;
 
 use Drupal\Component\Render\PlainTextOutput;
-use Drupal\Core\Test\AssertMailTrait;
 use Drupal\entity_test\Entity\EntityTestRev;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\user\Traits\UserCreationTrait;
@@ -17,7 +16,6 @@ use Drupal\user\Entity\User;
  */
 class NotificationsTest extends KernelTestBase {
 
-  use AssertMailTrait;
   use ContentModerationNotificationCreateTrait;
   use ContentModerationNotificationTestTrait;
   use UserCreationTrait;
@@ -31,7 +29,6 @@ class NotificationsTest extends KernelTestBase {
     'content_moderation_notifications_test',
     'entity_test',
     'filter',
-    'filter_test',
     'system',
     'user',
     'workflows',
@@ -46,7 +43,7 @@ class NotificationsTest extends KernelTestBase {
     $this->installEntitySchema('entity_test_rev');
     $this->installEntitySchema('content_moderation_state');
     $this->installEntitySchema('user');
-    $this->installConfig(['content_moderation', 'filter_test']);
+    $this->installConfig(['content_moderation']);
     $this->installSchema('system', ['sequences']);
 
     // Setup site email.
@@ -96,9 +93,8 @@ class NotificationsTest extends KernelTestBase {
     $entity->save();
     $this->assertMail('from', 'admin@example.com');
     $this->assertMail('to', 'admin@example.com');
-    // The adhoc emails should only include the admin user and the normal user.
     $this->assertFalse($entity->access('view', User::getAnonymousUser()));
-    $this->assertBccRecipients('foo@example.com,bar@example.com');
+    $this->assertBccRecipients('foo@example.com,bar@example.com,' . $long_email);
 
     $this->assertMail('id', 'content_moderation_notifications_content_moderation_notification');
     $this->assertMail('subject', PlainTextOutput::renderFromHtml($notification->getSubject()));
@@ -108,8 +104,7 @@ class NotificationsTest extends KernelTestBase {
     $entity->save();
     $this->assertMail('from', 'admin@example.com');
     $this->assertMail('to', 'admin@example.com');
-    // Only admin and the normal user with 'view' access should be emailed.
-    $this->assertBccRecipients('foo@example.com,bar@example.com');
+    $this->assertBccRecipients('foo@example.com,bar@example.com,' . $long_email);
     $this->assertMail('id', 'content_moderation_notifications_content_moderation_notification');
     $this->assertMail('subject', PlainTextOutput::renderFromHtml($notification->getSubject()));
     $this->assertCount(2, $this->getMails());
@@ -163,7 +158,7 @@ class NotificationsTest extends KernelTestBase {
     $this->assertMail('subject', PlainTextOutput::renderFromHtml($notification->getSubject()));
     $this->assertCount(5, $this->getMails());
 
-    // Send notication to the site email address if settings disabled.
+    // Send notification to the site email address if settings disabled.
     $notification->set('site_mail', FALSE)->save();
     $entity = \Drupal::entityTypeManager()->getStorage('entity_test_rev')->loadUnchanged($entity->id());
     $entity->moderation_state = 'published';
@@ -194,19 +189,6 @@ class NotificationsTest extends KernelTestBase {
     $entity->moderation_state = 'published';
     $entity->save();
     $this->assertCount(7, $this->getMails());
-  }
-
-  /**
-   * Helper method to assert the Bcc recipients.
-   *
-   * @param string $recipients
-   *   The expected recipients.
-   */
-  protected function assertBccRecipients($recipients) {
-    $mails = $this->getMails();
-    $mail = end($mails);
-    $this->assertNotEmpty($mail['headers']['Bcc']);
-    $this->assertEquals($recipients, $mail['headers']['Bcc']);
   }
 
 }

@@ -3,12 +3,14 @@
 namespace Drupal\Tests\scheduler\Functional;
 
 use Drupal\Core\Url;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the Scheduler section of the status report.
  *
  * @group scheduler
  */
+#[Group('scheduler')]
 class SchedulerStatusReportTest extends SchedulerBrowserTestBase {
 
   /**

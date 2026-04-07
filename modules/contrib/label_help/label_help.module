@@ -262,6 +262,14 @@ function label_help_process_form($element, FormStateInterface $form_state, &$for
         _label_help_append_label_suffix($element, $content, $use_case);
       }
 
+      elseif (isset($item['widget']['target_id']['#type'])
+        && $item['widget']['target_id']['#type'] === 'autocomplete_deluxe'
+      ) {
+        $use_case = 18;
+        $element = &$form[$key]['widget']['target_id'];
+        _label_help_append_title($element, $content, $use_case);
+      }
+
       elseif (isset($item['widget']['target_id']['#title'])) {
         $use_case = 14;
         $element = &$form[$key]['widget']['target_id'];

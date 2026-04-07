@@ -20,19 +20,16 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ViewsFieldTemplate extends ViewsDuplicateBuilderBase {
 
   /**
-   * The entity field manager object.
-   *
-   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
-   */
-  protected $fieldManager;
-
-  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ViewsTemplateLoaderInterface $loader, EntityFieldManagerInterface $manager) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    ViewsTemplateLoaderInterface $loader,
+    protected EntityFieldManagerInterface $fieldManager,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $loader);
-    $this->fieldManager = $manager;
-
   }
 
   /**
@@ -86,7 +83,6 @@ class ViewsFieldTemplate extends ViewsDuplicateBuilderBase {
         '#description' => $this->t('This view will be displayed by visiting this path on your site.'),
         '#default_value' => $replacements['base_path'],
         '#required' => TRUE,
-        // @todo add Validation for path element. From Views?
       ];
     }
     return $config_form;

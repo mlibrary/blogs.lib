@@ -199,7 +199,7 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
       'client_id' => '',
       'client_secret' => '',
       'iss_allowed_domains' => '',
-      'prompt' => ['login' => 'login'],
+      'prompt' => ['login'],
     ];
   }
 
@@ -255,7 +255,7 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
         'consent' => $this->t('Consent'),
         'select_account' => $this->t('Select account'),
       ],
-      '#default_value' => array_filter(array_values($this->configuration['prompt'] ?? [])),
+      '#default_value' => $this->configuration['prompt'] ?? [],
       '#description' => $this->t('<strong><em>Please note:</em> This option has security implications.</strong><br />While valid, not selecting a prompt could lead to security issues and is discouraged in most use cases.'),
     ];
     return $form;
@@ -287,7 +287,11 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    // Empty function. Can be overridden by derived classes if required.
+    $prompt = $form_state->getValue('prompt');
+    if (is_array($prompt)) {
+      $this->setConfiguration(['prompt' => array_values(array_filter($prompt))]);
+    }
+
   }
 
   /**
@@ -343,7 +347,7 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
       isset($this->configuration['prompt']) &&
       count($this->configuration['prompt']) > 0
     ) {
-      $return['query']['prompt'] = implode(' ', array_filter($this->configuration['prompt']));
+      $return['query']['prompt'] = implode(' ', $this->configuration['prompt']);
     }
     return $return;
   }

@@ -53,6 +53,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *     "author",
  *     "site_mail",
  *     "emails",
+ *     "user_fields",
  *     "subject",
  *     "body",
  *     "label",
@@ -91,6 +92,13 @@ class ContentModerationNotification extends ConfigEntityBase implements ContentM
    * @var string
    */
   public $emails = '';
+
+  /**
+   * The field IDs to send notifications to.
+   *
+   * @var string[]
+   */
+  public $user_fields = [];
 
   /**
    * The role IDs to send notifications to.
@@ -140,6 +148,7 @@ class ContentModerationNotification extends ConfigEntityBase implements ContentM
   public function preSave(EntityStorageInterface $storage) {
     $this->set('roles', array_filter($this->get('roles')));
     $this->set('transitions', array_filter(($this->get('transitions'))));
+    $this->set('user_fields', array_filter(($this->get('user_fields'))));
     parent::preSave($storage);
   }
 
@@ -190,6 +199,13 @@ class ContentModerationNotification extends ConfigEntityBase implements ContentM
    */
   public function disableSiteMail() {
     return (bool) $this->get('site_mail');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getUserFields(): array {
+    return (array) $this->get('user_fields');
   }
 
 }

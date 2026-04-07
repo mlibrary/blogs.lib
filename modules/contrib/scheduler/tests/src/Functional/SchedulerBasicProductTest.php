@@ -2,11 +2,14 @@
 
 namespace Drupal\Tests\scheduler\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+
 /**
  * Tests the modules primary functions with a Commerce Product entity type.
  *
  * @group scheduler
  */
+#[Group('scheduler')]
 class SchedulerBasicProductTest extends SchedulerBrowserTestBase {
 
   /**

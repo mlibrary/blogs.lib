@@ -91,11 +91,7 @@
   border-bottom: 0;
 }
 
-.calendar-calendar
-  .week-view
-  #multi-day-container
-  table
-  td.calendar-agenda-hour {
+.calendar-calendar .week-view #multi-day-container table td.calendar-agenda-hour {
   border-right: 1px solid #ccc;
 }
 
@@ -169,6 +165,11 @@
   border-top: 1px solid #ccc;
 }
 
+.calendar-calendar .week-view div.single-day .calendar-agenda-items,
+.calendar-calendar .day-view div.single-day .calendar-agenda-items {
+  position: relative;
+}
+
 .calendar-calendar .week-view .full .calendar-agenda-hour {
   width: auto;
 }
@@ -238,23 +239,11 @@
 
 /* stylelint-disable */
 .calendar-calendar .day-view .full td.multi-day .calendar.dayview .contents div,
-.calendar-calendar
-  .week-view
-  .full
-  td.multi-day
-  .calendar.weekview
-  .contents
-  div {
+.calendar-calendar .week-view .full td.multi-day .calendar.weekview .contents div {
 }
 /* stylelint-enable */
 
-.calendar-calendar
-  .week-view
-  .full
-  td.multi-day
-  .inner
-  .weekview
-  .continuation {
+.calendar-calendar .week-view .full td.multi-day .inner .weekview .continuation {
   height: 22px;
   margin-right: 3px;
   padding-top: 0;
@@ -268,24 +257,33 @@
   padding-top: 0;
 }
 
+.calendar-calendar .week-view div.single-day,
+.calendar-calendar .day-view div.single-day {
+  position: relative;
+}
+
 .calendar-calendar .week-view div.single-day .view-item,
 .calendar-calendar .day-view div.single-day .view-item {
+  position: absolute;
   z-index: 1;
-  float: left;
+  right: 0;
+  left: 0;
   width: 100%;
   max-width: 120px;
-  margin-top: -24px;
   text-align: left;
   background: none;
 }
 
 .calendar-calendar .week-view div.single-day .half-hour,
 .calendar-calendar .day-view div.single-day .half-hour {
-  position: relative;
+  position: absolute;
   z-index: 0;
   top: 0;
-  width: 100%;
-  height: 23px;
+  right: 0;
+  left: 0;
+  height: 50%;
+  margin: 0;
+  pointer-events: none;
   border-bottom: 1px dotted #ccc;
   font-size: 1px;
 }
@@ -755,11 +753,20 @@
 }
 
 .calendar-calendar .week-view div.single-day .i_0.md_0 .view-item .calendar {
-  width: 95%;
+  width: 100%;
+  margin-left: 0;
+}
+
+.calendar-calendar .week-view div.single-day .i_0.md_0 .view-item {
+  max-width: none;
 }
 
 .calendar-calendar .week-view div.single-day .i_0.md_1 .view-item .calendar {
   width: 60%;
+}
+
+.calendar-calendar .week-view div.single-day [class*=" i_"] .view-item {
+  max-width: none;
 }
 
 .calendar-calendar .day-view div.single-day .i_0 .view-item .calendar {
@@ -813,7 +820,16 @@
 }
 
 .calendar-calendar .day-view div.single-day .i_0.md_0 .view-item .calendar {
-  width: 98%;
+  width: 100%;
+  margin-left: 0;
+}
+
+.calendar-calendar .day-view div.single-day .i_0.md_0 .view-item {
+  max-width: none;
+}
+
+.calendar-calendar .day-view div.single-day [class*=" i_"] .view-item {
+  max-width: none;
 }
 
 .calendar-calendar .day-view div.single-day .i_0.md_1 .view-item .calendar {

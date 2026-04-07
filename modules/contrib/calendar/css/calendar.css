@@ -393,12 +393,7 @@ table.calendar-legend tr.even .stripe {
 .calendar-calendar tr.even td.today {
   background-color: #c3d6e4;
 }
-.calendar-calendar
-  td
-  .inner
-  div.calendar
-  div
-  div.view-data-node-data-field-date-field-date-value {
+.calendar-calendar td .inner div.calendar div div.view-data-node-data-field-date-field-date-value {
   border-bottom: 1px solid #ccc;
 }
 
@@ -454,3 +449,6 @@ table.calendar-legend tr.even .stripe {
 .calendar-calendar td.has-events {}
 .calendar-calendar td.has-no-events {}
 */
+.calendar-calendar td.multi-day[colspan="0"] {
+  display: none;
+}

@@ -8,421 +8,251 @@ namespace Drupal\calendar;
 class CalendarStyleInfo {
 
   /**
-   * Defines whether or not to show this calendar in a popup.
-   *
-   * @var bool
-   *   TRUE to show the calendar in a popup, FALSE otherwise.
-   */
-  protected $calendarPopup;
-
-  /**
    * Defines whether or not this is a mini calendar.
-   *
-   * @var bool
-   *   TRUE if the calendar is shown in mini, FALSE otherwise.
    */
-  protected $mini;
+  protected bool $mini = FALSE;
 
   /**
    * The size of the month name.
-   *
-   * @var int
-   *   The size of the month name.
    */
-  protected $monthNameSize;
+  protected int $monthNameSize = 99;
 
   /**
    * The size of the calendar name.
-   *
-   * @var int
-   *   The size of the calendar name.
    */
-  protected $nameSize;
+  protected int $nameSize = 3;
 
   /**
    * Defines whether or not to display the title.
-   *
-   * @var bool
-   *   TRUE to display the title, FALSE otherwise.
    */
-  protected $showTitle;
+  protected bool $showTitle = FALSE;
 
   /**
    * Defines whether or not to display the navigation.
-   *
-   * @var bool
-   *   TRUE to display the navigation, FALSE otherwise.
    */
-  protected $showNavigation;
+  protected bool $showNavigation = FALSE;
 
   /**
    * Defines whether or not to display the week numbers.
-   *
-   * @var bool
-   *   TRUE to display the week numbers, FAlSE otherwise.
    */
-  protected $showWeekNumbers;
+  protected bool $showWeekNumbers = FALSE;
 
   /**
    * Defines whether or not to display empty times.
-   *
-   * @var bool
    */
-  protected $showEmptyTimes;
+  protected bool $showEmptyTimes;
 
   /**
-   * Defines the way of grouping items.
+   * A set of start times to group items.
    *
-   * @var string
-   *   The way of grouping items (e.g. 'hour', 'half').
+   * @var string[]
    */
-  protected $groupByTimes;
-
-  /**
-   * Defines a custom way of grouping by times.
-   *
-   * @var string
-   *   The grouping by times.
-   */
-  protected $customGroupByTimes;
+  protected array $groupByTimes = [];
 
   /**
    * Defines a custom group by field.
-   *
-   * @var string
-   *   A field to group items by.
    */
-  protected $customGroupByField;
+  protected string $customGroupByField = '';
 
   /**
    * The maximum amount of items to show.
-   *
-   * @var int
-   *   The maximum amount.
    */
-  protected $maxItems;
+  protected int $maxItems = 0;
 
   /**
    * Defines what the maximum items style is.
-   *
-   * @var string
-   *   The maximum items style (e.g. 'hide').
    */
-  protected $maxItemsStyle;
+  protected string $maxItemsStyle = 'more';
 
   /**
    * Defines what the theme style is.
-   *
-   * @var int
-   *   The index number of the theme style.
    */
-  protected $themeStyle;
+  protected int $themeStyle = 1;
 
   /**
    * Defines what the multi day theme is.
-   *
-   * @var int
-   *   The index number of the multi-day theme.
    */
-  protected $multiDayTheme;
-
-  /**
-   * Getter for the calendar popup variable.
-   *
-   * @return bool
-   *   TRUE to show the calendar in a popup, FALSE otherwise.
-   */
-  public function isCalendarPopup() {
-    return $this->calendarPopup;
-  }
-
-  /**
-   * Setter for the calendar popup variable.
-   *
-   * @param bool $calendarPopup
-   *   TRUE to show the calendar in a popup, FALSE otherwise.
-   */
-  public function setCalendarPopup($calendarPopup) {
-    $this->calendarPopup = $calendarPopup;
-  }
+  protected int $multiDayTheme = 1;
 
   /**
    * Getter for the mini format variable.
-   *
-   * @return bool
-   *   TRUE if the calendar is shown in mini, FALSE otherwise.
    */
-  public function isMini() {
+  public function isMini(): bool {
     return $this->mini;
   }
 
   /**
    * Setter for the mini format variable.
-   *
-   * @param bool $mini
-   *   TRUE if the calendar is shown in mini, FALSE otherwise.
    */
-  public function setMini($mini) {
+  public function setMini(bool $mini): void {
     $this->mini = $mini;
   }
 
   /**
    * Getter for the month name size.
-   *
-   * @return int
-   *   The month name size.
    */
-  public function getMonthNameSize() {
+  public function getMonthNameSize(): int {
     return $this->monthNameSize;
   }
 
   /**
    * Setter for the month name size.
-   *
-   * @param int $nameSize
-   *   The month name size.
    */
-  public function setMonthNameSize($nameSize) {
+  public function setMonthNameSize(int $nameSize): void {
     $this->monthNameSize = $nameSize;
   }
 
   /**
    * Getter for the name size.
-   *
-   * @return int
-   *   The name size.
    */
-  public function getNameSize() {
+  public function getNameSize(): int {
     return $this->nameSize;
   }
 
   /**
    * Setter for the name size.
-   *
-   * @param int $nameSize
-   *   The name size.
    */
-  public function setNameSize($nameSize) {
+  public function setNameSize(int $nameSize): void {
     $this->nameSize = $nameSize;
   }
 
   /**
    * Getter for the show title variable.
-   *
-   * @return bool
-   *   TRUE to display the title, FALSE otherwise.
    */
-  public function isShowTitle() {
+  public function isShowTitle(): bool {
     return $this->showTitle;
   }
 
   /**
    * Setter for the show title variable.
-   *
-   * @param bool $showTitle
-   *   TRUE to display the title, FALSE otherwise.
    */
-  public function setShowTitle($showTitle) {
+  public function setShowTitle(bool $showTitle): void {
     $this->showTitle = $showTitle;
   }
 
   /**
    * Getter for the show navigation variable.
-   *
-   * @return bool
-   *   TRUE to show the navigation, FALSE otherwise.
    */
-  public function isShowNavigation() {
+  public function isShowNavigation(): bool {
     return $this->showNavigation;
   }
 
   /**
    * Setter for the show navigation variable.
-   *
-   * @param bool $showNavigation
-   *   TRUE to show the navigation, FALSE otherwise.
    */
-  public function setShowNavigation($showNavigation) {
+  public function setShowNavigation(bool $showNavigation): void {
     $this->showNavigation = $showNavigation;
   }
 
   /**
    * Getter for the show week numbers variable.
-   *
-   * @return bool
-   *   TRUE to display the week numbers, FAlSE otherwise.
    */
-  public function isShowWeekNumbers() {
+  public function isShowWeekNumbers(): bool {
     return $this->showWeekNumbers;
   }
 
   /**
    * Setter for the show week numbers variable.
-   *
-   * @param bool $showWeekNumbers
-   *   TRUE to display the week numbers, FAlSE otherwise.
    */
-  public function setShowWeekNumbers($showWeekNumbers) {
+  public function setShowWeekNumbers(bool $showWeekNumbers): void {
     $this->showWeekNumbers = $showWeekNumbers;
   }
 
   /**
    * Getter for the show empty times variable.
-   *
-   * @return bool
-   *   TRUE to show empty times, FALSE otherwise.
    */
-  public function isShowEmptyTimes() {
+  public function isShowEmptyTimes(): bool {
     return $this->showEmptyTimes;
   }
 
   /**
    * Setter for the show empty times variable.
-   *
-   * @param bool $showEmptyTimes
-   *   TRUE to show empty times, FALSE otherwise.
    */
-  public function setShowEmptyTimes($showEmptyTimes) {
+  public function setShowEmptyTimes(bool $showEmptyTimes): void {
     $this->showEmptyTimes = $showEmptyTimes;
   }
 
   /**
    * Getter for the group by times property.
-   *
-   * @return string
-   *   The group by time property.
    */
-  public function getGroupByTimes() {
+  public function getGroupByTimes(): array {
     return $this->groupByTimes;
   }
 
   /**
    * Setter for the group by times property.
-   *
-   * @param string $groupByTimes
-   *   The group by time property.
    */
-  public function setGroupByTimes($groupByTimes) {
+  public function setGroupByTimes(array $groupByTimes): void {
     $this->groupByTimes = $groupByTimes;
   }
 
   /**
-   * Getter for the custom group by times variable.
-   *
-   * @return string
-   *   The custom grouping by times.
-   */
-  public function getCustomGroupByTimes() {
-    return $this->customGroupByTimes;
-  }
-
-  /**
-   * Setter for the custom group by times variable.
-   *
-   * @param string $customGroupByTimes
-   *   The custom grouping by times.
-   */
-  public function setCustomGroupByTimes($customGroupByTimes) {
-    $this->customGroupByTimes = $customGroupByTimes;
-  }
-
-  /**
    * Getter for the custom group by field variable.
-   *
-   * @return string
-   *   The custom group by field.
    */
-  public function getCustomGroupByField() {
+  public function getCustomGroupByField(): string {
     return $this->customGroupByField;
   }
 
   /**
    * Setter for the custom group by field variable.
-   *
-   * @param string $customGroupByField
-   *   The custom group field.
    */
-  public function setCustomGroupByField($customGroupByField) {
+  public function setCustomGroupByField(string $customGroupByField): void {
     $this->customGroupByField = $customGroupByField;
   }
 
   /**
-   * Getter for the max items variable.
-   *
-   * @return int
-   *   The maximum amount of items to show.
+   * Getter for the max items to show.
    */
-  public function getMaxItems() {
+  public function getMaxItems(): int {
     return $this->maxItems;
   }
 
   /**
    * Setter for the max items variable.
-   *
-   * @param int $maxItems
-   *   The maximum amount of items to show.
    */
-  public function setMaxItems($maxItems) {
+  public function setMaxItems(int $maxItems): void {
     $this->maxItems = $maxItems;
   }
 
   /**
    * Getter for the max items style.
-   *
-   * @return string
-   *   The maximum items style.
    */
-  public function getMaxItemsStyle() {
+  public function getMaxItemsStyle(): string {
     return $this->maxItemsStyle;
   }
 
   /**
    * Setter for the maximum items style.
-   *
-   * @param string $maxItemsStyle
-   *   The maximum items style.
    */
-  public function setMaxItemsStyle($maxItemsStyle) {
+  public function setMaxItemsStyle(string $maxItemsStyle): void {
     $this->maxItemsStyle = $maxItemsStyle;
   }
 
   /**
    * Getter for the multi-day theme.
-   *
-   * @return int
-   *   The index number of the multi-day theme.
    */
-  public function getMultiDayTheme() {
+  public function getMultiDayTheme(): int {
     return $this->multiDayTheme;
   }
 
   /**
    * Setter for the multi day theme variable.
-   *
-   * @param int $multiDayTheme
-   *   The index number of the multi-day theme.
    */
-  public function setMultiDayTheme($multiDayTheme) {
+  public function setMultiDayTheme(int $multiDayTheme): void {
     $this->multiDayTheme = $multiDayTheme;
   }
 
   /**
    * Getter for the theme style variable.
-   *
-   * @return int
-   *   The index number of the theme style.
    */
-  public function getThemeStyle() {
+  public function getThemeStyle(): int {
     return $this->themeStyle;
   }
 
   /**
    * Setter for the theme style variable.
-   *
-   * @param int $themeStyle
-   *   The index number of the theme style.
    */
-  public function setThemeStyle($themeStyle) {
+  public function setThemeStyle(int $themeStyle): void {
     $this->themeStyle = $themeStyle;
   }
 

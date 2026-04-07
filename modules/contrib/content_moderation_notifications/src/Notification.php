@@ -3,89 +3,33 @@
 namespace Drupal\content_moderation_notifications;
 
 use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\SynchronizableInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Mail\MailManagerInterface;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\token\TokenEntityMapperInterface;
-use Drupal\user\Entity\User;
 use Drupal\user\EntityOwnerInterface;
 use Drupal\user\RoleInterface;
-
 
 /**
  * General service for moderation-related questions about Entity API.
  */
 class Notification implements NotificationInterface {
 
-  /**
-   * The current user.
-   *
-   * @var \Drupal\Core\Session\AccountInterface
-   */
-  protected $currentUser;
-
-  /**
-   * The entity type manager service.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
-   * The mail manager service.
-   *
-   * @var \Drupal\Core\Mail\MailManagerInterface
-   */
-  protected $mailManager;
-
-  /**
-   * The module handler service.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
-   */
-  protected $moduleHandler;
-
-  /**
-   * The notification information service.
-   *
-   * @var \Drupal\content_moderation_notifications\NotificationInformationInterface
-   */
-  protected $notificationInformation;
-
-  /**
-   * The token entity mapper, if available.
-   *
-   * @var \Drupal\token\TokenEntityMapperInterface
-   */
-  protected $tokenEntityMapper;
-
-  /**
-   * Creates a new ModerationInformation instance.
-   *
-   * @param \Drupal\Core\Session\AccountInterface $current_user
-   *   The current user.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager service.
-   * @param \Drupal\Core\Mail\MailManagerInterface $mail_manager
-   *   The mail manager.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
-   *   The module handler service.
-   * @param \Drupal\content_moderation_notifications\NotificationInformationInterface $notification_information
-   *   The notification information service.
-   * @param \Drupal\token\TokenEntityMapperInterface $token_entity_mappper
-   *   The token entity mapper service.
-   */
-  public function __construct(AccountInterface $current_user, EntityTypeManagerInterface $entity_type_manager, MailManagerInterface $mail_manager, ModuleHandlerInterface $module_handler, NotificationInformationInterface $notification_information, TokenEntityMapperInterface $token_entity_mappper = NULL) {
-    $this->currentUser = $current_user;
-    $this->entityTypeManager = $entity_type_manager;
-    $this->mailManager = $mail_manager;
-    $this->moduleHandler = $module_handler;
-    $this->notificationInformation = $notification_information;
-    $this->tokenEntityMapper = $token_entity_mappper;
-  }
+  public function __construct(
+    protected AccountInterface $currentUser,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected MailManagerInterface $mailManager,
+    protected ModuleHandlerInterface $moduleHandler,
+    protected NotificationInformationInterface $notificationInformation,
+    protected RendererInterface $renderer,
+    protected ConfigFactoryInterface $configFactory,
+    protected ?TokenEntityMapperInterface $tokenEntityMapper = NULL,
+  ) {}
 
   /**
    * {@inheritdoc}
@@ -106,8 +50,6 @@ class Notification implements NotificationInterface {
    * {@inheritdoc}
    */
   public function sendNotification(EntityInterface $entity, array $notifications) {
-    /** @var \Drupal\Core\Render\RendererInterface $renderer */
-    $renderer = \Drupal::service('renderer');
     /** @var \Drupal\content_moderation_notifications\ContentModerationNotificationInterface $notification */
     foreach ($notifications as $notification) {
       $data['langcode'] = $this->currentUser->getPreferredLangcode();
@@ -139,8 +81,8 @@ class Notification implements NotificationInterface {
       $subject = DeprecationHelper::backwardsCompatibleCall(
         currentVersion: \Drupal::VERSION,
         deprecatedVersion: '10.3',
-        currentCallable: fn() => $renderer->renderInIsolation($template),
-        deprecatedCallable: fn() => $renderer->renderPlain($template),
+        currentCallable: fn() => $this->renderer->renderInIsolation($template),
+        deprecatedCallable: fn() => $this->renderer->renderPlain($template),
       );
       // Remove any newlines from Subject.
       $subject = trim(str_replace("\n", ' ', $subject));
@@ -156,8 +98,8 @@ class Notification implements NotificationInterface {
       $message = DeprecationHelper::backwardsCompatibleCall(
         currentVersion: \Drupal::VERSION,
         deprecatedVersion: '10.3',
-        currentCallable: fn() => $renderer->renderInIsolation($template),
-        deprecatedCallable: fn() => $renderer->renderPlain($template),
+        currentCallable: fn() => $this->renderer->renderInIsolation($template),
+        deprecatedCallable: fn() => $this->renderer->renderPlain($template),
       );
       $data['params']['message'] = check_markup($message, $notification->getMessageFormat());
 
@@ -176,7 +118,9 @@ class Notification implements NotificationInterface {
         /** @var \Drupal\Core\Entity\EntityStorageInterface $user_storage */
         $user_storage = $this->entityTypeManager->getStorage('user');
         if ($role === RoleInterface::AUTHENTICATED_ID) {
-          $uids = \Drupal::entityQuery('user')
+          $uids = $this->entityTypeManager
+            ->getStorage('user')
+            ->getQuery()
             ->condition('status', 1)
             ->accessCheck(FALSE)
             ->execute();
@@ -207,26 +151,18 @@ class Notification implements NotificationInterface {
       $adhoc_emails = DeprecationHelper::backwardsCompatibleCall(
         currentVersion: \Drupal::VERSION,
         deprecatedVersion: '10.3',
-        currentCallable: fn() => $renderer->renderInIsolation($template),
-        deprecatedCallable: fn() => $renderer->renderPlain($template),
+        currentCallable: fn() => $this->renderer->renderInIsolation($template),
+        deprecatedCallable: fn() => $this->renderer->renderPlain($template),
       );
 
       // Split Adhoc emails on commas and newlines.
       $adhoc_emails = array_map('trim', explode(',', preg_replace("/((\r?\n)|(\r\n?))/", ',', $adhoc_emails)));
-      $anonymous_access = $entity->access('view', User::getAnonymousUser());
       foreach ($adhoc_emails as $email) {
-        // Attempt to find a user matching this email.
-        $email_accounts = $this->entityTypeManager->getStorage('user')->loadByProperties(
-          ['status' => 1, 'mail' => $email]
-        );
-        $email_account = reset($email_accounts);
-        if ($email_account && $entity->access('view', $email_account)) {
-          $data['to'][] = $email;
-        }
-        elseif ($anonymous_access) {
-          // Send adhoc emails if anonymous users can view the entity.
-          $data['to'][] = $email;
-        }
+        $data['to'][] = $email;
+      }
+
+      foreach ($this->getEmailsFromUserFields($entity, $notification) as $email) {
+        $data['to'][] = $email;
       }
 
       // Let other modules to alter the email data.
@@ -243,12 +179,43 @@ class Notification implements NotificationInterface {
 
       $recipient = '';
       if (!$notification->disableSiteMail()) {
-        $recipient = \Drupal::config('system.site')->get('mail');
+        $recipient = $this->configFactory->get('system.site')->get('mail');
       }
       if (!empty($data['params']['headers']['Bcc'])) {
         $this->mailManager->mail('content_moderation_notifications', 'content_moderation_notification', $recipient, $data['langcode'], $data['params'], NULL, TRUE);
       }
     }
+  }
+
+  /**
+   * Returns list with emails from related user fields.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The saved entity.
+   * @param \Drupal\content_moderation_notifications\ContentModerationNotificationInterface $notification
+   *   The notification to trigger.
+   *
+   * @return array
+   *   List of emails.
+   */
+  protected function getEmailsFromUserFields(
+    EntityInterface $entity,
+    ContentModerationNotificationInterface $notification,
+  ): array {
+    $recipients = [];
+    $fields = array_filter($notification->getUserFields(), function ($field_name) use ($entity) {
+      [$entity_type, $field_name] = explode(':', $field_name, 2);
+      return $entity_type === $entity->getEntityTypeId() && $entity->hasField($field_name) && !$entity->{$field_name}->isEmpty();
+    });
+    foreach ($fields as $field) {
+      [, $field_name] = explode(':', $field, 2);
+      /** @var \Drupal\Core\Field\FieldItemInterface $field_item */
+      foreach ($entity->{$field_name} as $field_item) {
+        $recipients[] = $field_item->entity->getEmail();
+      }
+    }
+
+    return $recipients;
   }
 
 }

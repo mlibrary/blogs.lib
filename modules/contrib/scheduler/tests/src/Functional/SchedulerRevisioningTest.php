@@ -3,12 +3,15 @@
 namespace Drupal\Tests\scheduler\Functional;
 
 use Drupal\Core\Entity\EntityInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests revision options when Scheduler publishes or unpublishes content.
  *
  * @group scheduler
  */
+#[Group('scheduler')]
 class SchedulerRevisioningTest extends SchedulerBrowserTestBase {
 
   /**
@@ -63,6 +66,7 @@ class SchedulerRevisioningTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataStandardEntityTypes
    */
+  #[DataProvider('dataStandardEntityTypes')]
   public function testNewRevision($entityTypeId, $bundle) {
     $entityType = $this->entityTypeObject($entityTypeId, $bundle);
 
@@ -114,6 +118,7 @@ class SchedulerRevisioningTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataAlterCreationDate
    */
+  #[DataProvider('dataAlterCreationDate')]
   public function testAlterCreationDate($entityTypeId, $bundle) {
     // Ensure entities with past dates are scheduled not published immediately.
     $entityType = $this->entityTypeObject($entityTypeId, $bundle);

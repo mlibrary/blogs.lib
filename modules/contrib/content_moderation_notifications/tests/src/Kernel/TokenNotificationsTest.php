@@ -5,8 +5,10 @@ namespace Drupal\Tests\content_moderation_notifications\Kernel;
 use Drupal\Component\Render\PlainTextOutput;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\node\Traits\ContentTypeCreationTrait;
 use Drupal\Tests\node\Traits\NodeCreationTrait;
+use Drupal\Tests\user\Traits\UserCreationTrait;
 use Drupal\workflows\Entity\Workflow;
 
 /**
@@ -16,16 +18,31 @@ use Drupal\workflows\Entity\Workflow;
  *
  * @requires module token
  */
-class TokenNotificationsTest extends NotificationsTest {
+class TokenNotificationsTest extends KernelTestBase {
 
   use ContentModerationNotificationTestTrait;
+  use ContentModerationNotificationCreateTrait;
   use ContentTypeCreationTrait;
   use NodeCreationTrait;
+  use UserCreationTrait;
 
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['field', 'node', 'text', 'token', 'system'];
+  protected static $modules = [
+    'content_moderation',
+    'content_moderation_notifications',
+    'field',
+    'filter',
+    // This is a short-cut to get a filtered_html format "for free".
+    'filter_test',
+    'node',
+    'text',
+    'token',
+    'system',
+    'user',
+    'workflows',
+  ];
 
   /**
    * {@inheritdoc}
@@ -33,9 +50,11 @@ class TokenNotificationsTest extends NotificationsTest {
   protected function setUp():void {
     parent::setUp();
 
+    $this->installEntitySchema('content_moderation_state');
+    $this->installEntitySchema('user');
     $this->installEntitySchema('node');
     $this->installSchema('node', ['node_access']);
-    $this->installConfig(['filter', 'node', 'system']);
+    $this->installConfig(['content_moderation', 'filter', 'filter_test', 'node', 'system']);
 
     $this->createContentType(['type' => 'article']);
 
@@ -70,8 +89,7 @@ class TokenNotificationsTest extends NotificationsTest {
     $entity = $this->createNode(['type' => 'article']);
 
     $this->assertMail('to', 'admin@example.com');
-    // The foo@example.com user does not have permission to see this.
-    $this->assertBccRecipients('bar@example.com');
+    $this->assertBccRecipients('foo@example.com,bar@example.com');
     $this->assertMail('id', 'content_moderation_notifications_content_moderation_notification');
     $this->assertMail('subject', PlainTextOutput::renderFromHtml($notification->getSubject()));
     $this->assertCount(1, $this->getMails());
@@ -133,8 +151,7 @@ class TokenNotificationsTest extends NotificationsTest {
     );
 
     $this->assertMail('to', 'admin@example.com');
-    // The foo@example.com user will not have access to this entity.
-    $this->assertBccRecipients('bar@example.com,adhoc1@example.com');
+    $this->assertBccRecipients('foo@example.com,bar@example.com,adhoc1@example.com');
     $this->assertMail('id', 'content_moderation_notifications_content_moderation_notification');
     $this->assertMail('subject', 'Article with ID ' . $entity->id() . ' Needs review');
     $this->assertCount(1, $this->getMails());

@@ -1,15 +1,32 @@
 {
-  "name": "drupal/calendar",
-  "description": "Provides a Views plugin to display views containing dates as Calendars.",
-  "type": "drupal-module",
-  "license": "GPL-2.0-or-later",
-  "homepage": "https://www.drupal.org/project/calendar",
-  "support": {
-    "issues": "https://www.drupal.org/project/issues/calendar",
-    "source": "https://git.drupalcode.org/project/calendar"
-  },
-  "require": {
-    "drupal/core": "^10 || ^11",
-    "drupal/views_templates": "^1.2"
-  }
+    "name": "drupal/calendar",
+    "description": "Provides a Views plugin to display views containing dates as Calendars.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "homepage": "https://www.drupal.org/project/calendar",
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/calendar",
+        "source": "https://git.drupalcode.org/project/calendar"
+    },
+    "require": {
+        "drupal/views_templates": "^1.2"
+    },
+    "require-dev": {
+        "drupal/coder": "^8.3.16",
+        "drupal/date_recur": "^3.0",
+        "drush/drush": "^12 || ^13"
+    },
+    "suggest": {
+        "drupal/date_recur": "To enable recurring date functionality (^3.0)"
+    },
+    "minimum-stability": "stable",
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "php-http/discovery": true,
+            "cweagans/composer-patches": true,
+            "tbachert/spi": false
+        }
+    }
 }

@@ -13,15 +13,16 @@
   <rule ref="DrupalPractice"/>
 
   <!-- Check these file extensions -->
-  <!-- .yml files are not processed by phpcs -->
-  <arg name="extensions" value="php,module,inc,install,css,md"/>
+  <arg name="extensions" value="php,module,inc,install,md,yml"/>
 
   <!-- Ignore all files that match these patterns. By default the full file -->
-  <!-- path is checked, unless type=relative is used. There is an implied * -->
-  <!-- wildcard at each end and periods and slashes must be escaped using \ -->
-  <exclude-pattern>\/_+ignore</exclude-pattern>
+  <!-- path is checked, unless type='relative' is used. There is an implied * -->
+  <!-- wildcard at each end, and periods must be escaped using a backslash. -->
+  <exclude-pattern>/_+ignore</exclude-pattern>
   <exclude-pattern>interdif</exclude-pattern>
-  <exclude-pattern>node_modules\/</exclude-pattern>
+  <exclude-pattern>node_modules/</exclude-pattern>
+  <!-- The bootstrap can exist as a symlink in the project folder when running phpunit locally, so ignore it. -->
+  <exclude-pattern>tests/bootstrap\.php</exclude-pattern>
 
   <!-- Use 's' to print the full sniff name in the report. -->
   <arg value="s"/>

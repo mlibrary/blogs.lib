@@ -5,12 +5,15 @@ namespace Drupal\Tests\scheduler_rules_integration\Functional;
 use Drupal\Core\Logger\RfcLogLevel;
 use Drupal\Tests\scheduler\Functional\SchedulerBrowserTestBase;
 use Drupal\rules\Context\ContextConfig;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the six actions that Scheduler provides for use in Rules module.
  *
  * @group scheduler_rules_integration
  */
+#[Group('scheduler_rules_integration')]
 class SchedulerRulesActionsTest extends SchedulerBrowserTestBase {
 
   /**
@@ -52,6 +55,7 @@ class SchedulerRulesActionsTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataStandardEntityTypes
    */
+  #[DataProvider('dataStandardEntityTypes')]
   public function testPublishOnActions($entityTypeId, $enabledBundle) {
     $nonEnabledBundle = $this->entityTypeObject($entityTypeId, 'non-enabled')->id();
     $titleField = $this->titleField($entityTypeId);
@@ -191,7 +195,7 @@ class SchedulerRulesActionsTest extends SchedulerBrowserTestBase {
     $this->submitForm(["{$titleField}[0][value]" => $title], 'Save');
     $entity = $this->getEntityByTitle($entityTypeId, $title);
     // Check that rule 1 issued a warning message.
-    $assert->pageTextContains('warning message');
+    $assert->pageTextMatches('/warning message.*Action .* is not valid because scheduled publishing is not enabled/i');
     $assert->elementExists('xpath', '//div[@aria-label="Warning message" and contains(string(), "Action")]');
     // Check that no publishing date is set.
     $this->assertEmpty($entity->publish_on->value, 'Entity should not be scheduled for publishing');
@@ -212,7 +216,7 @@ class SchedulerRulesActionsTest extends SchedulerBrowserTestBase {
     $this->drupalGet($entity->toUrl('edit-form'));
     $this->submitForm(["{$titleField}[0][value]" => "Edit non-enabled $nonEnabledBundle - Trigger Rule 1"], 'Save');
     // Check that rule 1 issued a warning message.
-    $assert->pageTextContains('warning message');
+    $assert->pageTextMatches('/warning message.*Action .* is not valid because scheduled publishing is not enabled/i');
     $assert->elementExists('xpath', '//div[@aria-label="Warning message" and contains(string(), "Action")]');
     // Check that no publishing date is set.
     $this->assertEmpty($entity->publish_on->value, 'Entity should not be scheduled for publishing.');
@@ -229,7 +233,7 @@ class SchedulerRulesActionsTest extends SchedulerBrowserTestBase {
     $this->drupalGet($entity->toUrl('edit-form'));
     $this->submitForm(["{$titleField}[0][value]" => "Edit non-enabled $nonEnabledBundle - Trigger Rule 2"], 'Save');
     // Check that rule 2 issued a warning message.
-    $assert->pageTextContains('warning message');
+    $assert->pageTextMatches('/warning message.*Action .* is not valid because scheduled publishing is not enabled/i');
     $assert->elementExists('xpath', '//div[@aria-label="Warning message" and contains(string(), "Action")]');
     // Check that a second log message has been recorded.
     $log = \Drupal::database()->select('watchdog', 'w')
@@ -247,6 +251,7 @@ class SchedulerRulesActionsTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataStandardEntityTypes
    */
+  #[DataProvider('dataStandardEntityTypes')]
   public function testUnpublishOnActions($entityTypeId, $enabledBundle) {
     $nonEnabledBundle = $this->entityTypeObject($entityTypeId, 'non-enabled')->id();
     $titleField = $this->titleField($entityTypeId);
@@ -386,7 +391,7 @@ class SchedulerRulesActionsTest extends SchedulerBrowserTestBase {
     $this->submitForm(["{$titleField}[0][value]" => $title], 'Save');
     $entity = $this->getEntityByTitle($entityTypeId, $title);
     // Check that rule 3 issued a warning message.
-    $assert->pageTextContains('warning message');
+    $assert->pageTextMatches('/warning message.*Action .* is not valid because scheduled unpublishing is not enabled/i');
     $assert->elementExists('xpath', '//div[@aria-label="Warning message" and contains(string(), "Action")]');
     // Check that no publishing date is set.
     $this->assertEmpty($entity->unpublish_on->value, 'Entity should not be scheduled for unpublishing');
@@ -407,7 +412,7 @@ class SchedulerRulesActionsTest extends SchedulerBrowserTestBase {
     $this->drupalGet($entity->toUrl('edit-form'));
     $this->submitForm(["{$titleField}[0][value]" => "Edit non-enabled $nonEnabledBundle - Trigger Rule 3"], 'Save');
     // Check that rule 3 issued a warning message.
-    $assert->pageTextContains('warning message');
+    $assert->pageTextMatches('/warning message.*Action .* is not valid because scheduled unpublishing is not enabled/i');
     $assert->elementExists('xpath', '//div[@aria-label="Warning message" and contains(string(), "Action")]');
     // Check that no unpublishing date is set.
     $this->assertEmpty($entity->unpublish_on->value, 'Entity should not be scheduled for unpublishing.');
@@ -424,7 +429,7 @@ class SchedulerRulesActionsTest extends SchedulerBrowserTestBase {
     $this->drupalGet($entity->toUrl('edit-form'));
     $this->submitForm(["{$titleField}[0][value]" => "Edit non-enabled $nonEnabledBundle - Trigger Rule 4"], 'Save');
     // Check that rule 4 issued a warning message.
-    $assert->pageTextContains('warning message');
+    $assert->pageTextMatches('/warning message.*Action .* is not valid because scheduled unpublishing is not enabled/i');
     $assert->elementExists('xpath', '//div[@aria-label="Warning message" and contains(string(), "Action")]');
     // Check that a second log message has been recorded.
     $log = \Drupal::database()->select('watchdog', 'w')

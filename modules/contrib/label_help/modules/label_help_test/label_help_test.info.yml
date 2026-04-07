@@ -6,7 +6,7 @@ core_version_requirement: ^10 || ^11
 dependencies:
   - label_help:label_help
 
-# Information added by Drupal.org packaging script on 2025-02-25
-version: '2.0.0-rc2'
+# Information added by Drupal.org packaging script on 2025-09-02
+version: '2.0.0-rc3'
 project: 'label_help'
-datestamp: 1740522416
+datestamp: 1756772770

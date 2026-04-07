@@ -3,12 +3,9 @@
 namespace Drupal\scheduler_rules_integration\Plugin\RulesAction;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\rules\Context\ContextDefinition;
-use Drupal\scheduler\SchedulerManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -35,30 +32,15 @@ class SchedulerRulesActionDeriver extends DeriverBase implements ContainerDerive
   protected $schedulerManager;
 
   /**
-   * Creates a new deriver object.
-   *
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
-   *   The string translation service.
-   * @param \Drupal\scheduler\SchedulerManager $scheduler_manager
-   *   The scheduler manager.
-   */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, TranslationInterface $string_translation, SchedulerManager $scheduler_manager) {
-    $this->entityTypeManager = $entity_type_manager;
-    $this->stringTranslation = $string_translation;
-    $this->schedulerManager = $scheduler_manager;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, $base_plugin_id) {
-    return new static(
-      $container->get('entity_type.manager'),
-      $container->get('string_translation'),
-      $container->get('scheduler.manager')
-    );
+    // Is $base_plugin_id used?
+    $instance = new static();
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->stringTranslation = $container->get('string_translation');
+    $instance->schedulerManager = $container->get('scheduler.manager');
+    return $instance;
   }
 
   /**

@@ -2,19 +2,20 @@
 
 namespace Drupal\calendar\Plugin\Block;
 
+use Drupal\Core\Block\Attribute\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Block\BlockPluginInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\calendar\CalendarHelper;
 
 /**
  * Provides a "Calendar legend" block.
- *
- * @Block(
- *   id = "calendar_legend_block",
- *   admin_label = @Translation("Calendar legend"),
- * )
  */
+#[Block(
+  id: 'calendar_legend_block',
+  admin_label: new TranslatableMarkup('Calendar legend'),
+)]
 class CalendarLegend extends BlockBase implements BlockPluginInterface {
 
   /**
@@ -50,11 +51,15 @@ class CalendarLegend extends BlockBase implements BlockPluginInterface {
     $config = $this->getConfiguration();
     $view_and_display_id = $config['calendar_legend_view_settings_view'];
 
-    // @todo don't return anything if no legend is needed
     return [
       '#theme' => 'calendar_stripe_legend',
       '#view_and_display_id' => $view_and_display_id,
       '#title' => $this->t('Calendar Legend'),
+      '#attached' => [
+        'library' => [
+          'calendar/calendar.theme',
+        ],
+      ],
     ];
   }
 

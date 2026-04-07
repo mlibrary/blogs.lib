@@ -7,7 +7,7 @@ use Drupal\filter\Entity\FilterFormat;
 use Drupal\Tests\BrowserTestBase;
 
 /**
- * Tests the editor_advanced_link alterations on the durpallink dialog form.
+ * Tests the editor_advanced_link alterations on the drupallink dialog form.
  *
  * @group editor_advanced_link
  * @requires module ckeditor
@@ -114,7 +114,7 @@ class AdvancedLinkDialogTest extends BrowserTestBase {
   /**
    * Data provider for testLinkDialogFieldsForm().
    */
-  public function providerLinkDialogFieldsForm() {
+  public static function providerLinkDialogFieldsForm() {
     $cases = [];
 
     $cases['all_enabled_no_filter'] = [

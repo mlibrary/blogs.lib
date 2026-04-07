@@ -159,7 +159,7 @@ abstract class ViewsDuplicateBuilderBase extends ViewsBuilderBase implements Vie
    * @param array $options
    *   Options for altering.
    */
-  protected function alterViewTemplateAfterCreation(array &$view_template, array $options = NULL) {
+  protected function alterViewTemplateAfterCreation(array &$view_template, ?array $options = NULL) {
     if ($replacements = $this->getReplacements($options)) {
       $this->replaceTemplateKeyAndValues($view_template, $replacements, $options);
     }

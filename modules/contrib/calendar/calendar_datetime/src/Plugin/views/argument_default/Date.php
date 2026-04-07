@@ -3,9 +3,11 @@
 namespace Drupal\calendar_datetime\Plugin\views\argument_default;
 
 use Drupal\Component\Datetime\TimeInterface;
-use Drupal\views\Plugin\views\argument\Date as DateArgument;
 use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Datetime\DateFormatterInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\views\Attribute\ViewsArgumentDefault;
+use Drupal\views\Plugin\views\argument\Date as DateArgument;
 use Drupal\views\Plugin\views\argument_default\ArgumentDefaultPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -13,20 +15,17 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * The current date argument default handler.
  *
  * @ingroup views_argument_default_plugins
- *
- * @ViewsArgumentDefault(
- *   id = "date",
- *   title = @Translation("Calendar Current date")
- * )
  */
+#[ViewsArgumentDefault(
+  id: 'date',
+  title: new TranslatableMarkup('Calendar Current date'),
+)]
 class Date extends ArgumentDefaultPluginBase implements CacheableDependencyInterface {
 
   /**
    * The date format to use.
-   *
-   * @var string
    */
-  protected $dateFormat = 'Y-m-d';
+  protected string $dateFormat = 'Y-m-d';
 
   /**
    * Constructs a new Date instance.
@@ -66,7 +65,12 @@ class Date extends ArgumentDefaultPluginBase implements CacheableDependencyInter
 
     // The Date argument handlers provide their own format strings, otherwise
     // use a default.
-    $format = $this->argument instanceof DateArgument ? $this->argument->getArgFormat() : 'Y-m-d';
+    if ($this->argument instanceof DateArgument && method_exists($this->argument, 'getArgFormat')) {
+      $format = $this->argument->getArgFormat();
+    }
+    else {
+      $format = 'Y-m-d';
+    }
 
     $request_time = $this->time->getRequestTime();
 

@@ -1,5 +1,4 @@
 editor_advanced_link:
-  version: VERSION
   js:
     js/editor_advanced_link.js: {}
   dependencies:
@@ -9,7 +8,6 @@ editor_advanced_link:
     - core/once
 
 ckeditor5:
-  version: VERSION
   js:
     js/build/editorAdvancedLink.js: { preprocess: false, minified: true }
   dependencies:

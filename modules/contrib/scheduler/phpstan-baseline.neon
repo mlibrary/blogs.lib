@@ -17,13 +17,25 @@ parameters:
       path: plugins/content_types/scheduler_form_pane.inc
 
     #---------------------------------------------------------------------------------------------------------------------------
-    # Mapping callback for the Feeds module is still no ported to Drupal 8.
+    # Mapping callback for the Feeds module is still not ported to Drupal 8.
     #---------------------------------------------------------------------------------------------------------------------------
     -
       message: '#^Instantiated class FeedsValidationException not found\.$#'
       identifier: class.notFound
       count: 1
       path: scheduler.module
+
+    #---------------------------------------------------------------------------------------------------------------------------
+    # scheduler_migration_plugins_alter() will likely be rewritten or removed before compatibility with Drupal 12.
+    # The class is deprecated in drupal:11.3.0 and is removed from drupal:12.0.0. There is no  replacement.
+    # This currently needs reportUnmatched: false because the warning is not produced in Drupal 11.2
+    #---------------------------------------------------------------------------------------------------------------------------
+    -
+      message: '#^Call to method getSystemData\(\) of deprecated class Drupal\\migrate_drupal\\Plugin\\migrate\\source\\DrupalSqlBase#'
+      identifier: method.deprecatedClass
+      count: 1
+      path: scheduler.module
+      reportUnmatched: false
 
     #---------------------------------------------------------------------------------------------------------------------------
     # rules_defaults.inc is still 7.x, not converted to 8.x+ and may never be, as development on the Rules project has slowed.

@@ -6,7 +6,7 @@ dependencies:
   - linkit:linkit (>= 6)
   - link_attributes:link_attributes
 
-# Information added by Drupal.org packaging script on 2024-07-19
-version: '2.1.1'
+# Information added by Drupal.org packaging script on 2025-11-13
+version: '2.1.2'
 project: 'link_attributes'
-datestamp: 1721366574
+datestamp: 1763068315

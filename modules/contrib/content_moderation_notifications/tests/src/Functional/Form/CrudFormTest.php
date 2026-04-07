@@ -83,7 +83,7 @@ class CrudFormTest extends BrowserTestBase {
       'subject' => $this->randomString(),
       'body[value]' => $this->getRandomGenerator()->paragraphs(2),
     ];
-    $this->submitForm($edit, t('Create Notification'));
+    $this->submitForm($edit, 'Create Notification');
 
     /** @var \Drupal\content_moderation_notifications\ContentModerationNotificationInterface $notification */
     $notification = ContentModerationNotification::load($edit['id']);
@@ -121,7 +121,7 @@ class CrudFormTest extends BrowserTestBase {
       'emails' => $emails[0] . ",\r\n" . $emails[1] . "\n" . $emails[2],
     ];
     $this->drupalGet($notification->toUrl('edit-form'));
-    $this->submitForm($edit, t('Update Notification'));
+    $this->submitForm($edit, 'Update Notification');
     $this->assertSession()
       ->responseContains(t('Notification <a href=":url">%label</a> has been updated.',
         [
@@ -138,7 +138,7 @@ class CrudFormTest extends BrowserTestBase {
 
     // Test the disable form.
     $this->drupalGet($notification->toUrl('disable-form'));
-    $this->submitForm([], t('Confirm'));
+    $this->submitForm([], 'Confirm');
     /** @var \Drupal\content_moderation_notifications\ContentModerationNotificationInterface $notification */
     $notification = ContentModerationNotification::load($notification->id());
     $this->assertFalse($notification->status());
@@ -149,7 +149,7 @@ class CrudFormTest extends BrowserTestBase {
 
     // Test the enable form.
     $this->drupalGet($notification->toUrl('enable-form'));
-    $this->submitForm([], t('Confirm'));
+    $this->submitForm([], 'Confirm');
     /** @var \Drupal\content_moderation_notifications\ContentModerationNotificationInterface $notification */
     $notification = ContentModerationNotification::load($notification->id());
     $this->assertTrue($notification->status());
@@ -160,7 +160,7 @@ class CrudFormTest extends BrowserTestBase {
 
     // Test the delete form.
     $this->drupalGet($notification->toUrl('delete-form'));
-    $this->submitForm([], t('Delete Notification'));
+    $this->submitForm([], 'Delete Notification');
     $this->assertSession()->responseContains(t('Notification %label was deleted.', ['%label' => $notification->label()]));
     $this->assertSession()->pageTextContains(t('There are no notifications yet.'));
   }

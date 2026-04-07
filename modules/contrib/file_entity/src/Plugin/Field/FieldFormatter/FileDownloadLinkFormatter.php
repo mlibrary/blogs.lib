@@ -155,9 +155,10 @@ class FileDownloadLinkFormatter extends FileFormatterBase implements ContainerFa
       $mime_type = $file->getMimeType();
       $token_data['file'] = $file;
       $link_text = $this->token->replace($this->getSetting('text'), $token_data);
+      $file_size = (int) $file->getSize();
       // Set options as per anchor format described at
       // http://microformats.org/wiki/file-format-examples
-      $download_url = $file->downloadUrl(array('attributes' => array('type' => $mime_type . '; length=' . $file->getSize())));
+      $download_url = $file->downloadUrl(array('attributes' => array('type' => $mime_type . '; length=' . $file_size)));
       if ($file->access('download')) {
         $elements[$delta] = [
           '#theme' => 'file_entity_download_link',
@@ -165,7 +166,7 @@ class FileDownloadLinkFormatter extends FileFormatterBase implements ContainerFa
           '#download_link' => Link::fromTextAndUrl($link_text, $download_url),
           '#icon' => \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.3.0', fn() => \Drupal\file\IconMimeTypes::getIconClass($mime_type), fn() => file_icon_class($mime_type)),
           '#attributes' => $attributes,
-          '#file_size' => \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.2.0', fn() => \Drupal\Core\StringTranslation\ByteSizeMarkup::create($file->getSize()), fn() => format_size($file->getSize())),
+          '#file_size' => \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.2.0', fn() => \Drupal\Core\StringTranslation\ByteSizeMarkup::create($file_size), fn() => format_size($file_size)),
         ];
       }
       else {

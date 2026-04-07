@@ -2,17 +2,17 @@
 
 namespace Drupal\calendar\Plugin\views\area;
 
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\calendar\CalendarHelper;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\Attribute\ViewsArea;
 use Drupal\views\Plugin\views\area\TokenizeAreaPluginBase;
 
 /**
  * Views area Calendar Header area.
  *
  * @ingroup views_area_handlers
- *
- * @ViewsArea("calendar_header")
  */
+#[ViewsArea('calendar_header')]
 class CalendarHeader extends TokenizeAreaPluginBase {
 
   /**

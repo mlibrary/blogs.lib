@@ -15,6 +15,7 @@ use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Extension\ModuleInstallerInterface;
+use Drupal\Core\Extension\ThemeExtensionList;
 use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\Core\Lock\LockBackendInterface;
 use Drupal\Core\StringTranslation\TranslationInterface;
@@ -92,6 +93,14 @@ class ConfigImporterExporter {
    */
   protected $themeHandler;
 
+
+  /**
+   * The theme extension list.
+   *
+   * @var \Drupal\Core\Extension\ThemeExtensionList
+   */
+  protected $themeExtensionList;
+
   /**
    * The string translation service.
    *
@@ -143,7 +152,8 @@ class ConfigImporterExporter {
     ModuleInstallerInterface $module_installer,
     ThemeHandlerInterface $theme_handler,
     TranslationInterface $string_translation,
-    ModuleExtensionList $module_extension_list
+    ModuleExtensionList $module_extension_list,
+    ThemeExtensionList $theme_extension_list,
   ) {
     $this->configFactory = $config_factory;
     $this->configStorage = $config_storage;
@@ -156,6 +166,7 @@ class ConfigImporterExporter {
     $this->themeHandler = $theme_handler;
     $this->stringTranslation = $string_translation;
     $this->moduleExtensionList = $module_extension_list;
+    $this->themeExtensionList = $theme_extension_list;
   }
 
   /**
@@ -206,7 +217,8 @@ class ConfigImporterExporter {
         $this->moduleInstaller,
         $this->themeHandler,
         $this->stringTranslation,
-        $this->moduleExtensionList
+        $this->moduleExtensionList,
+        $this->themeExtensionList
       );
 
       $config_importer->import();

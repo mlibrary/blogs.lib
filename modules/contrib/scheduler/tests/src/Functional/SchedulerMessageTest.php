@@ -2,11 +2,15 @@
 
 namespace Drupal\Tests\scheduler\Functional;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+
 /**
  * Tests the 'show confirmation message' entity type setting.
  *
  * @group scheduler
  */
+#[Group('scheduler')]
 class SchedulerMessageTest extends SchedulerBrowserTestBase {
 
   /**
@@ -14,6 +18,7 @@ class SchedulerMessageTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataStandardEntityTypes
    */
+  #[DataProvider('dataStandardEntityTypes')]
   public function testConfirmationMessage($entityTypeId, $bundle) {
     // The schedulerUser is adequate for node, media and commerce_product. But
     // for taxonomy_term after editing and saving an unpublished term, the url

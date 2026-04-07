@@ -2,11 +2,15 @@
 
 namespace Drupal\Tests\scheduler\FunctionalJavascript;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+
 /**
  * Tests the JavaScript functionality for default dates.
  *
  * @group scheduler_js
  */
+#[Group('scheduler_js')]
 class SchedulerJavascriptDefaultTimeTest extends SchedulerJavascriptTestBase {
 
   /**
@@ -31,6 +35,7 @@ class SchedulerJavascriptDefaultTimeTest extends SchedulerJavascriptTestBase {
     $this->nodetype->setThirdPartySetting('scheduler', 'fields_display_mode', 'fieldset')
       ->setThirdPartySetting('scheduler', 'expand_fieldset', 'always')->save();
     $this->drupalGet('node/add/' . $this->type);
+    $this->assertSession()->waitForText("Create {$this->typeName}");
     $page = $this->getSession()->getPage();
     $title = "Add a {$this->typeName} to determine the date-picker format";
     $page->fillField('edit-title-0-value', $title);
@@ -41,7 +46,10 @@ class SchedulerJavascriptDefaultTimeTest extends SchedulerJavascriptTestBase {
     $page->fillField('edit-publish-on-0-value-date', '05/02/' . (date('Y') + 1));
     $page->fillField('edit-publish-on-0-value-time', '06:00:00pm');
     $page->pressButton('Save');
+    // Show the content via the users own view.
+    $this->drupalGet("user/{$this->schedulerUser->id()}/scheduled");
     $node = $this->drupalGetNodeByTitle($title);
+    $this->assertNotEmpty($node, "The test node in setUp() failed to be found using title '{$title}'. This is a random problem.");
     // If the saved month is 2 then the format is d/m/Y, otherwise it is m/d/Y.
     $this->datepickerFormat = (date('n', $node->publish_on->value) == 2 ? 'd/m/Y' : 'm/d/Y');
   }
@@ -51,6 +59,7 @@ class SchedulerJavascriptDefaultTimeTest extends SchedulerJavascriptTestBase {
    *
    * @dataProvider dataTimeWhenSchedulingIsRequired
    */
+  #[DataProvider('dataTimeWhenSchedulingIsRequired')]
   public function testTimeWhenSchedulingIsRequired($entityTypeId, $bundle, $field) {
     $config = $this->config('scheduler.settings');
     $titleField = $this->titleField($entityTypeId);

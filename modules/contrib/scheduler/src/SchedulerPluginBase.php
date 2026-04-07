@@ -3,6 +3,7 @@
 namespace Drupal\scheduler;
 
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -26,6 +27,13 @@ abstract class SchedulerPluginBase extends PluginBase implements SchedulerPlugin
   protected $entityTypeObject;
 
   /**
+   * Entity type bundle info service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeBundleInfoInterface
+   */
+  protected EntityTypeBundleInfoInterface $entityTypeBundleInfo;
+
+  /**
    * A static cache of create/edit entity form IDs.
    *
    * @var string[]
@@ -47,6 +55,7 @@ abstract class SchedulerPluginBase extends PluginBase implements SchedulerPlugin
     $instance->entityTypeManager = $container->get('entity_type.manager');
     $instance->entityTypeObject = $instance->entityTypeManager
       ->getDefinition($plugin_definition['entityType']);
+    $instance->entityTypeBundleInfo = $container->get('entity_type.bundle.info');
 
     return $instance;
   }
@@ -251,10 +260,11 @@ abstract class SchedulerPluginBase extends PluginBase implements SchedulerPlugin
     }
 
     // When creating the first type/bundle there will be nothing returned for
-    // $this->getTypes(). This is only a problem when getting the 'type' forms,
-    // which do not actually need the list of types anyway. Hence for this case
-    // we need an element in $types, one is enough and it can be anything.
-    $types = $isBundle ? [''] : array_keys($this->getTypes());
+    // getBundleInfo(). This is only a problem when getting the 'type' forms,
+    // which do not actually need the list of types anyway. For this case we do
+    // need an array element in $types, one is enough and it can be anything,
+    // hence we use an empty string.
+    $types = $isBundle ? [''] : array_keys($this->entityTypeBundleInfo->getBundleInfo($entityType));
     foreach ($types as $typeId) {
       foreach ($operations as $operation) {
         $form_id = $entityType;

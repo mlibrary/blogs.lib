@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\content_moderation_notifications\Kernel;
 
+use Drupal\Core\Test\AssertMailTrait;
 use Drupal\Tests\content_moderation\Traits\ContentModerationTestTrait;
 use Drupal\workflows\Entity\Workflow;
 
@@ -11,6 +12,7 @@ use Drupal\workflows\Entity\Workflow;
 trait ContentModerationNotificationTestTrait {
 
   use ContentModerationTestTrait;
+  use AssertMailTrait;
 
   /**
    * Creates a page node type to test with, ensuring that it's moderated.
@@ -31,6 +33,19 @@ trait ContentModerationNotificationTestTrait {
     $workflow->getTypePlugin()->addEntityTypeAndBundle($entity_type, $bundle);
     $workflow->save();
     return $workflow;
+  }
+
+  /**
+   * Helper method to assert the Bcc recipients.
+   *
+   * @param string $recipients
+   *   The expected recipients.
+   */
+  protected function assertBccRecipients($recipients) {
+    $mails = $this->getMails();
+    $mail = end($mails);
+    $this->assertNotEmpty($mail['headers']['Bcc']);
+    $this->assertEquals($recipients, $mail['headers']['Bcc']);
   }
 
 }

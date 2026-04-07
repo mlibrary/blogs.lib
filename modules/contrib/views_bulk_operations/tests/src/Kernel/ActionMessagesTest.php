@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views_bulk_operations\Kernel;
 
 /**
  * @coversDefaultClass \Drupal\views_bulk_operations\Service\ViewsBulkOperationsActionProcessor
  * @group views_bulk_operations
  */
-class ActionMessagesTest extends ViewsBulkOperationsKernelTestBase {
+final class ActionMessagesTest extends ViewsBulkOperationsKernelTestBase {
 
   /**
    * Tests messages displayed by different actions.
@@ -17,7 +19,7 @@ class ActionMessagesTest extends ViewsBulkOperationsKernelTestBase {
    *
    * @dataProvider actionDataProvider
    */
-  public function testViewsbulkOperationsActionMessages(int $nodes_count, string $action_id, array $result_messages): void {
+  public function testViewsBulkOperationsActionMessages(int $nodes_count, string $action_id, array $result_messages): void {
     $this->createTestNodes([
       'page' => [
         'count' => $nodes_count,
@@ -33,8 +35,8 @@ class ActionMessagesTest extends ViewsBulkOperationsKernelTestBase {
     $results = $this->executeAction($vbo_data);
 
     foreach ($result_messages as $index => $message) {
-      static::assertEquals($message['type'], $results['finished_output'][$index]['type']);
-      static::assertEquals($message['message'], $results['finished_output'][$index]['message']);
+      static::assertEquals($results['finished_output'][$index]['type'], $message['type']);
+      static::assertEquals($results['finished_output'][$index]['message'], $message['message']);
     }
   }
 
@@ -44,7 +46,7 @@ class ActionMessagesTest extends ViewsBulkOperationsKernelTestBase {
    * @return mixed[]
    *   The test data.
    */
-  public function actionDataProvider(): array {
+  public static function actionDataProvider(): array {
     return [
       [
         4,

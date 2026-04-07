@@ -2,11 +2,15 @@
 
 namespace Drupal\Tests\scheduler\Functional;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+
 /**
  * Tests the validation when editing a node.
  *
  * @group scheduler
  */
+#[Group('scheduler')]
 class SchedulerValidationTest extends SchedulerBrowserTestBase {
 
   /**
@@ -21,6 +25,7 @@ class SchedulerValidationTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataStandardEntityTypes
    */
+  #[DataProvider('dataStandardEntityTypes')]
   public function testValidationDuringEdit($entityTypeId, $bundle) {
     $this->drupalLogin($this->adminUser);
 

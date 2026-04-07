@@ -4,12 +4,15 @@ namespace Drupal\Tests\scheduler_rules_integration\Functional;
 
 use Drupal\Tests\scheduler\Functional\SchedulerBrowserTestBase;
 use Drupal\rules\Context\ContextConfig;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the four conditions that Scheduler provides for use in Rules module.
  *
  * @group scheduler_rules_integration
  */
+#[Group('scheduler_rules_integration')]
 class SchedulerRulesConditionsTest extends SchedulerBrowserTestBase {
 
   /**
@@ -47,6 +50,7 @@ class SchedulerRulesConditionsTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataStandardEntityTypes
    */
+  #[DataProvider('dataStandardEntityTypes')]
   public function testEntityTypeEnabledConditions($entityTypeId, $bundle) {
 
     // The legacy rules condition ids for nodes remain as:
@@ -173,6 +177,7 @@ class SchedulerRulesConditionsTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataStandardEntityTypes
    */
+  #[DataProvider('dataStandardEntityTypes')]
   public function testEntityIsScheduledConditions($entityTypeId, $bundle) {
     // The legacy rules condition ids for nodes remain as:
     // -  scheduler_condition_node_scheduled_for_publishing

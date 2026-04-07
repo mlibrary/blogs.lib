@@ -4,6 +4,7 @@ namespace Drupal\scheduler_rules_integration\Plugin\RulesAction;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Url;
 use Drupal\rules\Core\RulesActionBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -11,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Provides base class on which all Scheduler Rules actions are built.
  */
-class SchedulerRulesActionBase extends RulesActionBase {
+class SchedulerRulesActionBase extends RulesActionBase implements ContainerFactoryPluginInterface {
 
   /**
    * The entity type id.
@@ -21,29 +22,36 @@ class SchedulerRulesActionBase extends RulesActionBase {
   protected $entityTypeId;
 
   /**
-   * Constructs a SchedulerRulesActionBase object.
+   * The scheduler manager.
    *
-   * @param array $configuration
-   *   A configuration array containing information about the plugin instance.
-   * @param string $plugin_id
-   *   The plugin ID for the plugin instance.
-   * @param mixed $plugin_definition
-   *   The plugin implementation definition.
+   * @var \Drupal\scheduler\SchedulerManager
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->entityTypeId = $plugin_definition['entity_type_id'];
-  }
+  protected $schedulerManager;
+
+  /**
+   * Logger service object.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
+  /**
+   * The Messenger service.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition
-    );
+    $instance = new static($configuration, $plugin_id, $plugin_definition);
+    $instance->entityTypeId = $plugin_definition['entity_type_id'];
+    $instance->schedulerManager = $container->get('scheduler.manager');
+    $instance->logger = $container->get('logger.channel.scheduler');
+    $instance->messenger = $container->get('messenger');
+    return $instance;
   }
 
   /**
@@ -51,6 +59,8 @@ class SchedulerRulesActionBase extends RulesActionBase {
    *
    * This is called from actions that attempt to set or remove a Scheduler date
    * value when the entity type is not enabled for that process.
+   *
+   * SchedulerRulesActionsTest provides test coverage for this functionality.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity object being processed by the action.
@@ -78,10 +88,10 @@ class SchedulerRulesActionBase extends RulesActionBase {
       '@url' => $url->toString(),
     ];
     $link = Link::fromTextAndUrl($this->t('@type settings', ['@type' => $type_name]), $url)->toString();
-    \Drupal::logger('scheduler')->warning('Action %action is not valid because @activity is not enabled for %type @group. Add the condition %condition to your Reaction Rule, or enable @activity via the %type settings.',
+    $this->logger->warning('Action %action is not valid because @activity is not enabled for %type @group. Add the condition %condition to your Reaction Rule, or enable @activity via the %type settings.',
       $arguments + ['link' => $link]);
 
-    \Drupal::messenger()->addMessage($this->t('Action %action is not valid because @activity is not enabled for %type @group. Add the condition %condition to your Reaction Rule, or enable @activity via the <a href="@url">%type</a> settings.',
+    $this->messenger->addMessage($this->t('Action %action is not valid because @activity is not enabled for %type @group. Add the condition %condition to your Reaction Rule, or enable @activity via the <a href="@url">%type</a> settings.',
       $arguments), 'warning', FALSE);
   }
 

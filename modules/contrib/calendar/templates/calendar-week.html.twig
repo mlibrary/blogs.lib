@@ -37,6 +37,7 @@
     </tr>
   </thead>
   <tbody>
+
     {%  for i in 0..multiday_rows %}
       {% set row_class = 'all-day' %}
       {% if loop.first %}{% set row_class_extra = 'first' %}{% endif %}
@@ -49,27 +50,25 @@
         </td>
       {% endif %}
 
-      {% set colpos = 0 %}
       {% for j in 0..6 %}
         {% set cell = all_day[j][i] %}
         {% if cell is not empty and cell.filled and cell['wday'] == j %}
-          {% for k in colpos..cell['wday'] %}
-            <td class="multi-day no-entry"><div class="inner">&nbsp;</div></td>
-          {% endfor %}
           <td colspan="{{ cell['colspan'] }}" class="multi-day">
             <div class="inner">
               {{ cell.entry }}
             </div>
           </td>
-          {% set colpos = cell['wday'] + cell['colspan'] + 1 %}
+        {% else %}
+          <td class="calendar-agenda-items single-day">
+            <div class="calendar">
+              <div class="inner">&nbsp</div>
+            </div>
+          </td>
         {% endif %}
-      {% endfor %}
-
-      {% for j in colpos..6 %}
-        <td class="multi-day no-entry"><div class="inner">&nbsp;</div></td>
       {% endfor %}
     </tr>
     {% endfor %}
+
     {% for time in items %}
     <tr class="not-all-day">
       <td class="calendar-agenda-hour">

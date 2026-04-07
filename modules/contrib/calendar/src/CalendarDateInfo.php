@@ -2,6 +2,8 @@
 
 namespace Drupal\calendar;
 
+use Drupal\views\Plugin\views\argument\Date;
+
 /**
  * Defines a calendar date info object.
  */
@@ -9,368 +11,211 @@ class CalendarDateInfo {
 
   /**
    * The calendar type.
-   *
-   * @var string
-   *   The type of calendar.
    */
-  protected $calendarType;
+  protected string $calendarType;
 
   /**
    * The date argument.
-   *
-   * @var \Drupal\calendar_datetime\Plugin\views\argument\Date
-   *   The date argument.
    */
-  protected $dateArgument;
-
-  /**
-   * The position of the date argument among the other view arguments.
-   *
-   * @var int dateArgumentPosition
-   *   The date argument position.
-   */
-  protected $dateArgumentPosition;
+  protected Date $dateArgument;
 
   /**
    * The timezone information for this calendar.
-   *
-   * @var \DateTimeZone
-   *   The timezone object.
    */
-  protected $timezone;
+  protected \DateTimeZone $timezone;
 
   /**
-   * The granularity of this calendar.
-   *
-   * @var string
-   *   The granularity of this calendar (e.g. 'day', 'week').
+   * The granularity of this calendar (e.g. 'day', 'week').
    */
-  protected $granularity;
+  protected string $granularity;
 
   /**
-   * The range of this calendar.
-   *
-   * @var string
-   *   The range of this calendar (e.g. '-3:+3').
+   * The range of this calendar (e.g. '-3:+3').
    */
-  protected $range;
+  protected string $range;
 
-  // @todo Find a better way to hold all "minimum x" information
   /**
    * The minimum date of this calendar.
-   *
-   * @var \DateTime
-   *   The minimum date of this calendar.
    */
-  protected $minDate;
+  protected \DateTimeInterface $minDate;
 
   /**
    * The minimum year of this calendar.
-   *
-   * @var string
-   *   The minimum year of this calendar.
    */
-  protected $minYear;
+  protected string $minYear;
 
   /**
    * The minimum month of this calendar.
-   *
-   * @var string
-   *   The minimum month of this calendar.
    */
-  protected $minMonth;
+  protected string $minMonth;
 
   /**
    * The minimum day of this calendar.
-   *
-   * @var string
-   *   The minimum day of this calendar.
    */
-  protected $minDay;
+  protected string $minDay;
 
   /**
    * The minimum week number of this calendar.
-   *
-   * @var int
-   *   The minimum week number of this calendar.
    */
-  protected $minWeek;
+  protected int $minWeek;
 
   /**
    * The maximum date of this calendar.
-   *
-   * @var \DateTime
-   *   The maximum date.
    */
-  protected $maxDate;
-
-  /**
-   * Indicates whether certain actions are forbidden in the calendar.
-   *
-   * @var bool
-   *   The forbid value.
-   * @todo Explain what this variable does.
-   */
-  protected $forbid;
+  protected \DateTimeInterface $maxDate;
 
   /**
    * Getter for the calendar type.
-   *
-   * @return string
-   *   The calendar type.
    */
-  public function getCalendarType() {
+  public function getCalendarType(): string {
     return $this->calendarType;
   }
 
   /**
    * Setter for the calendar type.
-   *
-   * @param string $calendarType
-   *   The calendar type.
    */
-  public function setCalendarType($calendarType) {
+  public function setCalendarType(string $calendarType): void {
     $this->calendarType = $calendarType;
   }
 
   /**
    * Getter for the date argument.
-   *
-   * @return \Drupal\calendar_datetime\Plugin\views\argument\Date
-   *   The date argument.
    */
-  public function getDateArgument() {
+  public function getDateArgument(): Date {
     return $this->dateArgument;
   }
 
   /**
    * Setter for the date argument.
-   *
-   * @param \Drupal\calendar_datetime\Plugin\views\argument\Date $dateArgument
-   *   The date argument.
    */
-  public function setDateArgument($dateArgument) {
+  public function setDateArgument($dateArgument): void {
     $this->dateArgument = $dateArgument;
   }
 
   /**
-   * Getter for the date argument position.
-   *
-   * @return int
-   *   The date argument position.
-   */
-  public function getDateArgumentPosition() {
-    return $this->dateArgumentPosition;
-  }
-
-  /**
-   * Setter for the date argument position.
-   *
-   * @param int $dateArgumentPosition
-   *   The date argument position.
-   */
-  public function setDateArgumentPosition($dateArgumentPosition) {
-    $this->dateArgumentPosition = $dateArgumentPosition;
-  }
-
-  /**
    * Getter for the timezone variable.
-   *
-   * @return \DateTimeZone
-   *   The timezone variable.
    */
-  public function getTimezone() {
+  public function getTimezone(): \DateTimeZone {
     return $this->timezone;
   }
 
   /**
    * Setter for the timezone variable.
-   *
-   * @param \DateTimeZone $timezone
-   *   The timezone variable.
    */
-  public function setTimezone($timezone) {
+  public function setTimezone(\DateTimeZone $timezone): void {
     $this->timezone = $timezone;
   }
 
   /**
    * Getter for the calendar granularity.
-   *
-   * @return string
-   *   The calendar granularity.
    */
-  public function getGranularity() {
+  public function getGranularity(): string {
     return $this->granularity;
   }
 
   /**
    * Setter for the granularity.
-   *
-   * @param string $granularity
-   *   The calendar granularity.
    */
-  public function setGranularity($granularity) {
+  public function setGranularity(string $granularity): void {
     $this->granularity = $granularity;
   }
 
   /**
    * Getter for the range.
-   *
-   * @return string
-   *   The calendar range.
    */
-  public function getRange() {
+  public function getRange(): string {
     return $this->range;
   }
 
   /**
    * Setter for the range.
-   *
-   * @param string $range
-   *   The calendar range.
    */
-  public function setRange($range) {
+  public function setRange(string $range): void {
     $this->range = $range;
   }
 
   /**
    * Getter for the minimum date.
-   *
-   * @return \DateTime
-   *   The minimum date.
    */
-  public function getMinDate() {
+  public function getMinDate(): \DateTimeInterface {
     return $this->minDate;
   }
 
   /**
    * Setter for the minimum date.
-   *
-   * @param \DateTime $minDate
-   *   The minimum date.
    */
-  public function setMinDate($minDate) {
+  public function setMinDate(\DateTimeInterface $minDate): void {
     $this->minDate = $minDate;
   }
 
   /**
    * Getter for the minimum year.
-   *
-   * @return string
-   *   The minimum year.
    */
-  public function getMinYear() {
+  public function getMinYear(): string {
     return $this->minYear;
   }
 
   /**
    * Setter for the minimum year.
-   *
-   * @param string $minYear
-   *   The minimum year.
    */
-  public function setMinYear($minYear) {
+  public function setMinYear(string $minYear): void {
     $this->minYear = $minYear;
   }
 
   /**
    * Getter for the minimum month.
-   *
-   * @return string
-   *   The minimum month.
    */
-  public function getMinMonth() {
+  public function getMinMonth(): string {
     return $this->minMonth;
   }
 
   /**
    * Setter for the minimum month.
-   *
-   * @param string $minMonth
-   *   The minimum month.
    */
-  public function setMinMonth($minMonth) {
+  public function setMinMonth(string $minMonth): void {
     $this->minMonth = $minMonth;
   }
 
   /**
    * Getter for the minimum day.
-   *
-   * @return string
-   *   The minimum day.
    */
-  public function getMinDay() {
+  public function getMinDay(): string {
     return $this->minDay;
   }
 
   /**
    * Setter for the minimum day.
-   *
-   * @param string $minDay
-   *   The minimum day.
    */
-  public function setMinDay($minDay) {
+  public function setMinDay(string $minDay): void {
     $this->minDay = $minDay;
   }
 
   /**
    * Getter for the minimum week number.
-   *
-   * @return int
-   *   The minimum week number.
    */
-  public function getMinWeek() {
+  public function getMinWeek(): int {
     return $this->minWeek;
   }
 
   /**
    * Setter for the minimum week number.
-   *
-   * @param int $minWeek
-   *   The minimum week number.
    */
-  public function setMinWeek($minWeek) {
+  public function setMinWeek(int $minWeek): void {
     $this->minWeek = $minWeek;
   }
 
   /**
    * Getter for the maximum date.
-   *
-   * @return \DateTime
-   *   The maximum date.
    */
-  public function getMaxDate() {
+  public function getMaxDate(): \DateTimeInterface {
     return $this->maxDate;
   }
 
   /**
    * Setter for the maximum date.
-   *
-   * @param \DateTime $maxDate
-   *   The maximum date.
    */
-  public function setMaxDate($maxDate) {
+  public function setMaxDate(\DateTimeInterface $maxDate): void {
     $this->maxDate = $maxDate;
-  }
-
-  /**
-   * Getter for the forbid value of this calendar.
-   *
-   * @return bool
-   *   The forbid value.
-   */
-  public function isForbid() {
-    return $this->forbid;
-  }
-
-  /**
-   * Setter for the forbid value of this calendar.
-   *
-   * @param bool $forbid
-   *   The forbid value.
-   */
-  public function setForbid($forbid) {
-    $this->forbid = $forbid;
   }
 
 }

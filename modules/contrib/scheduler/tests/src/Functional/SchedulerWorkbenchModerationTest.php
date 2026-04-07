@@ -2,11 +2,14 @@
 
 namespace Drupal\Tests\scheduler\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+
 /**
  * Tests Scheduler with Workbench Moderation installed.
  *
  * @group scheduler_workbench
  */
+#[Group('scheduler_workbench')]
 class SchedulerWorkbenchModerationTest extends SchedulerBrowserTestBase {
 
   /**

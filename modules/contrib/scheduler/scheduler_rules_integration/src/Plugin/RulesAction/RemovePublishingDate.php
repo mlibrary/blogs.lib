@@ -7,6 +7,8 @@ use Drupal\Core\Entity\EntityInterface;
 /**
  * Provides a 'Remove date for scheduled publishing' action.
  *
+ * SchedulerRulesActionsTest provides test coverage.
+ *
  * @RulesAction(
  *   id = "scheduler_remove_publishing_date",
  *   deriver = "Drupal\scheduler_rules_integration\Plugin\RulesAction\SchedulerRulesActionDeriver"
@@ -21,9 +23,9 @@ class RemovePublishingDate extends SchedulerRulesActionBase {
    *   The entity from which to remove the scheduled date.
    */
   public function doExecute(EntityInterface $entity) {
-    $config = \Drupal::config('scheduler.settings');
+    $default_publish_enable = $this->schedulerManager->setting('default_publish_enable');
     $bundle_field = $entity->getEntityType()->get('entity_keys')['bundle'];
-    if ($entity->$bundle_field->entity->getThirdPartySetting('scheduler', 'publish_enable', $config->get('default_publish_enable'))) {
+    if ($entity->$bundle_field->entity->getThirdPartySetting('scheduler', 'publish_enable', $default_publish_enable)) {
       $entity->set('publish_on', NULL);
       scheduler_entity_presave($entity);
     }

@@ -32,7 +32,7 @@ class SchedulerPermissions implements ContainerInjectionInterface {
    * Constructs a \Drupal\scheduler\SchedulerPermissions instance.
    *
    * @param \Drupal\scheduler\SchedulerManager $scheduler_manager
-   *   The entity type manager.
+   *   The Scheduler manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    */

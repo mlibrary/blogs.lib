@@ -2,11 +2,15 @@
 
 namespace Drupal\content_moderation_notifications\Form;
 
+use Drupal\content_moderation\ModerationInformationInterface;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class ContentModerationNotificationFormBase.
@@ -22,6 +26,43 @@ use Drupal\user\RoleInterface;
  * @ingroup content_moderation_notifications
  */
 class ContentModerationNotificationsFormBase extends EntityForm {
+
+  /**
+   * The entity field manager.
+   *
+   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
+   */
+  protected $entityFieldManager;
+
+  /**
+   * Moderation info service.
+   *
+   * @var \Drupal\content_moderation\ModerationInformationInterface
+   */
+  protected $moderationInfo;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('entity_field.manager'),
+      $container->get('content_moderation.moderation_information')
+    );
+  }
+
+  /**
+   * Constructs a new ContentModerationNotificationsFormBase object.
+   *
+   * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
+   *   The entity field manager.
+   * @param \Drupal\content_moderation\ModerationInformationInterface $moderation_info
+   *   Moderation info service.
+   */
+  public function __construct(EntityFieldManagerInterface $entity_field_manager, ModerationInformationInterface $moderation_info) {
+    $this->entityFieldManager = $entity_field_manager;
+    $this->moderationInfo = $moderation_info;
+  }
 
   /**
    * Update options.
@@ -163,7 +204,7 @@ class ContentModerationNotificationsFormBase extends EntityForm {
       '#title' => $this->t('Roles'),
       '#options' => $roles_options,
       '#default_value' => $content_moderation_notification->getRoleIds(),
-      '#description' => $this->t('Send notifications to all users with these roles.'),
+      '#description' => $this->t('Send notifications to all users with these roles if user have access to view the content.'),
     ];
 
     // Send email to author?
@@ -180,12 +221,20 @@ class ContentModerationNotificationsFormBase extends EntityForm {
       '#description' => $this->t('Do not send notifications to the site email address.'),
     ];
 
+    $form['user_fields'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Entity Reference User Fields'),
+      '#description' => $this->t('Send to users referenced by the selected fields.'),
+      '#options' => $this->getUserReferenceFieldOptions(),
+      '#default_value' => $content_moderation_notification->getUserFields(),
+    ];
+
     $form['emails'] = [
       '#type' => 'textarea',
       '#rows' => 3,
       '#title' => $this->t('Adhoc email addresses'),
       '#default_value' => $content_moderation_notification->getEmails(),
-      '#description' => $this->t('Send notifications to these email addresses. Separate emails with commas or newlines. You may use Twig templating code in this field.'),
+      '#description' => $this->t('Send notifications to these email addresses. No access checking is performed to verify these emails have access to view the content. Separate emails with commas or newlines. You may use Twig templating code in this field.'),
     ];
 
     // Email subject line.
@@ -218,6 +267,65 @@ class ContentModerationNotificationsFormBase extends EntityForm {
 
     // Return the form.
     return $form;
+  }
+
+  /**
+   * Returns the user entity references fields from all moderatable entities.
+   *
+   * @return array
+   *   List of all user entity references fields.
+   */
+  protected function getUserReferenceFieldOptions(): array {
+    $fields = $this->entityFieldManager->getFieldMapByFieldType('entity_reference');
+    $field_options = [];
+    foreach ($fields as $entity_type_id => $entity_type_fields) {
+      $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
+      if (!$this->isModeratableEntityType($entity_type)) {
+        // These fields are irrelevant, the entity type isn't moderated.
+        continue;
+      }
+      $base = $this->entityFieldManager->getBaseFieldDefinitions($entity_type_id);
+      foreach ($entity_type_fields as $field_name => $field_detail) {
+        if (in_array($field_name, array_keys($base), TRUE)) {
+          if ($base[$field_name]->getSetting('target_type') !== 'user') {
+            continue;
+          }
+          $field_options[$entity_type_id . ':' . $field_name] = $base[$field_name]->getLabel() . ' (' . $entity_type->getLabel() . ')';
+          continue;
+        }
+        $sample_bundle = reset($field_detail['bundles']);
+        $bundle_fields = $this->entityFieldManager->getFieldDefinitions($entity_type_id, $sample_bundle);
+        if (!isset($bundle_fields[$field_name])) {
+          // Stale field map reference.
+          continue;
+        }
+        $sample_field = $bundle_fields[$field_name];
+        if ($sample_field->getSetting('target_type') !== 'user') {
+          continue;
+        }
+        $field_options[$entity_type_id . ':' . $field_name] = $sample_field->getLabel() . ' (' . $entity_type->getLabel() . ')';
+      }
+    }
+
+    return $field_options;
+  }
+
+  /**
+   * Determines if an entity type has been marked as moderatable.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   *   An entity type object.
+   *
+   * @return bool
+   *   TRUE if this entity type has been marked as moderatable, FALSE otherwise.
+   */
+  protected function isModeratableEntityType(EntityTypeInterface $entity_type) {
+    if (method_exists($this->moderationInfo, 'isModeratableEntityType')) {
+      return $this->moderationInfo->isModeratableEntityType($entity_type);
+    }
+    else {
+      return $this->moderationInfo->canModerateEntitiesOfEntityType($entity_type);
+    }
   }
 
   /**
@@ -314,6 +422,8 @@ class ContentModerationNotificationsFormBase extends EntityForm {
 
     // Redirect the user back to the listing route after the save operation.
     $form_state->setRedirect('entity.content_moderation_notification.collection');
+
+    return $status;
   }
 
 }

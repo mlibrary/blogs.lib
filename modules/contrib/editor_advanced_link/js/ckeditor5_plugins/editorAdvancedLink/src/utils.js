@@ -2,6 +2,7 @@ const additionalFormElements = {
   linkTitle: {
     label: Drupal.t('Title'),
     viewAttribute: 'title',
+    group: 'advanced',
   },
   linkAriaLabel: {
     label: Drupal.t('ARIA label'),

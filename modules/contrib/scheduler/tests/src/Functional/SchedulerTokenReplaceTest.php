@@ -2,11 +2,15 @@
 
 namespace Drupal\Tests\scheduler\Functional;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+
 /**
  * Generates text using placeholders to check scheduler token replacement.
  *
  * @group scheduler
  */
+#[Group('scheduler')]
 class SchedulerTokenReplaceTest extends SchedulerBrowserTestBase {
 
   /**
@@ -14,6 +18,7 @@ class SchedulerTokenReplaceTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataSchedulerTokenReplacement
    */
+  #[DataProvider('dataSchedulerTokenReplacement')]
   public function testSchedulerTokenReplacement($entityTypeId, $bundle) {
     // For taxonomy, log in as adminUser to avoid 403 for unpublished terms.
     $entityTypeId == 'taxonomy_term' ? $this->drupalLogin($this->adminUser) : $this->drupalLogin($this->schedulerUser);
@@ -79,6 +84,7 @@ class SchedulerTokenReplaceTest extends SchedulerBrowserTestBase {
    *
    * @dataProvider dataSchedulerWithoutTokenModule
    */
+  #[DataProvider('dataSchedulerWithoutTokenModule')]
   public function testSchedulerWithoutTokenModule($entityTypeId, $bundle) {
     // Commerce product requires the token module, so that has to be uninstalled
     // also. Using FALSE allows both to be uninstalled in the same call.

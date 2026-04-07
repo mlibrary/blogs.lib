@@ -29,14 +29,8 @@ class TwigExtension extends AbstractExtension {
 
   /**
    * Adds a striped background to the passed event.
-   *
-   * @param \Drupal\calendar\CalendarEvent $event
-   *   Calendar event.
-   *
-   * @return string
-   *   A HTML output string.
    */
-  public function getCalendarStripe(CalendarEvent $event) {
+  public function getCalendarStripe(CalendarEvent $event): string {
     if (empty($event->getStripeHexes()) || (!count($event->getStripeHexes()))) {
       return '';
     }
@@ -46,6 +40,7 @@ class TwigExtension extends AbstractExtension {
         $output .= '<div style="background-color:' . $event->getStripeHexes()[$k] . ';color:' . $event->getStripeHexes()[$k] . '" class="stripe" title="Key: ' . $event->getStripeLabels()[$k] . '">&nbsp;</div>' . "\n";
       }
     }
+
     return $output;
   }
 
