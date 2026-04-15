@@ -2122,16 +2122,16 @@
         },
         {
             "name": "drupal/core",
-            "version": "10.6.5",
+            "version": "10.6.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core.git",
-                "reference": "bdca8f642833a5c959994d41e232f51b5a835a2d"
+                "reference": "d6e217d684894e5a0e6fb28261184dd57450bedb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core/zipball/bdca8f642833a5c959994d41e232f51b5a835a2d",
-                "reference": "bdca8f642833a5c959994d41e232f51b5a835a2d",
+                "url": "https://api.github.com/repos/drupal/core/zipball/d6e217d684894e5a0e6fb28261184dd57450bedb",
+                "reference": "d6e217d684894e5a0e6fb28261184dd57450bedb",
                 "shasum": ""
             },
             "require": {
@@ -2281,9 +2281,9 @@
             ],
             "description": "Drupal is an open source content management platform powering millions of websites and applications.",
             "support": {
-                "source": "https://github.com/drupal/core/tree/10.6.5"
+                "source": "https://github.com/drupal/core/tree/10.6.7"
             },
-            "time": "2026-03-06T09:55:31+00:00"
+            "time": "2026-04-15T16:19:28+00:00"
         },
         {
             "name": "drupal/create_user_permission",
