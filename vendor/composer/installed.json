@@ -2219,17 +2219,17 @@
         },
         {
             "name": "drupal/core",
-            "version": "10.6.7",
-            "version_normalized": "10.6.7.0",
+            "version": "10.6.8",
+            "version_normalized": "10.6.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core.git",
-                "reference": "d6e217d684894e5a0e6fb28261184dd57450bedb"
+                "reference": "7140382ee8fcb79d795a8caae99a5aaa7f9ba886"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core/zipball/d6e217d684894e5a0e6fb28261184dd57450bedb",
-                "reference": "d6e217d684894e5a0e6fb28261184dd57450bedb",
+                "url": "https://api.github.com/repos/drupal/core/zipball/7140382ee8fcb79d795a8caae99a5aaa7f9ba886",
+                "reference": "7140382ee8fcb79d795a8caae99a5aaa7f9ba886",
                 "shasum": ""
             },
             "require": {
@@ -2310,7 +2310,7 @@
             "suggest": {
                 "ext-zip": "Needed to extend the plugin.manager.archiver service capability with the handling of files in the ZIP format."
             },
-            "time": "2026-04-15T16:19:28+00:00",
+            "time": "2026-05-06T15:22:12+00:00",
             "type": "drupal-core",
             "extra": {
                 "drupal-scaffold": {
@@ -2386,7 +2386,7 @@
             ],
             "description": "Drupal is an open source content management platform powering millions of websites and applications.",
             "support": {
-                "source": "https://github.com/drupal/core/tree/10.6.7"
+                "source": "https://github.com/drupal/core/tree/10.6.8"
             },
             "install-path": "../../core"
         },
