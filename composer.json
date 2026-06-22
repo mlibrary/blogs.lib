@@ -17,10 +17,6 @@
                 }
             }
         },
-        "drupal": {
-            "type": "composer",
-            "url": "https://packages.drupal.org/8"
-        },
         "umlib_admin-theme": {
             "type": "package",
             "package": {

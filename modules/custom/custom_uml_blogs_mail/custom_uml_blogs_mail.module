@@ -26,22 +26,42 @@ function custom_uml_blogs_mail_module_implements_alter(&$implementations, $hook)
  * Alter destination of outgoing emails to group members.
  */
 function custom_uml_blogs_mail_mail_alter(&$message) {
-  if ($message['id'] == 'content_moderation_notifications_content_moderation_notification') {
-    $node = $message['params']['context']['entity'];
-    $group_node = \Drupal\node\Entity\Node::load($node->get('og_audience')->target_id);
-    $memberships = \Drupal::service('og.membership_manager')->getGroupMembershipsByRoleNames($group_node, ['member']);
-    $bcc = '';
-    foreach ($memberships as $membership) {
-      $bcc .= $membership->getOwner()->getEmail() . ',';
+  if (($message['id'] ?? '') == 'content_moderation_notifications_content_moderation_notification') {
+    $node = $message['params']['context']['entity'] ?? NULL;
+    if (!$node instanceof \Drupal\node\NodeInterface || !$node->hasField('og_audience') || $node->get('og_audience')->isEmpty()) {
+      return;
     }
-    $subject = str_replace('[node:og_audience:entity:title]: [node:title]', $group_node->getTitle().': '.$node->getTitle(), $message['params']['subject']);
-    \Drupal::logger('custom_uml_blogs_mail')->notice('Meessage %subject sent to %bcc',
+    $group_node = \Drupal\node\Entity\Node::load($node->get('og_audience')->target_id);
+    if (!$group_node) {
+      return;
+    }
+    $memberships = \Drupal::service('og.membership_manager')->getGroupMembershipsByRoleNames($group_node, ['member']);
+    $bcc_emails = [];
+    $validator = \Drupal::service('email.validator');
+    foreach ($memberships as $membership) {
+      $email = $membership->getOwner()->getEmail();
+      if (!empty($email) && $validator->isValid($email)) {
+        $bcc_emails[$email] = $email;
+      }
+    }
+    if (empty($bcc_emails)) {
+      return;
+    }
+    $bcc = implode(',', $bcc_emails);
+    $subject = str_replace(
+      '[node:og_audience:entity:title]: [node:title]',
+      $group_node->getTitle() . ': ' . $node->getTitle(),
+      (string) ($message['params']['subject'] ?? '')
+    );
+    \Drupal::logger('custom_uml_blogs_mail')->notice('Message %subject sent to %count subscribers',
     [
       '%subject' => $subject,
-      '%bcc' => $bcc,
+      '%count' => count($bcc_emails),
     ]);
-    $message['bcc'] = rtrim($bcc, ',');
-    $message['headers']['Bcc'] = $message['bcc'];
-    \Drupal::messenger()->addMessage('All subscribers of ' . $group_node->getTitle() . ' have been sent a notification email.');
+    $message['bcc'] = $bcc;
+    if (!isset($message['headers']) || !is_array($message['headers'])) {
+      $message['headers'] = [];
+    }
+    $message['headers']['Bcc'] = $bcc;
   }
 }

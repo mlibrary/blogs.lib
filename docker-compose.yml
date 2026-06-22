@@ -7,10 +7,10 @@ services:
       - database:/var/lib/mysql
       - ./drupal8-blogs.sql.gz:/docker-entrypoint-initdb.d/drupal8-blogs.sql.gz
     environment:
-      - MARIADB_ROOT_PASSWORD=password
-      - MARIADB_USER=user
-      - MARIADB_PASSWORD=password
-      - MARIADB_DATABASE=drupal
+      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD:-change_me}
+      - MARIADB_USER=${MARIADB_USER:-user}
+      - MARIADB_PASSWORD=${MARIADB_PASSWORD:-change_me}
+      - MARIADB_DATABASE=${MARIADB_DATABASE:-drupal}
     restart: always
 
   drupal:
@@ -21,11 +21,12 @@ services:
     ports:
       - 25647:80
     environment:
-      - MARIADB_USER=user
-      - MARIADB_PASSWORD=password
-      - MARIADB_DATABASE=drupal
+      - MARIADB_USER=${MARIADB_USER:-user}
+      - MARIADB_PASSWORD=${MARIADB_PASSWORD:-change_me}
+      - MARIADB_DATABASE=${MARIADB_DATABASE:-drupal}
       - DATABASE_HOST=database
-      - DRUPAL_HASH_SALT='drupal_hash_salt'
+      - DRUPAL_HASH_SALT=${DRUPAL_HASH_SALT:-set_a_strong_hash_salt}
+      - DRUPAL_DEV_MODE=${DRUPAL_DEV_MODE:-1}
     volumes:
       - ./:/var/www/html
     restart: always

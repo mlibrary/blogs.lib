@@ -10,17 +10,14 @@ use Drupal\paragraphs\Entity\Paragraph;
  * Implements hook_openid_connect_pre_authorize().
  */
 function custom_openid_openid_connect_pre_authorize($account, array $context) {
-  $uname = NULL;
-  if (isset($context['userinfo']['preferred_username']) || isset($context['userinfo']['email'])) {
-    $uname = $context['userinfo']['preferred_username'];
-    if (empty($uname)) {
-      $uname = explode('@', $context['userinfo']['email']);
-      if ($uname[1] == 'umich.edu') {
-        $uname = $uname[0];
-      }
-      else {
-        $uname = $context['userinfo']['email'];
-      }
+  if (($context['plugin_id'] ?? '') !== 'generic') {
+    return FALSE;
+  }
+  $uname = '';
+  if (!empty($context['userinfo'])) {
+    $uname = trim((string) ($context['userinfo']['preferred_username'] ?? ''));
+    if ($uname === '') {
+      $uname = _custom_openid_normalize_username_from_email($context['userinfo']['email'] ?? '');
     }
 // UNCOMMENT 3 LINES BELOW and replace YOUR_USERNAME_HERE and USER_YOU_WANT_TO_BE_HERE with appropriate values
 //    if (in_array($uname,['YOUR_USERNAME_HERE']) && strpos($_SERVER['HTTP_USER_AGENT'], 'Chrome')) {
@@ -40,17 +37,15 @@ function custom_openid_openid_connect_pre_authorize($account, array $context) {
 // above
 // $userinfo['name'] = $uname;
   }
-  if ((is_bool($account) || !$account) && $uname) {
+  if ((is_bool($account) || !$account) && $uname !== '') {
     $account = user_load_by_name($uname);
   }
   // Allow access only for current users
-  if (($account && !$account->isBlocked() && $account->hasRole('authenticated'))
-    && $context['plugin_id'] == 'generic'
-  ) {
+  if ($account && !$account->isBlocked() && $account->hasRole('authenticated')) {
     return $account;
   }
   // Deny all other users.
-//  return FALSE;
+  return FALSE;
 }
 
 /**
@@ -58,14 +53,24 @@ function custom_openid_openid_connect_pre_authorize($account, array $context) {
  */
 function custom_openid_openid_connect_userinfo_alter(array &$userinfo, array $context) {
   // Add some custom information.
-  if ($context['plugin_id'] == 'generic') {
-    $uname = explode('@', $userinfo['email']);
-    if ($uname[1] == 'umich.edu') {
-      $uname = $uname[0];
+  if (($context['plugin_id'] ?? '') == 'generic') {
+    $uname = _custom_openid_normalize_username_from_email($userinfo['email'] ?? '');
+    if ($uname !== '') {
+      $userinfo['name'] = $uname;
     }
-    else {
-      $uname = $userinfo['email'];
-    }
-    $userinfo['name'] = $uname;
   }
+}
+
+/**
+ * Normalize identity provider email to a local username format.
+ */
+function _custom_openid_normalize_username_from_email($email) {
+  $email = trim((string) $email);
+  if ($email === '') {
+    return '';
+  }
+  if (str_ends_with(strtolower($email), '@umich.edu')) {
+    return substr($email, 0, -strlen('@umich.edu'));
+  }
+  return $email;
 }
