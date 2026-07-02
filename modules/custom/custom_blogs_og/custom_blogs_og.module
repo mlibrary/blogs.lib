@@ -31,10 +31,12 @@ function _custom_blogs_og_verify_users($nid) {
   $memberships = $query->execute();
   foreach ($memberships as $member) {
     $user = User::load($member->uid);
+    if (!$user) {
+      continue;
+    }
     $name = $user->getDisplayName();
     $user_data = _get_mcommunity_user($name);
     if (strpos($name, '@') === FALSE && empty($user_data)) {
-      $roles['remove'] = _custom_blogs_get_all_roles();
       $memberships = \Drupal::service('og.membership_manager')->getMemberships($user->id());
       foreach ($memberships as $membership) {
         $membership->delete();
@@ -61,7 +63,7 @@ function custom_blogs_og_form_og_unsubscribe_confirm_form_alter(&$form, FormStat
   $account = \Drupal::currentUser();
   $accessible = _custom_blogs_test_og_access($node, 'edit', $account);
   $form['description'] = ['#markup' => t('You can resubscribe at any time.')];
-  $access = $accessible[$node->id()];
+  $access = $accessible[$node->id()] ?? 'blog_member';
   if ($access != 'blog_member') {
     $form['description'] = ['#markup' => t('<strong>Unsubscribing also removes your access to contribute to this blog.</strong><br/><em>If you resubscribe in the future, authoring access has to be granted separately by a blog manager.</em>')];
   }
@@ -473,10 +475,13 @@ function _custom_blogs_form_og_membership_add_validate(&$form, FormStateInterfac
   }
   $roles = _custom_blogs_get_roles($roles);
   if (empty($form_state->getValue('uid')[0]['target_id'])) {
-    $new_user_name = trim($user_input['uid'][0]['target_id']);
-    $uname = explode('@', $new_user_name);
-    if ($uname[1] == 'umich.edu') {
-      $new_user_name = $uname[0];
+    $new_user_name = trim((string) ($user_input['uid'][0]['target_id'] ?? ''));
+    if ($new_user_name === '') {
+      $form_state->setErrorByName('uid', t('A username or email address is required.'));
+      return;
+    }
+    if (str_ends_with(strtolower($new_user_name), '@umich.edu')) {
+      $new_user_name = substr($new_user_name, 0, -strlen('@umich.edu'));
     }
     $new_user = NULL;
     if (strpos($new_user_name, '@') === FALSE) {
@@ -529,6 +534,10 @@ function _custom_blogs_form_og_membership_add_validate(&$form, FormStateInterfac
   }
   else {
     $user = User::load($form_state->getValue('uid')[0]['target_id']);
+    if (!$user) {
+      $form_state->setErrorByName('uid', t('Unable to load the selected user.'));
+      return;
+    }
     foreach ($roles['add'] as $role) {
       $user->addRole($role);
     }

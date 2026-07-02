@@ -2,7 +2,6 @@
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
-use Drupal\Core\Render\Markup;
 use Drupal\Core\Block\BlockPluginInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\node\Entity\Node;
@@ -81,9 +80,9 @@ function _custom_blogs_form_user_register_validate(&$form, FormStateInterface $f
   $email = $form_state->getValue('mail');
   $uname = NULL;
   if ($email) {
-    $uname = explode('@', $email);
-    if ($uname[1] == 'umich.edu') {
-      $uname = $uname[0];
+    $email = trim($email);
+    if (str_ends_with(strtolower($email), '@umich.edu')) {
+      $uname = substr($email, 0, -strlen('@umich.edu'));
     }
     else {
       $uname = $email;
@@ -94,7 +93,7 @@ function _custom_blogs_form_user_register_validate(&$form, FormStateInterface $f
     $form_state->setValue('edit_name', $uname);
   }
   else {
-    $form_state->setErrorByName('blogs_username_error', t('Cannot create user ' . $uname));
+    $form_state->setErrorByName('blogs_username_error', t('Cannot create user from the provided email address.'));
   }
 }
 
@@ -104,32 +103,56 @@ function _custom_blogs_form_user_register_validate(&$form, FormStateInterface $f
 function _get_mcommunity_user($name) {
   $user_data = [];
   if ($mcomm = Settings::get('mcommunity')) {
+    $name = trim((string) $name);
+    if ($name === '') {
+      return $user_data;
+    }
+    if (function_exists('ldap_escape')) {
+      $name = ldap_escape($name, '', LDAP_ESCAPE_FILTER);
+    }
+    else {
+      $name = preg_replace('/[^a-zA-Z0-9._-]/', '', $name);
+    }
     $ldap_config = parse_ini_file($mcomm, TRUE);
     $ldap_resource = NULL;
     $attempts = 0;
     $ldap_result = FALSE;
     while ($attempts < 5 && !$ldap_result) {
       $ldap_resource = ldap_connect($ldap_config['connect']['uri']);
-      ldap_bind($ldap_resource, $ldap_config['bind']['dn'], $ldap_config['bind']['pw']);
+      if (!$ldap_resource) {
+        sleep(5);
+        $attempts++;
+        continue;
+      }
+      if (!ldap_bind($ldap_resource, $ldap_config['bind']['dn'], $ldap_config['bind']['pw'])) {
+        ldap_unbind($ldap_resource);
+        sleep(5);
+        $attempts++;
+        continue;
+      }
       $ldap_result = ldap_search(
         $ldap_resource,
         "ou=People,dc=umich,dc=edu",
-        "(uid=".$name.")",
+        '(uid=' . $name . ')',
         ['entityid','displayName','title','mail','givenname','umichdisplaysn','umichtitle','umichInstRoles','umichHR']
       );
       if (!$ldap_result) {
+        ldap_unbind($ldap_resource);
         sleep(5);
       }
       $attempts++;
     }
-    $ldap_entries = ldap_get_entries($ldap_resource, $ldap_result);
-    if ($ldap_entries['count'] != 0) {
-      $raw_data = array_filter($ldap_entries[0], function($k) { return !is_numeric($k); }, ARRAY_FILTER_USE_KEY);
-      foreach ($raw_data as $key => $data) {
-        if (isset($data[0])) {
-          $user_data[$key] = $data[0];
+    if ($ldap_resource && $ldap_result) {
+      $ldap_entries = ldap_get_entries($ldap_resource, $ldap_result);
+      if ($ldap_entries['count'] != 0) {
+        $raw_data = array_filter($ldap_entries[0], function($k) { return !is_numeric($k); }, ARRAY_FILTER_USE_KEY);
+        foreach ($raw_data as $key => $data) {
+          if (isset($data[0])) {
+            $user_data[$key] = $data[0];
+          }
         }
       }
+      ldap_unbind($ldap_resource);
     }
   }
 
@@ -193,7 +216,8 @@ function custom_blogs_user_presave($user) {
 */
 function custom_blogs_paragraph_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
   if ($entity->bundle() == 'get_in_touch') {
-    $is_empty = _custom_blogs_make_sure_we_delete_empty_paragraphs($entity);
+    // Never mutate storage during render.
+    $is_empty = _custom_blogs_is_empty_get_in_touch_paragraph($entity);
     if (!$is_empty) {
       $name = trim($entity->get('field_name')->value);
       $email = trim($entity->get('field_email')->value);
@@ -212,13 +236,20 @@ function custom_blogs_paragraph_view_alter(array &$build, EntityInterface $entit
  */
 // see if https://www.drupal.org/project/paragraphs/issues/2877695 is ever solved.
 function _custom_blogs_make_sure_we_delete_empty_paragraphs(EntityInterface $entity) {
-  $name = trim($entity->get('field_name')->value);
-  $email = trim($entity->get('field_email')->value);
-  if (empty($name) && empty($email)) {
+  if (_custom_blogs_is_empty_get_in_touch_paragraph($entity)) {
     $entity->delete();
     return TRUE;
   }
   return FALSE;
+}
+
+/**
+ * Determine if the paragraph has no contact information.
+ */
+function _custom_blogs_is_empty_get_in_touch_paragraph(EntityInterface $entity) {
+  $name = trim((string) $entity->get('field_name')->value);
+  $email = trim((string) $entity->get('field_email')->value);
+  return empty($name) && empty($email);
 }
 
 /**
@@ -237,7 +268,11 @@ function custom_blogs_node_view_alter(array &$build, EntityInterface $entity, En
   }
   if ($entity->bundle() == 'blog' && $display->id() == 'node.blog.subscribe') {
     $build['#post_render'][] = function ($html, array $elements) {
-      return str_replace(' group', ' '.$elements['#node']->label(), $html);
+      $label = '';
+      if (!empty($elements['#node']) && method_exists($elements['#node'], 'label')) {
+        $label = Html::escape($elements['#node']->label());
+      }
+      return str_replace(' group', ' ' . $label, $html);
     };
   }
 }
@@ -375,8 +410,8 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, FormStateInter
       $form['keys']['#title'] = 'Browse by Date';
     }
     $form['#info']['filter-keys']['label'] = $form['keys']['#title'];
-    $form['keys']['#placeholder'] = Markup::create(str_replace('search ', 'Search within ', strtolower($form['keys']['#title'])));
-    $form['#prefix'] = '<h3>'.$form['keys']['#title'].'</h3>';
+    $form['keys']['#placeholder'] = str_replace('search ', 'Search within ', strtolower($form['keys']['#title']));
+    $form['#prefix'] = '<h3>' . Html::escape($form['keys']['#title']) . '</h3>';
     if (strpos($path, 'all-posts') !== FALSE) {
       $form['#suffix'] = '<div><a href="/all-dates">Browse by Date</a></div>';
     }
@@ -399,13 +434,13 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, FormStateInter
           $form['keys']['#title'] = 'Browse in ' . $blog->getTitle();
         }
         $form['#info']['filter-keys']['label'] = $form['keys']['#title'];
-        $form['keys']['#placeholder'] = Markup::create(str_replace('Search ', 'Search within ', $form['keys']['#title']));
-        $form['#prefix'] = '<h3>'.$form['keys']['#title'].'</h3>';
+        $form['keys']['#placeholder'] = str_replace('Search ', 'Search within ', $form['keys']['#title']);
+        $form['#prefix'] = '<h3>' . Html::escape($form['keys']['#title']) . '</h3>';
       }
     }
   }
   //Unset these if we arent on the all-posts page with optional date
-  if (($view['view']->id() == 'all_posts' && !strpos($path, 'all-posts')) || ($view['view']->id() == 'all_posts_date' && !strpos($path, 'all-dates'))) {
+  if (($view['view']->id() == 'all_posts' && strpos($path, 'all-posts') === FALSE) || ($view['view']->id() == 'all_posts_date' && strpos($path, 'all-dates') === FALSE)) {
     unset($form['blog']);
   }
   if ($view['view']->id() == 'recent_posts') {
@@ -438,12 +473,12 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, FormStateInter
     else {
       $form['#attributes']['class'][] = 'hidden';
     }
-    $form['keys']['#placeholder'] = Markup::create(str_replace('Search in', 'Search within', $form['keys']['#title']));
-    if ($form['actions']['reset']['#access']) {
-      $form['#suffix'] = '<div><a href="'.$form['#action'].'">Reset results list</a></div>';
+    $form['keys']['#placeholder'] = str_replace('Search in', 'Search within', $form['keys']['#title']);
+    if (!empty($form['actions']['reset']['#access'])) {
+      $form['#suffix'] = '<div><a href="' . Html::escape($form['#action']) . '">Reset results list</a></div>';
       unset($form['actions']['reset']);
     }
-    $form['#prefix'] = '<h3>'.$form['keys']['#title'].'</h3>';
+    $form['#prefix'] = '<h3>' . Html::escape($form['keys']['#title']) . '</h3>';
   }
 }
 
@@ -627,7 +662,7 @@ function custom_blogs_views_post_render(ViewExecutable $view, array &$output, Ca
       $blog_id = $view->args[1];
       if ($blog = Node::load($blog_id)) {
         $title = $blog->getTitle();
-        $view->setTitle($view->getTitle() . ' in Blog <em>' . $title . '</em>');
+        $view->setTitle($view->getTitle() . ' in Blog ' . $title);
       }
       unset($output['#view']->field['og_audience']);
     }
@@ -637,7 +672,7 @@ function custom_blogs_views_post_render(ViewExecutable $view, array &$output, Ca
       $blog_id = $view->args[0];
       $blog = Node::load($blog_id);
       $title = $blog->getTitle();
-      $view->setTitle($view->getTitle() . ' in <em>' . $title . '</em>');
+      $view->setTitle($view->getTitle() . ' in ' . $title);
     }
   }
   if ($view->id() == 'recent_posts' && $view->current_display == 'block_1') {
