@@ -1,8 +1,4 @@
 {
-    "name": "drupal/recommended-project",
-    "description": "Project template for Drupal 9 projects with a relocated document root",
-    "type": "project",
-    "license": "GPL-2.0-or-later",
     "repositories": {
         "umlib_base-theme": {
             "type": "package",
@@ -66,7 +62,7 @@
         }
     },
     "require": {
-        "composer/installers": "^1.9",
+        "composer/installers": "^2.2",
         "cweagans/composer-patches": "^1.7",
         "drupal/allowed_formats": "3.x",
         "drupal/better_exposed_filters": "^6.0.3",
