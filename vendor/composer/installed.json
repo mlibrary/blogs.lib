@@ -1559,6 +1559,57 @@
             "install-path": "../../modules/contrib/allowed_formats"
         },
         {
+            "name": "drupal/autoban",
+            "version": "1.13.0",
+            "version_normalized": "1.13.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/autoban.git",
+                "reference": "8.x-1.13"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/autoban-8.x-1.13.zip",
+                "reference": "8.x-1.13",
+                "shasum": "c2aac4be8f9662a704b6739970f55b2e6e2b50ac"
+            },
+            "require": {
+                "drupal/core": "^9.3 || ^10 || ^11"
+            },
+            "require-dev": {
+                "drupal/advban": "*",
+                "drupal/ban": "*"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "8.x-1.13",
+                    "datestamp": "1774108029",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "installation-source": "dist",
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "goodboy",
+                    "homepage": "https://www.drupal.org/user/222910"
+                }
+            ],
+            "description": "Automatic IP ban using dblog table.",
+            "homepage": "https://www.drupal.org/project/autoban",
+            "support": {
+                "source": "https://git.drupalcode.org/project/autoban"
+            },
+            "install-path": "../../modules/contrib/autoban"
+        },
+        {
             "name": "drupal/better_exposed_filters",
             "version": "6.0.6",
             "version_normalized": "6.0.6.0",

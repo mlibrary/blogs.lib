@@ -65,6 +65,7 @@
         "composer/installers": "^2.2",
         "cweagans/composer-patches": "^1.7",
         "drupal/allowed_formats": "3.x",
+        "drupal/autoban": "^1.13",
         "drupal/better_exposed_filters": "^6.0.3",
         "drupal/block_class": "^3.0",
         "drupal/calendar": "^1.0@beta",

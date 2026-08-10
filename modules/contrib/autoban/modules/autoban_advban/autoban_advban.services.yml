@@ -1,0 +1,12 @@
+services:
+  autoban_advban.ban_provider:
+    class: Drupal\autoban_advban\AdvbanProvider
+    arguments: ['@advban.ip_manager']
+    tags:
+      - { name: ban_providers }
+
+  autoban_advban_range.ban_provider:
+    class: Drupal\autoban_advban\AdvbanRangeProvider
+    arguments: ['@advban.ip_manager']
+    tags:
+      - { name: ban_providers }

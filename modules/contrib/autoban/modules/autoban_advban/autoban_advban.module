@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Autoban ban provider - Advanced ban.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function autoban_advban_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.autoban_advban':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Autoban Advanced ban module allows integrate <a href=":advban">Advanced ban</a> module for IP ban using Autoban.',
+       [':advban' => 'https://drupal.org/project/advban']
+      ) . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<p>' . t('You may use Simple Advban Ban provider (ban individual IP address) or/and Range Advban ban provider (ban range of IP addresses).
+        This values may be selected for IP Ban provider field on Add/Edit ban forms.') . '</p>';
+      return $output;
+  }
+}

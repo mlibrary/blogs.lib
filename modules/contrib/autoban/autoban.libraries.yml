@@ -1,0 +1,6 @@
+form:
+  js:
+    js/form.js: {preprocess: false, minified: true}
+  css:
+    theme:
+      css/form.css: {preprocess: false, minified: true}

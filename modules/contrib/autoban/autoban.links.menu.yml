@@ -1,0 +1,29 @@
+entity.autoban.list:
+  title: 'Automatic IP address bans'
+  description: 'Ban IP using watchlog table.'
+  route_name: entity.autoban.list
+  parent: user.admin_index
+
+autoban.add:
+  title: 'Add rule'
+  route_name: entity.autoban.add_form
+  parent: entity.autoban.list
+  weight: 10
+
+autoban.analyze:
+  title: 'Log analyze'
+  route_name: autoban.analyze
+  parent: entity.autoban.list
+  weight: 11
+
+autoban.delete_all:
+  title: 'Delete all'
+  route_name: autoban.delete_all
+  parent: entity.autoban.list
+  weight: 12
+
+autoban.settings:
+  title: 'Settings'
+  route_name: autoban.settings
+  parent: entity.autoban.list
+  weight: 20

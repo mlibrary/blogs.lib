@@ -1,0 +1,19 @@
+autoban.list:
+  route_name: entity.autoban.list
+  title: 'Rules list'
+  base_route: entity.autoban.list
+
+autoban.analyze:
+  route_name: autoban.analyze
+  title: 'Log analyze'
+  base_route: entity.autoban.list
+
+autoban.delete_all:
+  route_name: autoban.delete_all
+  title: 'Delete all'
+  base_route: entity.autoban.list
+
+autoban.settings:
+  route_name: autoban.settings
+  title: 'Settings'
+  base_route: entity.autoban.list

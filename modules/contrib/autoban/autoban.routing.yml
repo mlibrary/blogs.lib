@@ -1,0 +1,80 @@
+entity.autoban.list:
+  path: '/admin/config/people/autoban'
+  defaults:
+    _entity_list: 'autoban'
+    _title: 'Autoban rules list'
+  requirements:
+    _permission: 'administer autoban'
+
+entity.autoban.add_form:
+  path: '/admin/config/people/autoban/add/{rule}'
+  defaults:
+    _title: 'Add autoban rule'
+    _entity_form: autoban.add
+    rule: ''
+  requirements:
+    _entity_create_access: autoban
+
+entity.autoban.edit_form:
+  path: '/admin/config/people/autoban/manage/{autoban}'
+  defaults:
+    _title: 'Edit autoban rule'
+    _entity_form: autoban.edit
+  requirements:
+    _entity_access: autoban.update
+
+entity.autoban.delete_form:
+  path: '/admin/config/people/autoban/manage/{autoban}/delete'
+  defaults:
+    _title: 'Delete autoban rule'
+    _entity_form: autoban.delete
+  requirements:
+    _entity_access: autoban.delete
+
+autoban.test:
+  path: '/admin/config/people/autoban/manage/{rule}/test'
+  defaults:
+    _form: '\Drupal\autoban\Form\AutobanTestForm'
+    _title: 'Retrieve IP addresses for autoban rule'
+  requirements:
+    _permission: 'administer autoban'
+
+autoban.ban:
+  path: '/admin/config/people/autoban/ban/{rule}'
+  defaults:
+    _form: '\Drupal\autoban\Form\AutobanBanForm'
+    _title: 'IP address bans'
+    rule: ''
+  requirements:
+    _permission: 'administer autoban'
+
+autoban.settings:
+  path: '/admin/config/people/autoban/settings'
+  defaults:
+    _form: '\Drupal\autoban\Form\AutobanSettingsForm'
+    _title: 'Autoban settings'
+  requirements:
+    _permission: 'administer autoban'
+
+autoban.direct_ban:
+  path: '/admin/config/people/autoban/direct_ban/{ips}/{provider}'
+  defaults:
+    _controller: '\Drupal\autoban\Controller\AutobanController::banIpAction'
+  requirements:
+    _permission: 'administer autoban'
+
+autoban.analyze:
+  path: '/admin/config/people/autoban/analyze'
+  defaults:
+    _form: '\Drupal\autoban\Form\AutobanAnalyzeForm'
+    _title: 'Log analyze'
+  requirements:
+    _permission: 'administer autoban'
+
+autoban.delete_all:
+  path: '/admin/config/people/autoban/delete_all'
+  defaults:
+    _form: '\Drupal\autoban\Form\AutobanDeleteAllForm'
+    _title: 'Delete All'
+  requirements:
+    _permission: 'administer autoban'

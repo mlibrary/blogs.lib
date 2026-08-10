@@ -1,0 +1,13 @@
+name: 'Autoban'
+type: module
+description: 'Automatic IP ban using dblog table.'
+package: 'Autoban'
+core_version_requirement: ^9.3 || ^10 || ^11
+dependencies:
+  - drupal:dblog
+configure: autoban.settings
+
+# Information added by Drupal.org packaging script on 2026-03-21
+version: '8.x-1.13'
+project: 'autoban'
+datestamp: 1774108031

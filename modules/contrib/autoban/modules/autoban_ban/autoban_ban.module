@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Autoban ban provider - core ban.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function autoban_ban_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.autoban_ban':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Autoban Core ban module allows integrate Core ban module for IP ban using Autoban.') . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<p>' . t('You may use Core Ban provider.
+        This value may be selected for IP Ban provider field on Add/Edit ban forms.') . '</p>';
+      return $output;
+  }
+}

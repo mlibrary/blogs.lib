@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * Autoban entity type configuration.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
+use Drupal\autoban\AutobanBatch;
+
+/**
+ * Implements hook_help().
+ */
+function autoban_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.autoban':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Autoban allows to automatize IP ban using watchdog table by the module rules.') . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Analyze <a href=":dblog">watchdog table</a> manually or using <a href=":analyze">analyze page</a>. Go to the test page during analysis.', [
+        ':dblog' => Url::fromRoute('dblog.overview')->toString(),
+        ':analyze' => Url::fromRoute('autoban.analyze')->toString(),
+      ]) . '</dt>';
+      $output .= '<dt>' . t('Go to the <a href=":config">autoban config page</a>.', [':config' => Url::fromRoute('autoban.settings')->toString()]) . '</dt>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function autoban_cron() {
+  $config = \Drupal::config('autoban.settings');
+  $autoban_cron = $config->get('autoban_cron') ?? TRUE;
+  if (!$autoban_cron) {
+    return;
+  }
+
+  $rules = \Drupal::entityTypeManager()->getStorage('autoban')->loadMultiple();
+  if (empty($rules)) {
+    return;
+  }
+
+  $total_banned = 0;
+  foreach (array_keys($rules) as $rule_id) {
+    $context = [];
+    AutobanBatch::ipBan($rule_id, $context);
+    $total_banned += (int) $context['results'];
+  }
+  if ($total_banned > 0) {
+    \Drupal::logger('autoban')->notice(t('Total IP banned: %count', ['%count' => $total_banned]));
+  }
+}

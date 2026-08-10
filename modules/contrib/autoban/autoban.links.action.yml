@@ -1,0 +1,18 @@
+autoban.add_action:
+  route_name: entity.autoban.add_form
+  title: 'Add rule'
+  appears_on:
+    - entity.autoban.list
+
+autoban.list_action:
+  route_name: entity.autoban.list
+  title: 'List Autoban rules'
+  appears_on:
+    - entity.autoban.add_form
+    - entity.autoban.edit_form
+
+autoban.ban_action:
+  route_name: autoban.ban
+  title: 'Ban all'
+  appears_on:
+    - entity.autoban.list

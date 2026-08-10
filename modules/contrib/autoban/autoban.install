@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Autoban module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function autoban_uninstall() {
+  // Delete all autoban entities.
+  $storage = \Drupal::entityTypeManager()->getStorage('autoban');
+  $query = $storage->getQuery();
+  $entity_ids = $query->accessCheck(FALSE)->execute();
+  $entities = $storage->loadMultiple($entity_ids);
+  $storage->delete($entities);
+
+  // Delete autoban config settings.
+  \Drupal::configFactory()->getEditable('autoban.settings')->delete();
+}
