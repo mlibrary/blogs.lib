@@ -770,7 +770,7 @@ $settings['migrate_node_migrate_type_classic'] = FALSE;
 #   include $app_root . '/' . $site_path . '/settings.local.php';
 # }
 
-$settings['hash_salt'] = getenv('DRUPAL_HASH_SALT');
+$settings['hash_salt'] = getenv('DRUPAL_HASH_SALT') ?: '';
 $databases['default']['default'] = [
   'database' => $_ENV["MARIADB_DATABASE"],
   'username' => $_ENV["MARIADB_USER"],
@@ -782,6 +782,14 @@ $databases['default']['default'] = [
   'driver' => 'mysql',
 ];
 $settings['config_sync_directory'] = 'sites/default/files/config_aFUnY9HdNNWWel_SNtonfe7b_UatBYGN_c8dC9jZqeG6xmeY8CwslFHgWq9YcF8ArK8PZE857Q/sync';
-error_reporting(E_ALL);
-ini_set('display_errors', TRUE);
-ini_set('display_startup_errors', TRUE);
+
+if (filter_var(getenv('DRUPAL_DEV_MODE') ?: '0', FILTER_VALIDATE_BOOL)) {
+  error_reporting(E_ALL);
+  ini_set('display_errors', '1');
+  ini_set('display_startup_errors', '1');
+}
+else {
+  error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+  ini_set('display_errors', '0');
+  ini_set('display_startup_errors', '0');
+}
