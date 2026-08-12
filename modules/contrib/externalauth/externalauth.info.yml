@@ -4,7 +4,7 @@ description: Helper module to authenticate users using an external site / servic
 core_version_requirement: ^10.1 || ^11
 package: 'User authentication'
 
-# Information added by Drupal.org packaging script on 2026-02-26
-version: '2.0.11'
+# Information added by Drupal.org packaging script on 2026-08-12
+version: '2.0.13'
 project: 'externalauth'
-datestamp: 1772135308
+datestamp: 1786545826
