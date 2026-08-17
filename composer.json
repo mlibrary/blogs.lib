@@ -122,7 +122,6 @@
         "jackmoore/colorbox": "^1.6",
         "mlibrary/umlib_admin": "^1.0",
         "mlibrary/umlib_base": "^1.0",
-        "oomphinc/composer-installers-extender": "^2.0",
         "wikimedia/composer-merge-plugin": "^2.0"
     },
     "conflict": {
@@ -133,9 +132,7 @@
         "allow-plugins": {
             "composer/installers": true,
             "drupal/core-project-message": false,
-            "drupal/console-extend-plugin": true,
             "cweagans/composer-patches": true,
-            "oomphinc/composer-installers-extender": true,
             "wikimedia/composer-merge-plugin": true
         }
     },
