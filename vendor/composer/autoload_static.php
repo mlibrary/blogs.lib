@@ -114,10 +114,6 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
             'PHPStan\\' => 8,
             'PHPMailer\\PHPMailer\\' => 20,
         ),
-        'O' =>
-        array (
-            'OomphInc\\ComposerInstallersExtender\\' => 36,
-        ),
         'M' =>
         array (
             'Masterminds\\' => 12,
@@ -394,10 +390,6 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         'PHPMailer\\PHPMailer\\' =>
         array (
             0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
-        ),
-        'OomphInc\\ComposerInstallersExtender\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/oomphinc/composer-installers-extender/src',
         ),
         'Masterminds\\' =>
         array (

@@ -1,0 +1,10 @@
+services:
+  autoban:
+    class: Drupal\autoban\Controller\AutobanController
+    arguments: ['@request_stack']
+
+  autoban.event_subscriber:
+    class: Drupal\autoban\EventSubscriber\AutobanSubscriber
+    arguments: ['@autoban', '@config.factory', '@entity_type.manager']
+    tags:
+      - { name: event_subscriber }

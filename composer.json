@@ -1,8 +1,4 @@
 {
-    "name": "drupal/recommended-project",
-    "description": "Project template for Drupal 9 projects with a relocated document root",
-    "type": "project",
-    "license": "GPL-2.0-or-later",
     "repositories": {
         "umlib_base-theme": {
             "type": "package",
@@ -62,9 +58,10 @@
         }
     },
     "require": {
-        "composer/installers": "^1.9",
+        "composer/installers": "^2.2",
         "cweagans/composer-patches": "^1.7",
         "drupal/allowed_formats": "3.x",
+        "drupal/autoban": "^1.13",
         "drupal/better_exposed_filters": "^6.0.3",
         "drupal/block_class": "^3.0",
         "drupal/calendar": "^1.0@beta",
@@ -125,7 +122,6 @@
         "jackmoore/colorbox": "^1.6",
         "mlibrary/umlib_admin": "^1.0",
         "mlibrary/umlib_base": "^1.0",
-        "oomphinc/composer-installers-extender": "^2.0",
         "wikimedia/composer-merge-plugin": "^2.0"
     },
     "conflict": {
@@ -136,9 +132,7 @@
         "allow-plugins": {
             "composer/installers": true,
             "drupal/core-project-message": false,
-            "drupal/console-extend-plugin": true,
             "cweagans/composer-patches": true,
-            "oomphinc/composer-installers-extender": true,
             "wikimedia/composer-merge-plugin": true
         }
     },

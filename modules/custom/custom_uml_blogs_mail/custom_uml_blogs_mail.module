@@ -54,7 +54,10 @@ function custom_uml_blogs_mail_mail_alter(&$message) {
       (string) ($message['params']['subject'] ?? '')
     );
     \Drupal::logger('custom_uml_blogs_mail')->notice('Message %subject sent to %count subscribers',
+    //For debug
+//    \Drupal::logger('custom_uml_blogs_mail')->notice('Meessage %subject sent to %bcc',
     [
+//    '%bcc' => $bcc,
       '%subject' => $subject,
       '%count' => count($bcc_emails),
     ]);
@@ -63,5 +66,6 @@ function custom_uml_blogs_mail_mail_alter(&$message) {
       $message['headers'] = [];
     }
     $message['headers']['Bcc'] = $bcc;
+    \Drupal::messenger()->addMessage('All subscribers of ' . $group_node->getTitle() . ' have been sent a notification email.');
   }
 }

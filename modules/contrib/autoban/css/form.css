@@ -1,0 +1,10 @@
+#edit-type--description span,
+#edit-autoban-window-default--description span {
+  font-style: italic;
+  border-bottom: 1px dashed;
+  cursor: pointer;
+}
+
+details.analyze-details summary {
+  white-space: nowrap;
+}

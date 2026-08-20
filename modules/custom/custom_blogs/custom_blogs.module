@@ -660,35 +660,25 @@ function custom_blogs_views_post_render(ViewExecutable $view, array &$output, Ca
   if ($view->id() == 'taxonomy_term' && $view->current_display == 'page_1') {
     if (isset($view->args[1]) && $view->args[1] != 'all') {
       $blog_id = $view->args[1];
-      if ($blog = Node::load($blog_id)) {
-        $title = $blog->getTitle();
-        $view->setTitle($view->getTitle() . ' in Blog ' . $title);
+      if (is_numeric($blog_id) && $blog = Node::load($blog_id)) {
+        $title = $blog->label();
+        $view->setTitle($view->getTitle() . ' in Blog <em>' . $title . '</em>');
       }
       unset($output['#view']->field['og_audience']);
     }
   }
   if ($view->id() == 'browse_by_tag' && $view->current_display == 'block_2') {
-    if (isset($view->args[0]) && is_numeric($view->args[0])) {
-      $blog_id = $view->args[0];
-      $blog = Node::load($blog_id);
-      $title = $blog->getTitle();
-      $view->setTitle($view->getTitle() . ' in ' . $title);
+    if (isset($view->args[0]) && is_numeric($view->args[0]) && $blog = Node::load($view->args[0])) {
+      $title = $blog->label();
+      $view->setTitle($view->getTitle() . ' in <em>' . $title . '</em>');
     }
   }
   if ($view->id() == 'recent_posts' && $view->current_display == 'block_1') {
-    if (is_numeric(\Drupal::request()->get('blog'))) {
-      $blog_id = Html::escape(\Drupal::request()->get('blog'));
-      $blog = Node::load($blog_id);
-      $title = $blog->getTitle();
+    $blog_param = \Drupal::requestStack()->getCurrentRequest()->get('blog');
+    $blog_id = is_numeric($blog_param) ? $blog_param : ($view->args[0] ?? null);
+    if (is_numeric($blog_id) && $blog = Node::load($blog_id)) {
+      $title = $blog->label();
       $view->setTitle('Posts in ' . $title);
-    }
-    else if (is_numeric($view->args[0])) {
-      $blog_id = $view->args[0];
-      $blog = Node::load($blog_id);
-      if (is_object($blog) && method_exists($blog, 'getTitle')) {
-        $title = $blog->getTitle();
-        $view->setTitle('Posts in ' . $title);
-      }
     }
   }
 }

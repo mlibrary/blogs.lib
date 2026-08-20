@@ -1,0 +1,5 @@
+services:
+  autoban_dblog.route_subscriber:
+    class: Drupal\autoban_dblog\Routing\RouteSubscriber
+    tags:
+      - { name: event_subscriber }

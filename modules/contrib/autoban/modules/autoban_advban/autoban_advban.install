@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Autoban_advban module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function autoban_advban_uninstall() {
+  // Delete autoban entities with advban provider.
+  $storage = \Drupal::entityTypeManager()->getStorage('autoban');
+  $query = $storage->getQuery();
+  $query->condition('provider', ['advban', 'advban_range'], 'IN');
+  $entity_ids = $query->accessCheck(FALSE)->execute();
+  $entities = $storage->loadMultiple($entity_ids);
+  $storage->delete($entities);
+}
