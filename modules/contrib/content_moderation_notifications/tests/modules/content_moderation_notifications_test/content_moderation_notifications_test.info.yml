@@ -5,7 +5,7 @@ dependencies:
   - content_moderation_notifications:content_moderation_notifications
 package: Testing
 
-# Information added by Drupal.org packaging script on 2025-10-03
-version: '8.x-3.8'
+# Information added by Drupal.org packaging script on 2026-08-26
+version: '8.x-3.9'
 project: 'content_moderation_notifications'
-datestamp: 1759515157
+datestamp: 1787756279

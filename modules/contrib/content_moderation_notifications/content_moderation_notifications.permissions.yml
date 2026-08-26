@@ -1,4 +1,5 @@
-#Define the administer permission for the content_moderation_notification config entity.
 'administer content moderation notifications':
   title: 'Administer content moderation notifications'
   description: Create and edit content moderation notifications.
+  # Config form allows entering twig templates which have security implications.
+  restrict access: true
