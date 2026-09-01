@@ -1,0 +1,47 @@
+<?php
+
+/**
+ * @file
+ * Add customizations to reroute_email_symfony_mailer module.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function reroute_email_symfony_mailer_form_reroute_email_test_email_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Add a display of the mail policy for the test email form.
+  $form['mailer_policy'] = \Drupal::service('symfony_mailer.helper')->renderTypePolicy('reroute_email');
+
+  // Reset the submit handler for sending email via symfony_mailer.
+  $form['submit']['#submit'] = ['_reroute_email_symfony_mailer_test_email_form_submit'];
+}
+
+/**
+ * Submit handler for reroute_email_test_email_form.
+ *
+ * @param array $form
+ *   An associative array containing the structure of the form.
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ *   The current state of the form.
+ */
+function _reroute_email_symfony_mailer_test_email_form_submit(array &$form, FormStateInterface $form_state) {
+  $params = $form_state->getValues();
+
+  // Send email with symfony_mailer.
+  $result = \Drupal::service('email_factory')->sendTypedEmail('reroute_email', 'test_email_form', $params);
+
+  \Drupal::messenger()->addMessage(t('Test email submitted for delivery from test form.'));
+  if (!empty($result->getError())) {
+    \Drupal::messenger()->addError($result->getError());
+  }
+}
+
+/**
+ * Implements hook_mailer_adjuster_info_alter().
+ */
+function reroute_email_symfony_mailer_mailer_adjuster_info_alter(array &$mailer_adjusters) {
+  $max_weight = max(array_column($mailer_adjusters, 'weight'));
+  $mailer_adjusters['reroute_email']['weight'] = $max_weight + 100;
+}

@@ -6,7 +6,7 @@ dependencies:
   - scheduler:scheduler
   - scheduler_api_test:scheduler_api_test
 
-# Information added by Drupal.org packaging script on 2025-10-19
-version: '2.2.2'
+# Information added by Drupal.org packaging script on 2026-06-05
+version: '2.3.0'
 project: 'scheduler'
-datestamp: 1760885785
+datestamp: 1780654238

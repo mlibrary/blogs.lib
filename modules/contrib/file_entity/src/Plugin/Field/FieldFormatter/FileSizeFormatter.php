@@ -50,7 +50,7 @@ class FileSizeFormatter extends FormatterBase {
       $elements[$delta] = [
         '#markup' => $is_newer
           ? ByteSizeMarkup::create($size, $langcode)
-          : format_size($size, $langcode),
+          : ByteSizeMarkup::create($size, $langcode),
       ];
     }
 

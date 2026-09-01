@@ -66,7 +66,7 @@ class SchedulerPluginManager extends DefaultPluginManager {
       }
 
       $entityType = $this->entityTypeManager->getDefinition($plugin_definition['entityType'], FALSE);
-      if (!$entityType || !$entityType->getBundleEntityType()) {
+      if (!$entityType) {
         unset($definitions[$plugin_id]);
       }
     }

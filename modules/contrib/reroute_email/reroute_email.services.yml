@@ -1,0 +1,4 @@
+services:
+  plugin.manager.reroute_email_handler:
+    class: Drupal\reroute_email\RerouteEmailHandlerPluginManager
+    arguments: ['@container.namespaces', '@cache.discovery', '@module_handler', '@config.factory']

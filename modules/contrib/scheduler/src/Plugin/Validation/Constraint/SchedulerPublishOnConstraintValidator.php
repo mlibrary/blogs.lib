@@ -42,7 +42,7 @@ class SchedulerPublishOnConstraintValidator extends ConstraintValidator implemen
   /**
    * {@inheritdoc}
    */
-  public function validate($entity, Constraint $constraint) {
+  public function validate($entity, Constraint $constraint): void {
 
     // If the content type is not enabled for publishing then exit early.
     if (!$this->schedulerManager->getThirdPartySetting($entity->getEntity(), 'publish_enable', FALSE)) {

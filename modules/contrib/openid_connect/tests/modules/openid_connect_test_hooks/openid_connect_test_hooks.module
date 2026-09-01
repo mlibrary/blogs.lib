@@ -1,0 +1,80 @@
+<?php
+
+/**
+ * @file
+ * Implements openid_connect hooks for testing purposes.
+ *
+ * Tests can use the Drupal state API to configure which hooks are active and
+ * to read the data captured by each hook invocation.
+ *
+ * To activate a hook implementation, set the corresponding state key to TRUE
+ * before triggering the relevant operation:
+ *
+ * @code
+ * \Drupal::state()->set('openid_connect_test_hooks.redirect_logout_alter', TRUE);
+ * @endcode
+ *
+ * After the operation, read the captured data from state:
+ *
+ * @code
+ * $data = \Drupal::state()->get('openid_connect_test_hooks.redirect_logout_alter.data');
+ * // $data['client_id'] — the value of $context['client'] passed to the hook.
+ * // $data['loaded_entity_id'] — the entity ID if the client loaded successfully, NULL otherwise.
+ * @endcode
+ */
+
+declare(strict_types=1);
+
+use Drupal\openid_connect\Entity\OpenIDConnectClientEntity;
+
+/**
+ * Implements hook_openid_connect_user_properties_ignore_alter().
+ *
+ * When the state key `openid_connect_test_hooks.unignore_mail` is TRUE,
+ * removes 'mail' from the ignored-properties list so that saveUserinfo() will
+ * attempt to update the user's email address.
+ */
+function openid_connect_test_hooks_openid_connect_user_properties_ignore_alter(array &$properties_ignore, array $context): void {
+  if (!\Drupal::state()->get('openid_connect_test_hooks.unignore_mail', FALSE)) {
+    return;
+  }
+  $properties_ignore = array_diff($properties_ignore, ['mail']);
+}
+
+/**
+ * Implements hook_openid_connect_userinfo_alter().
+ *
+ * When the state key `openid_connect_test_hooks.userinfo_alter` is TRUE,
+ * captures the $userinfo value it receives into state so tests can assert that
+ * it is always an array, even when the provider returns no data.
+ *
+ * The strict `array &$userinfo` declaration is intentional: if NULL is ever
+ * passed by the caller, PHP throws a TypeError. This validates
+ * https://www.drupal.org/project/openid_connect/issues/3243493
+ */
+function openid_connect_test_hooks_openid_connect_userinfo_alter(array &$userinfo, array $context): void {
+  if (!\Drupal::state()->get('openid_connect_test_hooks.userinfo_alter', FALSE)) {
+    return;
+  }
+  \Drupal::state()->set('openid_connect_test_hooks.userinfo_alter.data', $userinfo);
+}
+
+/**
+ * Implements hook_openid_connect_redirect_logout_alter().
+ *
+ * Captures the $context variable and attempts to load the client entity from
+ * $context['client'], storing the results in state so tests can assert on them.
+ */
+function openid_connect_test_hooks_openid_connect_redirect_logout_alter(array &$rsp, array $context): void {
+  if (!\Drupal::state()->get('openid_connect_test_hooks.redirect_logout_alter', FALSE)) {
+    return;
+  }
+
+  /** @var \Drupal\openid_connect\Entity\OpenIDConnectClientEntity|null $client */
+  $client = OpenIDConnectClientEntity::load($context['client']);
+
+  \Drupal::state()->set('openid_connect_test_hooks.redirect_logout_alter.data', [
+    'client_id' => $context['client'],
+    'loaded_entity_id' => $client?->id(),
+  ]);
+}

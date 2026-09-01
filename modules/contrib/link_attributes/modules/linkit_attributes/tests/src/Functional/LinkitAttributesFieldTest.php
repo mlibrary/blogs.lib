@@ -5,12 +5,16 @@ namespace Drupal\Tests\linkit_attributes\Functional;
 use Drupal\linkit\Tests\ProfileCreationTrait;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests linkit attributes functionality.
  *
  * @group linkit_attributes
  */
+#[Group('link_attributes')]
+#[RunTestsInSeparateProcesses]
 class LinkitAttributesFieldTest extends BrowserTestBase {
 
   use FieldUiTestTrait;

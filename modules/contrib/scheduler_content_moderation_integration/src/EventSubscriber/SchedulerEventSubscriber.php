@@ -31,13 +31,12 @@ class SchedulerEventSubscriber implements EventSubscriberInterface {
    *   The event being acted on.
    */
   public function publishImmediately(SchedulerEvent $event): void {
-    $entity = $event->getNode();
+    $entity = $event->getEntity();
 
     if (!$this->moderationInformation->isModeratedEntity($entity)) {
       return;
     }
 
-    $entity = $event->getEntity();
     $entity->set('moderation_state', $entity->publish_state->getValue());
     $event->setEntity($entity);
   }

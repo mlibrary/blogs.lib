@@ -65,6 +65,9 @@ openid_connect.redirect_controller_redirect:
     _custom_access: '\Drupal\openid_connect\Controller\OpenIDConnectRedirectController::accessAuthenticate'
   options:
     _maintenance_access: TRUE
+    parameters:
+      openid_connect_client:
+        type: 'openid_connect_entity'
 
 openid_connect.accounts_controller_index:
   path: '/user/{user}/connected-accounts'
@@ -110,3 +113,7 @@ openid_connect.redirect_controller_redirect_iss:
     _title: 'OpenID Connect initiate redirect page'
   requirements:
     _custom_access: '\Drupal\openid_connect\Controller\OpenIDConnectRedirectController::accessInitiate'
+  options:
+    parameters:
+      openid_connect_client:
+        type: 'openid_connect_entity'

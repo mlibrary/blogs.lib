@@ -5,6 +5,7 @@ namespace Drupal\Tests\scheduler\Functional;
 use Drush\TestTraits\DrushTestTrait;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the Drush commands provided by Scheduler.
@@ -12,6 +13,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group scheduler_drush
  */
 #[Group('scheduler_drush')]
+#[RunTestsInSeparateProcesses]
 class SchedulerDrushTest extends SchedulerBrowserTestBase {
 
   use DrushTestTrait;

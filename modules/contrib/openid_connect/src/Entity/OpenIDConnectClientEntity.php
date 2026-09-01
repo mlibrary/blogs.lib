@@ -95,20 +95,12 @@ class OpenIDConnectClientEntity extends ConfigEntityBase implements OpenIDConnec
   protected $pluginCollection;
 
   /**
-   * The config.factory service.
-   *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
-   */
-  protected $configFactory;
-
-  /**
    * {@inheritdoc}
    */
   public function __construct(array $values, $entity_type) {
     parent::__construct($values, $entity_type);
     $this->pluginManager = \Drupal::service('plugin.manager.openid_connect_client');
     $this->authmap = \Drupal::service('externalauth.authmap');
-    $this->configFactory = \Drupal::service('config.factory');
   }
 
   /**
@@ -133,13 +125,12 @@ class OpenIDConnectClientEntity extends ConfigEntityBase implements OpenIDConnec
    */
   protected function getPluginCollection(): OpenIDConnectClientCollection {
     if (!$this->pluginCollection) {
-      $config = $this->configFactory->get("openid_connect.client.{$this->id()}")->get('settings');
-      $settings = $this->get('settings');
-      if (!empty($config)) {
-        $settings = array_merge($settings, $config);
-      }
-
-      $this->pluginCollection = new OpenIDConnectClientCollection($this->pluginManager, $this->plugin, $settings, $this->id());
+      $this->pluginCollection = new OpenIDConnectClientCollection(
+        $this->pluginManager,
+        $this->plugin,
+        $this->get('settings'),
+        $this->id()
+      );
     }
     return $this->pluginCollection;
   }

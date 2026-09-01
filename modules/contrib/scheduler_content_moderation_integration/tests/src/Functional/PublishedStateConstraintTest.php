@@ -17,8 +17,10 @@ class PublishedStateConstraintTest extends SchedulerContentModerationBrowserTest
    * @covers ::validate
    *
    * @dataProvider dataEntityTypes
+   *
+   * @throws \Exception
    */
-  public function testValidPublishStateTransition($entityTypeId, $bundle) {
+  public function testValidPublishStateTransition($entityTypeId, $bundle): void {
     $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
     $entity = $this->createEntity($entityTypeId, $bundle, [
       'moderation_state' => 'draft',
@@ -37,7 +39,7 @@ class PublishedStateConstraintTest extends SchedulerContentModerationBrowserTest
    *
    * @dataProvider dataEntityTypes
    */
-  public function testInvalidPublishStateTransition($entityTypeId, $bundle) {
+  public function testInvalidPublishStateTransition($entityTypeId, $bundle): void {
     $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
     $entity = $this->createEntity($entityTypeId, $bundle, [
       'moderation_state' => 'draft',
@@ -48,7 +50,7 @@ class PublishedStateConstraintTest extends SchedulerContentModerationBrowserTest
     // Assert that the invalid publish state fails validation and produces our
     // specific transition constraint message. We get two violations since the
     // 'archived' value does not exist in the select list, however we should
-    // only test for the violation that is produced by this module.
+    // only test for the violation produced by this module.
     $violations = $entity->validate();
     $message = (count($violations) > 0) ? $violations->get(0)->getMessage() : 'No violation message found';
     $this->assertEquals('The scheduled publishing state of Archived is not a valid transition from the current moderation state of Draft for this content.', strip_tags($message));

@@ -4,6 +4,7 @@ namespace Drupal\Tests\scheduler\Functional;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the validation when editing a node.
@@ -11,6 +12,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group scheduler
  */
 #[Group('scheduler')]
+#[RunTestsInSeparateProcesses]
 class SchedulerValidationTest extends SchedulerBrowserTestBase {
 
   /**

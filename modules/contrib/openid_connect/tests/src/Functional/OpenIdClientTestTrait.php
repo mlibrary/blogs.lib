@@ -87,4 +87,30 @@ trait OpenIdClientTestTrait {
     $settingsConfig->save();
   }
 
+  /**
+   * Toggle the force_reset_role_mappings setting.
+   *
+   * @param bool $enabled
+   *   True for enabled, false for off.
+   */
+  public function toggleForceResetRoleMappings(bool $enabled): void {
+    // Enable the end session endpoint.
+    $settingsConfig = \Drupal::configFactory()->getEditable('openid_connect.settings');
+    $settingsConfig->set('force_reset_role_mappings', $enabled);
+    $settingsConfig->save();
+  }
+
+  /**
+   * Set the role mapping settings.
+   *
+   * @param array $roleMappings
+   *   Associative array of role mappings.
+   */
+  public function setRoleMappings(array $roleMappings = []): void {
+    // Enable the end session endpoint.
+    $settingsConfig = \Drupal::configFactory()->getEditable('openid_connect.settings');
+    $settingsConfig->set('role_mappings', $roleMappings);
+    $settingsConfig->save();
+  }
+
 }

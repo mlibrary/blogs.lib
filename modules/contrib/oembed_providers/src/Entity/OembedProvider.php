@@ -2,8 +2,10 @@
 
 namespace Drupal\oembed_providers\Entity;
 
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Defines the oEmbed provider entity.
@@ -19,6 +21,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *     plural = "@count oembed providers",
  *   ),
  *   handlers = {
+ *     "access" = "Drupal\oembed_providers\OembedProviderAccessControlHandler",
  *     "list_builder" = "Drupal\oembed_providers\OembedProviderListBuilder",
  *     "form" = {
  *       "edit" = "Drupal\oembed_providers\OembedProviderForm",
@@ -45,6 +48,43 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *   }
  * )
  */
+#[ConfigEntityType(
+  id: 'oembed_provider',
+  label: new TranslatableMarkup('oEmbed provider'),
+  label_collection: new TranslatableMarkup('oEmbed Providers'),
+  label_singular: new TranslatableMarkup('oembed provider'),
+  label_plural: new TranslatableMarkup('oembed providers'),
+  label_count: [
+    'singular' => '@count oembed provider',
+    'plural' => '@count oembed providers',
+  ],
+  handlers: [
+    'access' => \Drupal\oembed_providers\OembedProviderAccessControlHandler::class,
+    'list_builder' => \Drupal\oembed_providers\OembedProviderListBuilder::class,
+    'form' => [
+      'edit' => \Drupal\oembed_providers\OembedProviderForm::class,
+      'add' => \Drupal\oembed_providers\OembedProviderForm::class,
+      'delete' => \Drupal\Core\Entity\EntityDeleteForm::class,
+    ],
+  ],
+  admin_permission: 'administer oembed providers',
+  config_prefix: 'provider',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+  ],
+  config_export: [
+    'id',
+    'label',
+    'provider_url',
+    'endpoints',
+  ],
+  links: [
+    'edit-form' => '/admin/config/media/oembed-providers/custom-providers/{oembed_provider}/edit',
+    'delete-form' => '/admin/config/media/oembed-providers/custom-providers/{oembed_provider}/delete',
+    'collection' => '/admin/config/media/oembed-providers/custom-providers',
+  ]
+)]
 class OembedProvider extends ConfigEntityBase {
 
   /**

@@ -71,6 +71,8 @@ abstract class SchedulerContentModerationBrowserTestBase extends BrowserTestBase
 
   /**
    * {@inheritdoc}
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   protected function setUp(): void {
     parent::setUp();

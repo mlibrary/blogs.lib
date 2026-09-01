@@ -5,6 +5,7 @@
  - Description
  - Installation and configuration
  - Tips and Tricks
+ - Configuration via drush
  - Settings code snippet
  - Test Email Form
  - Bugs / features / patches
@@ -71,6 +72,25 @@ TRUE or FALSE value to any own emails in
 This header will force enable or disable email rerouting by
 ignoring default settings.
 
+## CONFIGURATION VIA DRUSH
+
+If email rerouting needs to be enabled/disabled or allowlist needs to be
+configured within some automated script, it is possible to do so via drush.
+
+Enables/disables email rerouting:  
+`drush config-set --input-format=yaml reroute_email.settings enable true -y`  
+`drush config-set --input-format=yaml reroute_email.settings enable false -y`
+
+Sets allowlisted emails:  
+`drush config-set reroute_email.settings allowed "*@allowed-domain.com" -y`
+
+Sets an email address that be used for email rerouting:  
+`drush config-set reroute_email.settings address "email@example.com" -y`
+
+Sets an empty email address that will be used for email rerouting
+(all rerouted emails will be aborted instead of rerouting):  
+`drush config-set reroute_email.settings address "" -y`
+
 ## SETTINGS.PHP CODE SNIPPET
 
 - Configuration and all the settings variables can be overridden in the
@@ -95,9 +115,9 @@ $config['reroute_email.settings']['address'] = 'your.email@example.com';
 
 // A comma-delimited list of email addresses to pass through. All emails to
 // addresses from this list will not be rerouted. A patterns like
-// "*@example.com" and "myname+*@example.com" can be used to add all emails by
+// "*@example.com" and "name+*@example.com" can be used to add all emails by
 // its domain or the pattern.
-$config['reroute_email.settings']['allowed'] = 'foo@bar.com, myname+*@ex.com';
+$config['reroute_email.settings']['allowed'] = 'foo@bar.com, my-name+*@ex.com';
 
 // An array of users' roles that need to be skipped from the rerouting. All
 // emails that belong to users with those roles won't be rerouted.
@@ -107,13 +127,13 @@ $config['reroute_email.settings']['roles'] = ["some_role", "administrator"];
 // name or specific mail key can be used for that. Use case: we need to reroute
 // only a few specific mail keys (specified mail keys will be rerouted, all
 // other emails will NOT be rerouted).
-$config['reroute_email.settings']['mailkeys'] = 'somemodule, mymodule_mykey';
+$config['reroute_email.settings']['mailkeys'] = 'some_module, my_module_key';
 
-// A line-delimited list of message keys to be rerouted. Either module machine
-// name or specific mail key can be used for that. Use case: we need to reroute
-// all outgoing emails except a few mail keys (specified mail keys will NOT be
-// rerouted, all other emails will be rerouted).
-$config['reroute_email.settings']['mailkeys_skip'] = 'somemodule, mymodule_key';
+// A line-delimited list of message keys NOT to be rerouted. Either module
+// machine name or specific mail key can be used for that. Use case: we need to
+// reroute all outgoing emails except a few mail keys (specified mail keys will
+// NOT be rerouted, all other emails will be rerouted).
+$config['reroute_email.settings']['mailkeys_skip'] = 'some_module, module_key';
 
 // Force enable/disable displaying a Drupal status message when the mail is
 // being rerouted.
@@ -139,16 +159,6 @@ correctly rerouted to the configured addresses.
 - Feel free to follow up in the issue queue (2) for any contributions, bug
 reports, feature requests.
 - Tests, feedback or comments in general are highly appreciated.
-
-## AUTHORS AND MAINTAINERS
-
-- kbahey - <https://www.drupal.org/user/4063>
-- rfay - <http://drupal.org/user/30906>
-- DYdave - <http://drupal.org/user/467284>
-- bohart - <https://drupal.org/user/289861>
-
-If you use this module, find it useful, and want to send the author a thank you
-note, then use the Feedback/Contact page at the URL above.
 
 ## LINK REFERENCES
 

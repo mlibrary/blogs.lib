@@ -1,0 +1,7 @@
+{
+    "name": "levmyshkin/plyr",
+    "description": "Plyr is a simple, lightweight, accessible and customizable HTML5, YouTube and Vimeo media player that supports modern browsers.",
+    "type": "drupal-library",
+    "license": "MIT",
+    "require": {}
+}

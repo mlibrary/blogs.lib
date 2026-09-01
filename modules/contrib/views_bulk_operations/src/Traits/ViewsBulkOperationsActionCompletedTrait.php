@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\views_bulk_operations\Traits;
 
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -18,7 +19,7 @@ trait ViewsBulkOperationsActionCompletedTrait {
    *
    * @see \Drupal\Core\Messenger\MessengerInterface
    */
-  public static function message(?string $message = NULL, string $type = 'status', bool $repeat = TRUE): void {
+  public static function message(string|MarkupInterface $message, string $type = 'status', bool $repeat = TRUE): void {
     \Drupal::messenger()->addMessage($message, $type, $repeat);
   }
 
@@ -44,18 +45,18 @@ trait ViewsBulkOperationsActionCompletedTrait {
   public static function finished($success, array $results, array $operations): ?RedirectResponse {
     if ($success) {
       foreach ($results['operations'] as $item) {
-        if (\strpos($item['message'], '@count') !== FALSE) {
+        if (str_contains($item['message'], '@count')) {
           $message = new FormattableMarkup($item['message'], [
             '@count' => $item['count'],
           ]);
         }
         else {
-          $message = new TranslatableMarkup('@message (@count)', [
-            '@message' => $item['message'],
+          $message_string = (string) $item['message'];
+          $message = new FormattableMarkup("$message_string (@count)", [
             '@count' => $item['count'],
           ]);
         }
-        static::message((string) $message, $item['type']);
+        static::message($message, $item['type']);
       }
     }
     else {

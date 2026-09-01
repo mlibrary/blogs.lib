@@ -3,3 +3,15 @@ services:
     class: Drupal\file_entity\Routing\RouteSubscriber
     tags:
       - { name: event_subscriber }
+
+  Drupal\file_entity\Hook\FileEntityFileHooks:
+    class: Drupal\file_entity\Hook\FileEntityFileHooks
+    autowire: true
+
+  Drupal\file_entity\Hook\FileEntityHooks:
+    class: Drupal\file_entity\Hook\FileEntityHooks
+    autowire: true
+
+  Drupal\file_entity\Hook\FileEntityTokensHooks:
+    class: Drupal\file_entity\Hook\FileEntityTokensHooks
+    autowire: true

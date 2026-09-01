@@ -15,6 +15,7 @@ use Drupal\Core\Plugin\PluginWithFormsInterface;
 use Drupal\Core\Url;
 use Drupal\openid_connect\Plugin\OpenIDConnectClientInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Routing\Exception\InvalidParameterException;
 
 /**
  * Form handler for the OpenID Connect client add and edit forms.
@@ -99,15 +100,21 @@ abstract class OpenIDConnectClientFormBase extends EntityForm {
       '#disabled' => !$entity->isNew(),
     ];
 
+    $plugin = $entity->getPlugin();
     $form['settings'] = [];
     $subform_state = SubformState::createForSubform($form['settings'], $form, $form_state);
-    $form['settings'] = $this->getPluginForm($entity->getPlugin())
+    $form['settings'] = $this->getPluginForm($plugin)
       ->buildConfigurationForm($form['settings'], $subform_state);
 
+    $provider_slug = $plugin->getProviderSlug() ?: $plugin->getParentEntityId();
     $form['redirect_url'] = [
       '#title' => $this->t('Redirect URL'),
-      '#type' => 'item',
-      '#markup' => '<div id="redirect-url-value">' . $this->getRedirectUrl($entity->id()) . '</div>',
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      "#attributes" => [
+        'id' => 'redirect-url-value',
+      ],
+      '#value' => $this->getRedirectUrl($provider_slug),
     ];
 
     return $form;
@@ -148,6 +155,40 @@ abstract class OpenIDConnectClientFormBase extends EntityForm {
       $subform_state = SubformState::createForSubform($form['settings'], $form, $form_state);
       $this->getPluginForm($entity->getPlugin())
         ->validateConfigurationForm($form['settings'], $subform_state);
+
+      // Validate provider_slug for format and uniqueness.
+      // @todo This should be done in a Constraint so programmatic
+      // entity validation can be used.
+      $provider_slug = $form_state->getValue(['settings', 'provider_slug']);
+      if (is_string($provider_slug)) {
+        $provider_slug = trim($provider_slug);
+        $form_state->setValue(['settings', 'provider_slug'], $provider_slug);
+      }
+      $slug_element = $form['settings']['provider_slug'] ?? $form['settings'];
+
+      // The slug becomes a single path segment of the redirect URL, so
+      // anything outside the URL-unreserved characters has to be rejected
+      // here. A slug containing '/' in particular makes route generation
+      // throw, which would take down both the login flow and this form.
+      if (!empty($provider_slug) && !preg_match('/^[a-zA-Z0-9._-]+$/', $provider_slug)) {
+        $form_state->setError($slug_element, $this->t('The provider slug can only contain letters, numbers, dots, hyphens and underscores.'));
+      }
+      elseif (!empty($provider_slug)) {
+        $storage = $this->entityTypeManager->getStorage('openid_connect_client');
+        $query = $storage->getQuery()
+          ->condition('settings.provider_slug', $provider_slug)
+          ->accessCheck(FALSE);
+
+        // If this is an existing entity, exclude it from the query.
+        if (!$entity->isNew()) {
+          $query->condition('id', $entity->id(), '<>');
+        }
+
+        $result = $query->execute();
+        if (!empty($result)) {
+          $form_state->setError($slug_element, $this->t('The provider slug must be unique.'));
+        }
+      }
     }
     catch (InvalidPluginDefinitionException $e) {
     }
@@ -212,7 +253,7 @@ abstract class OpenIDConnectClientFormBase extends EntityForm {
    * @param \Drupal\openid_connect\Plugin\OpenIDConnectClientInterface $openid_client
    *   The OpenID Connect client plugin.
    *
-   * @return \Drupal\Core\Plugin\PluginFormInterface
+   * @return \Drupal\Core\Plugin\PluginFormInterface|null
    *   The plugin form for the OpenID Connect client.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
@@ -227,19 +268,27 @@ abstract class OpenIDConnectClientFormBase extends EntityForm {
   /**
    * Returns the redirect URL.
    *
-   * @param string|null $id
+   * @param string $id
    *   Route parameter ID.
    *
    * @return string
    *   The absolute URL as a string.
    */
-  public function getRedirectUrl($id = ''): string {
+  public function getRedirectUrl(string $id = ''): string {
     if ($id) {
       $route_parameters = ['openid_connect_client' => $id];
-      return Url::fromRoute('openid_connect.redirect_controller_redirect', $route_parameters, [
-        'absolute' => TRUE,
-        'language' => $this->languageManager->getLanguage(LanguageInterface::LANGCODE_NOT_APPLICABLE),
-      ])->toString();
+      try {
+        return Url::fromRoute('openid_connect.redirect_controller_redirect', $route_parameters, [
+          'absolute' => TRUE,
+          'language' => $this->languageManager->getLanguage(LanguageInterface::LANGCODE_NOT_APPLICABLE),
+        ])->toString();
+      }
+      catch (InvalidParameterException $e) {
+        // A slug that is not a valid path segment can still reach this point
+        // through the AJAX callback or through configuration that was not
+        // entered on this form. Report it instead of taking the page down.
+        return $this->t('The provider slug %slug can not be used in a URL.', ['%slug' => $id]);
+      }
     }
     return $this->t('Pending name input');
   }
@@ -256,7 +305,20 @@ abstract class OpenIDConnectClientFormBase extends EntityForm {
    *   Render array with the redirect URL.
    */
   public function changeRedirectUrl(array &$form, FormStateInterface $form_state) : array {
-    return ['#markup' => '<div id="redirect-url-value">' . $this->getRedirectUrl($form_state->getValue('id')) . '</div>'];
+    // The getValues()['settings'] construct is to make it work with AJAX.
+    // Trim like validateForm() does, so the preview matches the value that
+    // would actually be stored.
+    $slug = trim($form_state->getValues()['settings']['provider_slug'] ?? '');
+    $id = $form_state->getValue('id') ?? '';
+    $redirectUrl = $this->getRedirectUrl($slug ?: $id);
+    return [
+      '#type' => 'html_tag',
+      '#tag' => 'div',
+      '#value' => $redirectUrl,
+      '#attributes' => [
+        'id' => 'redirect-url-value',
+      ],
+    ];
   }
 
 }

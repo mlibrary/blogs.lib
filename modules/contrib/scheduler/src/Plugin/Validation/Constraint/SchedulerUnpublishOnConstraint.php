@@ -3,6 +3,8 @@
 namespace Drupal\scheduler\Plugin\Validation\Constraint;
 
 use Drupal\Core\Entity\Plugin\Validation\Constraint\CompositeConstraintBase;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Validation\Attribute\Constraint;
 
 /**
  * Validates unpublish on values.
@@ -13,6 +15,11 @@ use Drupal\Core\Entity\Plugin\Validation\Constraint\CompositeConstraintBase;
  *   type = "entity"
  * )
  */
+#[Constraint(
+  id: 'SchedulerUnpublishOn',
+  label: new TranslatableMarkup('Scheduler unpublish on', [], ['context' => 'Validation']),
+  type: 'entity'
+)]
 class SchedulerUnpublishOnConstraint extends CompositeConstraintBase {
 
   /**

@@ -5,23 +5,15 @@
  * Tests the execution of hook_oembed_providers_alter().
  */
 
+use Drupal\Core\Hook\Attribute\LegacyHook;
+use Drupal\oembed_providers_test\Hook\OembedProvidersHooks;
+
 /**
  * Implements hook_oembed_providers_alter().
+ *
+ * @phpstan-ignore-next-line
  */
+#[LegacyHook]
 function oembed_providers_test_oembed_providers_alter(array &$providers) {
-  // Add a custom provider.
-  $providers[] = [
-    'provider_name' => 'My Custom Provider',
-    'provider_url' => 'http://my-custom-provider.example.com',
-    'endpoints' => [
-      [
-        'schemes' => [
-          'http://my-custom-provider.example.com/id/*',
-          'https://my-custom-provider.example.com/id/*',
-        ],
-        'url' => 'https://my-custom-provider.example.com/api/v2/oembed/',
-        'discovery' => 'true',
-      ],
-    ],
-  ];
+  \Drupal::service(OembedProvidersHooks::class)->providersAlter($providers);
 }

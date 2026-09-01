@@ -1,0 +1,6 @@
+services:
+  Drupal\oembed_providers_test\Hook\OembedProvidersHooks:
+    class: Drupal\oembed_providers_test\Hook\OembedProvidersHooks
+    autowire: true
+parameters:
+  oembed_providers_test.skip_procedural_hook_scan: true

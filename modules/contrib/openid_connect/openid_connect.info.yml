@@ -8,7 +8,7 @@ dependencies:
   - drupal:file
   - externalauth:externalauth
 
-# Information added by Drupal.org packaging script on 2026-03-11
-version: '3.0.0-alpha8'
+# Information added by Drupal.org packaging script on 2026-08-31
+version: '3.0.0-alpha9'
 project: 'openid_connect'
-datestamp: 1773253375
+datestamp: 1788187142

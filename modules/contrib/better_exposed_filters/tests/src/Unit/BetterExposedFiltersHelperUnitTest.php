@@ -2,12 +2,12 @@
 
 namespace Drupal\Tests\better_exposed_filters\Unit;
 
-use Drupal\better_exposed_filters\BetterExposedFiltersHelper;
 use Drupal\Component\Transliteration\TransliterationInterface;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Tests\UnitTestCase;
+use Drupal\better_exposed_filters\BetterExposedFiltersHelper;
 
 /**
  * Tests the helper functions for better exposed filters.
@@ -35,7 +35,7 @@ class BetterExposedFiltersHelperUnitTest extends UnitTestCase {
   /**
    * Data provider for ::testRewriteOptions.
    */
-  public function providerTestRewriteOptions() {
+  public static function providerTestRewriteOptions(): array {
     $data = [];
 
     // Super basic rewrite.
@@ -57,6 +57,19 @@ class BetterExposedFiltersHelperUnitTest extends UnitTestCase {
       ['foo' => '1', 'bar' => '2', 'baz' => '3'],
       "2|",
       ['foo' => '1', 'baz' => '3'],
+    ];
+
+    // Check boolean values.
+    $data[] = [
+      ['foo' => '0', 'bar' => '1'],
+      "0|Zero",
+      ['foo' => 'Zero', 'bar' => '1'],
+    ];
+
+    $data[] = [
+      ['foo' => '0', 'bar' => '1'],
+      "1|One",
+      ['foo' => '0', 'bar' => 'One'],
     ];
 
     // Ensure order is preserved.
@@ -112,6 +125,42 @@ class BetterExposedFiltersHelperUnitTest extends UnitTestCase {
       TRUE,
     ];
 
+    // A malformed line with no pipe separator is skipped.
+    $data[] = [
+      ['test' => 'test'],
+      'without_pipe',
+      ['test' => 'test'],
+    ];
+
+    // An empty rewrite settings string leaves options untouched.
+    $data[] = [
+      ['foo' => '1', 'bar' => '2'],
+      '',
+      ['foo' => '1', 'bar' => '2'],
+    ];
+
+    // Blank lines mixed between real rewrites are skipped.
+    $data[] = [
+      ['a' => 'a', 'c' => 'c'],
+      "a|A\n\nc|C",
+      ['a' => 'A', 'c' => 'C'],
+    ];
+
+    // Whitespace-only lines are treated the same as blank lines.
+    $data[] = [
+      ['a' => 'a', 'c' => 'c'],
+      "a|A\n   \nc|C",
+      ['a' => 'A', 'c' => 'C'],
+    ];
+
+    // A label containing a pipe survives because explode() is bounded to 2
+    // splits.
+    $data[] = [
+      ['answer' => 'answer'],
+      'answer|Yes | No',
+      ['answer' => 'Yes | No'],
+    ];
+
     return $data;
   }
 
@@ -130,7 +179,7 @@ class BetterExposedFiltersHelperUnitTest extends UnitTestCase {
   /**
    * Data provider for ::testRewriteReorderOptions.
    */
-  public function providerTestRewriteReorderOptions() {
+  public static function providerTestRewriteReorderOptions(): array {
     $data = [];
 
     // Basic use case.
@@ -172,7 +221,7 @@ class BetterExposedFiltersHelperUnitTest extends UnitTestCase {
   /**
    * Data provider for ::testRewriteTaxonomy.
    */
-  public function providerTestRewriteTaxonomy() {
+  public static function providerTestRewriteTaxonomy(): array {
     $data = [];
 
     // Replace a single item, no change in order.
@@ -242,12 +291,18 @@ class BetterExposedFiltersHelperUnitTest extends UnitTestCase {
    * @dataProvider providerTestSortOptions
    *
    * @covers ::sortOptions
+   *
+   * @throws \PHPUnit\Framework\MockObject\Exception
    */
   public function testSortOptions($unsorted, $expected) {
+    // Data providers run before ::setUp. We rely on the stringTranslationTrait
+    // for some of our option values so call it here instead.
+    $this->stringTranslation = $this->getStringTranslationStub();
+
     $transliterator = $this->createMock(TransliterationInterface::class);
     $transliterator->expects($this->any())
       ->method('transliterate')
-      ->will($this->returnCallback(
+      ->willReturnCallback(
         fn($string, $langcode = 'en', $unknown_character = '?', $max_length = NULL) => str_replace([
           'á',
           'ã',
@@ -255,7 +310,7 @@ class BetterExposedFiltersHelperUnitTest extends UnitTestCase {
           'ë',
           'ő',
         ], ['a', 'a', 'e', 'e', 'o'], $string)
-      ));
+      );
     $container = new ContainerBuilder();
     $container->set('transliteration', $transliterator);
     \Drupal::setContainer($container);
@@ -267,11 +322,7 @@ class BetterExposedFiltersHelperUnitTest extends UnitTestCase {
   /**
    * Data provider for ::testSortOptions.
    */
-  public function providerTestSortOptions() {
-    // Data providers run before ::setUp. We rely on the stringTranslationTrait
-    // for some of our option values so call it here instead.
-    $this->stringTranslation = $this->getStringTranslationStub();
-
+  public static function providerTestSortOptions(): array {
     $data = [];
 
     // List of strings.
@@ -363,23 +414,382 @@ class BetterExposedFiltersHelperUnitTest extends UnitTestCase {
   }
 
   /**
+   * Tests empty options handling.
+   *
+   * @covers ::sortOptions
+   */
+  public function testEmptyOptions() {
+    $sorted = BetterExposedFiltersHelper::sortOptions([]);
+    $this->assertEmpty($sorted, 'Empty options array remains unchanged');
+  }
+
+  /**
+   * Tests the enhanced sortOptionsCustom method with various sorting methods.
+   *
+   * @dataProvider providerTestSortOptionsCustom
+   *
+   * @covers ::sortOptionsCustom
+   *
+   * @throws \PHPUnit\Framework\MockObject\Exception
+   */
+  public function testSortOptionsCustom($unsorted, $method, $direction, $natural, $expected) {
+    // Data providers run before ::setUp. We rely on the stringTranslationTrait
+    // for some of our option values so call it here instead.
+    $this->stringTranslation = $this->getStringTranslationStub();
+
+    $transliterator = $this->createMock(TransliterationInterface::class);
+    $transliterator->expects($this->any())
+      ->method('transliterate')
+      ->willReturnCallback(
+        fn($string, $langcode = 'en', $unknown_character = '?', $max_length = NULL) => str_replace([
+          'á',
+          'ã',
+          'è',
+          'ë',
+          'ő',
+        ], ['a', 'a', 'e', 'e', 'o'], $string)
+      );
+    $container = new ContainerBuilder();
+    $container->set('transliteration', $transliterator);
+    \Drupal::setContainer($container);
+
+    $sorted = BetterExposedFiltersHelper::sortOptionsCustom($unsorted, $method, $direction, $natural);
+    $this->assertEquals(array_values($expected), array_values($sorted));
+  }
+
+  /**
+   * Data provider for ::testSortOptionsCustom.
+   */
+  public static function providerTestSortOptionsCustom(): array {
+    $data = [];
+
+    // Test alphabetical ascending with natural sorting.
+    $data[] = [
+      [
+        'item10' => 'Item 10',
+        'item2' => 'Item 2',
+        'item1' => 'Item 1',
+        'item20' => 'Item 20',
+      ],
+      'alpha',
+      'asc',
+      TRUE,
+      [
+        'item1' => 'Item 1',
+        'item2' => 'Item 2',
+        'item10' => 'Item 10',
+        'item20' => 'Item 20',
+      ],
+    ];
+
+    // Test alphabetical ascending without natural sorting.
+    $data[] = [
+      [
+        'item10' => 'Item 10',
+        'item2' => 'Item 2',
+        'item1' => 'Item 1',
+        'item20' => 'Item 20',
+      ],
+      'alpha',
+      'asc',
+      FALSE,
+      [
+        'item1' => 'Item 1',
+        'item10' => 'Item 10',
+        'item2' => 'Item 2',
+        'item20' => 'Item 20',
+      ],
+    ];
+
+    // Test alphabetical descending.
+    $data[] = [
+      [
+        'a' => 'Apple',
+        'c' => 'Cherry',
+        'b' => 'Banana',
+      ],
+      'alpha',
+      'desc',
+      TRUE,
+      [
+        'c' => 'Cherry',
+        'b' => 'Banana',
+        'a' => 'Apple',
+      ],
+    ];
+
+    // Test key ascending.
+    $data[] = [
+      [
+        '30' => 'Value 30',
+        '10' => 'Value 10',
+        '20' => 'Value 20',
+      ],
+      'key',
+      'asc',
+      TRUE,
+      [
+        '10' => 'Value 10',
+        '20' => 'Value 20',
+        '30' => 'Value 30',
+      ],
+    ];
+
+    // Test key descending.
+    $data[] = [
+      [
+        '10' => 'Value 10',
+        '30' => 'Value 30',
+        '20' => 'Value 20',
+      ],
+      'key',
+      'desc',
+      TRUE,
+      [
+        '30' => 'Value 30',
+        '20' => 'Value 20',
+        '10' => 'Value 10',
+      ],
+    ];
+
+    return $data;
+  }
+
+  /**
+   * Tests the sortOptionsByKey method.
+   *
+   * @dataProvider providerTestSortOptionsByKey
+   *
+   * @covers ::sortOptionsByKey
+   */
+  public function testSortOptionsByKey($unsorted, $direction, $expected) {
+    $sorted = BetterExposedFiltersHelper::sortOptionsByKey($unsorted, $direction);
+    $this->assertEquals($expected, $sorted);
+  }
+
+  /**
+   * Data provider for ::testSortOptionsByKey.
+   */
+  public static function providerTestSortOptionsByKey(): array {
+    $data = [];
+
+    // Test ascending key sort.
+    $data[] = [
+      [
+        '30' => 'Value 30',
+        '10' => 'Value 10',
+        '20' => 'Value 20',
+      ],
+      'asc',
+      [
+        '10' => 'Value 10',
+        '20' => 'Value 20',
+        '30' => 'Value 30',
+      ],
+    ];
+
+    // Test descending key sort.
+    $data[] = [
+      [
+        '10' => 'Value 10',
+        '30' => 'Value 30',
+        '20' => 'Value 20',
+      ],
+      'desc',
+      [
+        '30' => 'Value 30',
+        '20' => 'Value 20',
+        '10' => 'Value 10',
+      ],
+    ];
+
+    // Test with string keys.
+    $data[] = [
+      [
+        'z' => 'Zebra',
+        'a' => 'Apple',
+        'm' => 'Monkey',
+      ],
+      'asc',
+      [
+        'a' => 'Apple',
+        'm' => 'Monkey',
+        'z' => 'Zebra',
+      ],
+    ];
+
+    return $data;
+  }
+
+  /**
+   * Tests the sortOptionsAlphabetical method.
+   *
+   * @dataProvider providerTestSortOptionsAlphabetical
+   *
+   * @covers ::sortOptionsAlphabetical
+   *
+   * @throws \PHPUnit\Framework\MockObject\Exception
+   */
+  public function testSortOptionsAlphabetical($unsorted, $direction, $natural, $expected) {
+    // Data providers run before ::setUp. We rely on the stringTranslationTrait
+    // for some of our option values so call it here instead.
+    $this->stringTranslation = $this->getStringTranslationStub();
+
+    $transliterator = $this->createMock(TransliterationInterface::class);
+    $transliterator->expects($this->any())
+      ->method('transliterate')
+      ->willReturnCallback(
+        fn($string, $langcode = 'en', $unknown_character = '?', $max_length = NULL) => str_replace([
+          'á',
+          'ã',
+          'è',
+          'ë',
+          'ő',
+        ], ['a', 'a', 'e', 'e', 'o'], $string)
+      );
+    $container = new ContainerBuilder();
+    $container->set('transliteration', $transliterator);
+    \Drupal::setContainer($container);
+
+    $sorted = BetterExposedFiltersHelper::sortOptionsAlphabetical($unsorted, $direction, $natural);
+    $this->assertEquals(array_values($expected), array_values($sorted));
+  }
+
+  /**
+   * Data provider for ::testSortOptionsAlphabetical.
+   */
+  public static function providerTestSortOptionsAlphabetical(): array {
+    $data = [];
+
+    // Test natural sorting with numbers.
+    $data[] = [
+      [
+        'item10' => 'Item 10',
+        'item2' => 'Item 2',
+        'item1' => 'Item 1',
+        'item20' => 'Item 20',
+      ],
+      'asc',
+      TRUE,
+      [
+        'item1' => 'Item 1',
+        'item2' => 'Item 2',
+        'item10' => 'Item 10',
+        'item20' => 'Item 20',
+      ],
+    ];
+
+    // Test regular sorting with numbers (lexicographic).
+    $data[] = [
+      [
+        'item10' => 'Item 10',
+        'item2' => 'Item 2',
+        'item1' => 'Item 1',
+        'item20' => 'Item 20',
+      ],
+      'asc',
+      FALSE,
+      [
+        'item1' => 'Item 1',
+        'item10' => 'Item 10',
+        'item2' => 'Item 2',
+        'item20' => 'Item 20',
+      ],
+    ];
+
+    // Test descending order.
+    $data[] = [
+      [
+        'a' => 'Apple',
+        'c' => 'Cherry',
+        'b' => 'Banana',
+      ],
+      'desc',
+      TRUE,
+      [
+        'c' => 'Cherry',
+        'b' => 'Banana',
+        'a' => 'Apple',
+      ],
+    ];
+
+    // Test with mixed content and natural sorting.
+    $data[] = [
+      [
+        'mix' => 'File10.txt',
+        'foo' => 'File2.txt',
+        'bar' => 'File1.txt',
+        'baz' => 'File20.txt',
+      ],
+      'asc',
+      TRUE,
+      [
+        'bar' => 'File1.txt',
+        'foo' => 'File2.txt',
+        'mix' => 'File10.txt',
+        'baz' => 'File20.txt',
+      ],
+    ];
+
+    return $data;
+  }
+
+  /**
+   * Tests edge cases for custom sorting methods.
+   *
+   * @throws \PHPUnit\Framework\MockObject\Exception
+   */
+  public function testSortOptionsCustomEdgeCases() {
+    // Test empty array.
+    $result = BetterExposedFiltersHelper::sortOptionsCustom([]);
+    $this->assertEmpty($result, 'Empty array should remain empty');
+
+    // Test single element.
+    $single = ['key' => 'value'];
+    $result = BetterExposedFiltersHelper::sortOptionsCustom($single);
+    $this->assertEquals($single, $result, 'Single element array should remain unchanged');
+
+    // Test invalid method falls back to default.
+    $options = ['b' => 'Banana', 'a' => 'Apple'];
+    $this->stringTranslation = $this->getStringTranslationStub();
+
+    $transliterator = $this->createMock(TransliterationInterface::class);
+    $transliterator->expects($this->any())
+      ->method('transliterate')
+      ->willReturnCallback(fn($string) => $string);
+    $container = new ContainerBuilder();
+    $container->set('transliteration', $transliterator);
+    \Drupal::setContainer($container);
+
+    $result = BetterExposedFiltersHelper::sortOptionsCustom($options, 'invalid_method');
+    $expected = BetterExposedFiltersHelper::sortOptions($options);
+    $this->assertEquals($expected, $result, 'Invalid method should fall back to default sorting');
+  }
+
+  /**
    * Tests options are rewritten correctly.
    *
    * @dataProvider providerTestSortNestedOptions
    *
    * @covers ::sortNestedOptions
+   *
+   * @throws \PHPUnit\Framework\MockObject\Exception
    */
   public function testSortNestedOptions($unsorted, $expected) {
+    // Data providers run before ::setUp. We rely on the stringTranslationTrait
+    // for some of our option values so call it here instead.
+    $this->stringTranslation = $this->getStringTranslationStub();
+
     $transliterator = $this->createMock(TransliterationInterface::class);
     $transliterator->expects($this->any())
       ->method('transliterate')
-      ->will($this->returnCallback(
+      ->willReturnCallback(
         fn($string, $langcode = 'en', $unknown_character = '?', $max_length = NULL) => str_replace([
           'á',
           'é',
           'è',
         ], ['a', 'e', 'e'], $string)
-      ));
+      );
     $container = new ContainerBuilder();
     $container->set('transliteration', $transliterator);
     \Drupal::setContainer($container);
@@ -391,11 +801,7 @@ class BetterExposedFiltersHelperUnitTest extends UnitTestCase {
   /**
    * Data provider for ::testSortNestedOptions.
    */
-  public function providerTestSortNestedOptions() {
-    // Data providers run before ::setUp. We rely on the stringTranslationTrait
-    // for some of our option values so call it here instead.
-    $this->stringTranslation = $this->getStringTranslationStub();
-
+  public static function providerTestSortNestedOptions(): array {
     $data = [];
 
     // List of nested taxonomy terms.

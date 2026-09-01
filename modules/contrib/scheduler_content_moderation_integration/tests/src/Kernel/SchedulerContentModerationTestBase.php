@@ -58,6 +58,8 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
 
   /**
    * {@inheritdoc}
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   protected function setUp(): void {
     parent::setUp();
@@ -107,8 +109,10 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
 
   /**
    * Configure example node type.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function configureExampleNodeType() {
+  protected function configureExampleNodeType(): void {
     $node_type = NodeType::create([
       'type' => 'example',
       'name' => 'Example content',
@@ -120,8 +124,10 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
 
   /**
    * Configure example media type.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function configureExampleMediaType() {
+  protected function configureExampleMediaType(): void {
     $media_type = $this->createMediaType('audio_file', [
       'id' => 'soundtrack',
       'label' => 'Sound track',
@@ -133,8 +139,10 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
 
   /**
    * Configures the editorial workflow for the example node type.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  protected function configureEditorialWorkflow() {
+  protected function configureEditorialWorkflow(): void {
     $this->workflow = $this->createEditorialWorkflow();
     $this->workflow->getTypePlugin()->addEntityTypeAndBundle('node', 'example');
     $this->workflow->getTypePlugin()->addEntityTypeAndBundle('media', 'soundtrack');
@@ -147,12 +155,11 @@ abstract class SchedulerContentModerationTestBase extends KernelTestBase {
    * @return array
    *   Each array item has the values: [entity type id, bundle id].
    */
-  public static function dataEntityTypes() {
-    $data = [
+  public static function dataEntityTypes(): array {
+    return [
       '#node' => ['node', 'example'],
       '#media' => ['media', 'soundtrack'],
     ];
-    return $data;
   }
 
 }

@@ -14,7 +14,8 @@ use Prophecy\Argument;
 
 /**
  * @coversDefaultClass \Drupal\panels\Plugin\DisplayBuilder\StandardDisplayBuilder
- * @group Panels
+ *
+ * @group panels
  */
 class StandardDisplayBuilderTest extends UnitTestCase {
 

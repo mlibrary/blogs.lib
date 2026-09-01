@@ -6,7 +6,7 @@
     "require": {
         "drupal/mailsystem": "^4.4",
         "html2text/html2text": "^4.0.1",
-        "symfony/mailer": "^5.3 || ^6.0",
+        "symfony/mailer": "^6.4 || ^7.1",
         "tijsverkoyen/css-to-inline-styles": "^2.2"
     }
 }

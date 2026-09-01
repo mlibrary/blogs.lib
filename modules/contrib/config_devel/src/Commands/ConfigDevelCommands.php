@@ -288,13 +288,18 @@ class ConfigDevelCommands extends DrushCommands {
    *
    * @throws \Exception
    *   Throws an exception if the 'config_devel' property of the extension's
-   *   info file is badly formed.
+   *   info file is missing or badly formed.
    */
   protected function getExtensionConfig($type, $extension) {
     $filename = \Drupal::service('extension.path.resolver')->getPath($type, $extension) . '/' . $extension .'.info.yml';
     $info = $this->infoParser->parse($filename);
 
     $config = [];
+
+    if (!isset($info['config_devel'])) {
+      throw new \Exception("The '$extension' $type is missing a 'config_devel' property in its info.yml file.");
+    }
+
     if (isset($info['config_devel'])) {
       if (!is_array($info['config_devel'])) {
         throw new \Exception("The 'config_devel' property in the '$extension' extension must be an array.");

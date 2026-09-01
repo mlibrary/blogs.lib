@@ -1,0 +1,5 @@
+
+services:
+  Drupal\link_attributes_test_alterinfo\Hook\LinkAttributesTestAlterinfoHooks:
+    class: Drupal\link_attributes_test_alterinfo\Hook\LinkAttributesTestAlterinfoHooks
+    autowire: true

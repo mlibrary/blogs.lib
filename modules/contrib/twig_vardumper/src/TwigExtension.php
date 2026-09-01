@@ -16,13 +16,13 @@ class TwigExtension extends AbstractExtension {
    */
   public function getFunctions() {
     return [
-      new TwigFunction('dump', [$this, 'drupalDump'], [
+      new TwigFunction('dump', $this->drupalDump(...), [
         'is_safe' => ['html'],
         'needs_context' => TRUE,
         'needs_environment' => TRUE,
         'is_variadic' => TRUE,
       ]),
-      new TwigFunction('vardumper', [$this, 'drupalDump'], [
+      new TwigFunction('vardumper', $this->drupalDump(...), [
         'is_safe' => ['html'],
         'needs_context' => TRUE,
         'needs_environment' => TRUE,

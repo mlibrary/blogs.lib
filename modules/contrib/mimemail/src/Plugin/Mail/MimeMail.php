@@ -2,13 +2,17 @@
 
 namespace Drupal\mimemail\Plugin\Mail;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Component\Utility\EmailValidatorInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Mail\Attribute\Mail;
 use Drupal\Core\Mail\MailFormatHelper;
 use Drupal\Core\Mail\Plugin\Mail\PhpMail;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\filter\FilterFormatRepositoryInterface;
 use Drupal\mimemail\Utility\MimeMailFormatHelper;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -21,6 +25,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   description = @Translation("Sends MIME-encoded emails with embedded images and attachments.")
  * )
  */
+#[Mail(
+  id: 'mime_mail',
+  label: new TranslatableMarkup('Mime Mail mailer'),
+  description: new TranslatableMarkup("Sends MIME-encoded emails with embedded images and attachments.")
+)]
 class MimeMail extends PhpMail implements ContainerFactoryPluginInterface {
 
   /**
@@ -87,13 +96,14 @@ class MimeMail extends PhpMail implements ContainerFactoryPluginInterface {
     if (is_array($message['body'])) {
       $message['body'] = implode("\n\n", $message['body']);
     }
-
-    if (preg_match('/plain/', $message['headers']['Content-Type'])) {
-      if (!$format = $this->configFactory->get('mimemail.settings')->get('format')) {
-        $format = filter_fallback_format();
+    if (isset($message['headers']['Content-Type'])) {
+      if (preg_match('/plain/', $message['headers']['Content-Type'])) {
+        if (!$format = $this->configFactory->get('mimemail.settings')->get('format')) {
+          $format = DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.4.0', fn() => \Drupal::service(FilterFormatRepositoryInterface::class)->getFallbackFormatId(), fn() => filter_fallback_format());
+        }
+        $langcode = $message['langcode'] ?? '';
+        $message['body'] = ['#type' => 'processed_text', '#text' => $message['body'], '#format' => $format, '#langcode' => $langcode];
       }
-      $langcode = $message['langcode'] ?? '';
-      $message['body'] = check_markup($message['body'], $format, $langcode);
     }
 
     $message = $this->prepareMessage($message);
@@ -146,6 +156,7 @@ class MimeMail extends PhpMail implements ContainerFactoryPluginInterface {
     $from = $message['from'];
     $subject = $message['subject'];
     $body = $message['body'];
+    $params = $message['params'];
 
     $headers = $message['params']['headers'] ?? [];
     $plain = $message['params']['plain'] ?? NULL;
@@ -173,12 +184,14 @@ class MimeMail extends PhpMail implements ContainerFactoryPluginInterface {
     // Try to determine recipient's text mail preference.
     elseif (is_null($plain)) {
       if (is_string($to) && $this->emailValidator->isValid($to)) {
-        $user_plaintext_field = $this->configFactory->get('mimemail.settings')->get('user_plaintext_field');
-        if (is_object($account = user_load_by_mail($to)) && $account->hasField($user_plaintext_field)) {
-          /** @var boolean $plain */
-          $plain = $account->{$user_plaintext_field}->value;
+        if (is_object($account = array_values(\Drupal::entityTypeManager()->getStorage('user')->loadByProperties(['mail' => $to]))[0] ?? FALSE)) {
           // Might as well pass the user object to the address function.
           $to = $account;
+          $user_plaintext_field = $this->configFactory->get('mimemail.settings')->get('user_plaintext_field');
+          if (!empty($user_plaintext_field) && $account->hasField($user_plaintext_field)) {
+            /** @var boolean $plain */
+            $plain = $account->{$user_plaintext_field}->value;
+          }
         }
       }
     }
@@ -186,7 +199,7 @@ class MimeMail extends PhpMail implements ContainerFactoryPluginInterface {
     // MailFormatHelper::htmlToText() removes \r and adds \n both directly and
     // within the utility method MailFormatHelper::wrapMailLine(). Subject
     // headers can't contain \n characters, so we remove those here.
-    $subject = str_replace(["\n"], '', trim(MailFormatHelper::htmlToText($subject)));
+    $subject = str_replace([" \n", "\n"], '', trim(MailFormatHelper::htmlToText($subject)));
 
     $body = [
       '#theme' => 'mimemail_message',
@@ -195,9 +208,11 @@ class MimeMail extends PhpMail implements ContainerFactoryPluginInterface {
       '#recipient' => $to,
       '#subject' => $subject,
       '#body' => $body,
+      '#params' => $params,
+      '#langcode' => $message['langcode'] ?? '',
     ];
 
-    $body = $this->renderer->renderPlain($body);
+    $body = $this->renderer->renderInIsolation($body);
 
     $plain = $plain || $this->configFactory->get('mimemail.settings')->get('textonly');
     $from = MimeMailFormatHelper::mimeMailAddress($from);

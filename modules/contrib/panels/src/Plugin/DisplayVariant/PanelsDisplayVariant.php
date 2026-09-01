@@ -417,7 +417,7 @@ class PanelsDisplayVariant extends BlockDisplayVariant implements PluginWizardIn
   /**
    * {@inheritdoc}
    */
-  public function access(AccountInterface $account = NULL) {
+  public function access(?AccountInterface $account = NULL) {
     // If no blocks are configured for this variant, deny access.
     if (empty($this->configuration['blocks'])) {
       return FALSE;

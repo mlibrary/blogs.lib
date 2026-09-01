@@ -37,6 +37,21 @@ class UnPublishStateConstraintValidator extends ConstraintValidatorBase {
     $unpublish_state = $entity->unpublish_state->value;
     $moderation_state = $entity->moderation_state->value;
 
+    // Prevent saving when the current moderation state matches the scheduled
+    // unpublish state and there is no publish state scheduled. This would mean
+    // the content is already in the state it is scheduled to transition to.
+    if (!$publish_state && $moderation_state === $unpublish_state) {
+      $workflow_type = $this->getEntityWorkflowType($entity);
+      $state_label = $workflow_type->hasState($moderation_state) ? $workflow_type->getState($moderation_state)->label() : $moderation_state;
+      $this->context
+        ->buildViolation($constraint->sameStateMessage, [
+          '%moderation_state' => $state_label,
+        ])
+        ->atPath('unpublish_state')
+        ->addViolation();
+      return;
+    }
+
     // If the publish state has been set then we need to validate that the
     // transition from the set published state to the un-publish state is
     // a valid transition.

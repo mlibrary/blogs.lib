@@ -8,4 +8,5 @@ redirect_logout: ''
 userinfo_mappings:
   timezone: zoneinfo
 role_mappings: {}
+force_reset_role_mappings: true
 autostart_login: false

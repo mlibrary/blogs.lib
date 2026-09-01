@@ -3,6 +3,7 @@
 namespace Drupal\Tests\scheduler\Functional;
 
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the admin settings page of Scheduler.
@@ -14,6 +15,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group scheduler
  */
 #[Group('scheduler')]
+#[RunTestsInSeparateProcesses]
 class SchedulerAdminSettingsTest extends SchedulerBrowserTestBase {
 
   /**

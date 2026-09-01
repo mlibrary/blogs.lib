@@ -4,3 +4,7 @@ services:
     arguments: []
     tags:
       - { name: twig.extension }
+
+  Drupal\twig_vardumper\Hook\TwigVardumperHooks:
+    class: Drupal\twig_vardumper\Hook\TwigVardumperHooks
+    autowire: true

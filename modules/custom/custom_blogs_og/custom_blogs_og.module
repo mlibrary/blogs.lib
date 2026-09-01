@@ -8,6 +8,7 @@ use Drupal\node\NodeInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\node\Entity\Node;
+use Drupal\user\UserNameValidator;
 
 function _custom_blogs_og_verify_all_users() {
   $query = \Drupal::entityQuery('node')
@@ -485,7 +486,7 @@ function _custom_blogs_form_og_membership_add_validate(&$form, FormStateInterfac
     }
     $new_user = NULL;
     if (strpos($new_user_name, '@') === FALSE) {
-      if (user_validate_name($new_user_name)) {
+      if (count(\Drupal::service('user.name_validator')->validateName($new_user_name)) > 0) {
         $form_state->setErrorByName('uid', t('The username %name is not valid.', array('%name' => $new_user_name)));
         return;
       }
@@ -505,7 +506,7 @@ function _custom_blogs_form_og_membership_add_validate(&$form, FormStateInterfac
         $form_state->setErrorByName('uid', t('The email address %mail is not valid.', array('%mail' => $new_user_name)));
         return;
       }
-      if (user_validate_name($new_user_name)) {
+      if (count(\Drupal::service('user.name_validator')->validateName($new_user_name)) > 0) {
         $form_state->setErrorByName('uid', t('The username %name is not valid.', array('%name' => $new_user_name)));
         return;
       }

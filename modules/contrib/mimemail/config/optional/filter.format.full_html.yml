@@ -1,0 +1,55 @@
+# This filter format is a copy of the 'full_html' filter format that is
+# bundled with Drupal core's 'standard' installation profile. Copy was made
+# from core commit 5f533ca6602f28b7acffba2491c0365af60c35d5 (11 Nov 2023).
+#
+# This filter format will be installed when Mime Mail is enabled if and only
+# if it does not already exist, and will be uninstalled when Mime Mail is
+# uninstalled.
+langcode: en
+status: true
+dependencies:
+  module:
+    - editor
+    - filter
+    - mimemail
+  enforced:
+    module:
+      - editor
+      - filter
+      - mimemail
+name: 'Full HTML'
+format: full_html
+weight: 2
+roles:
+  - administrator
+filters:
+  editor_file_reference:
+    id: editor_file_reference
+    provider: editor
+    status: true
+    weight: 11
+    settings: {  }
+  filter_align:
+    id: filter_align
+    provider: filter
+    status: true
+    weight: 8
+    settings: {  }
+  filter_caption:
+    id: filter_caption
+    provider: filter
+    status: true
+    weight: 9
+    settings: {  }
+  filter_htmlcorrector:
+    id: filter_htmlcorrector
+    provider: filter
+    status: true
+    weight: 10
+    settings: {  }
+  filter_image_lazy_load:
+    id: filter_image_lazy_load
+    provider: filter
+    status: true
+    weight: 15
+    settings: {  }

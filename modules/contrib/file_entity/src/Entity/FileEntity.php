@@ -2,6 +2,7 @@
 
 namespace Drupal\file_entity\Entity;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -209,7 +210,7 @@ class FileEntity extends File implements FileEntityInterface {
         }
 
         // Flush image style derivatives whenever an image is updated.
-        image_path_flush($this->getFileUri());
+        DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.4.0', fn() => \Drupal::service('Drupal\image\ImageDerivativeUtilities')->pathFlush($this->getFileUri()), fn() => image_path_flush($this->getFileUri()));
       }
     }
 

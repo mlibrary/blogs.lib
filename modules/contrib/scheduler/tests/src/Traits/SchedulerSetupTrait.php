@@ -23,10 +23,6 @@ trait SchedulerSetupTrait {
     createNode as drupalCreateNode;
   }
 
-  // @todo Remove this when core 8.8 is the lowest supported version.
-  // @see https://www.drupal.org/project/scheduler/issues/3136744
-  use PhpunitCompatibilityCore87Trait;
-
   /**
    * A user with administration rights.
    *
@@ -270,6 +266,10 @@ trait SchedulerSetupTrait {
         $entity = $this->createTaxonomyTerm($values);
         break;
 
+      case 'scheduler_test_no_bundle':
+        $entity = $this->createEntityTestEntity($values);
+        break;
+
       default:
         // Incorrect parameter values.
         throw new \Exception(sprintf('Unrecognized combination of entityTypeId "%s" and bundle "%s" passed to createEntity()', $entityTypeId, $bundle));
@@ -305,6 +305,9 @@ trait SchedulerSetupTrait {
       case 'taxonomy_term':
         return $this->getTaxonomyTerm($title);
 
+      case 'scheduler_test_no_bundle':
+        return $this->getEntityTestEntity($title);
+
       default:
         // Incorrect parameter value.
         throw new \Exception(sprintf('Unrecognized entityTypeId value "%s" passed to getEntityByTitle()', $entityTypeId));
@@ -336,6 +339,7 @@ trait SchedulerSetupTrait {
         'media' => $this->mediaTypeName,
         'commerce_product' => $this->productTypeName,
         'taxonomy_term' => $this->vocabularyId,
+        'scheduler_test_no_bundle' => 'scheduler_test_no_bundle',
       ];
       $non_enabled_types = [
         'node' => $this->nonSchedulerType,
@@ -346,8 +350,14 @@ trait SchedulerSetupTrait {
       $bundle = (empty($bundle)) ? $default_types[$entityTypeId] : $non_enabled_types[$entityTypeId];
     }
     $entityTypeManager = $this->container->get('entity_type.manager');
-    $bundleEntityType = $entityTypeManager->getDefinition($entityTypeId)->getBundleEntityType();
-    if (!$entity_type = $entityTypeManager->getStorage($bundleEntityType)->load($bundle)) {
+    if ($bundleEntityType = $entityTypeManager->getDefinition($entityTypeId)->getBundleEntityType()) {
+      $entity_type = $entityTypeManager->getStorage($bundleEntityType)->load($bundle);
+    }
+    else {
+      // Entity is non-bundled.
+      $entity_type = $entityTypeManager->getDefinition($entityTypeId);
+    }
+    if (!$entity_type) {
       // Incorrect parameter values.
       throw new \Exception(sprintf('Unrecognized combination of entityTypeId "%s" and bundle "%s" passed to entityTypeObject()', $entityTypeId, $bundle));
     }
@@ -371,6 +381,7 @@ trait SchedulerSetupTrait {
 
       case 'media':
       case 'taxonomy_term':
+      case 'scheduler_test_no_bundle':
         return 'name';
 
       default:
@@ -428,6 +439,11 @@ trait SchedulerSetupTrait {
       case 'taxonomy_term':
         return '/(Created new|Updated) term ' . preg_quote($title, '/') . '/';
 
+      case 'scheduler_test_no_bundle':
+        // EntityTestForm emits 'scheduler_test_no_bundle @id has been
+        // created/updated.' The message uses the entity ID, not the title.
+        return '/scheduler_test_no_bundle \d+ has been (created|updated)\./';
+
       default:
         // Incorrect parameter value.
         throw new \Exception(sprintf('Unrecognized entityTypeId "%s" passed to entitySavedMessage()', $entityTypeId));
@@ -473,6 +489,10 @@ trait SchedulerSetupTrait {
         $route = 'entity.taxonomy_term.add_form';
         $type_parameter = 'taxonomy_vocabulary';
         break;
+
+      case 'scheduler_test_no_bundle':
+        // No bundle for this entity type, so the add form has no bundle param.
+        return Url::fromRoute('entity.scheduler_test_no_bundle.add_form');
 
       default:
         // Incorrect parameter values.
@@ -583,6 +603,22 @@ trait SchedulerSetupTrait {
       '#media' => ['media', 'test_video'],
       '#commerce_product' => ['commerce_product', 'test_product'],
       '#taxonomy_term' => ['taxonomy_term', 'test_vocab'],
+    ];
+  }
+
+  /**
+   * Provides test data for entity types that have no bundle entity type.
+   *
+   * Use this alongside dataStandardEntityTypes() in tests that are compatible
+   * with no-bundle entity types (i.e. do not call entityTypeObject(), access
+   * bundle config, or use entity-type-specific hooks).
+   *
+   * @return array
+   *   Each array item has the values: [entity type id, bundle id].
+   */
+  public static function dataNoBundleEntityTypes(): array {
+    return [
+      '#scheduler_test_no_bundle' => ['scheduler_test_no_bundle', 'scheduler_test_no_bundle'],
     ];
   }
 

@@ -17,6 +17,8 @@ use Drupal\Core\Extension\ModuleHandler;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Image\ImageFactory;
+use Drupal\Core\Image\ImageInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\Core\Messenger\MessengerInterface;
@@ -34,7 +36,9 @@ use Drupal\TestTools\Random;
 use Drupal\user\Entity\User;
 use Drupal\user\UserDataInterface;
 use Drupal\user\UserInterface;
-use PHPUnit\Framework\MockObject\Rule\InvokedCount;
+use GuzzleHttp\ClientInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 use Psr\Log\InvalidArgumentException;
 
 /**
@@ -165,6 +169,20 @@ class OpenIDConnectTest extends UnitTestCase {
   protected $fileRepository;
 
   /**
+   * Mock of the http_client service.
+   *
+   * @var \PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $httpClient;
+
+  /**
+   * Mock of the image.factory service.
+   *
+   * @var \PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $imageFactory;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
@@ -189,6 +207,7 @@ class OpenIDConnectTest extends UnitTestCase {
     $this->externalAuth = $this
       ->createMock(ExternalAuthInterface::class);
 
+    // @phpstan-ignore drupal.entityStoragePropertyAssignment
     $this->userStorage = $this
       ->createMock(EntityStorageInterface::class);
 
@@ -237,6 +256,10 @@ class OpenIDConnectTest extends UnitTestCase {
 
     $this->fileRepository = $this->createMock(FileRepositoryInterface::class);
 
+    $this->httpClient = $this->createMock(ClientInterface::class);
+
+    $this->imageFactory = $this->createMock(ImageFactory::class);
+
     $container = new ContainerBuilder();
     $container->set('string_translation', $this->getStringTranslationStub());
     $container->set('entity_type.repository', $this->createMock(EntityTypeRepositoryInterface::class));
@@ -257,7 +280,9 @@ class OpenIDConnectTest extends UnitTestCase {
       $this->logger,
       $this->fileSystem,
       $this->session,
-      $this->fileRepository
+      $this->fileRepository,
+      $this->httpClient,
+      $this->imageFactory,
     );
   }
 
@@ -405,6 +430,12 @@ class OpenIDConnectTest extends UnitTestCase {
     // Mock the user account to be created.
     $account = $this
       ->createMock(UserInterface::class);
+
+    $temp_account = $this
+      ->createMock(UserInterface::class);
+    $this->userStorage->expects($this->exactly(1))
+      ->method('create')
+      ->willReturn($temp_account);
 
     $this->externalAuth->expects($this->once())
       ->method('register')
@@ -773,6 +804,8 @@ class OpenIDConnectTest extends UnitTestCase {
         $this->fileSystem,
         $this->session,
         $this->fileRepository,
+        $this->httpClient,
+        $this->imageFactory,
       ])
       ->onlyMethods([
         'userPropertiesIgnore',
@@ -1089,15 +1122,55 @@ class OpenIDConnectTest extends UnitTestCase {
                 break;
 
               case 'field_image':
-                $this->fileSystem->expects($this->any())
-                  ->method('basename')
-                  ->with($value)
-                  ->willReturn('test-file');
                 $account->expects($this->any())
                   ->method('set');
 
                 $returnType = 'image';
 
+                // Create a minimal valid PNG image (1x1 transparent pixel).
+                $pngData = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+
+                // Mock the HTTP client response.
+                $mockResponse = $this->createMock(ResponseInterface::class);
+                $mockResponse->method('getHeaderLine')
+                  ->with('Content-Type')
+                  ->willReturn('image/png');
+
+                $mockStream = $this->createMock(StreamInterface::class);
+                $mockStream->method('getContents')
+                  ->willReturn($pngData);
+
+                $mockResponse->method('getBody')
+                  ->willReturn($mockStream);
+
+                $this->httpClient->expects($this->once())
+                  ->method('request')
+                  ->with('GET', $value, $this->anything())
+                  ->willReturn($mockResponse);
+
+                $imageMock = $this->createMock(ImageInterface::class);
+                $imageMock->expects($this->any())
+                  ->method('isValid')
+                  ->willReturn(TRUE);
+                $imageMock->expects($this->any())
+                  ->method('getMimeType')
+                  ->willReturn('image/png');
+                $this->fileSystem->expects(self::once())
+                  ->method('saveData');
+                $this->fileSystem->expects(self::once())
+                  ->method('saveData');
+                $this->imageFactory->expects(self::once())
+                  ->method('get')
+                  ->willReturn($imageMock);
+                $this->fileSystem->expects(self::any())
+                  ->method('delete');
+
+                $newMockFile = $this->createMock(File::class);
+                $newMockFile->method('id')->willReturn(456);
+
+                $this->fileRepository->expects($this->once())
+                  ->method('writeData')
+                  ->willReturn($newMockFile);
                 $mockFile = $this->createMock(File::class);
                 $mockFile->expects($this->once())
                   ->method('delete');
@@ -1109,7 +1182,7 @@ class OpenIDConnectTest extends UnitTestCase {
                   ->with('entity')
                   ->willReturn($mockFile);
 
-                $account->expects($this->once())
+                $account->expects($this->exactly(2))
                   ->method('__get')
                   ->willReturn($fieldItem);
                 break;
@@ -1259,7 +1332,7 @@ class OpenIDConnectTest extends UnitTestCase {
       [TRUE, $tokens, ['sub' => $sub, 'always_save' => TRUE],
         [
           'name' => Random::machineName(),
-          'field_image' => realpath(__DIR__) . '/image.png',
+          'field_image' => 'http://example.com/profile.png',
           'email' => 'valid@email.com',
         ], TRUE,
       ],
@@ -1276,127 +1349,6 @@ class OpenIDConnectTest extends UnitTestCase {
           'field_image_exception' => new \stdClass(),
           'email' => 'valid@email.com',
         ], TRUE,
-      ],
-    ];
-  }
-
-  /**
-   * Test the saveUserinfo method.
-   *
-   * @param array $userinfo
-   *   The mocked userinfo array.
-   * @param array $mappings
-   *   The configured role mappings.
-   * @param array $add
-   *   The roles expected to be added.
-   * @param array $remove
-   *   The roles expected to be removed.
-   *
-   * @dataProvider dataProviderForTestRoleMappings
-   */
-  public function testRoleMappings(array $userinfo, array $mappings, array $add, array $remove): void {
-    $account = $this->createMock(UserInterface::class);
-    $this->entityFieldManager->expects($this->once())
-      ->method('getFieldDefinitions')
-      ->with('user', 'user')
-      ->willReturn([]);
-
-    $config = $this->createMock(ImmutableConfig::class);
-    $config->expects($this->any())
-      ->method('get')
-      ->with('role_mappings')
-      ->willReturn($mappings);
-
-    $this->configFactory->expects($this->any())
-      ->method('get')
-      ->with('openid_connect.settings')
-      ->willReturn($config);
-
-    $add_matcher = $this->exactly(count($add));
-    $account->expects($add_matcher)
-      ->method('addRole')
-      ->willReturnCallback(function (string $param) use ($add, $add_matcher) {
-        $this->assertSame($param, $add[$this->getInvocationCountHelper($add_matcher) - 1]);
-      });
-
-    $remove_matcher = $this->exactly(count($remove));
-    $account->expects($remove_matcher)
-      ->method('removeRole')
-      ->willReturnCallback(function (string $param) use ($remove, $remove_matcher) {
-        $this->assertSame($param, $remove[$this->getInvocationCountHelper($remove_matcher) - 1]);
-      });
-
-    $this->openIdConnect->saveUserinfo($account, ['userinfo' => $userinfo]);
-  }
-
-  /**
-   * Helper to determine the number of invocations.
-   *
-   * @param \PHPUnit\Framework\MockObject\Rule\InvokedCount $count
-   *   The invoked count object.
-   *
-   * @return int
-   *   The number of invocations.
-   */
-  private function getInvocationCountHelper(InvokedCount $count): int {
-    if (method_exists($count, 'getInvocationCount')) {
-      // @todo Remove this once we drop support for Drupal ^10.
-      trigger_deprecation('openid_connect', '3.x', 'The method InvocationMocker::getInvocationCount() is deprecated. Use numberOfInvocations() instead.');
-      return $count->getInvocationCount();
-    }
-
-    return $count->numberOfInvocations();
-  }
-
-  /**
-   * Data provider for the testRoleMappings method.
-   *
-   * @return array|array[]
-   *   Array of parameters to pass to testRoleMappings().
-   */
-  public static function dataProviderForTestRoleMappings(): array {
-    return [
-      'add groupX, remove groupY' => [
-        'userinfo' => [
-          'groups' => ['groupX'],
-        ],
-        'mappings' => [
-          'role1' => ['groupX'],
-          'role2' => ['groupY'],
-        ],
-        'add' => ['role1'],
-        'remove' => ['role2'],
-      ],
-      'add groupX, groupY' => [
-        'userinfo' => [
-          'groups' => ['groupX', 'groupY'],
-        ],
-        'mappings' => [
-          'role1' => ['groupX'],
-          'role2' => ['groupY'],
-        ],
-        'add' => ['role1', 'role2'],
-        'remove' => [],
-      ],
-      'remove groupX, groupY' => [
-        'userinfo' => [
-          'groups' => [],
-        ],
-        'mappings' => [
-          'role1' => ['groupX'],
-          'role2' => ['groupY'],
-        ],
-        'add' => [],
-        'remove' => ['role1', 'role2'],
-      ],
-      'remove all groups when no groups in userinfo' => [
-        'userinfo' => [],
-        'mappings' => [
-          'role1' => ['groupX'],
-          'role2' => ['groupY'],
-        ],
-        'add' => [],
-        'remove' => ['role1', 'role2'],
       ],
     ];
   }

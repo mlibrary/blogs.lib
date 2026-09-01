@@ -2,7 +2,7 @@
  * @file
  * JQuery to set default time for Scheduler DateTime Widget.
  *
- * This is a legacy version to maintain compatibility with Drupal 8.9.
+ * This is a legacy version to maintain compatibility with Drupal 9.0 and 9.1.
  */
 
 (function ($, drupalSettings) {

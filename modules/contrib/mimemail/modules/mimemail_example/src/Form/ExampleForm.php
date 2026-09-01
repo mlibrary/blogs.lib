@@ -134,7 +134,7 @@ class ExampleForm extends FormBase {
         'List-unsubscribe' => [
           '#type' => 'textfield',
           '#title' => $this->t('List-unsubscribe'),
-          '#description' => $this->t('An email address and/or a URL that may be used for unsubscription. Values must be enclosed by angle brackets and separated by a comma.'),
+          '#description' => $this->t('An email address and/or a URL that may be used to unsubscribe. Values must be enclosed by angle brackets and separated by a comma.'),
         ],
       ],
       'subject' => [

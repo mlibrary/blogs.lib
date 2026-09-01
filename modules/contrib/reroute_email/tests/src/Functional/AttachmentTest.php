@@ -3,12 +3,10 @@
 namespace Drupal\Tests\reroute_email\Functional;
 
 use Drupal\Component\Render\FormattableMarkup;
-use Drupal\reroute_email\Constants\RerouteEmailConstants;
+use Drupal\reroute_email\RerouteEmailHandlerPluginInterface;
 
 /**
  * Test that attachments are included when redirecting email.
- *
- * @ingroup reroute_email_tests
  *
  * @group reroute_email
  */
@@ -16,12 +14,14 @@ class AttachmentTest extends RerouteEmailBrowserTestBase {
 
   /**
    * Test attachments to be present on rerouted mail.
+   *
+   * @throws \Behat\Mink\Exception\ResponseTextException
    */
   public function testAttachmentsArePresentOnReroutedMail() {
-    // Configure to reroute to {$this->rerouteDestination}.
+    // Configure to reroute to rerouteDestination.
     $this->configureRerouteEmail([
-      RerouteEmailConstants::REROUTE_EMAIL_ENABLE => TRUE,
-      RerouteEmailConstants::REROUTE_EMAIL_ADDRESS => $this->rerouteDestination,
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ENABLE => TRUE,
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ADDRESS => static::$rerouteDestination,
     ]);
 
     // Generate a new email.
@@ -38,8 +38,8 @@ class AttachmentTest extends RerouteEmailBrowserTestBase {
     $params['attachments'][] = $file;
 
     // Send mail.
-    $mailManager->mail("system", "mail", $this->originalDestination, 'en', $params);
-    $this->assertMail('to', $this->rerouteDestination, new FormattableMarkup('Email was rerouted to @address.', ['@address' => $this->rerouteDestination]));
+    $mailManager->mail("system", "mail", static::$originalDestination, 'en', $params);
+    $this->assertMail('to', static::$rerouteDestination, new FormattableMarkup('Email was rerouted to @address.', ['@address' => static::$rerouteDestination]));
 
     // Check the last sent email has our attachment.
     $captured_emails = $this->container->get('state')->get('system.test_mail_collector') ?: [];

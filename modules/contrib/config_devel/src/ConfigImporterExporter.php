@@ -205,8 +205,8 @@ class ConfigImporterExporter {
 
       $storage_comparer->createChangelist();
 
-      // TODO: simplify this when
-      // https://www.drupal.org/project/drupal/issues/3123491 is fixed.
+      // TODO: simplify this when Drupal core 11.3 is our minimum: see
+      // https://www.drupal.org/node/3394638.
       $config_importer = new ConfigImporter(
         $storage_comparer,
         $this->eventDispatcher,

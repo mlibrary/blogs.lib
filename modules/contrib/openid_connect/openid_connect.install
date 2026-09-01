@@ -9,6 +9,7 @@
 /* @noinspection PhpUnused */
 
 use Drupal\Core\Config\Entity\ConfigEntityType;
+use Drupal\Core\Database\IntegrityConstraintViolationException;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\Core\Utility\UpdateException;
@@ -54,6 +55,38 @@ function openid_connect_requirements($phase) {
         // No need to check other clients once we've found one with prompt=none.
         break;
       }
+    }
+
+    // Update 8205 only drops the old 'openid_connect_authmap' table once
+    // update 8204 has moved every record into 'authmap'. So if the table is
+    // still there, the migration did not complete. Sites that have not yet run
+    // update 8205 are skipped: core already reports their pending updates.
+    $installed_version = \Drupal::service('update.update_hook_registry')
+      ->getInstalledVersion('openid_connect');
+    $database = \Drupal::database();
+
+    if ($installed_version >= 8205 && $database->schema()->tableExists('openid_connect_authmap')) {
+      $remaining = (int) $database->select('openid_connect_authmap')
+        ->countQuery()
+        ->execute()
+        ->fetchField();
+
+      // Records left behind are a real problem: another account is already
+      // mapped to the same identifier, so these accounts cannot authenticate.
+      // An empty table is only left-over clean-up.
+      $requirements['openid_connect_authmap_migration'] = $remaining ? [
+        'title' => t('OpenID Connect authmap migration'),
+        'value' => t('Not completed'),
+        'description' => t('@number record(s) could not be moved from the old <code>openid_connect_authmap</code> table into the <code>authmap</code> table, usually because another account is already mapped to the same identifier for that client. Any account whose record was not migrated <strong>cannot authenticate</strong> through OpenID Connect until this is resolved. Review the OpenID Connect log messages to identify them, migrate or remove the conflicting records, then drop the <code>openid_connect_authmap</code> table.',
+          ['@number' => $remaining]
+        ),
+        'severity' => REQUIREMENT_WARNING,
+      ] : [
+        'title' => t('OpenID Connect authmap migration'),
+        'value' => t('Clean-up pending'),
+        'description' => t('The old <code>openid_connect_authmap</code> table is empty but still present. Its records have all been migrated or removed, so the table can now be dropped.'),
+        'severity' => REQUIREMENT_INFO,
+      ];
     }
   }
   return $requirements;
@@ -214,10 +247,16 @@ function openid_connect_update_8200() {
     // Only convert configuration where the client id or secret are not empty.
     $settings = $configuration->get('settings');
     if (!empty($settings['client_id']) || !empty($settings['client_secret'])) {
-      // Create new configuration entity.
+      // Create new configuration entity and set the original plugin id
+      // as the new provider_slug.
+      $settings['provider_slug'] = $plugin['id'];
+
+      // System names normally can't contain the '-' character. Such names can
+      // be created by code but are unusable afterward.
+      $newSystemName = str_replace('-', '_', $plugin['id']);
       $entity_storage->create([
         'status' => $configuration->get('enabled'),
-        'id' => $plugin['id'],
+        'id' => $newSystemName,
         'label' => $plugin['label']->getUntranslatedString(),
         'plugin' => $plugin['id'],
         'settings' => $settings,
@@ -261,32 +300,195 @@ function openid_connect_update_8203() {
 /**
  * Move all 'openid_connect_authmap' data to 'authmap'.
  */
-function openid_connect_update_8204() {
+function openid_connect_update_8204(array &$sandbox) {
   $database = \Drupal::database();
 
-  // Get all records and move them to the authmap table.
-  $query = $database->select('openid_connect_authmap', 'a')->fields('a');
-  $authmap_records = $query->execute()->fetchAllAssoc('aid');
+  // Number of records processed per batch pass.
+  $batch_size = 500;
+
+  if (!isset($sandbox['initialized'])) {
+    $sandbox['total'] = (int) $database->select('openid_connect_authmap')
+      ->countQuery()
+      ->execute()
+      ->fetchField();
+
+    $sandbox['last_aid'] = 0;
+    $sandbox['moved'] = 0;
+    $sandbox['sweep_moved'] = 0;
+    $sandbox['retrying'] = FALSE;
+    $sandbox['initialized'] = TRUE;
+  }
+
+  // Get records and move them to the authmap table. Records are ordered by
+  // 'aid' ascending, so that when a user has several entries for the same
+  // client the most recent one is merged last and therefore wins.
+  $authmap_records = $database->select('openid_connect_authmap', 'a')
+    ->fields('a')
+    ->condition('a.aid', $sandbox['last_aid'], '>')
+    ->orderBy('a.aid')
+    ->range(0, $batch_size)
+    ->execute()
+    ->fetchAll();
 
   foreach ($authmap_records as $authmap_record) {
-    $database->merge('authmap')
-      ->keys([
-        'uid' => $authmap_record->uid,
-        'provider' => 'openid_connect.' . $authmap_record->client_name,
-      ])
-      ->fields([
-        'authname' => $authmap_record->sub,
-        'data' => 'N;',
-      ])
-      ->execute();
+    $sandbox['last_aid'] = $authmap_record->aid;
+
+    // The 1.x client name is the plugin id, which may contain the '-'
+    // character. openid_connect_update_8200() sanitizes that character out
+    // when it creates the configuration entity, and the runtime provider name
+    // is built from the entity id. Sanitize the same way here, otherwise the
+    // migrated mapping would never match again and every existing user would
+    // be silently unlinked from their account.
+    $client_name = str_replace('-', '_', $authmap_record->client_name);
+
+    try {
+      $database->merge('authmap')
+        ->keys([
+          'uid' => $authmap_record->uid,
+          'provider' => 'openid_connect.' . $client_name,
+        ])
+        ->fields([
+          'authname' => $authmap_record->sub,
+          'data' => 'N;',
+        ])
+        ->execute();
+    }
+    catch (IntegrityConstraintViolationException $exception) {
+      // The 'authmap' table has a unique key on (authname, provider), so this
+      // record collides with an entry belonging to a different user. Leave it
+      // in place: it is retried once this sweep is done, because moving a
+      // later record can free the identifier this one needs.
+      continue;
+    }
+
+    // Delete the record that was just moved, so that each entry is only
+    // processed one time, even if the updater fails part-way through. Only
+    // this record is deleted: deleting by uid and client_name would also
+    // discard the duplicates that have not been moved yet.
+    try {
+      $database->delete('openid_connect_authmap')
+        ->condition('aid', (int) $authmap_record->aid)
+        ->execute();
+    }
+    catch (\Exception $exception) {
+      \Drupal::logger('openid_connect')->error(
+        'Failed to delete the old openid_connect_authmap entry for UID @uid / client @client: @message',
+        [
+          '@uid' => $authmap_record->uid,
+          '@client' => $authmap_record->client_name,
+          '@message' => $exception->getMessage(),
+        ]
+      );
+      continue;
+    }
+
+    // Only records that actually left the table are counted, so that a sweep
+    // which cannot delete anything is not mistaken for progress.
+    $sandbox['moved']++;
+    $sandbox['sweep_moved']++;
   }
+
+  // Another pass is required whenever the batch came back full. Progress is
+  // capped below 1, so that the update is never reported as finished early.
+  if (count($authmap_records) === $batch_size) {
+    $sandbox['#finished'] = min(0.99, $sandbox['moved'] / max($sandbox['total'], $sandbox['moved']));
+    return NULL;
+  }
+
+  $remaining = (int) $database->select('openid_connect_authmap')
+    ->countQuery()
+    ->execute()
+    ->fetchField();
+
+  // This sweep is done, and whatever is left behind collided. Sweep again from
+  // the start, because moving a record can free the identifier that a
+  // colliding record needs. Every sweep that continues has removed at least
+  // one record, so the number left strictly decreases and this terminates.
+  if ($remaining > 0 && (!$sandbox['retrying'] || $sandbox['sweep_moved'] > 0)) {
+    $sandbox['retrying'] = TRUE;
+    $sandbox['sweep_moved'] = 0;
+    $sandbox['last_aid'] = 0;
+    $sandbox['#finished'] = 0.99;
+    return NULL;
+  }
+
+  $sandbox['#finished'] = 1;
+
+  if ($remaining === 0) {
+    return sprintf('Moved %d record(s) from openid_connect_authmap to authmap.', $sandbox['moved']);
+  }
+
+  // Retrying got no further, so report what is still here. Reporting happens
+  // now rather than when a record first collided, because a record that a
+  // later sweep resolves must not be logged as an error.
+  $leftovers = $database->select('openid_connect_authmap', 'a')
+    ->fields('a', ['uid', 'client_name', 'sub'])
+    ->orderBy('a.aid')
+    ->execute();
+
+  foreach ($leftovers as $leftover) {
+    // A record that already reached 'authmap' is only still here because
+    // deleting it failed, which is a different problem from a collision and
+    // was logged when it happened. Do not blame it on another account.
+    $migrated = (bool) $database->select('authmap', 'a')
+      ->fields('a', ['uid'])
+      ->condition('a.uid', $leftover->uid)
+      ->condition('a.provider', 'openid_connect.' . str_replace('-', '_', $leftover->client_name))
+      ->condition('a.authname', $leftover->sub)
+      ->range(0, 1)
+      ->execute()
+      ->fetchField();
+
+    if ($migrated) {
+      \Drupal::logger('openid_connect')->error(
+        'The openid_connect_authmap entry for UID @uid / client @client reached the authmap table, but could not be deleted from openid_connect_authmap. The account can authenticate; only the old record needs removing.',
+        [
+          '@uid' => $leftover->uid,
+          '@client' => $leftover->client_name,
+        ]
+      );
+      continue;
+    }
+
+    \Drupal::logger('openid_connect')->error(
+      'Could not move the openid_connect_authmap entry for UID @uid / client @client / sub @sub into the authmap table: another account is already mapped to that identifier for this client. The record has been left in openid_connect_authmap.',
+      [
+        '@uid' => $leftover->uid,
+        '@client' => $leftover->client_name,
+        '@sub' => $leftover->sub,
+      ]
+    );
+  }
+
+  return sprintf('Moved %d record(s) from openid_connect_authmap to authmap. %d record(s) remain in the openid_connect_authmap table; see the OpenID Connect log messages for details.', $sandbox['moved'], $remaining);
 }
 
 /**
  * Drop the 'openid_connect_authmap' table.
  */
 function openid_connect_update_8205() {
-  \Drupal::database()->schema()->dropTable('openid_connect_authmap');
+  $database = \Drupal::database();
+  $schema = $database->schema();
+
+  if (!$schema->tableExists('openid_connect_authmap')) {
+    return 'Skipped. The openid_connect_authmap table does not exist.';
+  }
+
+  // Update 8204 leaves records behind when they cannot be moved into the
+  // 'authmap' table. Keep the table in that case, so that the remaining
+  // mappings can still be recovered.
+  $remaining = (int) $database->select('openid_connect_authmap')
+    ->countQuery()
+    ->execute()
+    ->fetchField();
+
+  if ($remaining > 0) {
+    return sprintf('Skipped dropping the openid_connect_authmap table: %d record(s) could not be moved to the authmap table. Review the OpenID Connect log messages, migrate or remove the conflicting records, then drop the table manually.', $remaining);
+  }
+
+  $schema->dropTable('openid_connect_authmap');
+
+  return 'Dropped the openid_connect_authmap table.';
 }
 
 /**
@@ -478,6 +680,26 @@ function openid_connect_update_30006() {
     $config->set('settings.prompt', $newOidcPromptValue)
       ->save(TRUE);
     $updatedConfigNames[] = $configName;
+  }
+
+  return new TranslatableMarkup('OpenID Connect client plugins updated: @plugins', ['@plugins' => implode(', ', $updatedConfigNames)]);
+}
+
+/**
+ * Update plugins with 'provider_slug'.
+ */
+function openid_connect_update_30007() {
+  $configFactory = \Drupal::configFactory();
+  $updatedConfigNames = [];
+
+  foreach ($configFactory->listAll('openid_connect.client.') as $configName) {
+    $config = $configFactory->getEditable($configName);
+    $settings = $config->get('settings');
+
+    if (!array_key_exists('provider_slug', (array) $settings)) {
+      $config->set('settings.provider_slug', '')->save(TRUE);
+      $updatedConfigNames[] = $configName;
+    }
   }
 
   return new TranslatableMarkup('OpenID Connect client plugins updated: @plugins', ['@plugins' => implode(', ', $updatedConfigNames)]);

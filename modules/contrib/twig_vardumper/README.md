@@ -40,6 +40,23 @@ commands to run:
 
 ## Configuration
 
+On Drupal 11.x.x, install the module using CLI:
+
+1. Require and install the module and its dependencies
+   1. `composer config repositories.drupal composer https://packages.drupal.org/11`
+   1. `composer require drupal/twig_vardumper:^3`
+
+Configure Drupal to work
+
+1. Set development environment for twig
+   1. Uncomnet in *settings.local.php* file `$settings['container_yamls'][] = DRUPAL_ROOT . '/sites/development.services.yml';` line
+   1. Add in *development.services.yml*
+       ```yml
+       parameters:
+         twig.config:
+           debug: true
+       ```
+
 The module has no menu or modifiable settings. There is no configuration. When
 enabled, the module will prevent the links from appearing. To get the links
 back, disable the module and clear caches.
@@ -48,7 +65,7 @@ back, disable the module and clear caches.
 ## How to use
 
 Enable the module twig_vardumper then (e.g., page.html.twig)...
-
+```html
     <header class="header-mediador">
       {{ page.header }}
     </header>
@@ -61,7 +78,7 @@ Enable the module twig_vardumper then (e.g., page.html.twig)...
     <footer class="seccion-footer">
       {{ page.footer }}
     </footer>
-
+```
 
 ## Related modules
 

@@ -55,7 +55,7 @@ abstract class ConfigDevelSubscriberTestBase extends KernelTestBase {
   /**
    * Assert that the config import succeeded.
    *
-   * @param array $writen_data
+   * @param array $data
    *   The config data as written.
    * @param array $exported_data
    *   The config data exported.

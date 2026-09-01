@@ -1,0 +1,43 @@
+<?php
+
+/**
+ * @file
+ * Install and uninstall functions for the reroute email symfony mailer module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function reroute_email_symfony_mailer_install($is_syncing) {
+  /** @var \Drupal\symfony_mailer\Entity\MailerPolicyInterface $policy */
+  $policy = \Drupal::entityTypeManager()->getStorage('mailer_policy')->load('_');
+
+  // Adds the 'reroute_email' email adjuster to the 'symfony_mailer' global mail
+  // policy.
+  if ($policy !== NULL) {
+    $conf = $policy->getConfiguration();
+    $conf['reroute_email'] = ['use_global' => TRUE];
+    $policy->setConfiguration($conf);
+    $policy->save();
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function reroute_email_symfony_mailer_uninstall($is_syncing) {
+  /* This is required to prevent deleting policy mailers which contain the 'reroute_email' email adjuster. */
+  /** @var \Drupal\symfony_mailer\Entity\MailerPolicyInterface $policy */
+  $policies = \Drupal::entityTypeManager()->getStorage('mailer_policy')->loadMultiple();
+
+  // Removes the 'reroute_email' email adjuster from the 'symfony_mailer' global
+  // mail policy.
+  foreach ($policies as $policy) {
+    $conf = $policy->getConfiguration();
+    if (isset($conf['reroute_email'])) {
+      unset($conf['reroute_email']);
+      $policy->setConfiguration($conf);
+      $policy->save();
+    }
+  }
+}

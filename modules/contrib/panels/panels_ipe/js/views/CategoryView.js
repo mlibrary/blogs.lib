@@ -253,7 +253,7 @@
 
       // Filter our collection based on the input.
       var results = this.collection.filter(function (model) {
-        var attribute = model.get(this.searchAttribute);
+        var attribute = model.get(this.searchAttribute) || '';
         return attribute ? attribute.toLowerCase().indexOf(search) !== -1 : false;
       }, this);
 
@@ -315,9 +315,11 @@
 
         // Remove our throbber on load.
         ajax.options.complete = function () {
-          // Do as Drupal.Ajax would do, and mark the request as inactive.
-          ajax.ajaxing = false;
-
+          // Note: do not reset ajax.ajaxing here. Drupal's own success handler
+          // resets it once the response's command queue has finished running.
+          // Resetting it early makes jQuery's global "ajaxComplete" event fire
+          // an extra time (core suppresses it only while the request is still
+          // in progress), which unbalances drupalActiveXhrCount.
           self.$('.ipe-category-picker-top .ipe-icon-loading').remove();
 
           self.setTopMaxHeight();

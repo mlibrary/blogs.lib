@@ -2,6 +2,8 @@
 
 namespace Drupal\file_entity\Form;
 
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\File\FileExists;
 use Drupal\Core\Archiver\ArchiverManager;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormBase;
@@ -123,7 +125,7 @@ class FileAddArchiveForm extends FormBase {
       if ($archiver = $this->archiverManager->getInstance(['filepath' => $this->fileSystem->realpath($archive->getFileUri())])) {
 
         $extract_dir = $this->config('system.file')->get('default_scheme') . '://' . pathinfo($archive->getFilename(), PATHINFO_FILENAME);
-        $extract_dir = $this->fileSystem->getDestinationFilename($extract_dir, FileSystemInterface::EXISTS_RENAME);
+        $extract_dir = $this->fileSystem->getDestinationFilename($extract_dir, DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.3.0', fn() => FileExists::Rename, fn() => FileSystemInterface::EXISTS_RENAME));
         if (!$this->fileSystem->prepareDirectory($extract_dir, FileSystemInterface::MODIFY_PERMISSIONS | FileSystemInterface::CREATE_DIRECTORY)) {
           throw new \Exception(t('Unable to prepare, the directory %dir for extraction.', array('%dir' => $extract_dir)));
         }

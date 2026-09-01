@@ -6,6 +6,7 @@ use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\Tests\DocumentElement;
 use Drupal\Tests\scheduler\Traits\SchedulerCommerceProductSetupTrait;
 use Drupal\Tests\scheduler\Traits\SchedulerMediaSetupTrait;
+use Drupal\Tests\scheduler\Traits\SchedulerNoBundleEntitySetupTrait;
 use Drupal\Tests\scheduler\Traits\SchedulerSetupTrait;
 use Drupal\Tests\scheduler\Traits\SchedulerTaxonomyTermSetupTrait;
 
@@ -16,6 +17,11 @@ abstract class SchedulerJavascriptTestBase extends WebDriverTestBase {
 
   use SchedulerCommerceProductSetupTrait;
   use SchedulerMediaSetupTrait;
+  // SchedulerSetupTrait::createEntity() and getEntityByTitle() dispatch the
+  // no-bundle entity type to methods defined in this trait, so it must be used
+  // here even though the javascript tests do not exercise no-bundle entities
+  // directly (there is no javascript-specific UI for them).
+  use SchedulerNoBundleEntitySetupTrait;
   use SchedulerSetupTrait;
   use SchedulerTaxonomyTermSetupTrait;
 

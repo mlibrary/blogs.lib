@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\file_entity\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\pathauto\Entity\PathautoPattern;
 use Drupal\Tests\Traits\Core\PathAliasTestTrait;
 
@@ -12,6 +14,8 @@ use Drupal\Tests\Traits\Core\PathAliasTestTrait;
  *
  * @group file_entity
  */
+#[Group('file_entity')]
+#[RunTestsInSeparateProcesses]
 class FileEntityPathautoTest extends FileEntityTestBase {
 
   use PathAliasTestTrait;

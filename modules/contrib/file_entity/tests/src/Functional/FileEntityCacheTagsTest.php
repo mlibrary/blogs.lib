@@ -2,7 +2,8 @@
 
 namespace Drupal\Tests\file_entity\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
@@ -15,6 +16,8 @@ use Drupal\Tests\system\Functional\Cache\AssertPageCacheContextsAndTagsTrait;
  *
  * @group file_entity
  */
+#[Group('file_entity')]
+#[RunTestsInSeparateProcesses]
 class FileEntityCacheTagsTest extends FileEntityTestBase {
 
   use AssertPageCacheContextsAndTagsTrait;
@@ -26,7 +29,10 @@ class FileEntityCacheTagsTest extends FileEntityTestBase {
 
   protected $adminUser;
 
-  function setUp(): void {
+  /**
+   *
+   */
+  public function setUp(): void {
     parent::setUp();
 
     $this->enablePageCaching();
@@ -35,69 +41,69 @@ class FileEntityCacheTagsTest extends FileEntityTestBase {
   /**
    * Check file edit functionality.
    */
-  function testFileEntityEdit() {
+  public function testFileEntityEdit() {
     // Create two files.
     $file1 = $this->createFileEntity();
     $file2 = $this->createFileEntity();
 
     $content_type = $this->drupalCreateContentType();
-    $field_storage = FieldStorageConfig::create(array(
+    $field_storage = FieldStorageConfig::create([
       'field_name' => 'used_file',
       'entity_type' => 'node',
       'type' => 'file',
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
-    ));
+    ]);
     $field_storage->save();
-    $field_instance = FieldConfig::create(array(
+    $field_instance = FieldConfig::create([
       'field_storage' => $field_storage,
       'entity_type' => 'node',
       'bundle' => $content_type->id(),
-    ));
+    ]);
     $field_instance->save();
 
     // Create three nodes, the first has file 1, the second both files, the
     // third only the second.
-    $node1 = Node::create(array(
+    $node1 = Node::create([
       'title' => 'An article that uses a file',
       'promote' => 1,
       'type' => $content_type->id(),
-      'used_file' => array(
+      'used_file' => [
         'target_id' => $file1->id(),
         'display' => 1,
         'description' => '',
-      ),
-    ));
+      ],
+    ]);
     $node1->save();
 
-    $node2 = Node::create(array(
+    $node2 = Node::create([
       'title' => 'An article that uses a file',
       'promote' => 1,
       'type' => $content_type->id(),
-      'used_file' => array(
-        array(
+      'used_file' => [
+        [
           'target_id' => $file1->id(),
           'display' => 1,
           'description' => '',
-        ),
-        array(
+        ],
+        [
           'target_id' => $file2->id(),
           'display' => 1,
           'description' => '',
-        ),
-      ),
-    ));
+        ],
+      ],
+    ]);
     $node2->save();
 
-    $node3 = Node::create(array(
+    $node3 = Node::create([
       'title' => 'An article that uses a file',
       'promote' => 1,
       'type' => $content_type->id(),
-      'used_file' => array(
+      'used_file' => [
         'target_id' => $file2->id(),
         'display' => 1,
         'description' => '',
-      ),
-    ));
+      ],
+    ]);
     $node3->save();
 
     // Check cache tags.
@@ -148,7 +154,7 @@ class FileEntityCacheTagsTest extends FileEntityTestBase {
    * @param string $hit_or_miss
    *   'HIT' if a page cache hit is expected, 'MISS' otherwise.
    *
-   * @param array|FALSE $tags
+   * @param array|false $tags
    *   When expecting a page cache hit, you may optionally specify an array of
    *   expected cache tags. While FALSE, the cache tags will not be verified.
    */
@@ -157,7 +163,7 @@ class FileEntityCacheTagsTest extends FileEntityTestBase {
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache', $hit_or_miss);
     if ($hit_or_miss === 'HIT' && is_array($tags)) {
       $absolute_url = $url->setAbsolute()->toString();
-      $cid_parts = array($absolute_url, 'html');
+      $cid_parts = [$absolute_url, 'html'];
       $cid = implode(':', $cid_parts);
       $cache_entry = \Drupal::cache('render')->get($cid);
       sort($cache_entry->tags);

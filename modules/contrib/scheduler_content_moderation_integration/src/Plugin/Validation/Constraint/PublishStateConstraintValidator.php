@@ -34,6 +34,21 @@ class PublishStateConstraintValidator extends ConstraintValidatorBase {
     $moderation_state = $entity->moderation_state->value;
     $publish_state = $entity->publish_state->value;
 
+    // Prevent saving when the current moderation state matches the scheduled
+    // publish state. This is confusing because the content would be immediately
+    // saved in that state while showing a message that it is "scheduled".
+    if ($moderation_state === $publish_state) {
+      $workflow_type = $this->getEntityWorkflowType($entity);
+      $state_label = $workflow_type->hasState($moderation_state) ? $workflow_type->getState($moderation_state)->label() : $moderation_state;
+      $this->context
+        ->buildViolation($constraint->sameStateMessage, [
+          '%moderation_state' => $state_label,
+        ])
+        ->atPath('publish_state')
+        ->addViolation();
+      return;
+    }
+
     if (!$this->isValidTransition($entity, $moderation_state, $publish_state)) {
       $workflow_type = $this->getEntityWorkflowType($entity);
       $mod_state_label = $workflow_type->hasState($moderation_state) ? $workflow_type->getState($moderation_state)->label() : 'None';

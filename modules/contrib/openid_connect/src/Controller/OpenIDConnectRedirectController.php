@@ -228,14 +228,14 @@ class OpenIDConnectRedirectController implements ContainerInjectionInterface, Ac
     if (!empty($iss)) {
       // If the iss domain is not in the allowed list, return forbidden.
       if (!$this->isValidRedirect($openid_connect_client, $iss)) {
-        return AccessResult::forbidden();
+        return AccessResult::forbidden()->addCacheableDependency($openid_connect_client);
       }
 
-      return AccessResult::allowed();
+      return AccessResult::allowed()->addCacheableDependency($openid_connect_client);
     }
 
     // Default to forbidden.
-    return AccessResult::forbidden();
+    return AccessResult::forbidden()->addCacheableDependency($openid_connect_client);
   }
 
   /**
@@ -249,13 +249,14 @@ class OpenIDConnectRedirectController implements ContainerInjectionInterface, Ac
     // Confirm anti-forgery state token. This round-trip verification helps to
     // ensure that the user, not a malicious script, is making the request.
     $request = $this->requestStack->getCurrentRequest();
+    $client = $request->attributes->get('openid_connect_client');
     $state_token = $request->get('state');
     if ($state_token && $this->stateToken->confirm($state_token)) {
-      return AccessResult::allowed();
+      return AccessResult::allowed()->addCacheableDependency($client);
     }
 
     // Default to forbidden.
-    return AccessResult::forbidden();
+    return AccessResult::forbidden()->addCacheableDependency($client);
   }
 
   /**
@@ -288,7 +289,9 @@ class OpenIDConnectRedirectController implements ContainerInjectionInterface, Ac
       throw new NotFoundHttpException();
     }
 
-    $provider_param = ['@provider' => $openid_connect_client->label()];
+    // Slug could potentially be an empty string.
+    $slug = $plugin->getProviderSlug();
+    $provider_param = ['@provider' => $slug ?: $plugin->getParentEntityId()];
 
     if ($request->get('error')) {
       if (in_array($request->get('error'), [
@@ -347,7 +350,7 @@ class OpenIDConnectRedirectController implements ContainerInjectionInterface, Ac
     $langcode = $session['langcode'] ?: $this->languageManager->getCurrentLanguage()->getId();
     $language = $this->languageManager->getLanguage($langcode);
 
-    $redirect = Url::fromUri('internal:/' . ltrim($destination, '/'), ['language' => $language])->toString();
+    $redirect = Url::fromUri('internal:/' . ltrim($destination ?: '', '/'), ['language' => $language])->toString();
     return new RedirectResponse($redirect);
   }
 

@@ -1,15 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\mimemail\Functional;
 
-use Drupal\Tests\BrowserTestBase;
 use Drupal\mimemail\Utility\MimeMailFormatHelper;
+use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Mime Mail web tests.
  *
  * @group mimemail
  */
+#[Group('mimemail')]
+#[RunTestsInSeparateProcesses]
 class MimeMailWebTest extends BrowserTestBase {
 
   /**
@@ -61,7 +67,7 @@ class MimeMailWebTest extends BrowserTestBase {
     $result = MimeMailFormatHelper::mimeMailUrl($url, TRUE);
     $expected = str_replace(' ', '%20', \Drupal::service('file_url_generator')->generateAbsoluteString($url));
     $message = 'Stream wrapper converted to web accessible URL for linked image.';
-    $this->assertSame($result, $expected, $message);
+    $this->assertSame($expected, $result, $message);
   }
 
 }

@@ -45,7 +45,7 @@ trait PanelsIPETestTrait {
     if ($inactive_tab) {
       $this->clickAndWait($selector);
       // Accept alert dialog.
-      $session->getDriver()->getWebDriverSession()->accept_alert();
+      $session->getDriver()->getWebDriverSession()->alert()->accept();
     }
     $this->assertSession()->elementExists('css', '[data-tab-id="edit"].active');
   }
@@ -77,7 +77,7 @@ trait PanelsIPETestTrait {
 
       $driver = $session->getDriver();
       if ($driver instanceof Selenium2Driver) {
-        $driver->getWebDriverSession()->accept_alert();
+        $driver->getWebDriverSession()->alert()->accept();
       }
     }
   }
@@ -153,6 +153,11 @@ trait PanelsIPETestTrait {
 
     // Submit the form with default settings.
     $this->saveBlockConfigurationForm();
+
+    // The block is placed on screen via the AJAX submit response, so wait for a
+    // new "[data-block-id]" element to appear before looking for it.
+    $block_count = count($old_blocks);
+    $this->assertJsCondition("jQuery('[data-block-id]').length > $block_count", 10000);
 
     // Find the newest Block Plugin.
     $new_blocks = $this->getOnScreenBlockIDs();

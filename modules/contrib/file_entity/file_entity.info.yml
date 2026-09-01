@@ -2,7 +2,7 @@ type: module
 name: File entity
 description: "Extends Drupal file entities to be fieldable and viewable."
 package: Media
-core_version_requirement: ^10.2 || ^11
+core_version_requirement: ^10.5 || ^11.2
 dependencies:
   - drupal:file
   - drupal:text
@@ -11,7 +11,7 @@ dependencies:
   - token:token
 configure: file_entity.settings
 
-# Information added by Drupal.org packaging script on 2026-03-30
-version: '8.x-2.4'
+# Information added by Drupal.org packaging script on 2026-07-30
+version: '8.x-2.8'
 project: 'file_entity'
-datestamp: 1774904229
+datestamp: 1785434873

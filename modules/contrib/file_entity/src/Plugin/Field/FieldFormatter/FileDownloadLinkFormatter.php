@@ -2,6 +2,9 @@
 
 namespace Drupal\file_entity\Plugin\Field\FieldFormatter;
 
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\file\IconMimeTypes;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
@@ -164,9 +167,9 @@ class FileDownloadLinkFormatter extends FileFormatterBase implements ContainerFa
           '#theme' => 'file_entity_download_link',
           '#file' => $file,
           '#download_link' => Link::fromTextAndUrl($link_text, $download_url),
-          '#icon' => \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.3.0', fn() => \Drupal\file\IconMimeTypes::getIconClass($mime_type), fn() => file_icon_class($mime_type)),
+          '#icon' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.3.0', fn() => IconMimeTypes::getIconClass($mime_type), fn() => file_icon_class($mime_type)),
           '#attributes' => $attributes,
-          '#file_size' => \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.2.0', fn() => \Drupal\Core\StringTranslation\ByteSizeMarkup::create($file_size), fn() => format_size($file_size)),
+          '#file_size' => DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.2.0', fn() => ByteSizeMarkup::create($file_size), fn() => format_size($file_size)),
         ];
       }
       else {

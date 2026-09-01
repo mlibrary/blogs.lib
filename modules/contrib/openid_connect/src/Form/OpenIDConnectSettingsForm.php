@@ -228,6 +228,13 @@ class OpenIDConnectSettingsForm extends ConfigFormBase {
       ];
     }
 
+    $form['force_reset_role_mappings'] = [
+      '#title' => $this->t('Force reset role mappings'),
+      '#type' => 'checkbox',
+      '#default_value' => $settings->get('force_reset_role_mappings') ?? TRUE,
+      '#description' => $this->t('Enable this if you would like roles to be reset on every login. When this is enabled, upon login, if the groups returned by the provider are empty and any role mappings are defined, then all Drupal roles will be cleared. This setting has a default of enabled to maintain backward compatibility.'),
+    ];
+
     $form['advanced'] = [
       '#title' => $this->t('Advanced'),
       '#type' => 'details',
@@ -248,7 +255,6 @@ class OpenIDConnectSettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
-
     $role_mappings = [];
     foreach ($form_state->getValue('role_mappings') as $role => $mapping) {
       $values = array_values(array_filter(str_getcsv($mapping, ' ', '"', "\\")));
@@ -268,6 +274,7 @@ class OpenIDConnectSettingsForm extends ConfigFormBase {
       ->set('redirect_logout', $form_state->getValue('redirect_logout'))
       ->set('userinfo_mappings', array_filter($form_state->getValue('userinfo_mappings')))
       ->set('role_mappings', $role_mappings)
+      ->set('force_reset_role_mappings', $form_state->getValue('force_reset_role_mappings'))
       ->save();
   }
 

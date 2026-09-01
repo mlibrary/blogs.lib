@@ -29,6 +29,7 @@ theme:
         name: Switch to system preference
 nav:
   - Home: 'index.md'
+  - Readme: 'readme.md'
   - Set Up: 'setup.md'
   - Extend with a new entity plugin:
       - Introduction: 'plugin.md'

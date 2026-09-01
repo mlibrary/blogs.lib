@@ -5,6 +5,7 @@
     "license": "GPL-2.0-or-later",
     "require": {
         "drupal/rules": "^3",
+        "doctrine/annotations": "*",
         "drupal/scheduler": ">=2"
     }
 }

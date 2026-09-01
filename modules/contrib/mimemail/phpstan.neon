@@ -1,0 +1,17 @@
+parameters:
+  level: 1
+
+  ignoreErrors:
+    -
+      message: '#\Drupal calls should be avoided in classes, use dependency injection instead#'
+      path: src/Form/AdminForm.php
+      count: 1
+
+    # new static() is a best practice in Drupal, so we cannot fix that.
+    # @see https://www.drupal.org/docs/develop/development-tools/phpstan/handling-unsafe-usage-of-new-static
+    -
+      message: "#^Unsafe usage of new static#"
+      paths:
+        - modules/mimemail_example/src/Form/ExampleForm.php
+        - src/Form/AdminForm.php
+        - src/Plugin/Mail/MimeMail.php

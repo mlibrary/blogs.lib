@@ -1,0 +1,55 @@
+<?php
+
+namespace Drupal\mimemail_example\Hook;
+
+use Drupal\Core\Hook\Attribute\Hook;
+
+/**
+ * Hook implementations for mimemail_example.
+ */
+class MimemailExampleHooks {
+  /**
+   * @file
+   * Hook implementations for the Mime Mail Example module.
+   */
+
+  /**
+   * Implements hook_theme().
+   */
+  #[Hook('theme')]
+  public static function theme() {
+    return [
+          // Normally, templates are only found when they are put into a theme
+          // directory. This demonstrates how to provide a template with a custom
+          // module, by providing a new theme hook that will be used when sending
+          // mail from this module.
+          //
+          // The template used for this email is found in
+          // templates/mimemail-message--mimemail-example.html.twig.
+      'mimemail_message__mimemail_example' => [
+        'render element' => 'elements',
+        'base hook' => 'mimemail_message',
+      ],
+    ];
+  }
+
+  /**
+   * Implements hook_mail().
+   */
+  #[Hook('mail')]
+  public static function mail($key, &$message, $params) {
+    // The $params array holds the values entered on the ExampleForm, stored
+    // with the same structure as the $form array. We need to copy these values
+    // to the appropriate place in the $message so that they get used when
+    // sending the email.
+    $message['from'] = $params['headers']['From'] ?? NULL;
+    // Strip newline characters from email subjects.
+    $message['subject'] = isset($params['subject']) ? str_replace([
+      "\r\n",
+      "\r",
+      "\n",
+    ], ' ', $params['subject']) : NULL;
+    $message['body'][] = $params['body'];
+  }
+
+}

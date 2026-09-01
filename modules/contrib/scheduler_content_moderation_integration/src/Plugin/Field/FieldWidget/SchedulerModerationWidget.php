@@ -3,26 +3,25 @@
 namespace Drupal\scheduler_content_moderation_integration\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Entity\ContentEntityForm;
+use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldWidget\OptionsSelectWidget;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\content_moderation\ModerationInformationInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the 'scheduler moderation' widget.
- *
- * @FieldWidget(
- *   id = "scheduler_moderation",
- *   label = @Translation("Scheduler Moderation"),
- *   description = @Translation("Select list for choosing a state. Defined by Scheduler Content Moderation Integration module."),
- *   field_types = {
- *     "list_string",
- *   }
- * )
  */
+#[FieldWidget(
+  id: 'scheduler_moderation',
+  label: new TranslatableMarkup('Scheduler Moderation'),
+  description: new TranslatableMarkup('Select list for choosing a state. Defined by Scheduler Content Moderation Integration module.'),
+  field_types: ['list_string'],
+)]
 class SchedulerModerationWidget extends OptionsSelectWidget implements ContainerFactoryPluginInterface {
 
   /**

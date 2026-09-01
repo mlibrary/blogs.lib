@@ -66,6 +66,6 @@ interface PanelsStorageManagerInterface {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result. If there is no such Panels display then deny access.
    */
-  public function access($storage_type, $id, $op, AccountInterface $account = NULL);
+  public function access($storage_type, $id, $op, ?AccountInterface $account = NULL);
 
 }

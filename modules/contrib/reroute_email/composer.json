@@ -1,0 +1,32 @@
+{
+    "name": "drupal/reroute_email",
+    "description": "Reroutes emails send from the site to a predefined email. Useful for test sites.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "homepage": "https://www.drupal.org/project/reroute_email",
+    "authors": [
+        {
+            "name": "Khalid Baheyeldin",
+            "homepage": "https://www.drupal.org/u/kbahey"
+        },
+        {
+            "name": "Devaraj Johnson",
+            "homepage": "https://www.drupal.org/u/devaraj-johnson"
+        },
+        {
+            "name": "Randy Fay",
+            "homepage": "https://www.drupal.org/u/rfay"
+        },
+        {
+            "name": "Bohdan Artemchuk",
+            "homepage": "https://www.drupal.org/u/bohart"
+        },
+        {
+            "name": "Pravin Gaikwad",
+            "homepage": "https://www.drupal.org/u/rajeshreeputra"
+        }
+    ],
+    "require-dev": {
+        "drupal/symfony_mailer": "^1.4"
+    }
+}

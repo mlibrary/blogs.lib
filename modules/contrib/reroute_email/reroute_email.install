@@ -6,32 +6,48 @@
  */
 
 use Drupal\Core\Link;
-use Drupal\reroute_email\Constants\RerouteEmailConstants;
+use Drupal\reroute_email\RerouteEmailHandlerPluginInterface;
 
 /**
  * Implements hook_requirements().
  */
-function reroute_email_requirements($phase) {
+function reroute_email_requirements($phase): array {
   $requirements = [];
-  $reroute_config = \Drupal::config('reroute_email.settings');
 
-  if ($phase === 'runtime' && $reroute_config->get(RerouteEmailConstants::REROUTE_EMAIL_ENABLE)) {
-    $settings = [
-      '@link' => Link::createFromRoute(t('configure allow list'), 'reroute_email.settings')->toString(),
-      '%addresses' => $reroute_config->get(RerouteEmailConstants::REROUTE_EMAIL_ADDRESS) ?? '',
+  if ($phase !== 'runtime') {
+    return $requirements;
+  }
+
+  $reroute_config = \Drupal::config('reroute_email.settings');
+  if ($reroute_config->get(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ENABLE)) {
+    $placeholders = [
+      '@configure_link' => Link::createFromRoute(t('configure allow list'), 'reroute_email.settings')->toString(),
+      '%addresses' => $reroute_config->get(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ADDRESS) ?? '',
     ];
 
-    if (empty($settings['%addresses'])) {
-      $message = t('All outgoing emails (@link) would be aborted and recorded in the recent log entries (if enabled).', $settings);
+    if (empty($placeholders['%addresses'])) {
+      $message = t('All outgoing emails (@configure_link) would be aborted and recorded in the recent log entries (if enabled).', $placeholders);
     }
     else {
-      $message = t('All outgoing emails (@link) would be rerouted to: %addresses', $settings);
+      $message = t('All outgoing emails (@configure_link) would be rerouted to: %addresses', $placeholders);
     }
 
     $requirements['reroute_email'] = [
       'title' => t('Reroute Email'),
       'value' => $message,
       'severity' => REQUIREMENT_WARNING,
+    ];
+  }
+
+  // Validate the proper work with Drupal Symfony Mailer module.
+  if (\Drupal::moduleHandler()->moduleExists('symfony_mailer') &&
+    !\Drupal::moduleHandler()->moduleExists('reroute_email_symfony_mailer')) {
+    $requirements['reroute_email_symfony_mailer'] = [
+      'title' => t('Reroute Email (Symfony Mailer support)'),
+      'description' => t('"Reroute Email (Symfony Mailer support)" module is required to work with Symfony Mailer. You can enable it @extend_link.', [
+        '@extend_link' => Link::createFromRoute(t('here'), 'system.modules_list')->toString(),
+      ]),
+      'severity' => REQUIREMENT_ERROR,
     ];
   }
 
@@ -48,35 +64,35 @@ function reroute_email_requirements($phase) {
 function reroute_email_update_8001() {
   // A map of changed config names.
   $old = [
-    RerouteEmailConstants::REROUTE_EMAIL_ENABLE => 'reroute_email_enable',
-    RerouteEmailConstants::REROUTE_EMAIL_ADDRESS => 'reroute_email_address',
-    RerouteEmailConstants::REROUTE_EMAIL_DESCRIPTION => 'reroute_email_enable_message',
+    RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ENABLE => 'reroute_email_enable',
+    RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ADDRESS => 'reroute_email_address',
+    RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_DESCRIPTION => 'reroute_email_enable_message',
   ];
 
   $config = \Drupal::configFactory()->getEditable('reroute_email.settings');
 
   // Do not update values if the user sets them manually already.
   // `Allowed list addresses` is a new variable, so it couldn't exist before.
-  if (NULL !== $config->get(RerouteEmailConstants::REROUTE_EMAIL_ALLOWLIST)) {
+  if (NULL !== $config->get(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ALLOWLIST)) {
     return t('The setting form was updated manually already. This update is to be skipped.');
   }
 
   // Update the list of allowed email addresses.
-  $addresses = $config->get($old[RerouteEmailConstants::REROUTE_EMAIL_ADDRESS]);
-  $config->set(RerouteEmailConstants::REROUTE_EMAIL_ALLOWLIST, $addresses);
+  $addresses = $config->get($old[RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ADDRESS]);
+  $config->set(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ALLOWLIST, $addresses);
 
   // Update rerouting email addresses value.
   $addresses = reroute_email_split_string($addresses);
-  $config->set(RerouteEmailConstants::REROUTE_EMAIL_ADDRESS, !empty($addresses[0]) ? $addresses[0] : '');
+  $config->set(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ADDRESS, !empty($addresses[0]) ? $addresses[0] : '');
 
   // Update other configs to new names.
-  $config->set(RerouteEmailConstants::REROUTE_EMAIL_ENABLE, $config->get($old[RerouteEmailConstants::REROUTE_EMAIL_ENABLE]));
-  $config->set(RerouteEmailConstants::REROUTE_EMAIL_DESCRIPTION, $config->get($old[RerouteEmailConstants::REROUTE_EMAIL_DESCRIPTION]));
+  $config->set(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ENABLE, $config->get($old[RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ENABLE]));
+  $config->set(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_DESCRIPTION, $config->get($old[RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_DESCRIPTION]));
 
   // Remove old configs.
-  $config->clear($old[RerouteEmailConstants::REROUTE_EMAIL_ENABLE]);
-  $config->clear($old[RerouteEmailConstants::REROUTE_EMAIL_ADDRESS]);
-  $config->clear($old[RerouteEmailConstants::REROUTE_EMAIL_DESCRIPTION]);
+  $config->clear($old[RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ENABLE]);
+  $config->clear($old[RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ADDRESS]);
+  $config->clear($old[RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_DESCRIPTION]);
 
   // Save configuration values.
   $config->save();
@@ -94,18 +110,18 @@ function reroute_email_update_8001() {
  */
 function reroute_email_update_8201() {
   // A map of changed config names.
-  $old = [RerouteEmailConstants::REROUTE_EMAIL_ALLOWLIST => 'whitelist'];
+  $old = [RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ALLOWLIST => 'whitelist'];
 
   // Do not update values if the user sets them manually already.
   // `Allowed list addresses` is a new property, so it couldn't exist before.
   $config = \Drupal::configFactory()->getEditable('reroute_email.settings');
-  if (NULL !== $config->get(RerouteEmailConstants::REROUTE_EMAIL_ALLOWLIST)) {
+  if (NULL !== $config->get(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ALLOWLIST)) {
     return t('The setting form was updated manually already. This update is to be skipped.');
   }
 
   // Update the list of allowed email addresses.
-  $addresses = $config->get($old[RerouteEmailConstants::REROUTE_EMAIL_ALLOWLIST]);
-  $config->set(RerouteEmailConstants::REROUTE_EMAIL_ALLOWLIST, $addresses);
+  $addresses = $config->get($old[RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ALLOWLIST]);
+  $config->set(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ALLOWLIST, $addresses);
   $config->save();
 
   // Return a message to the user.
@@ -123,7 +139,7 @@ function reroute_email_update_8202() {
   // Check to see if the property still exists.
   $config = \Drupal::configFactory()->getEditable('reroute_email.settings');
   if (NULL === $config->get('whitelist')) {
-    return t('The outdated property "whitelist" has already been removed. This update is to be skipped.');
+    return t("The outdated property 'whitelist' has already been removed. This update is to be skipped.");
   }
   // Remove the property.
   $config->clear('whitelist');

@@ -155,4 +155,8 @@ class Transport extends ConfigEntityBase implements TransportInterface, EntityWi
     return $id ? static::load($id) : NULL;
   }
 
+  public function getConfiguration() : array {
+    return $this->configuration;
+  }
+
 }

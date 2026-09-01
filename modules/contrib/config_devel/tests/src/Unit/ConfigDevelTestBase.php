@@ -37,7 +37,7 @@ abstract class ConfigDevelTestBase extends UnitTestCase {
     $this->configManager = $this->createMock('Drupal\Core\Config\ConfigManagerInterface');
     $this->configManager->expects($this->any())
       ->method('getEntityTypeIdByName')
-      ->will($this->returnArgument(0));
+      ->willReturnArgument(0);
 
     vfsStream::setup('public://');
   }

@@ -29,7 +29,7 @@ function scheduler_content_moderation_integration_token_info(): array {
 function scheduler_content_moderation_integration_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata): array {
   /** @var \Drupal\content_moderation\ModerationInformationInterface $moderation_info */
   $moderation_info = Drupal::service('content_moderation.moderation_information');
-  $language_code = isset($options['language']) ? $options['language']->language : NULL;
+  $language_code = $options['langcode'] ?? NULL;
   $replacements = [];
 
   if ($type == 'node' && !empty($data['node'])) {

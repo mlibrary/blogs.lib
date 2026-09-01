@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\file_entity\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\file\FileInterface;
@@ -14,6 +16,8 @@ use Drupal\file_entity\Entity\FileType;
  *
  * @group file_entity
  */
+#[Group('file_entity')]
+#[RunTestsInSeparateProcesses]
 class FileEntityCreationTest extends FileEntityTestBase {
 
   protected static $modules = ['views'];
@@ -24,12 +28,12 @@ class FileEntityCreationTest extends FileEntityTestBase {
   public function setUp(): void {
     parent::setUp();
 
-    $web_user = $this->drupalCreateUser(array('create files',
+    $web_user = $this->drupalCreateUser(['create files',
       'edit own document files',
       'administer files',
       'administer site configuration',
       'view private files',
-    ));
+    ]);
     $this->drupalLogin($web_user);
   }
 
@@ -47,13 +51,13 @@ class FileEntityCreationTest extends FileEntityTestBase {
 
     $test_file = $this->getTestFile('text');
     // Create a file.
-    $edit = array();
+    $edit = [];
     $edit['files[upload]'] = \Drupal::service('file_system')->realpath($test_file->uri);
     $this->drupalGet('file/add');
     $this->submitForm($edit, 'Next');
 
     // Check that the document file has been uploaded.
-    $this->assertSession()->responseContains(t('@type %name was uploaded.', array('@type' => 'Document', '%name' => 'text-0_0.txt')));
+    $this->assertSession()->responseContains(t('@type %name was uploaded.', ['@type' => 'Document', '%name' => 'text-0_0.txt']));
 
     // Check that the file exists in the database.
     $file = $this->getFileByFilename('text-0_0.txt');
@@ -70,7 +74,7 @@ class FileEntityCreationTest extends FileEntityTestBase {
   public function testFileEntityCreationMultipleSteps() {
     $test_file = $this->getTestFile('text');
     // Create a file.
-    $edit = array();
+    $edit = [];
     $edit['files[upload]'] = \Drupal::service('file_system')->realpath($test_file->uri);
     $this->drupalGet('file/add');
     $this->assertEmpty($this->xpath('//input[@id="edit-upload-remove-button"]'), 'Remove');
@@ -84,12 +88,12 @@ class FileEntityCreationTest extends FileEntityTestBase {
     $this->assertSession()->checkboxChecked('edit-scheme-public');
 
     // Submit form and set scheme to private.
-    $edit = array();
+    $edit = [];
     $edit['scheme'] = 'private';
     $this->submitForm($edit, 'Next');
 
     // Check that the document file has been uploaded.
-    $this->assertSession()->responseContains(t('@type %name was uploaded.', array('@type' => 'Document', '%name' => 'text-0_0.txt')));
+    $this->assertSession()->responseContains(t('@type %name was uploaded.', ['@type' => 'Document', '%name' => 'text-0_0.txt']));
 
     // Check that the file exists in the database.
     $file = $this->getFileByFilename('text-0_0.txt');
@@ -109,17 +113,17 @@ class FileEntityCreationTest extends FileEntityTestBase {
 
     // Create an image.
     $test_file = $this->getTestFile('image');
-    $edit = array('files[upload]' => \Drupal::service('file_system')->realpath($test_file->uri));
+    $edit = ['files[upload]' => \Drupal::service('file_system')->realpath($test_file->uri)];
     $this->drupalGet('file/add');
     $this->submitForm($edit, 'Next');
 
-    $data = array(
+    $data = [
       'field_image_title_text' => 'My image',
       'field_image_alt_text' => 'A test image',
-    );
+    ];
 
     // Set fields.
-    $edit = array();
+    $edit = [];
     foreach ($data as $field => $value) {
       $edit[$field . '[0][value]'] = $value;
     }
@@ -146,7 +150,7 @@ class FileEntityCreationTest extends FileEntityTestBase {
       'label' => 'Archive',
       'status' => TRUE,
       'mimetypes' => [
-        'application/gzip'
+        'application/gzip',
       ],
     ]);
 

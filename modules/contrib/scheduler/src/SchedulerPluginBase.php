@@ -48,6 +48,13 @@ abstract class SchedulerPluginBase extends PluginBase implements SchedulerPlugin
   protected $entityTypeFormIds;
 
   /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * Create method.
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
@@ -56,6 +63,7 @@ abstract class SchedulerPluginBase extends PluginBase implements SchedulerPlugin
     $instance->entityTypeObject = $instance->entityTypeManager
       ->getDefinition($plugin_definition['entityType']);
     $instance->entityTypeBundleInfo = $container->get('entity_type.bundle.info');
+    $instance->moduleHandler = $container->get('module_handler');
 
     return $instance;
   }
@@ -114,9 +122,11 @@ abstract class SchedulerPluginBase extends PluginBase implements SchedulerPlugin
    *
    * @return string
    *   The name of the type/bundle field for this entity type.
+   *   The bundle key for non-bundled entity types.
+   *   Blank if neither of the above.
    */
   public function typeFieldName() {
-    return $this->entityTypeObject->getKey('bundle');
+    return $this->pluginDefinition['typeFieldName'] ?? $this->entityTypeObject->getKey('bundle') ?? '';
   }
 
   /**
@@ -199,6 +209,9 @@ abstract class SchedulerPluginBase extends PluginBase implements SchedulerPlugin
    */
   public function getTypes() {
     $bundleEntityType = $this->entityTypeObject->getBundleEntityType();
+    if (empty($bundleEntityType)) {
+      return [];
+    }
 
     return $this->entityTypeManager
       ->getStorage($bundleEntityType)
@@ -225,6 +238,9 @@ abstract class SchedulerPluginBase extends PluginBase implements SchedulerPlugin
     }
 
     $bundleEntityType = $this->entityTypeObject->getBundleEntityType();
+    if (empty($bundleEntityType)) {
+      return $this->entityTypeFormIds = [];
+    }
 
     return $this->entityTypeFormIds = $this->entityFormIdsByType($bundleEntityType, TRUE);
   }
@@ -259,12 +275,21 @@ abstract class SchedulerPluginBase extends PluginBase implements SchedulerPlugin
       $operations[] = 'edit';
     }
 
+    if ($this->moduleHandler->moduleExists('quick_node_clone')) {
+      if ($definition->getFormClass('quick_node_clone')) {
+        $operations[] = 'quick_node_clone';
+      }
+    }
+
     // When creating the first type/bundle there will be nothing returned for
     // getBundleInfo(). This is only a problem when getting the 'type' forms,
     // which do not actually need the list of types anyway. For this case we do
     // need an array element in $types, one is enough and it can be anything,
     // hence we use an empty string.
     $types = $isBundle ? [''] : array_keys($this->entityTypeBundleInfo->getBundleInfo($entityType));
+    if (empty($types)) {
+      $types = [''];
+    }
     foreach ($types as $typeId) {
       foreach ($operations as $operation) {
         $form_id = $entityType;

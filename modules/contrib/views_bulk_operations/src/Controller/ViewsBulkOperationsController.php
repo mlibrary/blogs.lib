@@ -6,12 +6,10 @@ namespace Drupal\views_bulk_operations\Controller;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\views_bulk_operations\Service\ViewsBulkOperationsActionProcessorInterface;
 use Drupal\views_bulk_operations\Traits\ViewsBulkOperationsFormTrait;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -19,7 +17,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 /**
  * Defines VBO controller class.
  */
-class ViewsBulkOperationsController extends ControllerBase implements ContainerInjectionInterface {
+class ViewsBulkOperationsController extends ControllerBase {
 
   use ViewsBulkOperationsFormTrait;
 
@@ -38,17 +36,6 @@ class ViewsBulkOperationsController extends ControllerBase implements ContainerI
     protected readonly ViewsBulkOperationsActionProcessorInterface $actionProcessor,
     protected readonly RendererInterface $renderer,
   ) {}
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('tempstore.private'),
-      $container->get('views_bulk_operations.processor'),
-      $container->get('renderer')
-    );
-  }
 
   /**
    * The actual page callback.
@@ -88,7 +75,7 @@ class ViewsBulkOperationsController extends ControllerBase implements ContainerI
     $parameters = $request->request->all();
 
     if ($parameters['op'] === 'method_include') {
-      unset($tempstore_data['exclude_mode']);
+      $tempstore_data['exclude_mode'] = FALSE;
       $tempstore_data['list'] = [];
     }
     elseif ($parameters['op'] === 'method_exclude') {
@@ -96,9 +83,11 @@ class ViewsBulkOperationsController extends ControllerBase implements ContainerI
       $tempstore_data['list'] = [];
     }
     elseif ($parameters['op'] === 'update') {
-      $exclude_mode = \array_key_exists('exclude_mode', $tempstore_data) && $tempstore_data['exclude_mode'] === TRUE;
       foreach ($parameters['list'] as $bulkFormKey => $state) {
-        if ($exclude_mode) {
+        // PHP converts numeric string array keys to integers when parsing
+        // POST data. Cast back to string for base64_decode() compatibility.
+        $bulkFormKey = (string) $bulkFormKey;
+        if ($tempstore_data['exclude_mode']) {
           $state = $state === 'true' ? 'false' : 'true';
         }
         if ($state === 'true') {
@@ -115,8 +104,7 @@ class ViewsBulkOperationsController extends ControllerBase implements ContainerI
 
     $this->setTempstoreData($tempstore_data);
 
-    $exclude_mode = \array_key_exists('exclude_mode', $tempstore_data) && $tempstore_data['exclude_mode'] === TRUE;
-    $count = $exclude_mode ? $tempstore_data['total_results'] - \count($tempstore_data['list']) : \count($tempstore_data['list']);
+    $count = $tempstore_data['exclude_mode'] ? $tempstore_data['total_results'] - \count($tempstore_data['list']) : \count($tempstore_data['list']);
 
     $selection_info_renderable = $this->getMultipageList($tempstore_data);
     $response_data = [

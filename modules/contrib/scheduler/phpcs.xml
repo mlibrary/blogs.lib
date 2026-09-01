@@ -3,11 +3,6 @@
   <description>Default PHP CodeSniffer configuration for Scheduler.</description>
   <file>.</file>
 
-  <!-- Temporary fix until drupal.org testbot script is changed. This is also
-    compatible with running phpcs locally, and on Travis, so can be committed.
-    See https://www.drupal.org/project/drupalci_testbot/issues/3283978 -->
-  <config name="installed_paths" value="../../drupal/coder/coder_sniffer/,../../sirbrillig/phpcs-variable-analysis/,../../slevomat/coding-standard/"/>
-
   <!-- Initially include all Drupal and DrupalPractice sniffs. -->
   <rule ref="Drupal"/>
   <rule ref="DrupalPractice"/>

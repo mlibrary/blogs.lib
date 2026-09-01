@@ -8,8 +8,6 @@ parameters:
   # Do not add 'paths: .' as this causes the gitlab pipeline job to fail.
 
   excludePaths:
-    # Legacy code that produces warnings which cannot be added to a .baseline file.
-    - tests/src/Traits/PhpunitCompatibilityCore87Trait.php
     # The bootstrap can exist as a symlink in the project folder when running phpunit locally, so ignore it.
     - tests/bootstrap.php (?)
 

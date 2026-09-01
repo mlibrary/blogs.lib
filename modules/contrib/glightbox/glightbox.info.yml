@@ -1,0 +1,14 @@
+name: 'GLightbox'
+type: module
+description: 'GLightbox is a pure javascript lightbox.'
+package: Media
+core_version_requirement: ^9.3 || ^10 || ^11
+configure: glightbox.admin_settings
+
+dependencies:
+  - drupal:image
+
+# Information added by Drupal.org packaging script on 2026-07-27
+version: '1.0.20'
+project: 'glightbox'
+datestamp: 1785134063

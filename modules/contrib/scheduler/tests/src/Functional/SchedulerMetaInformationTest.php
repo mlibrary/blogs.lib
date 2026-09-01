@@ -4,6 +4,7 @@ namespace Drupal\Tests\scheduler\Functional;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests meta information output by scheduler.
@@ -11,6 +12,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group scheduler
  */
 #[Group('scheduler')]
+#[RunTestsInSeparateProcesses]
 class SchedulerMetaInformationTest extends SchedulerBrowserTestBase {
 
   /**
@@ -21,14 +23,16 @@ class SchedulerMetaInformationTest extends SchedulerBrowserTestBase {
    * removed from search results.
    *
    * @dataProvider dataStandardEntityTypes
+   * @dataProvider dataNoBundleEntityTypes
    */
   #[DataProvider('dataStandardEntityTypes')]
+  #[DataProvider('dataNoBundleEntityTypes')]
   public function testMetaInformation($entityTypeId, $bundle) {
     // Log in.
     $this->drupalLogin($this->schedulerUser);
 
-    // Create a published entity without scheduling dates.
-    $entity = $this->createEntity($entityTypeId, $bundle, ['status' => TRUE]);
+    // Create a published promoted entity without scheduling dates.
+    $entity = $this->createEntity($entityTypeId, $bundle, ['status' => TRUE, 'promote' => TRUE]);
 
     // Since we did not set an unpublish date, there should be no X-Robots-Tag
     // header on the response.

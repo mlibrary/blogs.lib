@@ -4,6 +4,7 @@ namespace Drupal\Tests\scheduler\Functional;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests some permissions of the Scheduler module.
@@ -15,6 +16,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group scheduler
  */
 #[Group('scheduler')]
+#[RunTestsInSeparateProcesses]
 class SchedulerPermissionsTest extends SchedulerBrowserTestBase {
 
   /**

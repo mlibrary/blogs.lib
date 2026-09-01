@@ -3,8 +3,7 @@
 namespace Drupal\Tests\reroute_email\Functional;
 
 use Drupal\Component\Render\FormattableMarkup;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\reroute_email\Constants\RerouteEmailConstants;
+use Drupal\reroute_email\RerouteEmailHandlerPluginInterface;
 
 /**
  * Test for default address.
@@ -12,18 +11,14 @@ use Drupal\reroute_email\Constants\RerouteEmailConstants;
  * When reroute email addresses field is not configured, attempt to use the site
  * email address, otherwise use sendmail_from system variable.
  *
- * @ingroup reroute_email_tests
- *
  * @group reroute_email
  */
 class DefaultAddressesTest extends RerouteEmailBrowserTestBase {
 
-  use StringTranslationTrait;
-
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['reroute_email', 'dblog'];
+  protected static $modules = ['dblog'];
 
   /**
    * Enable modules and create user with specific permissions.
@@ -53,18 +48,18 @@ class DefaultAddressesTest extends RerouteEmailBrowserTestBase {
     $this->assertTrue(isset($site_mail), new FormattableMarkup('Site mail is not empty: @site_mail.', ['@site_mail' => $site_mail]));
 
     // Programmatically enable email rerouting.
-    $this->rerouteConfig->set(RerouteEmailConstants::REROUTE_EMAIL_ENABLE, TRUE)->save();
+    $this->rerouteConfig->set(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ENABLE, TRUE)->save();
 
     // Load Reroute Email Settings form page. Ensure rerouting is enabled.
-    $this->drupalGet('admin/config/development/reroute_email');
+    $this->drupalGet($this->rerouteSettingsFormPath);
     $this->assertSession()->checkboxChecked('edit-enable');
-    $this->assertTrue($this->rerouteConfig->get(RerouteEmailConstants::REROUTE_EMAIL_ENABLE), 'Rerouting is enabled.');
+    $this->assertTrue($this->rerouteConfig->get(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ENABLE), 'Rerouting is enabled.');
 
     // Email addresses field default value is system.site.mail.
-    $this->assertSession()->fieldValueEquals(RerouteEmailConstants::REROUTE_EMAIL_ADDRESS, $site_mail);
+    $this->assertSession()->fieldValueEquals(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ADDRESS, $site_mail);
 
     // Ensure reroute_email_address is actually empty at this point.
-    $this->assertNull($this->rerouteConfig->get(RerouteEmailConstants::REROUTE_EMAIL_ADDRESS), 'Reroute email destination address is not configured.');
+    $this->assertNull($this->rerouteConfig->get(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ADDRESS), 'Reroute email destination address is not configured.');
 
     // Submit a test email, check if it is rerouted to system.site.mail address.
     $this->drupalGet($this->rerouteTestFormPath);
@@ -84,15 +79,15 @@ class DefaultAddressesTest extends RerouteEmailBrowserTestBase {
     // Configure the allowed list of addresses as an empty string to abort all
     // emails.
     $this->configureRerouteEmail([
-      RerouteEmailConstants::REROUTE_EMAIL_ENABLE => TRUE,
-      RerouteEmailConstants::REROUTE_EMAIL_ALLOWLIST => '',
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ENABLE => TRUE,
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ALLOWLIST => '',
     ]);
 
     // Make sure configured emails values are an empty string.
-    $this->assertSame($this->rerouteConfig->get(RerouteEmailConstants::REROUTE_EMAIL_ADDRESS), '', 'Reroute email destination address is an empty string.');
-    $this->assertSame($this->rerouteConfig->get(RerouteEmailConstants::REROUTE_EMAIL_ALLOWLIST), '', 'Allowed email address is an empty string.');
+    $this->assertSame($this->rerouteConfig->get(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ADDRESS), '', 'Reroute email destination address is an empty string.');
+    $this->assertSame($this->rerouteConfig->get(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ALLOWLIST), '', 'Allowed email address is an empty string.');
 
-    // Flush the Test Mail collector to ensure it is empty for this tests.
+    // Flushes the Test Mail collector to ensure it is empty for those tests.
     \Drupal::state()->set('system.test_mail_collector', []);
 
     // Submit a test email to check if it is aborted.

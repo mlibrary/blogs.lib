@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\file_entity\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Component\Serialization\Json;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
@@ -15,10 +17,12 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\RequestOptions;
 
 /**
- * Tests File entity REST services
+ * Tests File entity REST services.
  *
  * @group file_entity
  */
+#[Group('file_entity')]
+#[RunTestsInSeparateProcesses]
 class FileEntityServicesTest extends FileEntityTestBase {
 
   /**
@@ -29,7 +33,7 @@ class FileEntityServicesTest extends FileEntityTestBase {
   protected static $modules = [
     'node',
     'hal',
-    'rest'
+    'rest',
   ];
 
   /**
@@ -62,36 +66,36 @@ class FileEntityServicesTest extends FileEntityTestBase {
     ]);
 
     // Add a file field to the resttest content type.
-    $file_field_storage = FieldStorageConfig::create(array(
+    $file_field_storage = FieldStorageConfig::create([
       'type' => 'file',
       'entity_type' => 'node',
       'field_name' => 'field_file',
-    ));
+    ]);
     $file_field_storage->save();
-    $file_field = FieldConfig::create(array(
+    $file_field = FieldConfig::create([
       'field_storage' => $file_field_storage,
       'entity_type' => 'node',
       'bundle' => 'resttest',
-    ));
+    ]);
     $file_field->save();
 
     // Create a file.
     $file_uri = 'public://' . $this->randomMachineName() . '.txt';
     file_put_contents($file_uri, 'This is some file contents');
-    $file = File::create(array('uri' => $file_uri, 'status' => FileInterface::STATUS_PERMANENT, 'uid' => 1));
+    $file = File::create(['uri' => $file_uri, 'status' => FileInterface::STATUS_PERMANENT, 'uid' => 1]);
     $file->save();
 
     // Create a node with a file.
-    $node = Node::create(array(
+    $node = Node::create([
       'title' => 'A node with a file',
       'type' => 'resttest',
-      'field_file' => array(
+      'field_file' => [
         'target_id' => $file->id(),
         'display' => 0,
         'description' => 'An attached file',
-      ),
+      ],
       'status' => TRUE,
-    ));
+    ]);
     $node->save();
 
     // GET node.

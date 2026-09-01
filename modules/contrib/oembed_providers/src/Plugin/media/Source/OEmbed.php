@@ -3,6 +3,8 @@
 namespace Drupal\oembed_providers\Plugin\media\Source;
 
 use Drupal\Core\Entity\DependencyTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\media\Attribute\MediaSource;
 use Drupal\media\Plugin\media\Source\OEmbed as CoreOEmbed;
 
 /**
@@ -13,17 +15,15 @@ use Drupal\media\Plugin\media\Source\OEmbed as CoreOEmbed;
  * plugin it replaces. (Due to module weights, it overwrites the core plugin.)
  * The sole purpose of this class is to extend core OEmbed and add a
  * ::calculateDependencies method.
- *
- * @MediaSource(
- *   id = "oembed",
- *   label = @Translation("oEmbed source"),
- *   description = @Translation("Use oEmbed URL for reusable media."),
- *   allowed_field_types = {"string"},
- *   default_thumbnail_filename = "no-thumbnail.png",
- *   deriver = "Drupal\media\Plugin\media\Source\OEmbedDeriver",
- *   providers = {},
- * )
  */
+#[MediaSource(
+  id: 'oembed',
+  label: new TranslatableMarkup('oEmbed source'),
+  description: new TranslatableMarkup('Use oEmbed URL for reusable media.'),
+  allowed_field_types: ['string'],
+  default_thumbnail_filename: 'no-thumbnail.png',
+  deriver: \Drupal\media\Plugin\media\Source\OEmbedDeriver::class,
+)]
 class OEmbed extends CoreOEmbed {
 
   use DependencyTrait;

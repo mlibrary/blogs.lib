@@ -1,0 +1,5 @@
+glightbox.admin_settings:
+  title: 'GLightbox settings'
+  description: 'Configure the GLightbox settings.'
+  parent: system.admin_config_media
+  route_name: glightbox.admin_settings

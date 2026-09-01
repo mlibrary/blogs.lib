@@ -147,7 +147,7 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
    * @param $mime_type_guesser
    * @param AssetOptimizerInterface|null $cssOptimizer
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, ConfigFactoryInterface $config_factory, LoggerInterface $logger, RendererInterface $renderer, ModuleHandlerInterface $module_handler, MailManagerInterface $mail_manager, ThemeManagerInterface $theme_manager, AssetResolverInterface $asset_resolver, EmbeddedImageValidatorInterface $embedded_image_validator, MailerInterface $mailer, AssetOptimizerInterface $cssOptimizer = NULL) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, ConfigFactoryInterface $config_factory, LoggerInterface $logger, RendererInterface $renderer, ModuleHandlerInterface $module_handler, MailManagerInterface $mail_manager, ThemeManagerInterface $theme_manager, AssetResolverInterface $asset_resolver, EmbeddedImageValidatorInterface $embedded_image_validator, MailerInterface $mailer, ?AssetOptimizerInterface $cssOptimizer = NULL) {
     $this->entityTypeManager = $entity_type_manager;
     $this->configFactory = $config_factory;
     $this->logger = $logger;
@@ -310,7 +310,7 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
         $email->to(...$to);
       }
       if (!empty($message['headers']['From'])) {
-        $email->from($message['headers']['From']);
+        $email->from($this->parseMailbox($message['headers']['From']));
       }
       if (!empty($message['headers']['Reply-To'])) {
         $email->replyTo($message['headers']['Reply-To']);
@@ -451,7 +451,7 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
         }
 
         // Attach file.
-        $email->attachPart(new DataPart($content, $file['filename'], $file['filemime']));
+        $email->addPart(new DataPart($content, $file['filename'], $file['filemime']));
       }
     }
 
@@ -480,11 +480,6 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
           continue;
         }
 
-        // Convert markup to string.
-        if($a['filecontent'] instanceof MarkupInterface) {
-          $a['filecontent'] = (string) $a['filecontent'];
-        }
-
         // Attach file (either using a static file or provided content).
         if (!empty($a['filepath'])) {
           $file = new stdClass();
@@ -494,7 +489,11 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
           $this->attachFiles($email, [$file]);
         }
         else {
-          $email->attachPart(new DataPart($a['filecontent'], $a['filename'], $a['filemime']));
+          // Convert markup to string.
+          if ($a['filecontent'] instanceof MarkupInterface) {
+            $a['filecontent'] = (string) $a['filecontent'];
+          }
+          $email->addPart(new DataPart($a['filecontent'], $a['filename'], $a['filemime']));
         }
       }
     }
@@ -666,7 +665,7 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
         $css .= $message['params']['css'];
       }
 
-      if ($css) {
+      if ($css && !empty($message['body'])) {
         $message['body'] = $this->cssInliner->convert($message['body'], $css);
       }
     }
@@ -784,7 +783,7 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
     // Code copied from Drupal Symfony Mailer module's MailerHelper class,
     // which copied from \Symfony\Component\Mime\Address::create().
     if (strpos($value, '<')) {
-      if (preg_match('~(?<displayName>[^<]*)<(?<addrSpec>.*)>[^>]*~', $value, $matches)) {
+      if (preg_match('~(?<displayName>.*)<(?<addrSpec>.*)>[^>]*~', $value, $matches)) {
         return new Address($matches['addrSpec'], trim($matches['displayName'], ' \'"'));
       }
       $this->logger->error("Could not parse @part as an address.", ['@part' => $value]);
@@ -877,7 +876,8 @@ class SymfonyMailer implements MailInterface, ContainerFactoryPluginInterface {
     if (!empty($message['params']['text_format'])) {
       return $message['params']['text_format'];
     }
-    return $this->configFactory->get('symfony_mailer_lite.message')->get('text_format');
+    $text_format = $this->configFactory->get('symfony_mailer_lite.message')->get('text_format');
+    return !empty($text_format) ? $text_format : NULL;
   }
 
 }

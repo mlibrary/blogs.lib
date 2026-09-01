@@ -107,7 +107,7 @@ class PanelsStorageManager extends DefaultPluginManager implements PanelsStorage
   /**
    * {@inheritdoc}
    */
-  public function access($storage_type, $id, $op, AccountInterface $account = NULL) {
+  public function access($storage_type, $id, $op, ?AccountInterface $account = NULL) {
     if ($account === NULL) {
       $account = $this->currentUser->getAccount();
     }

@@ -68,7 +68,7 @@ scheduler.settings:
       type: string
       label: 'Time part of the full format'
 
-node.type.*.third_party.scheduler: &third_party_settings_alias
+scheduler_third_party_settings:
   type: mapping
   label: 'Scheduler entity type settings'
   mapping:
@@ -109,11 +109,17 @@ node.type.*.third_party.scheduler: &third_party_settings_alias
       type: boolean
       label: 'Create a new revision on unpublishing'
 
-# Use the saved alias to repeat the schema for Media entity type.
-media.type.*.third_party.scheduler: *third_party_settings_alias
+node.type.*.third_party.scheduler:
+  type: scheduler_third_party_settings
 
-# Repeat the schema for Commerce Product entity type.
-commerce_product.commerce_product_type.*.third_party.scheduler: *third_party_settings_alias
+media.type.*.third_party.scheduler:
+  type: scheduler_third_party_settings
 
-# Repeat the schema for Taxonomy Terms
-taxonomy.vocabulary.*.third_party.scheduler: *third_party_settings_alias
+commerce_product.commerce_product_type.*.third_party.scheduler:
+  type: scheduler_third_party_settings
+
+taxonomy.vocabulary.*.third_party.scheduler:
+  type: scheduler_third_party_settings
+
+scheduler.no_bundle_entity_type_settings.*:
+  type: scheduler_third_party_settings

@@ -20,8 +20,10 @@ class UnpublishedStateConstraintTest extends SchedulerContentModerationBrowserTe
    * @covers ::validate
    *
    * @dataProvider dataEntityTypes
+   *
+   * @throws \Exception
    */
-  public function testValidPublishStateToUnPublishStateTransition($entityTypeId, $bundle) {
+  public function testValidPublishStateToUnPublishStateTransition($entityTypeId, $bundle): void {
     $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
     $entity = $this->createEntity($entityTypeId, $bundle, [
       'moderation_state' => 'draft',
@@ -36,16 +38,18 @@ class UnpublishedStateConstraintTest extends SchedulerContentModerationBrowserTe
   }
 
   /**
-   * Test an invalid un-publish transition.
+   * Test an invalid unpublish transition.
    *
-   * Test an invalid un-publish transition from current moderation state of
+   * Test an invalid unpublish transition from current moderation state of
    * draft to archived state.
    *
    * @cover ::validate
    *
    * @dataProvider dataEntityTypes
+   *
+   * @throws \Exception
    */
-  public function testInvalidUnPublishStateTransition($entityTypeId, $bundle) {
+  public function testInvalidUnPublishStateTransition($entityTypeId, $bundle): void {
     $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
 
     // Check cases when a publish_state has been selected and not selected.
@@ -74,8 +78,10 @@ class UnpublishedStateConstraintTest extends SchedulerContentModerationBrowserTe
    * @covers ::validate
    *
    * @dataProvider dataEntityTypes
+   *
+   * @throws \Exception
    */
-  public function testInvalidPublishStateToUnPublishStateTransition($entityTypeId, $bundle) {
+  public function testInvalidPublishStateToUnPublishStateTransition($entityTypeId, $bundle): void {
     // This test is not about permissions, therefore we can use the root user
     // id 1 which will have permission to use the new state created below.
     $this->drupalLogin($this->rootUser);

@@ -1,0 +1,7 @@
+{
+    "name": "levmyshkin/dom_purify",
+    "description": "DOMPurify is a DOM-only, super-fast, uber-tolerant XSS sanitizer for HTML, MathML and SVG",
+    "type": "drupal-library",
+    "license": "MIT",
+    "require": {}
+}

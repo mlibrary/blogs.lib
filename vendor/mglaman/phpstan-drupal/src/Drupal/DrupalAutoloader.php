@@ -237,7 +237,7 @@ class DrupalAutoloader
                 //     tags:
                 //       - { name: foo_bar }
                 // @endcode
-                if (!isset($serviceDefinition['class']) && class_exists($serviceId)) {
+                if (!isset($serviceDefinition['class']) && $this->classExists($serviceId)) {
                     $serviceDefinition['class'] = $serviceId;
                 }
                 // @todo sanitize "calls" and "configurator" and "factory"
@@ -254,6 +254,8 @@ class DrupalAutoloader
             }
         }
 
+        $this->loadConfigSchemas($container);
+
         $service_map = $container->getByType(ServiceMap::class);
         $service_map->setDrupalServices($this->serviceMap);
 
@@ -264,6 +266,35 @@ class DrupalAutoloader
 
         $extension_map = $container->getByType(ExtensionMap::class);
         $extension_map->setExtensions($this->moduleData, $this->themeData, $profiles);
+    }
+
+    protected function loadConfigSchemas(Container $container): void
+    {
+        // Only collect the schema directories here. Parsing every schema file
+        // has a real memory cost, and this bootstrap runs regardless of
+        // whether a schema-consuming feature (configGetReturnType or
+        // configGetUnknownKeyRule) is enabled, so ConfigSchemaData parses the
+        // files lazily on first query.
+        $schemaDirs = [];
+        $coreSchemaDir = $this->drupalRoot . '/core/config/schema';
+        if (is_dir($coreSchemaDir)) {
+            $schemaDirs[] = $coreSchemaDir;
+        }
+        foreach ($this->moduleData as $extension) {
+            $schemaDir = $this->drupalRoot . '/' . $extension->getPath() . '/config/schema';
+            if (is_dir($schemaDir)) {
+                $schemaDirs[] = $schemaDir;
+            }
+        }
+        foreach ($this->themeData as $extension) {
+            $schemaDir = $this->drupalRoot . '/' . $extension->getPath() . '/config/schema';
+            if (is_dir($schemaDir)) {
+                $schemaDirs[] = $schemaDir;
+            }
+        }
+
+        $configSchemaData = $container->getByType(ConfigSchemaData::class);
+        $configSchemaData->setSchemaDirectories($schemaDirs);
     }
 
     protected function loadLegacyIncludes(): void
@@ -387,5 +418,17 @@ class DrupalAutoloader
     protected function camelize(string $id): string
     {
         return strtr(ucwords(strtr($id, ['_' => ' ', '.' => '_ ', '\\' => '_ '])), [' ' => '']);
+    }
+
+    private function classExists(string $className): bool
+    {
+        try {
+            return class_exists($className);
+        } catch (Throwable) {
+            // Loading the class can fail when it depends on a class from an
+            // extension that is not available, such as a decorator for an
+            // optional module registered with decoration_on_invalid: ignore.
+            return false;
+        }
     }
 }

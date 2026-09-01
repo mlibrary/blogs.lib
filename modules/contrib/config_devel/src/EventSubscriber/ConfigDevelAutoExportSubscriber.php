@@ -127,7 +127,7 @@ class ConfigDevelAutoExportSubscriber extends ConfigDevelSubscriberBase implemen
    * @return array
    *   An array of event listener definitions.
    */
-  static function getSubscribedEvents() {
+  static function getSubscribedEvents(): array {
     $events[ConfigEvents::SAVE][] = array('onConfigSave', 10);
     $events[ConfigEvents::RENAME][] = array('onConfigRename', 10);
     return $events;

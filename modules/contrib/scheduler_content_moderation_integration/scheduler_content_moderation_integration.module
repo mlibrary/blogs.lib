@@ -23,7 +23,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\content_moderation\ContentModerationState;
-use Drupal\workflows\Transition;
 
 require_once dirname(__FILE__) . '/includes/scheduler_hooks.inc';
 
@@ -281,7 +280,7 @@ function _scheduler_content_moderation_integration_reset_form_display(): array {
  */
 function _scheduler_content_moderation_integration_format_text($fields): string {
   return implode(', ', array_map(function ($name, $bundles) {
-    return "$name (" . implode(', ', $bundles) . ")";
+    return "$name (" . implode(', ', array_unique($bundles)) . ")";
   }, array_keys($fields), $fields));
 }
 
@@ -390,7 +389,11 @@ function _scheduler_content_moderation_integration_form_entity_type_submit($form
     if (!$form_state->getValue('scheduler_publish_enable') || !in_array($display_mode, $supported_display_modes) || !$can_moderate) {
       $form_display->removeComponent('publish_state')->save();
     }
-    elseif ($form_state->getValue('scheduler_publish_enable')) {
+    elseif (!$form['scheduler']['publish']['scheduler_publish_enable']['#default_value']) {
+      // If the entity bundle is now enabled for scheduled publishing but was
+      // not enabled before then set the publish_state field to be displayed and
+      // give a default weight. This is achieved by checking if the default was
+      // 'off' as this means that the checkbox has been changed from off to on.
       $form_display->setComponent('publish_state', ['type' => 'scheduler_moderation', 'weight' => 53])->save();
     }
 
@@ -398,7 +401,7 @@ function _scheduler_content_moderation_integration_form_entity_type_submit($form
     if (!$form_state->getValue('scheduler_unpublish_enable') || !in_array($display_mode, $supported_display_modes) || !$can_moderate) {
       $form_display->removeComponent('unpublish_state')->save();
     }
-    elseif ($form_state->getValue('scheduler_unpublish_enable')) {
+    elseif (!$form['scheduler']['unpublish']['scheduler_unpublish_enable']['#default_value']) {
       $form_display->setComponent('unpublish_state', ['type' => 'scheduler_moderation', 'weight' => 55])->save();
     }
   }
@@ -476,9 +479,10 @@ function _scheduler_content_moderation_integration_states_values(FieldStorageDef
   $type_plugin = $workflow->getTypePlugin();
 
   $user = \Drupal::currentUser();
-  $user_transitions = array_filter($type_plugin->getTransitions(), function (Transition $transition) use ($workflow, $user) {
-    return $user->hasPermission('use ' . $workflow->id() . ' transition ' . $transition->id());
-  });
+
+  /** @var \Drupal\content_moderation\StateTransitionValidationInterface $transition_validation */
+  $transition_validation = \Drupal::service('content_moderation.state_transition_validation');
+  $user_transitions = $transition_validation->getValidTransitions($entity, $user);
 
   // Grabs the entity moderation state if it has a value, otherwise it uses the
   // default one.
@@ -519,21 +523,29 @@ function _scheduler_content_moderation_integration_states_values(FieldStorageDef
       if ($ok_from_current) {
         $unpublish_state_options[$state->id()] = $state->label();
       }
-      foreach ($new_publish_states as $publish_state) {
-        if ($publish_state->canTransitionTo($state->id())) {
-          $unpublish_state_options[$state->id()] = $state->label();
-        }
+    }
+  }
+
+  // Also add unpublish states reachable from each possible publish state.
+  foreach ($new_publish_states as $publish_state) {
+    $cloned_entity = clone $entity;
+    $cloned_entity->set('moderation_state', $publish_state->id());
+    $publish_state_transitions = $transition_validation->getValidTransitions($cloned_entity, $user);
+    foreach ($publish_state_transitions as $transition) {
+      $to_state = $transition->to();
+      if (!$to_state->isPublishedState() && $to_state->isDefaultRevisionState()) {
+        $unpublish_state_options[$to_state->id()] = $to_state->label();
       }
     }
   }
-  // Finally return the options set for the field being processed.
+  // Finally, return the options set for the field being processed.
   return $definition->getName() === 'publish_state' ? $publish_state_options : $unpublish_state_options;
 }
 
 /**
  * Implements hook_module_implements_alter().
  */
-function scheduler_content_moderation_integration_module_implements_alter(array &$implementations, string $hook): void {
+function scheduler_content_moderation_integration_module_implements_alter(array &$implementations, string|int $hook): void {
   // Scheduler module implements presave that sets entity status to 0 if
   // the entity can't be published immediately.
   // Scmi module has to make sure, moderation state is not set to published
@@ -556,7 +568,9 @@ function scheduler_content_moderation_integration_entity_presave(EntityInterface
   if (!$moderation_information->isModeratedEntity($entity)) {
     return;
   }
-  assert($entity instanceof EditorialContentEntityBase);
+  if (!$entity instanceof EditorialContentEntityBase) {
+    return;
+  }
   $new_state_value = $entity->get('moderation_state')->value;
   $workflow = $moderation_information->getWorkflowForEntity($entity);
   $new_state = $workflow?->getTypePlugin()->getState($new_state_value);

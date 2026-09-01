@@ -206,6 +206,11 @@ class OpenIDConnect {
     $this->configFactory = $config_factory;
     $this->authmap = $authmap;
     $this->externalAuth = $external_auth;
+    // Keep the storage handle as a property. Calling getStorage() at each call
+    // site instead would require removing the protected $userStorage property,
+    // which is a BC break for subclasses of this non-final service. Revisit in
+    // a major release.
+    // @phpstan-ignore drupal.entityStoragePropertyAssignment
     $this->userStorage = $entity_type_manager->getStorage('user');
     $this->entityFieldManager = $entity_field_manager;
     $this->currentUser = $current_user;
@@ -273,7 +278,7 @@ class OpenIDConnect {
     $user_data = isset($tokens['id_token']) ? (is_string($tokens['id_token']) ? $this->parseToken($tokens['id_token']) : $tokens['id_token']) : NULL;
     $access_data = isset($tokens['access_token']) ? (is_string($tokens['access_token']) ? $this->parseToken($tokens['access_token']) : $tokens['access_token']) : NULL;
     if ($plugin->usesUserInfo()) {
-      $userinfo = $plugin->retrieveUserInfo($tokens['access_token']);
+      $userinfo = $plugin->retrieveUserInfo($tokens['access_token']) ?? [];
     }
     elseif (is_array($user_data)) {
       $userinfo = $user_data;
@@ -728,7 +733,8 @@ class OpenIDConnect {
                 break;
 
               case 'image':
-                $file = $this->getUserProfilePhoto($claim_value, $account);
+                $uri_scheme = $account->$property_name->getSetting('uri_scheme') ?: 'public';
+                $file = $this->getUserProfilePhoto($claim_value, $account, $uri_scheme);
                 // If the file is not valid, skip processing this claim.
                 if (is_null($file)) {
                   continue 2;
@@ -749,7 +755,7 @@ class OpenIDConnect {
                   // as it is one of the properties that requires to be unique
                   // for all Drupal users.
                   $account_by_mail = $this->userStorage->loadByProperties(['mail' => $claim_value]);
-                  if (empty($account_by_mail) || ($account_by_mail->id() == $account->id())) {
+                  if (empty($account_by_mail) || (current($account_by_mail)->id() == $account->id())) {
                     $account->set('mail', $claim_value);
                   }
                   else {
@@ -779,17 +785,18 @@ class OpenIDConnect {
     }
 
     // Map groups to Drupal roles.
-    $role_mappings = $this->configFactory->get('openid_connect.settings')->get('role_mappings') ?? [];
+    $settings = $this->configFactory->get('openid_connect.settings');
+    $role_mappings = $settings->get('role_mappings') ?? [];
     $user_groups = $userinfo['groups'] ?? [];
-    foreach ($role_mappings as $role => $mappings) {
-      if (empty(array_intersect($mappings, $user_groups))) {
-        // User doesn't have a mapped role. Remove it from their account.
-        $account->removeRole($role);
-      }
-      else {
-        // User has a mapped role. Add it to their account.
-        $account->addRole($role);
-      }
+
+    // Ensure that both role mappings and user groups are available
+    // before altering user roles.
+    // @see https://www.drupal.org/project/openid_connect/issues/3497559
+    $mapping_data_available = !empty($role_mappings) && !empty($user_groups);
+    // Get the reset role mapping configuration. Default to TRUE for BC.
+    $force_reset_role_mapping = $settings->get('force_reset_role_mappings') ?? TRUE;
+    if ($force_reset_role_mapping || $mapping_data_available) {
+      $this->setAccountRoles($account, $role_mappings, $user_groups);
     }
 
     // Save the display name additionally in the user account 'data', for
@@ -809,6 +816,33 @@ class OpenIDConnect {
     }
     catch (EntityStorageException $e) {
       return FALSE;
+    }
+  }
+
+  /**
+   * Set and revoke roles for a user account.
+   *
+   * @param \Drupal\user\UserInterface $account
+   *   The account to act upon.
+   * @param array $role_mappings
+   *   The role mappings defined in openid_connect.settings.
+   * @param array $user_groups
+   *   The groups array returned from the service provider.
+   */
+  private function setAccountRoles(
+    UserInterface $account,
+    array $role_mappings,
+    array $user_groups,
+  ): void {
+    foreach ($role_mappings as $role => $mappings) {
+      if (empty(array_intersect($mappings, $user_groups))) {
+        // User doesn't have a mapped role. Remove it from their account.
+        $account->removeRole($role);
+      }
+      else {
+        // User has a mapped role. Add it to their account.
+        $account->addRole($role);
+      }
     }
   }
 
@@ -839,6 +873,8 @@ class OpenIDConnect {
    *   The URL of the profile photo to download and process.
    * @param \Drupal\Core\Session\AccountInterface $account
    *   The user account associated with the profile photo.
+   * @param string $scheme
+   *   The file system scheme, as defined in the field settings.
    *
    * @return \Drupal\file\FileInterface|null
    *   A file entity representing the saved profile photo, or NULL if the
@@ -847,6 +883,7 @@ class OpenIDConnect {
   protected function getUserProfilePhoto(
     string $profilePhotoUrl,
     AccountInterface $account,
+    string $scheme = 'public',
   ): ?FileInterface {
     // Validate URL scheme and host.
     UrlHelper::setAllowedProtocols(['https', 'http']);
@@ -909,7 +946,7 @@ class OpenIDConnect {
 
     return $this->fileRepository->writeData(
       $data,
-      sprintf('public://user-picture--%s.%s', $account->uuid(), $extension)
+      sprintf('%s://user-picture--%s.%s', $scheme, $account->uuid(), $extension)
     );
   }
 

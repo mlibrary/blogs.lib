@@ -7,6 +7,7 @@ use Drupal\media\Entity\MediaType;
 use Drupal\node\Entity\NodeType;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the API hook functions of the Scheduler module.
@@ -17,6 +18,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group scheduler_api
  */
 #[Group('scheduler_api')]
+#[RunTestsInSeparateProcesses]
 class SchedulerHooksTest extends SchedulerBrowserTestBase {
 
   /**
@@ -513,7 +515,7 @@ class SchedulerHooksTest extends SchedulerBrowserTestBase {
       'publish_on' => strtotime('-1 day'),
     ]);
     // 'Green' will have both fields hidden so is harder to test manually.
-    // Therefore introduce a different colour - Blue.
+    // Therefore introduce a different color - Blue.
     $entity4 = $this->createEntity($entityTypeId, $bundle, [
       'status' => TRUE,
       'title' => "Blue $entityTypeId will cause a failure on unpublishing",

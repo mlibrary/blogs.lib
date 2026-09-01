@@ -4,6 +4,7 @@ namespace Drupal\Tests\scheduler\Functional;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the default time functionality.
@@ -16,6 +17,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group scheduler
  */
 #[Group('scheduler')]
+#[RunTestsInSeparateProcesses]
 class SchedulerDefaultTimeTest extends SchedulerBrowserTestBase {
 
   /**
@@ -68,8 +70,10 @@ class SchedulerDefaultTimeTest extends SchedulerBrowserTestBase {
    * required. A javascript test covers the cases where the dates are required.
    *
    * @dataProvider dataStandardEntityTypes
+   * @dataProvider dataNoBundleEntityTypes
    */
   #[DataProvider('dataStandardEntityTypes')]
+  #[DataProvider('dataNoBundleEntityTypes')]
   public function testDefaultTime($entityTypeId, $bundle) {
     $this->drupalLogin($this->schedulerUser);
     $config = $this->config('scheduler.settings');
@@ -142,8 +146,10 @@ class SchedulerDefaultTimeTest extends SchedulerBrowserTestBase {
    * elements of both of the scheduler date input fields.
    *
    * @dataProvider dataStandardEntityTypes
+   * @dataProvider dataNoBundleEntityTypes
    */
   #[DataProvider('dataStandardEntityTypes')]
+  #[DataProvider('dataNoBundleEntityTypes')]
   public function testDefaultWithHiddenTime($entityTypeId, $bundle) {
     \Drupal::service('module_installer')->install(['scheduler_extras']);
     $titleField = $this->titleField($entityTypeId);

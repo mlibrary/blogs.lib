@@ -1,14 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\mimemail\Functional;
 
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
+// cspell:ignore unpriv
 /**
  * Tests operation of the Mime Mail settings page.
  *
  * @group mimemail
  */
+#[Group('mimemail')]
+#[RunTestsInSeparateProcesses]
 class MimeMailSettingsTest extends BrowserTestBase {
 
   /**

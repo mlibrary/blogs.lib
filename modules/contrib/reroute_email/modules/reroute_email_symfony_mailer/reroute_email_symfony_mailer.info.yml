@@ -1,0 +1,14 @@
+name: 'Reroute Email (Symfony Mailer support)'
+description: 'Reroute emails to predefined addresses using Symfony Mailer.'
+package: Development
+configure: reroute_email.settings
+core_version_requirement: ^10.2 || ^11
+type: module
+dependencies:
+  - drupal:reroute_email
+  - drupal:symfony_mailer
+
+# Information added by Drupal.org packaging script on 2024-10-28
+version: '2.3.0-rc2'
+project: 'reroute_email'
+datestamp: 1730150312

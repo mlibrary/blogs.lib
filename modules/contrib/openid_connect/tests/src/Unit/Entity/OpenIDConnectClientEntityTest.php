@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\Tests\openid_connect\Unit\Entity;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -40,11 +39,6 @@ class OpenIDConnectClientEntityTest extends UnitTestCase {
       'end_session_endpoint' => '',
       'scopes' => ['openid', 'email'],
     ],
-  ];
-
-  const KEY_OVERRIDES = [
-    'client_id' => 'CLIENT_ID_OVERRIDE',
-    'client_secret' => 'CLIENT_SECRET_OVERRIDE',
   ];
 
   const ENTITY_TYPE = 'openid_connect_client';
@@ -139,35 +133,26 @@ class OpenIDConnectClientEntityTest extends UnitTestCase {
    */
   public function testGetPlugin(): void {
     $entity_id = self::PLUGIN_VALUES['id'];
-    $immutableConfig = $this->createMock(ImmutableConfig::class);
-    $immutableConfig->expects($this->once())
-      ->method('get')
-      ->with('settings')
-      ->willReturn(self::KEY_OVERRIDES);
 
-    $this->configFactory->expects($this->once())
-      ->method('get')
-      ->with("openid_connect.client.{$entity_id}")
-      ->willReturn($immutableConfig);
+    $this->configFactory->expects($this->never())
+      ->method('get');
 
-    $collectionSettings = self::PLUGIN_VALUES['settings'];
-    $collectionSettings['client_id'] = self::KEY_OVERRIDES['client_id'];
-    $collectionSettings['client_secret'] = self::KEY_OVERRIDES['client_secret'];
+    $rawSettings = self::PLUGIN_VALUES['settings'];
     $pluginMock = $this->createMock(OpenIDConnectGenericClient::class);
     $pluginMock->expects($this->once())
       ->method('getConfiguration')
-      ->willReturn($collectionSettings);
+      ->willReturn($rawSettings);
     $this->pluginManager->expects($this->once())
       ->method('createInstance')
-      ->with($entity_id, $collectionSettings)
+      ->with($entity_id, $rawSettings)
       ->willReturn($pluginMock);
 
     $plugin = $this->entity->getPlugin();
 
     $config = $plugin->getConfiguration();
 
-    $this->assertEquals(self::KEY_OVERRIDES['client_id'], $config['client_id']);
-    $this->assertEquals(self::KEY_OVERRIDES['client_secret'], $config['client_secret']);
+    $this->assertEquals(self::CLIENT_ID, $config['client_id']);
+    $this->assertEquals(self::CLIENT_SECRET, $config['client_secret']);
   }
 
   /**
@@ -175,24 +160,15 @@ class OpenIDConnectClientEntityTest extends UnitTestCase {
    */
   public function testGetPluginCollections(): void {
     $entity_id = self::PLUGIN_VALUES['id'];
-    $immutableConfig = $this->createMock(ImmutableConfig::class);
-    $immutableConfig->expects($this->once())
-      ->method('get')
-      ->with('settings')
-      ->willReturn(self::KEY_OVERRIDES);
 
-    $this->configFactory->expects($this->once())
-      ->method('get')
-      ->with("openid_connect.client.{$entity_id}")
-      ->willReturn($immutableConfig);
+    $this->configFactory->expects($this->never())
+      ->method('get');
 
-    $collectionSettings = self::PLUGIN_VALUES['settings'];
-    $collectionSettings['client_id'] = self::KEY_OVERRIDES['client_id'];
-    $collectionSettings['client_secret'] = self::KEY_OVERRIDES['client_secret'];
+    $rawSettings = self::PLUGIN_VALUES['settings'];
     $pluginMock = $this->createMock(OpenIDConnectGenericClient::class);
     $this->pluginManager->expects($this->once())
       ->method('createInstance')
-      ->with($entity_id, $collectionSettings)
+      ->with($entity_id, $rawSettings)
       ->willReturn($pluginMock);
 
     $collections = $this->entity->getPluginCollections();

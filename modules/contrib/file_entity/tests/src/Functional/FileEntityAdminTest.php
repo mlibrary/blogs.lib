@@ -2,12 +2,13 @@
 
 namespace Drupal\Tests\file_entity\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file_entity\Entity\FileEntity;
 use Drupal\node\Entity\Node;
 use Drupal\user\Entity\Role;
-use Drupal\user\Entity\User;
 use Drupal\views\Entity\View;
 
 /**
@@ -15,21 +16,28 @@ use Drupal\views\Entity\View;
  *
  * @group file_entity
  */
+#[Group('file_entity')]
+#[RunTestsInSeparateProcesses]
 class FileEntityAdminTest extends FileEntityTestBase {
 
-  /** @var User */
+  /**
+   * @var \Drupal\user\Entity\User */
   protected $userAdmin;
 
-  /** @var User */
+  /**
+   * @var \Drupal\user\Entity\User */
   protected $userBasic;
 
-  /** @var User */
+  /**
+   * @var \Drupal\user\Entity\User */
   protected $userViewOwn;
 
-  /** @var User */
+  /**
+   * @var \Drupal\user\Entity\User */
   protected $userViewPrivate;
 
-  /** @var User */
+  /**
+   * @var \Drupal\user\Entity\User */
   protected $userEditDelete;
 
   /**
@@ -53,20 +61,20 @@ class FileEntityAdminTest extends FileEntityTestBase {
     // correctly.
     $roles = Role::loadMultiple();
     foreach ($roles as $rid => $role) {
-      user_role_revoke_permissions($rid, array('view files'));
+      user_role_revoke_permissions($rid, ['view files']);
     }
 
-    $this->userAdmin = $this->drupalCreateUser(array('administer files', 'bypass file access'));
-    $this->userBasic = $this->drupalCreateUser(array('administer files'));
-    $this->userViewOwn = $this->drupalCreateUser(array('administer files', 'view own private files'));
-    $this->userViewPrivate = $this->drupalCreateUser(array('administer files', 'view private files'));
-    $this->userEditDelete = $this->drupalCreateUser(array(
+    $this->userAdmin = $this->drupalCreateUser(['administer files', 'bypass file access']);
+    $this->userBasic = $this->drupalCreateUser(['administer files']);
+    $this->userViewOwn = $this->drupalCreateUser(['administer files', 'view own private files']);
+    $this->userViewPrivate = $this->drupalCreateUser(['administer files', 'view private files']);
+    $this->userEditDelete = $this->drupalCreateUser([
       'administer files',
       'edit any document files',
       'delete any document files',
       'edit any image files',
       'delete any image files',
-    ));
+    ]);
 
     // Enable the enhanced Files view.
     View::load('files')->disable()->save();
@@ -79,13 +87,13 @@ class FileEntityAdminTest extends FileEntityTestBase {
   public function testFilesAdminSort() {
     $this->drupalLogin($this->userAdmin);
     $i = 0;
-    foreach (array('dd', 'aa', 'DD', 'bb', 'cc', 'CC', 'AA', 'BB') as $prefix) {
-      $this->createFileEntity(array('filename' => $prefix . $this->randomMachineName(6), 'created' => $i * 90000));
+    foreach (['dd', 'aa', 'DD', 'bb', 'cc', 'CC', 'AA', 'BB'] as $prefix) {
+      $this->createFileEntity(['filename' => $prefix . $this->randomMachineName(6), 'created' => $i * 90000]);
       $i++;
     }
 
     // Test that the default sort by file_managed.created DESC fires properly.
-    $files_query = array();
+    $files_query = [];
     foreach (\Drupal::entityQuery('file')->sort('created', 'DESC')->accessCheck(FALSE)->execute() as $fid) {
       $files_query[] = FileEntity::load($fid)->label();
     }
@@ -101,12 +109,12 @@ class FileEntityAdminTest extends FileEntityTestBase {
 
     // Compare the rendered HTML node list to a query for the files ordered by
     // filename to account for possible database-dependent sort order.
-    $files_query = array();
+    $files_query = [];
     foreach (\Drupal::entityQuery('file')->sort('filename')->accessCheck(FALSE)->execute() as $fid) {
       $files_query[] = FileEntity::load($fid)->label();
     }
 
-    $this->drupalGet('admin/content/files', array('query' => array('sort' => 'asc', 'order' => 'filename')));
+    $this->drupalGet('admin/content/files', ['query' => ['sort' => 'asc', 'order' => 'filename']]);
     $list = $this->xpath($xpath);
     $entries = [];
     foreach ($list as $entry) {
@@ -121,27 +129,27 @@ class FileEntityAdminTest extends FileEntityTestBase {
   public function testFilesAdminPages() {
     $this->drupalLogin($this->userAdmin);
 
-    /** @var FileEntity[] $files */
-    $files['public_image'] = $this->createFileEntity(array(
+    /** @var \Drupal\file_entity\Entity\FileEntity[] $files */
+    $files['public_image'] = $this->createFileEntity([
       'scheme' => 'public',
       'uid' => $this->userBasic->id(),
       'type' => 'image',
-    ));
-    $files['public_document'] = $this->createFileEntity(array(
+    ]);
+    $files['public_document'] = $this->createFileEntity([
       'scheme' => 'public',
       'uid' => $this->userViewOwn->id(),
       'type' => 'document',
-    ));
-    $files['private_image'] = $this->createFileEntity(array(
+    ]);
+    $files['private_image'] = $this->createFileEntity([
       'scheme' => 'private',
       'uid' => $this->userBasic->id(),
       'type' => 'image',
-    ));
-    $files['private_document'] = $this->createFileEntity(array(
+    ]);
+    $files['private_document'] = $this->createFileEntity([
       'scheme' => 'private',
       'uid' => $this->userViewOwn->id(),
       'type' => 'document',
-    ));
+    ]);
 
     // Verify view, edit, and delete links for any file.
     $this->drupalGet('admin/content/files');
@@ -175,7 +183,6 @@ class FileEntityAdminTest extends FileEntityTestBase {
     // @todo Drupal 8 always shows bulk selection, test specific actions
     //   instead.
     // $this->assertNoFieldByName('bulk_form[' . $files['public_image']->id() . ']', '', 'No bulk form checkbox found.');
-
     // Verify private file is displayed with permission.
     $this->drupalLogout();
     $this->drupalLogin($this->userViewOwn);
@@ -245,8 +252,8 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->assertSession()->linkByHrefExists('file/1/delete');
     $this->assertSession()->linkByHrefExists('file/2/delete');
     $this->drupalGet('file/1/delete');
-    $this->assertSession()->titleEquals((string) t('Are you sure you want to delete the file @filename? | Drupal', array('@filename' => FileEntity::load(1)->label())));
-    $this->submitForm(array(), 'Delete');
+    $this->assertSession()->titleEquals((string) t('Are you sure you want to delete the file @filename? | Drupal', ['@filename' => FileEntity::load(1)->label()]));
+    $this->submitForm([], 'Delete');
     $this->assertSession()->linkByHrefNotExists('file/1/delete');
     $this->assertSession()->linkByHrefExists('file/2/delete');
 
@@ -257,13 +264,13 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->assertTrue(FileEntity::load(4)->isPermanent());
     $this->assertTrue(FileEntity::load(5)->isPermanent());
 
-    $this->drupalGet('admin/content/files', array('query' => array('order' => 'fid')));
-    $edit = array(
+    $this->drupalGet('admin/content/files', ['query' => ['order' => 'fid']]);
+    $edit = [
       'action' => 'file_temporary_action',
       'bulk_form[0]' => 1,
       'bulk_form[1]' => 1,
       'bulk_form[2]' => 1,
-    );
+    ];
     $this->submitForm($edit, 'Apply to selected items');
 
     \Drupal::entityTypeManager()->getStorage('file')->resetCache();
@@ -272,12 +279,12 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->assertFalse(FileEntity::load(4)->isPermanent());
     $this->assertTrue(FileEntity::load(5)->isPermanent());
 
-    $this->drupalGet('admin/content/files', array('query' => array('order' => 'fid')));
-    $edit = array(
+    $this->drupalGet('admin/content/files', ['query' => ['order' => 'fid']]);
+    $edit = [
       'action' => 'file_permanent_action',
       'bulk_form[0]' => 1,
       'bulk_form[1]' => 1,
-    );
+    ];
     $this->submitForm($edit, 'Apply to selected items');
 
     \Drupal::entityTypeManager()->getStorage('file')->resetCache();
@@ -287,16 +294,16 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->assertTrue(FileEntity::load(5)->isPermanent());
 
     // Test bulk delete.
-    $this->drupalGet('admin/content/files', array('query' => array('order' => 'fid')));
-    $edit = array(
+    $this->drupalGet('admin/content/files', ['query' => ['order' => 'fid']]);
+    $edit = [
       'action' => 'file_delete_action',
       'bulk_form[0]' => 1,
       'bulk_form[1]' => 1,
-    );
+    ];
     $this->submitForm($edit, 'Apply to selected items');
     $this->assertSession()->titleEquals('Are you sure you want to delete these files? | Drupal');
     $this->assertSession()->linkExists('Cancel');
-    $this->submitForm(array(), 'Delete');
+    $this->submitForm([], 'Delete');
 
     \Drupal::entityTypeManager()->getStorage('file')->resetCache();
     $this->assertNull(FileEntity::load(2), 'File 2 is deleted.');
@@ -308,9 +315,9 @@ class FileEntityAdminTest extends FileEntityTestBase {
    * Tests the file usage view.
    */
   public function testUsageView() {
-    $this->container->get('module_installer')->install(array('node'));
+    $this->container->get('module_installer')->install(['node']);
     \Drupal::service('router.builder')->rebuild();
-    $file = $this->createFileEntity(array('uid' => $this->userAdmin));
+    $file = $this->createFileEntity(['uid' => $this->userAdmin]);
     // @todo Next line causes an exception, core issue https://www.drupal.org/node/2462283
     $this->drupalLogin($this->userAdmin);
 
@@ -325,29 +332,29 @@ class FileEntityAdminTest extends FileEntityTestBase {
 
     // Attach a file field to article nodes.
     $content_type = $this->drupalCreateContentType();
-    $field_storage = FieldStorageConfig::create(array(
+    $field_storage = FieldStorageConfig::create([
       'field_name' => 'used_file',
       'entity_type' => 'node',
       'type' => 'file',
-    ));
+    ]);
     $field_storage->save();
-    $field_instance = FieldConfig::create(array(
+    $field_instance = FieldConfig::create([
       'field_storage' => $field_storage,
       'entity_type' => 'node',
       'bundle' => $content_type->id(),
-    ));
+    ]);
     $field_instance->save();
 
     // Create a node using a file.
-    $node = Node::create(array(
+    $node = Node::create([
       'title' => 'An article that uses a file',
       'type' => $content_type->id(),
-      'used_file' => array(
+      'used_file' => [
         'target_id' => $file->id(),
         'display' => 1,
         'description' => '',
-      ),
-    ));
+      ],
+    ]);
     $node->save();
     \Drupal::entityTypeManager()->getStorage('node')->resetCache();
     \Drupal::entityTypeManager()->getStorage('file')->resetCache();
@@ -366,4 +373,5 @@ class FileEntityAdminTest extends FileEntityTestBase {
     $this->clickLink('Usage');
     $this->assertSession()->statusCodeEquals(200);
   }
+
 }

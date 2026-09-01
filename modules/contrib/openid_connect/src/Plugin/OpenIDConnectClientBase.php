@@ -95,6 +95,13 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
   protected $parentEntityId;
 
   /**
+   * The provider slug.
+   *
+   * @var string
+   */
+  protected $providerSlug;
+
+  /**
    * The constructor.
    *
    * @param array $configuration
@@ -131,7 +138,8 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
     $this->languageManager = $language_manager;
     $this->stateToken = $state_token;
     $this->autoDiscover = $auto_discover;
-    $this->parentEntityId = '';
+    $this->setParentEntityId('');
+    $this->setProviderSlug($configuration['provider_slug'] ?? '');
     $this->setConfiguration($configuration);
   }
 
@@ -198,6 +206,7 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
     return [
       'client_id' => '',
       'client_secret' => '',
+      'provider_slug' => '',
       'iss_allowed_domains' => '',
       'prompt' => ['login'],
     ];
@@ -215,6 +224,20 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
    */
   public function getParentEntityId() : string {
     return $this->parentEntityId;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setProviderSlug(string $provider_slug = ''): void {
+    $this->providerSlug = $provider_slug;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getProviderSlug(): string {
+    return $this->providerSlug;
   }
 
   /**
@@ -239,6 +262,18 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
       '#type' => 'textarea',
       '#default_value' => $this->configuration['client_secret'],
       '#required' => TRUE,
+    ];
+    $form['provider_slug'] = [
+      '#title' => $this->t('Provider slug'),
+      '#type' => 'textfield',
+      '#default_value' => $this->configuration['provider_slug'],
+      '#required' => FALSE,
+    ];
+    $form['provider_slug']['#ajax'] = [
+      'callback' => '::changeRedirectUrl',
+      'event' => 'focusout',
+      'disable-refocus' => TRUE,
+      'wrapper' => 'redirect-url-value',
     ];
     $form['iss_allowed_domains'] = [
       '#title' => $this->t('Allowed domains'),
@@ -476,7 +511,9 @@ abstract class OpenIDConnectClientBase extends PluginBase implements OpenIDConne
    * @see \Drupal\Core\Url::fromRoute()
    */
   protected function getRedirectUrl(array $route_parameters = [], array $options = []): Url {
-    $route_parameters += ['openid_connect_client' => $this->parentEntityId];
+    // Slug could be an empty string.
+    $slug = $this->getProviderSlug();
+    $route_parameters += ['openid_connect_client' => $slug ?: $this->getParentEntityId()];
     $options += [
       'absolute' => TRUE,
       'language' => $this->languageManager->getLanguage(LanguageInterface::LANGCODE_NOT_APPLICABLE),

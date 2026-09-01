@@ -14,3 +14,11 @@ services:
     arguments: ['@entity_type.manager']
     tags:
       - { name: 'event_subscriber' }
+  Drupal\oembed_providers\Hook\FormHooks:
+    class: Drupal\oembed_providers\Hook\FormHooks
+    autowire: true
+  Drupal\oembed_providers\Hook\MediaSourceHooks:
+    class: Drupal\oembed_providers\Hook\MediaSourceHooks
+    autowire: true
+parameters:
+  oembed_providers.skip_procedural_hook_scan: true

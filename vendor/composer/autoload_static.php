@@ -28,6 +28,7 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         '2f69d3914119f042cca9e44442d5ce95' => __DIR__ . '/../..' . '/core/includes/bootstrap.inc',
         '23c18046f52bef3eea034657bafda50f' => __DIR__ . '/..' . '/symfony/polyfill-php81/bootstrap.php',
         '9b38cf48e83f5d8f60375221cd213eee' => __DIR__ . '/..' . '/phpstan/phpstan/bootstrap.php',
+        '47e1160838b5e5a10346ac4084b58c23' => __DIR__ . '/..' . '/laravel/prompts/src/helpers.php',
         '801c31d8ed748cfa537fa45402288c95' => __DIR__ . '/..' . '/psy/psysh/src/functions.php',
     );
 
@@ -94,7 +95,6 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
             'Symfony\\Component\\CssSelector\\' => 30,
             'Symfony\\Component\\Console\\' => 26,
             'Symfony\\Bridge\\PsrHttpMessage\\' => 30,
-            'SelfUpdate\\' => 11,
         ),
         'R' =>
         array (
@@ -121,6 +121,7 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         'L' =>
         array (
             'League\\Container\\' => 17,
+            'Laravel\\Prompts\\' => 16,
         ),
         'H' =>
         array (
@@ -338,10 +339,6 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         array (
             0 => __DIR__ . '/..' . '/symfony/psr-http-message-bridge',
         ),
-        'SelfUpdate\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/consolidation/self-update/src',
-        ),
         'Robo\\' =>
         array (
             0 => __DIR__ . '/..' . '/consolidation/robo/src',
@@ -399,6 +396,10 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         array (
             0 => __DIR__ . '/..' . '/league/container/src',
         ),
+        'Laravel\\Prompts\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/laravel/prompts/src',
+        ),
         'Html2Text\\' =>
         array (
             0 => __DIR__ . '/..' . '/html2text/html2text/src',
@@ -449,7 +450,7 @@ class ComposerStaticInit9ff5e241092e0368ed95a4350b436f9e
         ),
         'Doctrine\\Persistence\\' =>
         array (
-            0 => __DIR__ . '/..' . '/doctrine/persistence/src/Persistence',
+            0 => __DIR__ . '/..' . '/doctrine/persistence/src',
         ),
         'Doctrine\\Deprecations\\' =>
         array (

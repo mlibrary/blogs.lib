@@ -32,7 +32,7 @@ class UnPublishedStateConstraintTest extends SchedulerContentModerationTestBase 
    *
    * @covers ::validate
    */
-  public function testValidPublishStateToUnPublishStateTransition() {
+  public function testValidPublishStateToUnPublishStateTransition(): void {
     $node = Node::create([
       'type' => 'example',
       'title' => 'Test title',
@@ -55,7 +55,7 @@ class UnPublishedStateConstraintTest extends SchedulerContentModerationTestBase 
    *
    * @cover ::validate
    */
-  public function testInvalidUnPublishStateTransition() {
+  public function testInvalidUnPublishStateTransition(): void {
     // Check cases when a publish_state has been selected and not selected.
     // No publish_on date been entered, so they should fail validation.
     foreach (['', '_none', 'published'] as $publish_state) {
@@ -82,8 +82,10 @@ class UnPublishedStateConstraintTest extends SchedulerContentModerationTestBase 
    * state.
    *
    * @covers ::validate
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function testInvalidPublishStateToUnPublishStateTransition() {
+  public function testInvalidPublishStateToUnPublishStateTransition(): void {
     // Add a second published state, and a transition to it from draft, but no
     // transition from it to archived.
     $this->workflow->getTypePlugin()
@@ -113,6 +115,60 @@ class UnPublishedStateConstraintTest extends SchedulerContentModerationTestBase 
     $this->assertCount(1, $violations, 'The transition from published 2 to archived should fail validation');
     $message = (count($violations) > 0) ? $violations->get(0)->getMessage() : 'No violation message found';
     $this->assertEquals('The scheduled un-publishing state of Archived is not a valid transition from the scheduled publishing state of Published 2.', strip_tags($message));
+  }
+
+  /**
+   * Test that scheduling unpublish to the current state fails validation.
+   *
+   * When no publish state is scheduled, the unpublish state should not match
+   * the current moderation state as the content is already in that state.
+   *
+   * @covers ::validate
+   */
+  public function testSameStateAsScheduledUnpublishState(): void {
+    $node = Node::create([
+      'type' => 'example',
+      'title' => 'Test title',
+      'moderation_state' => 'archived',
+      'unpublish_on' => strtotime('tomorrow'),
+      'unpublish_state' => 'archived',
+    ]);
+
+    $violations = $node->validate();
+    $found = FALSE;
+    foreach ($violations as $violation) {
+      if (str_contains(strip_tags((string) $violation->getMessage()), 'already in the Archived state')) {
+        $found = TRUE;
+        break;
+      }
+    }
+    $this->assertTrue($found);
+  }
+
+  /**
+   * Test same-state check is skipped when a publish state is also scheduled.
+   *
+   * When both publish and unpublish are scheduled, the current state matching
+   * the unpublish state is valid because the content will transition through
+   * the publish state first.
+   *
+   * @covers ::validate
+   */
+  public function testSameUnpublishStateAllowedWithPublishState(): void {
+    $node = Node::create([
+      'type' => 'example',
+      'title' => 'Test title',
+      'moderation_state' => 'archived',
+      'publish_on' => strtotime('tomorrow'),
+      'publish_state' => 'published',
+      'unpublish_on' => strtotime('+2 days'),
+      'unpublish_state' => 'archived',
+    ]);
+
+    $violations = $node->validate();
+    foreach ($violations as $violation) {
+      $this->assertStringNotContainsString('already in the', strip_tags((string) $violation->getMessage()));
+    }
   }
 
 }

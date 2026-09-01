@@ -2,12 +2,11 @@
 
 namespace Drupal\Tests\reroute_email\Functional;
 
-use Drupal\reroute_email\Constants\RerouteEmailConstants;
+use Drupal\TestTools\Random;
+use Drupal\reroute_email\RerouteEmailHandlerPluginInterface;
 
 /**
  * Test Reroute Email's form for sending a test email.
- *
- * @ingroup reroute_email_tests
  *
  * @group reroute_email
  */
@@ -29,9 +28,9 @@ class TestEmailFormTest extends RerouteEmailBrowserTestBase {
 
     // Configure to reroute all outgoing emails.
     $this->configureRerouteEmail([
-      RerouteEmailConstants::REROUTE_EMAIL_ENABLE => $enabled,
-      RerouteEmailConstants::REROUTE_EMAIL_ADDRESS => $this->rerouteDestination,
-      RerouteEmailConstants::REROUTE_EMAIL_ALLOWLIST => $allowlisted,
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ENABLE => $enabled,
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ADDRESS => static::$rerouteDestination,
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ALLOWLIST => $allowlisted,
     ]);
 
     // Check Subject field default value.
@@ -43,48 +42,25 @@ class TestEmailFormTest extends RerouteEmailBrowserTestBase {
   }
 
   /**
-   * Data provider for ::formValuesProvider().
+   * Data provider for ::testFormTestEmail().
    */
-  public function formValuesProvider(): array {
-
+  public static function formValuesProvider(): array {
     // All fields are set correctly.
-    $data[] = [
+    $data['correct_fields'] = [
       'enabled' => TRUE,
       'allowlisted' => '',
       'post' => [
-        'to' => $this->originalDestination,
-        'cc' => $this->randomMachineName() . '@not-allowed.com',
-        'bcc' => $this->randomMachineName() . '@not-allowed.com',
+        'to' => static::$originalDestination,
+        'cc' => Random::machineName() . '@not-allowed.com',
+        'bcc' => Random::machineName() . '@not-allowed.com',
         'subject' => 'Test Reroute Email Test Email Form',
         'body' => 'Testing email rerouting and the Test Email form',
       ],
       'rerouted' => TRUE,
     ];
 
-    // A test with invalid emails and default values for subject and body.
-    $data[] = [
-      'enabled' => TRUE,
-      'allowlisted' => '',
-      'post' => [
-        'to' => 'To address invalid format',
-        'cc' => 'Cc address invalid format',
-        'bcc' => 'Bcc address invalid format',
-      ],
-      'rerouted' => TRUE,
-    ];
-    $data[] = [
-      'enabled' => FALSE,
-      'allowlisted' => '',
-      'post' => [
-        'to' => 'To address invalid format',
-        'cc' => 'Cc address invalid format',
-        'bcc' => 'Bcc address invalid format',
-      ],
-      'rerouted' => FALSE,
-    ];
-
     // Test a form with empty values for non-required fields.
-    $data[] = [
+    $data['empty_fields_1'] = [
       'enabled' => TRUE,
       'allowlisted' => '',
       'post' => [
@@ -96,11 +72,11 @@ class TestEmailFormTest extends RerouteEmailBrowserTestBase {
       ],
       'rerouted' => TRUE,
     ];
-    $data[] = [
+    $data['empty_fields_2'] = [
       'enabled' => TRUE,
-      'allowlisted' => "{$this->originalDestination}, ",
+      'allowlisted' => static::$originalDestination . ", ",
       'post' => [
-        'to' => $this->originalDestination,
+        'to' => static::$originalDestination,
         'cc' => '',
         'bcc' => '',
         'subject' => '',
@@ -110,52 +86,32 @@ class TestEmailFormTest extends RerouteEmailBrowserTestBase {
     ];
 
     // Tests for partial emails amd domain wildcards in the allowed list.
-    $data[] = [
+    $data['partial_emails_1'] = [
       'enabled' => TRUE,
       'allowlisted' => 'some+*@allowlisted.com',
       'post' => ['to' => 'email@allowlisted.com'],
       'rerouted' => TRUE,
     ];
-    $data[] = [
+    $data['partial_emails_2'] = [
       'enabled' => TRUE,
       'allowlisted' => 'some+*@allowlisted.com',
       'post' => ['to' => 'some+partial@allowlisted.com'],
       'rerouted' => FALSE,
     ];
-    $data[] = [
+    $data['partial_emails_3'] = [
       'enabled' => TRUE,
       'allowlisted' => 'some+*@allowlisted.com, *@great-company.com',
       'post' => ['to' => 'some+partial@allowlisted.com, email@great-company.com'],
       'rerouted' => FALSE,
     ];
 
-    // Check if recipient fields support an email with additional display name.
-    // like "Display Name <display.name@example.com>".
-    $email_allowlisted_one = $this->randomMachineName() . '@allowlisted.com';
-    $email_allowlisted_two = $this->randomMachineName() . '@allowlisted.com';
-    $email_allowlisted_three = $this->randomMachineName() . '@allowlisted.com';
-    $email_allowlisted_not = $this->randomMachineName() . '@not-allowlisted.com';
-    $data[] = [
-      'enabled' => TRUE,
-      'allowlisted' => "{$email_allowlisted_one}, {$email_allowlisted_two}",
-      'post' => [
-        'to' => "Some Display Name <{$email_allowlisted_not}>",
-      ],
-      'rerouted' => TRUE,
-    ];
-    $data[] = [
-      'enabled' => TRUE,
-      'allowlisted' => "{$email_allowlisted_one}, {$email_allowlisted_two}, {$email_allowlisted_three}",
-      'post' => [
-        'to' => "Display Name <{$email_allowlisted_one}>",
-        'cc' => "Display Name &*% (Test Special Chars) <{$email_allowlisted_two}>",
-        'bcc' => "Display Name @ <{$email_allowlisted_three}>",
-      ],
-      'rerouted' => FALSE,
-    ];
+    $email_allowlisted_one = Random::machineName() . '@allowlisted.com';
+    $email_allowlisted_two = Random::machineName() . '@allowlisted.com';
+    $email_allowlisted_three = Random::machineName() . '@allowlisted.com';
+    $email_allowlisted_not = Random::machineName() . '@not-allowlisted.com';
 
     // Check rerouting by `cc` and `bcc` with allowlisted `to` value.
-    $data[] = [
+    $data['cc_bcc_1'] = [
       'enabled' => TRUE,
       'allowlisted' => '*@allowlisted.com',
       'post' => [
@@ -165,7 +121,7 @@ class TestEmailFormTest extends RerouteEmailBrowserTestBase {
       ],
       'rerouted' => FALSE,
     ];
-    $data[] = [
+    $data['cc_bcc_2'] = [
       'enabled' => TRUE,
       'allowlisted' => '*@allowlisted.com',
       'post' => [
@@ -174,7 +130,7 @@ class TestEmailFormTest extends RerouteEmailBrowserTestBase {
       ],
       'rerouted' => TRUE,
     ];
-    $data[] = [
+    $data['cc_bcc_3'] = [
       'enabled' => TRUE,
       'allowlisted' => '*@allowlisted.com',
       'post' => [
@@ -183,7 +139,7 @@ class TestEmailFormTest extends RerouteEmailBrowserTestBase {
       ],
       'rerouted' => TRUE,
     ];
-    $data[] = [
+    $data['cc_bcc_4'] = [
       'enabled' => TRUE,
       'allowlisted' => '*@allowlisted.com',
       'post' => [

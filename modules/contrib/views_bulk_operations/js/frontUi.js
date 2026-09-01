@@ -284,7 +284,7 @@
           )
           .each(function () {
             if (this.checked !== value) {
-              $(this).click();
+              this.checked = value;
             }
           });
 

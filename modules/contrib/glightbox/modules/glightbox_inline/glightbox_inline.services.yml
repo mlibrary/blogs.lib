@@ -1,0 +1,5 @@
+
+services:
+  Drupal\glightbox_inline\Hook\GlightboxInlineHooks:
+    class: Drupal\glightbox_inline\Hook\GlightboxInlineHooks
+    autowire: true

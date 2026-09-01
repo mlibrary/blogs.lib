@@ -5,12 +5,16 @@ namespace Drupal\Tests\link_attributes_menu_link_content\Functional;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\Tests\block\Traits\BlockCreationTrait;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests link attributes functionality.
  *
  * @group link_attributes
  */
+#[Group('link_attributes')]
+#[RunTestsInSeparateProcesses]
 class LinkAttributesMenuLinkContentMenuTest extends BrowserTestBase {
 
   use BlockCreationTrait;

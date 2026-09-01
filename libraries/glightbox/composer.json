@@ -1,0 +1,7 @@
+{
+    "name": "levmyshkin/glightbox",
+    "description": "GLightbox is a pure javascript lightbox",
+    "type": "drupal-library",
+    "license": "MIT",
+    "require": {}
+}

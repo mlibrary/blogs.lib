@@ -121,4 +121,20 @@ interface OpenIDConnectClientInterface extends ConfigurableInterface, DependentP
    */
   public function getParentEntityId() : string;
 
+  /**
+   * Sets the provider slug.
+   *
+   * @param string $provider_slug
+   *   The provider slug.
+   */
+  public function setProviderSlug(string $provider_slug = ''): void;
+
+  /**
+   * Returns the provider slug.
+   *
+   * @return string
+   *   The provider slug.
+   */
+  public function getProviderSlug(): string;
+
 }

@@ -208,6 +208,13 @@ class InPlaceEditorDisplayBuilder extends StandardDisplayBuilder {
       $build['#attached']['library'][] = 'panels_ipe/panels_ipe';
       $build['#attached']['drupalSettings']['panels_ipe'] = $this->getDrupalSettings($regions, $layout, $panels_display, $unsaved, $locked);
 
+      // The unsaved/locked state depends on the current user and on the shared
+      // tempstore, which any user with edit access can change at any time. Do
+      // not cache the in-place editor build, otherwise a stale lock state can
+      // be served to another user (e.g. showing the editor as editable when it
+      // is actually locked by someone else).
+      $build['#cache']['max-age'] = 0;
+
       // Add our custom elements to the build.
       $build['#prefix'] = '<div id="panels-ipe-content">';
 

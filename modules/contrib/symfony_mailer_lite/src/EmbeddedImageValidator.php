@@ -3,6 +3,7 @@
 namespace Drupal\symfony_mailer_lite;
 
 use Drupal\Core\File\FileSystemInterface;
+use Symfony\Component\Filesystem\Path;
 
 class EmbeddedImageValidator implements EmbeddedImageValidatorInterface {
 
@@ -42,34 +43,28 @@ class EmbeddedImageValidator implements EmbeddedImageValidatorInterface {
     $image_file_realpath = $this->fileSystem->realpath($this->getDrupalRootRealpath() . $embedded_image->getImagePath());
 
     // Confirm the image file is within the public files directory.
-    if (strpos($image_file_realpath, $this->getPublicFilesRealpath()) !== 0) {
+    if (!Path::isBasePath($this->getPublicFilesRealpath(), $image_file_realpath)) {
       return FALSE;
     }
 
-    // Get the real path of the image file relative to the Drupal root.
-    $image_file_path = $this->getDrupalRootRelativePath($image_file_realpath);
-    if (mb_strpos($image_file_path, '/') === 0) {
-      $image_file_path = mb_substr($image_file_path, 1);
-    }
-
     // Confirm the image file exists.
-    if (!file_exists($image_file_path)) {
+    if (!file_exists($image_file_realpath)) {
       return FALSE;
     }
 
     // Confirm the image file is actually an image.
     if ($this->mimeTypeGuesser instanceof \Symfony\Component\Mime\MimeTypeGuesserInterface) {
-      $filemime = $this->mimeTypeGuesser->guessMimeType($image_file_path);
+      $filemime = $this->mimeTypeGuesser->guessMimeType($image_file_realpath);
     }
     else {
       // @todo Remove this once we no longer have to support Drupal 9.
-      $filemime = $this->mimeTypeGuesser->guess($image_file_path);
+      $filemime = $this->mimeTypeGuesser->guess($image_file_realpath);
     }
     if (strpos($filemime, 'image/') !== 0) {
       return FALSE;
     }
 
-    $embedded_image->setImagePath($image_file_path)
+    $embedded_image->setImagePath($image_file_realpath)
       ->setFileMime($filemime);
 
     return $embedded_image;

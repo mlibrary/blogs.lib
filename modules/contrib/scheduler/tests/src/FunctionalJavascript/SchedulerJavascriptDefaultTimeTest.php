@@ -4,6 +4,7 @@ namespace Drupal\Tests\scheduler\FunctionalJavascript;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the JavaScript functionality for default dates.
@@ -11,6 +12,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group scheduler_js
  */
 #[Group('scheduler_js')]
+#[RunTestsInSeparateProcesses]
 class SchedulerJavascriptDefaultTimeTest extends SchedulerJavascriptTestBase {
 
   /**

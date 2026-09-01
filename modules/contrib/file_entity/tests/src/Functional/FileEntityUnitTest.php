@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\file_entity\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\file\Entity\File;
 
 /**
@@ -11,9 +13,14 @@ use Drupal\file\Entity\File;
  *
  * @group file_entity
  */
+#[Group('file_entity')]
+#[RunTestsInSeparateProcesses]
 class FileEntityUnitTest extends FileEntityTestBase {
 
-  function setUp(): void {
+  /**
+   *
+   */
+  public function setUp(): void {
     parent::setUp();
     $this->setUpFiles();
   }
@@ -21,14 +28,14 @@ class FileEntityUnitTest extends FileEntityTestBase {
   /**
    * Regression tests for core issue http://drupal.org/node/1239376.
    */
-  function testMimeTypeMappings() {
-    $tests = array(
+  public function testMimeTypeMappings() {
+    $tests = [
       'public://test.ogg' => 'audio/ogg',
       'public://test.m4v' => 'video/x-m4v',
       'public://test.mka' => 'audio/x-matroska',
       'public://test.mkv' => 'video/x-matroska',
       'public://test.webp' => 'image/webp',
-    );
+    ];
     /** @var \Symfony\Component\Mime\MimeTypes $guesser */
     $guesser = $this->container->get('file.mime_type.guesser.extension');
     foreach ($tests as $input => $expected) {
@@ -36,7 +43,10 @@ class FileEntityUnitTest extends FileEntityTestBase {
     }
   }
 
-  function testFileEntity() {
+  /**
+   *
+   */
+  public function testFileEntity() {
     $file = reset($this->files['text']);
 
     // Test entity ID, revision ID, and bundle.
@@ -49,9 +59,12 @@ class FileEntityUnitTest extends FileEntityTestBase {
     $this->assertEqual($uri['path'], "file/{$file->fid}");*/
   }
 
-  function testImageDimensions() {
-    $files = array();
-    $text_fids = array();
+  /**
+   *
+   */
+  public function testImageDimensions() {
+    $files = [];
+    $text_fids = [];
     // Test hook_file_insert().
     // Files have been saved as part of setup (in FileEntityTestHelper::setUpFiles).
     foreach ($this->files['image'] as $file) {
@@ -119,13 +132,14 @@ class FileEntityUnitTest extends FileEntityTestBase {
     $this->assertEquals($file->getMetadata('height'), $files[$file->id()]['height'] / 2, 'Updated image height retrieved by file load.');
     $this->assertEquals($file->getMetadata('width'), $files[$file->id()]['width'] / 2, 'Updated image width retrieved by file load.');
 
-    //Test hook_file_delete().
+    // Test hook_file_delete().
     $file->delete();
     $this->assertEquals(0, \Drupal::database()->query(
         'SELECT COUNT(*) FROM {file_metadata} WHERE fid = :fid',
-        array(':fid' => 'fid')
+        [':fid' => 'fid']
       )->fetchField(),
       'Row deleted in {file_dimensions} when deleting the file.'
     );
   }
+
 }

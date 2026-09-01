@@ -10,6 +10,7 @@ default-time:
   dependencies:
     - core/jquery
     - core/once
+# The scheduler_default_time_8x.js library is still used when running at Drupal Core 9.0 and 9.1
 default-time-8x:
   js:
     js/scheduler_default_time_8x.js: {}

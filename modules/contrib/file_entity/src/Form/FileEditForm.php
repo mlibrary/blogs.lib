@@ -2,6 +2,8 @@
 
 namespace Drupal\file_entity\Form;
 
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\File\FileExists;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityRepositoryInterface;
@@ -165,7 +167,7 @@ class FileEditForm extends ContentEntityForm {
       }
       $log_args = array('@old' => $this->entity->getFilename(), '@new' => $entity_replacement->getFileName());
       // Move file from temp to permanent home.
-      if ($this->fileSystem->copy($entity_replacement->getFileUri(), $this->entity->getFileUri(), FileSystemInterface::EXISTS_REPLACE)) {
+      if ($this->fileSystem->copy($entity_replacement->getFileUri(), $this->entity->getFileUri(), DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.3.0', fn() => FileExists::Replace, fn() => FileSystemInterface::EXISTS_REPLACE))) {
         $entity_replacement->delete();
         \Drupal::logger('file_entity')->info('File @old was replaced by @new', $log_args);
       }

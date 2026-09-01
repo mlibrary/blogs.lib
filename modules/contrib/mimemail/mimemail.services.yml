@@ -1,0 +1,5 @@
+
+services:
+  Drupal\mimemail\Hook\MimemailHooks:
+    class: Drupal\mimemail\Hook\MimemailHooks
+    autowire: true
