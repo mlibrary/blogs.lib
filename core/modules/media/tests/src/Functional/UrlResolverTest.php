@@ -5,17 +5,21 @@ declare(strict_types=1);
 namespace Drupal\Tests\media\Functional;
 
 use Drupal\Component\Utility\UrlHelper;
+use Drupal\media\OEmbed\UrlResolver;
 use Drupal\Tests\media\Traits\OEmbedTestTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Depends;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore dailymotion
-
 /**
  * Tests the oEmbed URL resolver service.
- *
- * @coversDefaultClass \Drupal\media\OEmbed\UrlResolver
- *
- * @group media
  */
+#[CoversClass(UrlResolver::class)]
+#[Group('media')]
+#[RunTestsInSeparateProcesses]
 class UrlResolverTest extends MediaFunctionalTestBase {
 
   use OEmbedTestTrait;
@@ -40,6 +44,7 @@ class UrlResolverTest extends MediaFunctionalTestBase {
    * @see ::testEndpointMatching()
    *
    * @return array
+   *   An array of test data.
    */
   public static function providerEndpointMatching() {
     return [
@@ -65,16 +70,15 @@ class UrlResolverTest extends MediaFunctionalTestBase {
   /**
    * Tests resource URL resolution with a matched provider endpoint.
    *
-   * @covers ::getProviderByUrl
-   * @covers ::getResourceUrl
-   *
    * @param string $url
    *   The asset URL to resolve.
    * @param string $resource_url
    *   The expected oEmbed resource URL of the asset.
    *
-   * @dataProvider providerEndpointMatching
+   * @legacy-covers ::getProviderByUrl
+   * @legacy-covers ::getResourceUrl
    */
+  #[DataProvider('providerEndpointMatching')]
   public function testEndpointMatching($url, $resource_url): void {
     $this->assertSame(
       $resource_url,
@@ -84,12 +88,14 @@ class UrlResolverTest extends MediaFunctionalTestBase {
 
   /**
    * Tests that hook_oembed_resource_url_alter() is invoked.
-   *
-   * @depends testEndpointMatching
    */
+  #[Depends('testEndpointMatching')]
   public function testResourceUrlAlterHook(): void {
     $this->container->get('module_installer')->install(['media_test_oembed']);
 
+    // Much like FunctionalTestSetupTrait::installModulesFromClassProperty()
+    // after module install the rebuilt container needs to be used.
+    $this->container = \Drupal::getContainer();
     $resource_url = $this->container->get('media.oembed.url_resolver')
       ->getResourceUrl('https://vimeo.com/14782834');
 
@@ -102,6 +108,7 @@ class UrlResolverTest extends MediaFunctionalTestBase {
    * @see ::testUrlDiscovery()
    *
    * @return array
+   *   An array of test data.
    */
   public static function providerUrlDiscovery() {
     return [
@@ -124,12 +131,11 @@ class UrlResolverTest extends MediaFunctionalTestBase {
    * @param string $resource_url
    *   The expected oEmbed resource URL of the asset.
    *
-   * @covers ::discoverResourceUrl
-   * @covers ::getProviderByUrl
-   * @covers ::getResourceUrl
-   *
-   * @dataProvider providerUrlDiscovery
+   * @legacy-covers ::discoverResourceUrl
+   * @legacy-covers ::getProviderByUrl
+   * @legacy-covers ::getResourceUrl
    */
+  #[DataProvider('providerUrlDiscovery')]
   public function testUrlDiscovery(string $url, string $resource_url): void {
     $settings['settings']['media_oembed_discovery_trusted_host_patterns'] = (object) [
       'value' => [

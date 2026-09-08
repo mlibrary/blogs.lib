@@ -84,7 +84,7 @@ class FileEditForm extends ContentEntityForm {
         // Set up replacement file validation.
         $replacement_options = array();
         // Replacement file must have the same extension as the original file.
-        $replacement_options['file_extensions'] = pathinfo($file->getFilename(), PATHINFO_EXTENSION);
+        $replacement_options['file_extensions'] = pathinfo($file->getFileUri(), PATHINFO_EXTENSION);
 
         $form['replace_upload'] = array(
           '#type' => 'managed_file',

@@ -7,16 +7,20 @@ namespace Drupal\Tests\media\Kernel;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\Core\Url;
 use Drupal\filter\Entity\FilterFormat;
+use Drupal\media\Controller\MediaFilterController;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Tests that media preview route follows the media's access control.
- *
- * @coversDefaultClass \Drupal\media\Controller\MediaFilterController
- * @group media
  */
+#[CoversClass(MediaFilterController::class)]
+#[Group('media')]
+#[RunTestsInSeparateProcesses]
 class MediaFilterControllerTest extends MediaEmbedFilterTestBase {
 
   /**

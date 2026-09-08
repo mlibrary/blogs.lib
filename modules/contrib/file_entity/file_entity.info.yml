@@ -11,7 +11,7 @@ dependencies:
   - token:token
 configure: file_entity.settings
 
-# Information added by Drupal.org packaging script on 2026-07-30
-version: '8.x-2.8'
+# Information added by Drupal.org packaging script on 2026-09-02
+version: '8.x-2.9'
 project: 'file_entity'
-datestamp: 1785434873
+datestamp: 1788326075

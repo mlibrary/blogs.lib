@@ -16,10 +16,8 @@ use Symfony\Component\Validator\Constraints\DisableAutoMapping;
 use Symfony\Component\Validator\Constraints\EnableAutoMapping;
 use Symfony\Component\Validator\Exception\NoSuchMetadataException;
 use Symfony\Component\Validator\Mapping\AutoMappingStrategy;
-use Symfony\Component\Validator\Mapping\CascadingStrategy;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 use Symfony\Component\Validator\Mapping\Loader\LoaderInterface;
-use Symfony\Component\Validator\Mapping\MemberMetadata;
 use Symfony\Component\Validator\Mapping\MetadataInterface;
 use Symfony\Component\Validator\Mapping\PropertyMetadata;
 
@@ -45,20 +43,17 @@ use Symfony\Component\Validator\Mapping\PropertyMetadata;
  */
 class LazyLoadingMetadataFactory implements MetadataFactoryInterface
 {
-    protected $loader;
-    protected $cache;
-
     /**
      * The loaded metadata, indexed by class name.
      *
      * @var ClassMetadata[]
      */
-    protected $loadedClasses = [];
+    protected array $loadedClasses = [];
 
-    public function __construct(?LoaderInterface $loader = null, ?CacheItemPoolInterface $cache = null)
-    {
-        $this->loader = $loader;
-        $this->cache = $cache;
+    public function __construct(
+        protected ?LoaderInterface $loader = null,
+        protected ?CacheItemPoolInterface $cache = null,
+    ) {
     }
 
     /**
@@ -108,7 +103,7 @@ class LazyLoadingMetadataFactory implements MetadataFactoryInterface
 
             $this->loader->loadClassMetadata($metadata);
 
-            $this->removeUnusedPlaceholders($metadata, $placeholders);
+            $metadata->removeUnusedAutoMappingPlaceholders($placeholders);
         }
 
         if (null !== $cacheItem) {
@@ -185,7 +180,14 @@ class LazyLoadingMetadataFactory implements MetadataFactoryInterface
 
                 if (AutoMappingStrategy::NONE !== $strategy = $member->getAutoMappingStrategy()) {
                     $metadata->addPropertyConstraint($property, AutoMappingStrategy::DISABLED === $strategy ? new DisableAutoMapping() : new EnableAutoMapping());
-                    $placeholders[$property] = [$metadata->properties[$property], $strategy];
+
+                    foreach ($metadata->getPropertyMetadata($property) as $placeholder) {
+                        if ($placeholder instanceof PropertyMetadata) {
+                            $placeholders[$property] = [$placeholder, $strategy];
+
+                            break;
+                        }
+                    }
                 }
 
                 // The first property metadata is the one declared closest to the class, so it wins
@@ -194,32 +196,6 @@ class LazyLoadingMetadataFactory implements MetadataFactoryInterface
         }
 
         return $placeholders;
-    }
-
-    /**
-     * Drops the placeholders the loaders left untouched, and moves the remaining
-     * ones last, where merging the parent's metadata would have put them.
-     *
-     * @param array<string, array{PropertyMetadata, int}> $placeholders
-     */
-    private function removeUnusedPlaceholders(ClassMetadata $metadata, array $placeholders): void
-    {
-        foreach ($placeholders as $property => [$placeholder, $strategy]) {
-            if (!$placeholder->getConstraints() && $strategy === $placeholder->getAutoMappingStrategy() && CascadingStrategy::NONE === $placeholder->getCascadingStrategy()) {
-                $metadata->members[$property] = array_values(array_filter($metadata->members[$property], static fn (MemberMetadata $member) => $member !== $placeholder));
-
-                if ($placeholder === ($metadata->properties[$property] ?? null)) {
-                    unset($metadata->properties[$property]);
-                }
-            }
-
-            $members = $metadata->members[$property];
-            unset($metadata->members[$property]);
-
-            if ($members) {
-                $metadata->members[$property] = $members;
-            }
-        }
     }
 
     /**

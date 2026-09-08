@@ -90,7 +90,7 @@ class UrlResolver implements UrlResolverInterface {
    * @param string $url
    *   The resource's URL.
    *
-   * @return string|bool
+   * @return string|false
    *   URL of the oEmbed endpoint, or FALSE if the discovery was unsuccessful.
    */
   protected function discoverResourceUrl($url) {
@@ -117,8 +117,14 @@ class UrlResolver implements UrlResolverInterface {
       return FALSE;
     }
 
+    // Only care about HTML responses.
+    $response_type = strtolower($response->getHeaderLine('Content-Type'));
+    if (!str_contains($response_type, 'text/html')) {
+      return FALSE;
+    }
+
     $document = Html::load((string) $response->getBody());
-    $xpath = new \DOMXpath($document);
+    $xpath = new \DOMXPath($document);
 
     return $this->findUrl($xpath, 'json') ?: $this->findUrl($xpath, 'xml');
   }
@@ -158,7 +164,7 @@ class UrlResolver implements UrlResolverInterface {
       return $this->resourceFetcher->fetchResource($resource_url)->getProvider();
     }
 
-    throw new ResourceException('No matching provider found.', $url);
+    throw new ResourceException("No matching oEmbed provider found for resource: \"{$url}\"", $url);
   }
 
   /**

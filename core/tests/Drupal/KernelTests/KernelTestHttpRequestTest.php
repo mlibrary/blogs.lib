@@ -5,16 +5,22 @@ declare(strict_types=1);
 namespace Drupal\KernelTests;
 
 use Drupal\Core\Url;
+use Drupal\Tests\HttpKernelUiHelperTrait;
+use PHPUnit\Framework\Attributes\CoversTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Tests making HTTP requests in a kernel test.
- *
- * @group PHPUnit
- * @group Test
- * @group KernelTests
  */
+#[CoversTrait(HttpKernelUiHelperTrait::class)]
+#[Group('PHPUnit')]
+#[Group('Test')]
+#[Group('KernelTests')]
+#[RunTestsInSeparateProcesses]
 class KernelTestHttpRequestTest extends KernelTestBase {
+
 
   /**
    * {@inheritdoc}

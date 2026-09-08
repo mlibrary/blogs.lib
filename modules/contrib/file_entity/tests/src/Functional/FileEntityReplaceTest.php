@@ -25,6 +25,46 @@ class FileEntityReplaceTest extends FileEntityTestBase {
   }
 
   /**
+   * Tests replacement validation uses the on-disk file extension.
+   */
+  public function testReplacementValidationUsesFileUriExtension() {
+    // Select a text file whose actual file on disk has a .txt extension.
+    $file = reset($this->files['text']);
+    $original_uri = $file->getFileUri();
+    $original_contents = file_get_contents($original_uri);
+
+    // Create a user with file edit permissions.
+    $user = $this->drupalCreateUser(['edit any document files']);
+    $this->drupalLogin($user);
+
+    // Rename only the editable filename property. This must not change the
+    // extension used to validate replacement uploads.
+    $this->drupalGet('file/' . $file->id() . '/edit');
+    $this->submitForm([
+      'filename[0][value]' => 'example.zip',
+    ], t('Save'));
+
+    // Re-load the file and verify that only its filename property changed.
+    $file = File::load($file->id());
+    $this->assertSame('example.zip', $file->getFilename());
+    $this->assertSame($original_uri, $file->getFileUri());
+
+    // Attempt to replace the .txt file with a .zip file. Validation must use
+    // the extension from the file URI, rather than the editable filename.
+    $zip_uri = 'public://replacement.zip';
+    file_put_contents($zip_uri, "PK\x03\x04test zip contents");
+    $edit = [
+      'files[replace_upload]' => \Drupal::service('file_system')->realpath($zip_uri),
+    ];
+    $this->drupalGet('file/' . $file->id() . '/edit');
+    $this->submitForm($edit, t('Save'));
+
+    $this->assertSession()->responseContains(t('The specified file %file could not be uploaded.', ['%file' => 'replacement.zip']));
+    $this->assertSession()->pageTextContains('Only files with the following extensions are allowed: txt.');
+    $this->assertSame($original_contents, file_get_contents($original_uri));
+  }
+
+  /**
    * @todo Test image dimensions for an image field are reset when a file is replaced.
    * @todo Test image styles are cleared when an image is updated.
    */
