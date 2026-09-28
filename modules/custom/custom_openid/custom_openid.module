@@ -44,6 +44,7 @@ function custom_openid_openid_connect_pre_authorize($account, array $context) {
   if ($account && !$account->isBlocked() && $account->hasRole('authenticated')) {
     return $account;
   }
+  //new um account
   $user_data = _get_mcommunity_user($uname);
   if (is_array($user_data) && isset($user_data['mail']) && !empty($user_data['mail'])) {
     $testname = _custom_openid_normalize_username_from_email($user_data['mail']);
@@ -57,6 +58,19 @@ function custom_openid_openid_connect_pre_authorize($account, array $context) {
       $new_user->save();
       return user_load_by_name($uname);
     }
+  }
+  //new friend account
+  else if (str_contains($uname, '@') && !empty($context['userinfo']['email_verified']) &&
+    $uname === strtolower($context['userinfo']['email']) && $uname === strtolower($context['userinfo']['name'])
+  ) {
+    $new_user = User::create([
+      'name' => $uname,
+      'mail' => $uname,
+      'pass' => \Drupal::service('password_generator')->generate(),
+      'status' => 1,
+    ]);
+    $new_user->save();
+    return user_load_by_name($uname);
   }
 
   // Deny all other users.
