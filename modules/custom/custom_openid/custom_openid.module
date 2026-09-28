@@ -48,7 +48,7 @@ function custom_openid_openid_connect_pre_authorize($account, array $context) {
   $user_data = _get_mcommunity_user($uname);
   if (is_array($user_data) && isset($user_data['mail']) && !empty($user_data['mail'])) {
     $testname = _custom_openid_normalize_username_from_email($user_data['mail']);
-    if ($testname == $uname && !user_load_by_name($uname)) {
+    if ($testname == $uname && !user_load_by_name($uname) && count(\Drupal::service('user.name_validator')->validateName($uname)) === 0) {
       $new_user = User::create([
         'name' => $uname,
         'mail' => $user_data['mail'],
@@ -62,6 +62,7 @@ function custom_openid_openid_connect_pre_authorize($account, array $context) {
   //new friend account
   else if (str_contains($uname, '@') && !empty($context['userinfo']['email_verified']) &&
     $uname === strtolower($context['userinfo']['email']) && $uname === strtolower($context['userinfo']['name'])
+    && count(\Drupal::service('user.name_validator')->validateName($uname)) === 0
   ) {
     $new_user = User::create([
       'name' => $uname,
