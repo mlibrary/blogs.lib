@@ -1,0 +1,12 @@
+name: 'OpenID Connect Test'
+type: module
+description: 'Test helpers for OpenID Connect functional tests.'
+package: Testing
+hidden: TRUE
+dependencies:
+  - openid_connect:openid_connect
+
+# Information added by Drupal.org packaging script on 2026-08-31
+version: '3.0.0-alpha9'
+project: 'openid_connect'
+datestamp: 1788187142

@@ -1,11 +1,11 @@
-name: 'Reroute emails'
+name: 'Reroute Email'
 description: 'Reroutes emails send from the site to a predefined email. Useful for test sites.'
 package: Development
-core_version_requirement: ^9.4 || ^10
+core_version_requirement: ^10.2 || ^11
 configure: reroute_email.settings
 type: module
 
-# Information added by Drupal.org packaging script on 2023-10-01
-version: '2.2.1'
+# Information added by Drupal.org packaging script on 2024-10-28
+version: '2.3.0-rc2'
 project: 'reroute_email'
-datestamp: 1696186593
+datestamp: 1730150312

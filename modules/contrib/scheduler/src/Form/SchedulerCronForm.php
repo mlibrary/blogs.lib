@@ -94,6 +94,17 @@ class SchedulerCronForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('scheduler.settings');
 
+    $timecheck = array_merge([$this->t('Server time: %utc', _scheduler_timecheck())], _scheduler_timecheck('description'));
+    $form['timecheck'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Timecheck'),
+      'description' => [
+        '#type' => 'inline_template',
+        '#template' => '{{ description|raw }}',
+        '#context' => ['description' => implode('<br />', $timecheck)],
+      ],
+    ];
+
     $form['cron_settings'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Lightweight cron settings'),

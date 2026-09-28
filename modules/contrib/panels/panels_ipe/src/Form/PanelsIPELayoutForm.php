@@ -139,7 +139,7 @@ class PanelsIPELayoutForm extends FormBase {
       '#ajax' => [
         'callback' => '::submitForm',
         'wrapper' => 'panels-ipe-layout-form-wrapper',
-        'method' => 'replace',
+        'method' => 'replaceWith',
         'progress' => [
           'type' => 'throbber',
           'message' => '',

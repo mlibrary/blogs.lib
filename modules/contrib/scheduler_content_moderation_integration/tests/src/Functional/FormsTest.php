@@ -18,8 +18,10 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
    * Tests the hook_form_alter functionality.
    *
    * @dataProvider dataFormAlter
+   *
+   * @throws \Exception
    */
-  public function testEntityFormAlter($entityTypeId, $bundle, $operation) {
+  public function testEntityFormAlter($entityTypeId, $bundle, $operation): void {
     $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
     $entityType = $this->entityTypeObject($entityTypeId, $bundle);
     $assert = $this->assertSession();
@@ -35,8 +37,8 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
     // Check both state fields are shown when the entity is enabled by default.
     $this->drupalGet($url);
     $this->assertSession()->statusCodeEquals(200);
-    $assert->ElementExists('xpath', '//select[@id = "edit-publish-state-0"]');
-    $assert->ElementExists('xpath', '//select[@id = "edit-unpublish-state-0"]');
+    $assert->elementExists('xpath', '//select[@id = "edit-publish-state-0"]');
+    $assert->elementExists('xpath', '//select[@id = "edit-unpublish-state-0"]');
 
     // Check that both fields have the Scheduler Settings group as parent.
     $assert->elementExists('xpath', '//details[@id = "edit-scheduler-settings"]//select[@id = "edit-publish-state-0"]');
@@ -46,16 +48,16 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
     // now hidden.
     $entityType->setThirdPartySetting('scheduler', 'publish_enable', FALSE)->save();
     $this->drupalGet($url);
-    $assert->ElementNotExists('xpath', '//select[@id = "edit-publish-state-0"]');
-    $assert->ElementExists('xpath', '//select[@id = "edit-unpublish-state-0"]');
+    $assert->elementNotExists('xpath', '//select[@id = "edit-publish-state-0"]');
+    $assert->elementExists('xpath', '//select[@id = "edit-unpublish-state-0"]');
 
     // Re-enable scheduled publishing and disable unpublishing, and check that
     // only the unpublish-state field is hidden.
     $entityType->setThirdPartySetting('scheduler', 'publish_enable', TRUE)
       ->setThirdPartySetting('scheduler', 'unpublish_enable', FALSE)->save();
     $this->drupalGet($url);
-    $assert->ElementExists('xpath', '//select[@id = "edit-publish-state-0"]');
-    $assert->ElementNotExists('xpath', '//select[@id = "edit-unpublish-state-0"]');
+    $assert->elementExists('xpath', '//select[@id = "edit-publish-state-0"]');
+    $assert->elementNotExists('xpath', '//select[@id = "edit-unpublish-state-0"]');
   }
 
   /**
@@ -68,7 +70,7 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
    *
    * @dataProvider dataFormAlter
    */
-  public function testHideSchedulerFields($entityTypeId, $bundle, $operation) {
+  public function testHideSchedulerFields($entityTypeId, $bundle, $operation): void {
     $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
 
     if ($operation == 'add') {
@@ -82,10 +84,10 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
     // By default the Scheduler publish_on and unpublish_on fields are shown.
     $this->drupalGet($url);
     $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()->FieldExists('publish_on[0][value][date]');
-    $this->assertSession()->FieldExists('publish_state[0]');
-    $this->assertSession()->FieldExists('unpublish_on[0][value][date]');
-    $this->assertSession()->FieldExists('unpublish_state[0]');
+    $this->assertSession()->fieldExists('publish_on[0][value][date]');
+    $this->assertSession()->fieldExists('publish_state[0]');
+    $this->assertSession()->fieldExists('unpublish_on[0][value][date]');
+    $this->assertSession()->fieldExists('unpublish_state[0]');
 
     // Remove the 'archived' state so that there is no transition relating to
     // scheduled unpublishing.
@@ -94,20 +96,20 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
 
     // Check that the unpublish_on and unpublish_state fields are hidden.
     $this->drupalGet($url);
-    $this->assertSession()->FieldExists('publish_state[0]');
-    $this->assertSession()->FieldExists('publish_on[0][value][date]');
-    $this->assertSession()->FieldNotExists('unpublish_state[0]');
-    $this->assertSession()->FieldNotExists('unpublish_on[0][value][date]');
+    $this->assertSession()->fieldExists('publish_state[0]');
+    $this->assertSession()->fieldExists('publish_on[0][value][date]');
+    $this->assertSession()->fieldNotExists('unpublish_state[0]');
+    $this->assertSession()->fieldNotExists('unpublish_on[0][value][date]');
 
     // Set the unpublish_state field to be hidden, and check that the results
     // are the same as above.
     $formDisplay = $this->container->get('entity_display.repository')->getFormDisplay($entityTypeId, $bundle);
     $formDisplay->removeComponent('unpublish_state')->save();
     $this->drupalGet($url);
-    $this->assertSession()->FieldExists('publish_state[0]');
-    $this->assertSession()->FieldExists('publish_on[0][value][date]');
-    $this->assertSession()->FieldNotExists('unpublish_state[0]');
-    $this->assertSession()->FieldNotExists('unpublish_on[0][value][date]');
+    $this->assertSession()->fieldExists('publish_state[0]');
+    $this->assertSession()->fieldExists('publish_on[0][value][date]');
+    $this->assertSession()->fieldNotExists('unpublish_state[0]');
+    $this->assertSession()->fieldNotExists('unpublish_on[0][value][date]');
 
     // Remove the 'publish' transition so there is nothing relating to scheduled
     // publishing.
@@ -116,19 +118,19 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
 
     // Check that the publish_on and publish_state fields are hidden.
     $this->drupalGet($url);
-    $this->assertSession()->FieldNotExists('publish_state[0]');
-    $this->assertSession()->FieldNotExists('publish_on[0][value][date]');
-    $this->assertSession()->FieldNotExists('unpublish_state[0]');
-    $this->assertSession()->FieldNotExists('unpublish_on[0][value][date]');
+    $this->assertSession()->fieldNotExists('publish_state[0]');
+    $this->assertSession()->fieldNotExists('publish_on[0][value][date]');
+    $this->assertSession()->fieldNotExists('unpublish_state[0]');
+    $this->assertSession()->fieldNotExists('unpublish_on[0][value][date]');
 
     // Also set the publish_state field to be hidden, and check that the results
     // are the same as above.
     $formDisplay->removeComponent('publish_state')->save();
     $this->drupalGet($url);
-    $this->assertSession()->FieldNotExists('publish_state[0]');
-    $this->assertSession()->FieldNotExists('publish_on[0][value][date]');
-    $this->assertSession()->FieldNotExists('unpublish_state[0]');
-    $this->assertSession()->FieldNotExists('unpublish_on[0][value][date]');
+    $this->assertSession()->fieldNotExists('publish_state[0]');
+    $this->assertSession()->fieldNotExists('publish_on[0][value][date]');
+    $this->assertSession()->fieldNotExists('unpublish_state[0]');
+    $this->assertSession()->fieldNotExists('unpublish_on[0][value][date]');
 
   }
 
@@ -139,7 +141,7 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
    *
    * @dataProvider dataFormAlter
    */
-  public function testFormAlterWithDeniedAccess($entityTypeId, $bundle, $operation) {
+  public function testFormAlterWithDeniedAccess($entityTypeId, $bundle, $operation): void {
     $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);
     $assert = $this->assertSession();
 
@@ -154,8 +156,8 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
     // Check that both state fields are shown by default.
     $this->drupalGet($url);
     $this->assertSession()->statusCodeEquals(200);
-    $assert->FieldExists('publish_state[0]');
-    $assert->FieldExists('unpublish_state[0]');
+    $assert->fieldExists('publish_state[0]');
+    $assert->fieldExists('unpublish_state[0]');
 
     // Install the testing module which uses hook_form_alter to deny access to
     // the two state fields.
@@ -170,8 +172,8 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
     // Check that both state fields are now hidden.
     $this->drupalGet($url);
     $this->assertSession()->statusCodeEquals(200);
-    $assert->FieldNotExists('publish_state[0]');
-    $assert->FieldNotExists('unpublish_state[0]');
+    $assert->fieldNotExists('publish_state[0]');
+    $assert->fieldNotExists('unpublish_state[0]');
   }
 
   /**
@@ -199,7 +201,7 @@ class FormsTest extends SchedulerContentModerationBrowserTestBase {
    *
    * @dataProvider dataEntityTypeFormAlter
    */
-  public function testEntityTypeFormAlter($entityTypeId, $bundle, $moderatable) {
+  public function testEntityTypeFormAlter($entityTypeId, $bundle, $moderatable): void {
     // Give adminUser the permissions to use the field_ui 'manage form display'
     // tab for the entity type being tested.
     $this->addPermissionsToUser($this->adminUser, ["administer {$entityTypeId} form display"]);

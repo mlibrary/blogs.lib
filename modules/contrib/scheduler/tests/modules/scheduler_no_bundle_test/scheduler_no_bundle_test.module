@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * Test module for scheduler no-bundle entity type support.
+ */
+
+/**
+ * Implements hook_entity_form_mode_info_alter().
+ *
+ * Registers a phantom form mode for scheduler_test_no_bundle that has no
+ * backing core.entity_form_mode.* config entity, to test that scheduler
+ * handles this edge case without a fatal error.
+ */
+function scheduler_no_bundle_test_entity_form_mode_info_alter(array &$form_modes): void {
+  $form_modes['scheduler_test_no_bundle']['phantom'] = [
+    'label' => 'Phantom',
+    'targetEntityType' => 'scheduler_test_no_bundle',
+    'status' => TRUE,
+    'cache' => TRUE,
+  ];
+}

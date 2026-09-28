@@ -23,7 +23,7 @@
     "irc": "irc://irc.freenode.org/drupal-scotch",
     "source": "https://git.drupalcode.org/project/panels"
   },
-  "license": "GPL-2.0+",
+  "license": "GPL-2.0-or-later",
   "minimum-stability": "dev",
   "require": {
     "drupal/ctools": "^3.15 || ^4.1",

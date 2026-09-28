@@ -1,0 +1,31 @@
+openid_connect.client.plugin.acm-idm:
+  type: mapping
+  label: 'OpenID Connect Test Dash client settings'
+  mapping:
+    client_id:
+      type: string
+      label: 'Client ID'
+    client_secret:
+      type: string
+      label: 'Client secret'
+    provider_slug:
+      type: string
+      label: 'Redirect URL Slug'
+    iss_allowed_domains:
+      type: string
+      label: 'Domains that are allowed to initiate SSO using ISS'
+    prompt:
+      type: sequence
+      label: 'Prompt'
+      sequence:
+        type: string
+        label: 'Prompt option'
+    authorization_endpoint:
+      type: string
+      label: 'Authorization endpoint'
+    token_endpoint:
+      type: string
+      label: 'Token endpoint'
+    userinfo_endpoint:
+      type: string
+      label: 'Userinfo endpoint'

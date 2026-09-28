@@ -21,7 +21,7 @@ class SendmailTransport extends TransportBase {
    */
   public function defaultConfiguration() {
     return [
-      'query' => ['command' => '/usr/sbin/sendmail -bs']
+      'query' => ['command' => '']
     ];
   }
 
@@ -29,12 +29,16 @@ class SendmailTransport extends TransportBase {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    $commands = Settings::get('mailer_sendmail_commands', []);
+    $commands = ['_default_' => $this->t('&lt;Default&gt;')] + array_combine($commands, $commands);
 
     $form['command'] = [
-      '#type' => 'textfield',
+      '#type' => 'radios',
       '#title' => $this->t('Sendmail Command'),
-      '#default_value' => $this->configuration['query']['command'],
+      '#options' => $commands,
+      '#default_value' => !empty($this->configuration['query']['command']) ? $this->configuration['query']['command'] : '_default_',
       '#required' => TRUE,
+      '#description' => $this->t('Configure additional sendmail commands by adding or updating <a href="https://git.drupalcode.org/project/symfony_mailer_lite/-/tree/2.0.x/README.md#using-custom-sendmail-commands">$settings[\'mailer_sendmail_commands\']</a> in your settings.php or settings.local.php file.'),
     ];
 
     return $form;
@@ -44,7 +48,13 @@ class SendmailTransport extends TransportBase {
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $this->configuration['query']['command'] = $form_state->getValue('command');
+    $command = $form_state->getValue('command');
+    if ($command === '_default_') {
+      $command = '';
+    }
+    $this->configuration['query']['command'] = $command;
   }
+
+
 
 }

@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\mimemail\Unit;
 
-use Drupal\Tests\Core\Mail\Plugin\Mail\PhpMailTest;
 use Drupal\mimemail\Plugin\Mail\MimeMail;
+use Drupal\Tests\Core\Mail\Plugin\Mail\PhpMailTest;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the MimeMail plugin by adapting its parent class's tests.
@@ -12,6 +15,7 @@ use Drupal\mimemail\Plugin\Mail\MimeMail;
  *
  * @group mimemail
  */
+#[Group('mimemail')]
 class MimeMailTest extends PhpMailTest {
 
   /**
@@ -44,7 +48,7 @@ class MimeMailTest extends PhpMailTest {
    *
    * @covers ::mail
    */
-  public function testMail() {
+  public function testMail(): void {
     $this->assertTrue($this->createMimeMailInstance()
       ->mail([
         'id' => 'test',

@@ -1,0 +1,6 @@
+glightbox_inline:
+  js:
+    js/glightbox_inline.js: {}
+  dependencies:
+    - glightbox/glightbox
+    - core/once

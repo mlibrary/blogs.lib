@@ -85,6 +85,28 @@ class SchedulerAdminForm extends ConfigFormBase {
       'url' => Url::fromRoute('system.admin_structure'),
     ];
     foreach ($plugins as $entityTypeId => $plugin) {
+      if (!$this->schedulerManager->hasBundleType($entityTypeId)) {
+        $entity_type_definition = $this->entityTypeManager->getDefinition($entityTypeId, FALSE);
+        if (!$entity_type_definition) {
+          throw new \Exception(sprintf('Invalid or empty %s entity type definition for %s module. Do a full cache clear via admin/config/development/performance or drush cr.', $entityTypeId, $plugin->dependency()));
+        }
+        $collection_label = (string) ($entity_type_definition->get('label_collection') ?: $entity_type_definition->get('label'));
+        $settings = [];
+        if ($this->schedulerManager->getNoBundleEntityTypeSetting($entityTypeId, 'publish_enable', $this->setting('default_publish_enable'))) {
+          $settings[] = $this->t('publishing');
+        }
+        if ($this->schedulerManager->getNoBundleEntityTypeSetting($entityTypeId, 'unpublish_enable', $this->setting('default_unpublish_enable'))) {
+          $settings[] = $this->t('unpublishing');
+        }
+
+        $links[] = ['title' => "-- $collection_label --"];
+        $links[] = [
+          'title' => $collection_label . (!empty($settings) ? ' (' . implode(', ', $settings) . ')' : ''),
+          'url' => Url::fromRoute('scheduler.no_bundle_settings_form', ['entity_type_id' => $entityTypeId]),
+        ];
+        continue;
+      }
+
       $publishing_enabled_types = $this->schedulerManager->getEnabledTypes($entityTypeId, 'publish');
       $unpublishing_enabled_types = $this->schedulerManager->getEnabledTypes($entityTypeId, 'unpublish');
 

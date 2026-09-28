@@ -2,19 +2,17 @@
 
 namespace Drupal\Tests\reroute_email\Functional;
 
-use Drupal\reroute_email\Constants\RerouteEmailConstants;
+use Drupal\reroute_email\RerouteEmailHandlerPluginInterface;
 
 /**
  * Test Reroute Email's with an allow-listed permission.
- *
- * @ingroup reroute_email_tests
  *
  * @group reroute_email
  */
 class SkipRolesTest extends RerouteEmailBrowserTestBase {
 
   /**
-   * Basic tests for the allowlisted addresses by the permissin.
+   * Basic tests for the allowlisted addresses by the permission.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Behat\Mink\Exception\ResponseTextException
@@ -26,9 +24,9 @@ class SkipRolesTest extends RerouteEmailBrowserTestBase {
 
     // Configure to skip rerouting by a role.
     $this->configureRerouteEmail([
-      RerouteEmailConstants::REROUTE_EMAIL_ENABLE => TRUE,
-      RerouteEmailConstants::REROUTE_EMAIL_ADDRESS => $this->rerouteDestination,
-      RerouteEmailConstants::REROUTE_EMAIL_ROLES => [$role],
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ENABLE => TRUE,
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ADDRESS => static::$rerouteDestination,
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ROLES => [$role],
     ]);
 
     // Create a user.
@@ -44,7 +42,7 @@ class SkipRolesTest extends RerouteEmailBrowserTestBase {
 
     // Submit a test email (should not be rerouted).
     $this->assertMailNotReroutedFromTestForm(['to' => $account->getEmail()]);
-    $this->assertMailHeader('X-Rerouted-Reason', 'ROLE');
+    $this->assertMailHeader(RerouteEmailHandlerPluginInterface::HEADER_REASON, 'ROLE');
   }
 
 }

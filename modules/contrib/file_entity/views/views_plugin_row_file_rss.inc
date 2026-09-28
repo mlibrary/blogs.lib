@@ -151,7 +151,7 @@ class views_plugin_row_file_rss extends RowPluginBase {
 
     // Hide the links if desired.
     if (!$this->options['links']) {
-      hide($build['links']);
+      $build['links']['#printed'] = true;
     }
 
     if ($display_mode != 'title') {

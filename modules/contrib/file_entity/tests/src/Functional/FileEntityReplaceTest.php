@@ -2,6 +2,9 @@
 
 namespace Drupal\Tests\file_entity\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\file\Entity\File;
 
 /**
@@ -9,6 +12,8 @@ use Drupal\file\Entity\File;
  *
  * @group file_entity
  */
+#[Group('file_entity')]
+#[RunTestsInSeparateProcesses]
 class FileEntityReplaceTest extends FileEntityTestBase {
 
   /**
@@ -20,6 +25,46 @@ class FileEntityReplaceTest extends FileEntityTestBase {
   }
 
   /**
+   * Tests replacement validation uses the on-disk file extension.
+   */
+  public function testReplacementValidationUsesFileUriExtension() {
+    // Select a text file whose actual file on disk has a .txt extension.
+    $file = reset($this->files['text']);
+    $original_uri = $file->getFileUri();
+    $original_contents = file_get_contents($original_uri);
+
+    // Create a user with file edit permissions.
+    $user = $this->drupalCreateUser(['edit any document files']);
+    $this->drupalLogin($user);
+
+    // Rename only the editable filename property. This must not change the
+    // extension used to validate replacement uploads.
+    $this->drupalGet('file/' . $file->id() . '/edit');
+    $this->submitForm([
+      'filename[0][value]' => 'example.zip',
+    ], t('Save'));
+
+    // Re-load the file and verify that only its filename property changed.
+    $file = File::load($file->id());
+    $this->assertSame('example.zip', $file->getFilename());
+    $this->assertSame($original_uri, $file->getFileUri());
+
+    // Attempt to replace the .txt file with a .zip file. Validation must use
+    // the extension from the file URI, rather than the editable filename.
+    $zip_uri = 'public://replacement.zip';
+    file_put_contents($zip_uri, "PK\x03\x04test zip contents");
+    $edit = [
+      'files[replace_upload]' => \Drupal::service('file_system')->realpath($zip_uri),
+    ];
+    $this->drupalGet('file/' . $file->id() . '/edit');
+    $this->submitForm($edit, t('Save'));
+
+    $this->assertSession()->responseContains(t('The specified file %file could not be uploaded.', ['%file' => 'replacement.zip']));
+    $this->assertSession()->pageTextContains('Only files with the following extensions are allowed: txt.');
+    $this->assertSame($original_contents, file_get_contents($original_uri));
+  }
+
+  /**
    * @todo Test image dimensions for an image field are reset when a file is replaced.
    * @todo Test image styles are cleared when an image is updated.
    */
@@ -28,7 +73,7 @@ class FileEntityReplaceTest extends FileEntityTestBase {
     $file = reset($this->files['text']);
 
     // Create a user with file edit permissions.
-    $user = $this->drupalCreateUser(array('edit any document files'));
+    $user = $this->drupalCreateUser(['edit any document files']);
     $this->drupalLogin($user);
 
     // Test that the Upload widget appears for a local file.
@@ -36,19 +81,19 @@ class FileEntityReplaceTest extends FileEntityTestBase {
     $this->assertSession()->fieldExists('files[replace_upload]');
 
     // Test that file saves without uploading a file.
-    $this->submitForm(array(), t('Save'));
-    $this->assertSession()->pageTextContains(t('@file has been updated.', array('@file' => $file->getFilename())));
+    $this->submitForm([], t('Save'));
+    $this->assertSession()->pageTextContains(t('@file has been updated.', ['@file' => $file->getFilename()]));
 
     // Get the next text file to use as a replacement.
     $original = clone $file;
     $replacement = next($this->files['text']);
 
     // Test that the file saves when uploading a replacement file.
-    $edit = array();
+    $edit = [];
     $edit['files[replace_upload]'] = \Drupal::service('file_system')->realpath($replacement->getFileUri());
     $this->drupalGet('file/' . $file->id() . '/edit');
     $this->submitForm($edit, t('Save'));
-    $this->assertSession()->pageTextContains(t('@file has been updated.', array('@file' => $file->getFilename())));
+    $this->assertSession()->pageTextContains(t('@file has been updated.', ['@file' => $file->getFilename()]));
 
     // Re-load the file from the database.
     /** @var \Drupal\file\FileInterface $file */
@@ -68,25 +113,25 @@ class FileEntityReplaceTest extends FileEntityTestBase {
 
     // Test that validation works by uploading a non-text file as a replacement.
     $this->submitForm($edit, t('Save'));
-    $this->assertSession()->responseContains(t('The specified file %file could not be uploaded.', array('%file' => $image->getFilename())));
+    $this->assertSession()->responseContains(t('The specified file %file could not be uploaded.', ['%file' => $image->getFilename()]));
     $this->assertSession()->pageTextContains('Only files with the following extensions are allowed: txt.');
 
     $replacement = next($this->files['text']);
 
     // Test the file upload.
-    $edit = array();
+    $edit = [];
     $edit['files[replace_upload]'] = \Drupal::service('file_system')->realpath($replacement->getFileUri());
     $this->drupalGet('file/' . $file->id() . '/edit');
     $this->submitForm($edit, t('Upload'));
     $this->assertSession()->pageTextContains('text-2.txt');
-    $this->submitForm(array(), t('Save'));
-    $this->assertSession()->pageTextContains(t('@file has been updated.', array('@file' => $file->getFilename())));
+    $this->submitForm([], t('Save'));
+    $this->assertSession()->pageTextContains(t('@file has been updated.', ['@file' => $file->getFilename()]));
 
     // Create a non-local file record.
     /** @var \Drupal\file\FileInterface $file2 */
-    $file2 = File::create(array('type' => 'image'));
+    $file2 = File::create(['type' => 'image']);
     $file2->setFileUri('http://' . $this->randomMachineName());
-    $file2->getFilename(\Drupal::service('file_system')->basename($file2->getFileUri()));
+    $file2->getFilename(DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.3.0', fn() => basename($file2->getFileUri()), fn() => \Drupal::service('file_system')->basename($file2->getFileUri())));
     $file2->setMimeType('image/oembed');
     $file2->setOwnerId(1);
     $file2->getSize(0);
@@ -97,4 +142,5 @@ class FileEntityReplaceTest extends FileEntityTestBase {
     $this->assertSession()->fieldNotExists('files[replace_upload]');
 
   }
+
 }

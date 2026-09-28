@@ -17,6 +17,6 @@
     "source": "https://git.drupalcode.org/project/oembed_providers"
   },
   "require": {
-    "drupal/core": "^10|^11"
+    "drupal/core": "^10.3 || ^11"
   }
 }

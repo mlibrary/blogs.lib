@@ -2,16 +2,15 @@
 
 namespace Drupal\file_entity\Plugin\Field\FieldFormatter;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\image\Plugin\Field\FieldFormatter\ImageFormatter;
 use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Session\AccountInterface;
-use Drupal\Core\Utility\LinkGeneratorInterface;
 
 /**
  * Plugin for responsive image formatter.
@@ -28,23 +27,9 @@ use Drupal\Core\Utility\LinkGeneratorInterface;
 class FileImageResponsiveFormatter extends ImageFormatter {
 
   /**
-   * @var EntityStorageInterface
-   */
-  protected $responsiveImageStyleStorage;
-
-  /*
-   * The image style entity storage.
-   *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
-  protected $imageStyleStorage;
-
-  /**
-   * The current user.
-   *
-   * @var \Drupal\Core\Session\AccountInterface
-   */
-  protected $currentUser;
+  protected $responsiveImageStyleStorage;
 
   /**
    * The link generator.
@@ -87,7 +72,7 @@ class FileImageResponsiveFormatter extends ImageFormatter {
 
     // Collect cache tags to be added for each item in the field.
     $responsive_image_style = $this->responsiveImageStyleStorage->load($this->getSetting('responsive_image_style'));
-    $image_styles_to_load = array();
+    $image_styles_to_load = [];
     $cache_tags = [];
     if ($responsive_image_style) {
       $cache_tags = Cache::mergeTags($cache_tags, $responsive_image_style->getCacheTags());
@@ -114,16 +99,25 @@ class FileImageResponsiveFormatter extends ImageFormatter {
       $item_attributes['loading'] = $image_loading_settings['attribute'] ?? 'lazy';
     }
 
-    $elements[] = array(
+    $elements[] = DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.4.0', fn() => [
+      '#theme' => 'responsive_image_formatter',
+      '#item' => $item,
+      '#attributes' => $item_attributes,
+      '#responsive_image_style_id' => $responsive_image_style ? $responsive_image_style->id() : '',
+      '#url' => !empty($url) ? $url : NULL,
+      '#cache' => [
+        'tags' => $cache_tags,
+      ],
+    ], fn() => [
       '#theme' => 'responsive_image_formatter',
       '#item' => $item,
       '#item_attributes' => $item_attributes,
       '#responsive_image_style_id' => $responsive_image_style ? $responsive_image_style->id() : '',
       '#url' => !empty($url) ? $url : NULL,
-      '#cache' => array(
+      '#cache' => [
         'tags' => $cache_tags,
-      ),
-    );
+      ],
+    ]);
 
     return $elements;
   }
@@ -138,7 +132,7 @@ class FileImageResponsiveFormatter extends ImageFormatter {
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
     $elements = parent::settingsForm($form, $form_state);
-    $responsive_image_options = array();
+    $responsive_image_options = [];
     $responsive_image_styles = $this->responsiveImageStyleStorage->loadMultiple();
     if ($responsive_image_styles && !empty($responsive_image_styles)) {
       foreach ($responsive_image_styles as $machine_name => $responsive_image_style) {
@@ -148,17 +142,17 @@ class FileImageResponsiveFormatter extends ImageFormatter {
       }
     }
 
-    $elements['responsive_image_style'] = array(
+    $elements['responsive_image_style'] = [
       '#title' => t('Responsive image style'),
       '#type' => 'select',
       '#default_value' => $this->getSetting('responsive_image_style'),
       '#required' => TRUE,
       '#options' => $responsive_image_options,
-      '#description' => array(
+      '#description' => [
         '#markup' => $this->linkGenerator->generate($this->t('Configure Responsive Image Styles'), new Url('entity.responsive_image_style.collection')),
         '#access' => $this->currentUser->hasPermission('administer responsive image styles'),
-      ),
-    );
+      ],
+    ];
 
     unset($elements['image_link']['#options']['content']);
     unset($elements['image_style']);
@@ -173,11 +167,11 @@ class FileImageResponsiveFormatter extends ImageFormatter {
 
     $responsive_image_style = $this->responsiveImageStyleStorage->load($this->getSetting('responsive_image_style'));
     if ($responsive_image_style) {
-      $summary[] = t('Responsive image style: @responsive_image_style', array('@responsive_image_style' => $responsive_image_style->label()));
+      $summary[] = t('Responsive image style: @responsive_image_style', ['@responsive_image_style' => $responsive_image_style->label()]);
 
-      $link_types = array(
+      $link_types = [
         'file' => t('Linked to file'),
-      );
+      ];
       // Display this setting only if image is linked.
       if (isset($link_types[$this->getSetting('image_link')])) {
         $summary[] = $link_types[$this->getSetting('image_link')];

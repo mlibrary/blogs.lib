@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the GLightbox module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function glightbox_install() {
+  \Drupal::messenger()->addMessage(t('Thanks for installing GLightbox'));
+}

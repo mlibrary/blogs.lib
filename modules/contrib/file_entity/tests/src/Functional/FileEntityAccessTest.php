@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\file_entity\Functional;
 
-use Drupal\file\FileInterface;
-use Drupal\file_entity\FileEntityAccessControlHandler;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\node\Entity\Node;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\user\Entity\Role;
@@ -13,6 +13,8 @@ use Drupal\user\Entity\Role;
  *
  * @group file_entity
  */
+#[Group('file_entity')]
+#[RunTestsInSeparateProcesses]
 class FileEntityAccessTest extends FileEntityTestBase {
 
   /**
@@ -25,13 +27,16 @@ class FileEntityAccessTest extends FileEntityTestBase {
   /**
    * The File Entity access controller.
    *
-   * @var FileEntityAccessControlHandler
+   * @var \Drupal\file_entity\FileEntityAccessControlHandler
    */
   protected $accessControlHandler;
 
-  function setUp(): void {
+  /**
+   *
+   */
+  public function setUp(): void {
     parent::setUp();
-    $this->setUpFiles(array('uid' => 0));
+    $this->setUpFiles(['uid' => 0]);
     $this->accessControlHandler = $this->container->get('entity_type.manager')->getAccessControlHandler('file');
 
     // Unset the fact that file_entity_install() adds the 'view files'
@@ -39,14 +44,14 @@ class FileEntityAccessTest extends FileEntityTestBase {
     // test the file_entity_access() function.
     $roles = Role::loadMultiple();
     foreach ($roles as $rid => $role) {
-      user_role_revoke_permissions($rid, array('view files'));
+      user_role_revoke_permissions($rid, ['view files']);
     }
   }
 
   /**
    * Asserts FileEntityAccessControlHandler correctly grants or denies access.
    */
-  function assertFileEntityAccess($ops, $file, $account) {
+  public function assertFileEntityAccess($ops, $file, $account) {
     $this->accessControlHandler->resetCache();
     foreach ($ops as $op => $expected) {
       $this->assertEquals($expected, $op === 'create' ?
@@ -58,65 +63,65 @@ class FileEntityAccessTest extends FileEntityTestBase {
   /**
    * Runs basic tests for file_entity_access function.
    */
-  function testFileEntityAccess() {
-    /** @var FileInterface $file */
+  public function testFileEntityAccess() {
+    /** @var \Drupal\file\FileInterface $file */
     $file = reset($this->files['image']);
 
     // Ensures user with 'bypass file access' permission can do everything.
-    $web_user = $this->drupalCreateUser(array('bypass file access'));
-    $this->assertFileEntityAccess(array('create' => TRUE), NULL, $web_user);
-    $this->assertFileEntityAccess(array('view' => TRUE, 'download' => TRUE, 'update' => TRUE, 'delete' => TRUE), $file, $web_user);
+    $web_user = $this->drupalCreateUser(['bypass file access']);
+    $this->assertFileEntityAccess(['create' => TRUE], NULL, $web_user);
+    $this->assertFileEntityAccess(['view' => TRUE, 'download' => TRUE, 'update' => TRUE, 'delete' => TRUE], $file, $web_user);
 
     // A user with 'administer files' should not access CRUD operations.
-    $web_user = $this->drupalCreateUser(array('administer files'));
-    $this->assertFileEntityAccess(array('view' => FALSE, 'download' => TRUE, 'update' => FALSE, 'delete' => FALSE), $file, $web_user);
+    $web_user = $this->drupalCreateUser(['administer files']);
+    $this->assertFileEntityAccess(['view' => FALSE, 'download' => TRUE, 'update' => FALSE, 'delete' => FALSE], $file, $web_user);
 
     // User cannot 'view files'.
-    $web_user = $this->drupalCreateUser(array('create files'));
-    $this->assertFileEntityAccess(array('view' => FALSE), $file, $web_user);
+    $web_user = $this->drupalCreateUser(['create files']);
+    $this->assertFileEntityAccess(['view' => FALSE], $file, $web_user);
     // But can upload new ones.
-    $this->assertFileEntityAccess(array('create' => TRUE), NULL, $web_user);
+    $this->assertFileEntityAccess(['create' => TRUE], NULL, $web_user);
 
     // User can view own files but no other files.
-    $web_user = $this->drupalCreateUser(array('create files', 'view own files'));
-    $this->assertFileEntityAccess(array('view' => FALSE), $file, $web_user);
+    $web_user = $this->drupalCreateUser(['create files', 'view own files']);
+    $this->assertFileEntityAccess(['view' => FALSE], $file, $web_user);
     $file->setOwner($web_user)->save();
-    $this->assertFileEntityAccess(array('view' => TRUE), $file, $web_user);
+    $this->assertFileEntityAccess(['view' => TRUE], $file, $web_user);
 
     // Public files can always be downloaded.
     // @todo Review download permissions.
-    $web_user = $this->drupalCreateUser(array('create files', 'download own image files'));
-    $this->assertFileEntityAccess(array('download' => TRUE), $file, $web_user);
+    $web_user = $this->drupalCreateUser(['create files', 'download own image files']);
+    $this->assertFileEntityAccess(['download' => TRUE], $file, $web_user);
     $file->setOwner($web_user)->save();
-    $this->assertFileEntityAccess(array('download' => TRUE), $file, $web_user);
+    $this->assertFileEntityAccess(['download' => TRUE], $file, $web_user);
 
     // User can update own files but no other files.
-    $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own image files'));
-    $this->assertFileEntityAccess(array('update' => FALSE), $file, $web_user);
+    $web_user = $this->drupalCreateUser(['create files', 'view own files', 'edit own image files']);
+    $this->assertFileEntityAccess(['update' => FALSE], $file, $web_user);
     $file->setOwner($web_user)->save();
-    $this->assertFileEntityAccess(array('update' => TRUE), $file, $web_user);
+    $this->assertFileEntityAccess(['update' => TRUE], $file, $web_user);
 
     // User can delete own files but no other files.
-    $web_user = $this->drupalCreateUser(array('create files', 'view own files', 'edit own image files', 'delete own image files'));
-    $this->assertFileEntityAccess(array('delete' => FALSE), $file, $web_user);
+    $web_user = $this->drupalCreateUser(['create files', 'view own files', 'edit own image files', 'delete own image files']);
+    $this->assertFileEntityAccess(['delete' => FALSE], $file, $web_user);
     $file->setOwner($web_user)->save();
-    $this->assertFileEntityAccess(array('delete' => TRUE), $file, $web_user);
+    $this->assertFileEntityAccess(['delete' => TRUE], $file, $web_user);
 
     // User can view any file.
-    $web_user = $this->drupalCreateUser(array('create files', 'view files'));
-    $this->assertFileEntityAccess(array('view' => TRUE), $file, $web_user);
+    $web_user = $this->drupalCreateUser(['create files', 'view files']);
+    $this->assertFileEntityAccess(['view' => TRUE], $file, $web_user);
 
     // User can download any file.
-    $web_user = $this->drupalCreateUser(array('create files', 'download any image files'));
-    $this->assertFileEntityAccess(array('download' => TRUE), $file, $web_user);
+    $web_user = $this->drupalCreateUser(['create files', 'download any image files']);
+    $this->assertFileEntityAccess(['download' => TRUE], $file, $web_user);
 
     // User can edit any file.
-    $web_user = $this->drupalCreateUser(array('create files', 'view files', 'edit any image files'));
-    $this->assertFileEntityAccess(array('update' => TRUE), $file, $web_user);
+    $web_user = $this->drupalCreateUser(['create files', 'view files', 'edit any image files']);
+    $this->assertFileEntityAccess(['update' => TRUE], $file, $web_user);
 
     // User can delete any file.
-    $web_user = $this->drupalCreateUser(array('create files', 'view files', 'edit any image files', 'delete any image files'));
-    $this->assertFileEntityAccess(array('delete' => TRUE), $file, $web_user);
+    $web_user = $this->drupalCreateUser(['create files', 'view files', 'edit any image files', 'delete any image files']);
+    $this->assertFileEntityAccess(['delete' => TRUE], $file, $web_user);
   }
 
   /**
@@ -128,12 +133,12 @@ class FileEntityAccessTest extends FileEntityTestBase {
    *  file/%/edit
    *  file/%/delete
    */
-  function testFileEntityPageAccess() {
-    $web_user = $this->drupalCreateUser(array());
+  public function testFileEntityPageAccess() {
+    $web_user = $this->drupalCreateUser([]);
     $this->drupalLogin($web_user);
     $this->drupalGet('file/add');
     $this->assertSession()->statusCodeEquals(403);
-    $web_user = $this->drupalCreateUser(array('create files'));
+    $web_user = $this->drupalCreateUser(['create files']);
     $this->drupalLogin($web_user);
     $this->drupalGet('file/add');
     $this->assertSession()->statusCodeEquals(200);
@@ -141,25 +146,25 @@ class FileEntityAccessTest extends FileEntityTestBase {
     $file = reset($this->files['text']);
 
     // This fails.. No clue why but, tested manually and works as should.
-    $web_user = $this->drupalCreateUser(array('view own files'));
+    $web_user = $this->drupalCreateUser(['view own files']);
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}");
     $this->assertSession()->statusCodeEquals(403);
-    $web_user = $this->drupalCreateUser(array('view files'));
+    $web_user = $this->drupalCreateUser(['view files']);
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}");
     $this->assertSession()->statusCodeEquals(200);
 
     $url = "file/{$file->id()}/download";
-    $web_user = $this->drupalCreateUser(array());
+    $web_user = $this->drupalCreateUser([]);
     $this->drupalLogin($web_user);
-    $this->drupalGet($url, array('query' => array('token' => $file->getDownloadToken())));
+    $this->drupalGet($url, ['query' => ['token' => $file->getDownloadToken()]]);
     $this->assertSession()->statusCodeEquals(200);
-    $web_user = $this->drupalCreateUser(array('download any document files'));
+    $web_user = $this->drupalCreateUser(['download any document files']);
     $this->drupalLogin($web_user);
-    $this->drupalGet($url, array('query' => array('token' => $file->getDownloadToken())));
+    $this->drupalGet($url, ['query' => ['token' => $file->getDownloadToken()]]);
     $this->assertSession()->statusCodeEquals(200);
-    $this->drupalGet($url, array('query' => array('token' => 'invalid-token')));
+    $this->drupalGet($url, ['query' => ['token' => 'invalid-token']]);
     $this->assertSession()->statusCodeEquals(403);
     $this->drupalGet($url);
     $this->assertSession()->statusCodeEquals(403);
@@ -167,20 +172,20 @@ class FileEntityAccessTest extends FileEntityTestBase {
     $this->drupalGet($url);
     $this->assertSession()->statusCodeEquals(200);
 
-    $web_user = $this->drupalCreateUser(array());
+    $web_user = $this->drupalCreateUser([]);
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}/edit");
     $this->assertSession()->statusCodeEquals(403);
-    $web_user = $this->drupalCreateUser(array('edit any document files'));
+    $web_user = $this->drupalCreateUser(['edit any document files']);
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}/edit");
     $this->assertSession()->statusCodeEquals(200);
 
-    $web_user = $this->drupalCreateUser(array());
+    $web_user = $this->drupalCreateUser([]);
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}/delete");
     $this->assertSession()->statusCodeEquals(403);
-    $web_user = $this->drupalCreateUser(array('delete any document files'));
+    $web_user = $this->drupalCreateUser(['delete any document files']);
     $this->drupalLogin($web_user);
     $this->drupalGet("file/{$file->id()}/delete");
     $this->assertSession()->statusCodeEquals(200);
@@ -189,11 +194,11 @@ class FileEntityAccessTest extends FileEntityTestBase {
   /**
    * Test to see if we have access to download private files when granted the permissions.
    */
-  function testFileEntityPrivateDownloadAccess() {
+  public function testFileEntityPrivateDownloadAccess() {
     $original_file = next($this->files['text']);
 
     foreach ($this->getPrivateDownloadAccessCases() as $case) {
-      /** @var FileInterface $file */
+      /** @var \Drupal\file\FileInterface $file */
       $file = \Drupal::service('file.repository')->copy($original_file, 'private://');
       $user_name = 'anonymous';
 
@@ -209,11 +214,11 @@ class FileEntityAccessTest extends FileEntityTestBase {
       }
 
       // Check if the physical file is there.
-      $arguments = array(
+      $arguments = [
         '%name' => $file->getFilename(),
         '%username' => $user_name,
         '%uri' => $file->getFileUri(),
-      );
+      ];
       $this->assertTrue(is_file($file->getFileUri()), new FormattableMarkup('File %name owned by %username successfully created at %uri.', $arguments));
       $url = \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri());
 

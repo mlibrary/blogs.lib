@@ -2,11 +2,16 @@
 
 namespace Drupal\Tests\config_devel\Kernel;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+
 /**
  * Tests the automated importer for config entities.
  *
  * @group config_devel
  */
+#[Group('config_devel')]
+#[RunTestsInSeparateProcesses]
 class ConfigDevelSubscriberEntityTest extends ConfigDevelSubscriberTestBase {
 
   /**

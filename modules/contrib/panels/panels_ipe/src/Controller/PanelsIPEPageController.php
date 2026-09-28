@@ -330,7 +330,7 @@ class PanelsIPEPageController extends ControllerBase {
       }
       $blocks[] = [
         'plugin_id' => $plugin_id,
-        'label' => $definition['admin_label'],
+        'label' => !empty($definition['admin_label']) ? $definition['admin_label'] : '',
         'category' => $definition['category'],
         'id' => $definition['id'],
         'provider' => $definition['provider'],

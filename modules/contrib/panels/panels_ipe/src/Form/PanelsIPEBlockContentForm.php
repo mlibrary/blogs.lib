@@ -15,7 +15,7 @@ class PanelsIPEBlockContentForm extends BlockContentForm {
   /**
    * {@inheritdoc}
    */
-  protected function actions(array $form, FormStateInterface $form_state) {
+  protected function actions(array $form, FormStateInterface $form_state): array {
     $button_value = $this->t('Create and Place');
     if (!$this->entity->isNew()) {
       $button_value = $this->t('Update');
@@ -30,7 +30,7 @@ class PanelsIPEBlockContentForm extends BlockContentForm {
       '#ajax' => [
         'callback' => '::submitAjax',
         'wrapper' => 'panels-ipe-block-type-form-wrapper',
-        'method' => 'replace',
+        'method' => 'replaceWith',
         'progress' => [
           'type' => 'throbber',
           'message' => '',

@@ -2,3 +2,7 @@ services:
   plugin.manager.link_attributes:
     class: Drupal\link_attributes\LinkAttributesManager
     arguments: ['@module_handler', '@cache.discovery']
+
+  Drupal\link_attributes\Hook\LinkAttributesHooks:
+    class: Drupal\link_attributes\Hook\LinkAttributesHooks
+    autowire: true

@@ -1,0 +1,17 @@
+services:
+  glightbox.activation_check:
+    class: Drupal\glightbox\ActivationCheck
+    arguments: ['@config.factory', '@request_stack']
+  glightbox.attachment:
+    class: Drupal\glightbox\GLightboxAttachment
+    arguments: ['@glightbox.activation_check', '@module_handler', '@config.factory', '@library.libraries_directory_file_finder']
+  glightbox.gallery_id_generator:
+    class: Drupal\glightbox\GalleryIdHelper
+    arguments: ['@config.factory', '@token']
+  glightbox.formatter:
+    class: Drupal\glightbox\Service\GLightboxFormatterService
+    arguments: ['@token', '@module_handler', '@config.factory']
+
+  Drupal\glightbox\Hook\GlightboxHooks:
+    class: Drupal\glightbox\Hook\GlightboxHooks
+    autowire: true

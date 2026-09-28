@@ -13,6 +13,8 @@ class EventsTest extends SchedulerContentModerationBrowserTestBase {
    * Tests the PUBLISH_IMMEDIATELY Scheduler event subscriber.
    *
    * @dataProvider dataEntityTypes
+   *
+   * @throws \Exception
    */
   public function testEvents($entityTypeId, $bundle): void {
     $this->drupalLogin($entityTypeId == 'media' ? $this->schedulerMediaUser : $this->schedulerUser);

@@ -48,3 +48,8 @@ services:
     arguments:
       # Wire arguments manually until externalauth provides autowiring aliases.
       $authmap: '@externalauth.authmap'
+
+  Drupal\openid_connect\ParamConverter\OpenIDConnectEntityConverter:
+    class: Drupal\openid_connect\ParamConverter\OpenIDConnectEntityConverter
+    tags:
+      - { name: paramconverter }

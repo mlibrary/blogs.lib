@@ -4,6 +4,7 @@ namespace Drupal\Tests\scheduler\Kernel;
 
 use Drupal\node\Entity\NodeType;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the migration of Drupal 7 Scheduler node type settings.
@@ -11,6 +12,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group scheduler_kernel
  */
 #[Group('scheduler_kernel')]
+#[RunTestsInSeparateProcesses]
 class MigrateSchedulerNodeTypeConfigTest extends MigrateSchedulerTestBase {
 
   /**

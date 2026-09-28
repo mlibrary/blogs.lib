@@ -98,4 +98,90 @@ class AutoLoginTest extends OpenIdConnectTestBase {
       ->addressEquals('https://example.com/oauth2/authorize');
   }
 
+  /**
+   * Tests auto-redirect when a disabled client exists alongside an enabled one.
+   *
+   * Regression test: disabled clients must be filtered out before checking
+   * whether exactly one client is active. Without the fix, having any disabled
+   * client would cause getClient() to count more than one and skip auto-login.
+   */
+  public function testAutoRedirectWithDisabledClient(): void {
+    // The setUp() already created one enabled client (self::OIDC_ID).
+    // Add a second client that is disabled.
+    $storage = \Drupal::entityTypeManager()->getStorage('openid_connect_client');
+    $disabledClient = $storage->create([
+      'id' => 'disabled_client',
+      'label' => 'Disabled OIDC Client',
+      'plugin' => 'generic',
+      'status' => FALSE,
+      'settings' => [
+        'client_id' => $this->randomString(8),
+        'client_secret' => $this->randomString(8),
+      ],
+    ]);
+    $disabledClient->save();
+
+    $this->toggleAutoStart(TRUE);
+    // Ensure we are the anonymous user.
+    $this->drupalLogout();
+
+    // With one enabled and one disabled client, auto-login should still
+    // redirect to the OAuth provider.
+    $this->drupalGet('/user/login');
+    $this->assertSession()
+      ->addressEquals('https://example.com/oauth2/authorize');
+  }
+
+  /**
+   * Tests auto-redirect on the register and password reset routes.
+   *
+   * Auto-login covers user.login, user.register and user.pass. Only user.login
+   * is exercised above, so assert the other two routes resolve to a name the
+   * subscriber recognizes as well.
+   *
+   * @dataProvider dataProviderForAutoRedirectPaths
+   */
+  public function testAutoRedirectOnOtherLoginRoutes(string $path): void {
+    $this->toggleAutoStart(TRUE);
+    // Ensure we are the anonymous user.
+    $this->drupalLogout();
+
+    $this->drupalGet($path);
+    $this->assertSession()
+      ->addressEquals('https://example.com/oauth2/authorize');
+  }
+
+  /**
+   * Data provider for testAutoRedirectOnOtherLoginRoutes().
+   *
+   * @return array<string, array{string}>
+   *   Paths that must trigger auto-login.
+   */
+  public static function dataProviderForAutoRedirectPaths(): array {
+    return [
+      'user.register' => ['/user/register'],
+      'user.pass' => ['/user/password'],
+    ];
+  }
+
+  /**
+   * Tests that a route outside the login routes is not redirected.
+   *
+   * With autostart enabled and an anonymous visitor, every request passes
+   * through the subscriber, so anything other than the three login routes has
+   * to render normally. /user/login/openid_connect is the useful case: it is
+   * reachable by anonymous users and its path starts with /user/login, so a
+   * subscriber matching on the path rather than the route name would wrongly
+   * hijack the module's own login page.
+   */
+  public function testNoAutoRedirectOnUnrelatedRoute(): void {
+    $this->toggleAutoStart(TRUE);
+    // Ensure we are the anonymous user.
+    $this->drupalLogout();
+
+    $this->drupalGet('/user/login/openid_connect');
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->addressEquals('/user/login/openid_connect');
+  }
+
 }

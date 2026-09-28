@@ -5,16 +5,16 @@ config_devel.settings:
     auto_import:
       type: sequence
       sequence:
-        - type: mapping
-          mapping:
-            filename:
-              type: string
-            hash:
-              type: string
+        type: mapping
+        mapping:
+          filename:
+            type: string
+          hash:
+            type: string
     auto_export:
       type: sequence
       sequence:
-        - type: string
+        type: string
 config_devel.test:
   type: config_object
   label: config devel test

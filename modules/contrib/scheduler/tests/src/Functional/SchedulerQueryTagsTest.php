@@ -4,6 +4,7 @@ namespace Drupal\Tests\scheduler\Functional;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the Query Tag Alter hook functions for the Scheduler module.
@@ -11,6 +12,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group scheduler_api
  */
 #[Group('scheduler_api')]
+#[RunTestsInSeparateProcesses]
 class SchedulerQueryTagsTest extends SchedulerBrowserTestBase {
 
   /**

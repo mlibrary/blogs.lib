@@ -2,12 +2,10 @@
 
 namespace Drupal\Tests\reroute_email\Functional;
 
-use Drupal\reroute_email\Constants\RerouteEmailConstants;
+use Drupal\reroute_email\RerouteEmailHandlerPluginInterface;
 
 /**
  * Test Reroute Email with multiple recipients.
- *
- * @ingroup reroute_email_tests
  *
  * @group reroute_email
  */
@@ -22,17 +20,17 @@ class MultipleRecipientsTest extends RerouteEmailBrowserTestBase {
     // Set multiple rerouting emails and a domain to the allowed list.
     // Multiple commas and semicolons are added for validation tests.
     $emails_reroute_to_form = "user1@reroute-to.com, \nuser2@reroute-to.com,;;, ,\nuser3@reroute-to.com\n";
-    $emails_reroute_to_result = "user1@reroute-to.com,user2@reroute-to.com,user3@reroute-to.com";
+    $emails_reroute_to_result = "user1@reroute-to.com, user2@reroute-to.com, user3@reroute-to.com";
     $email_allow_domain = '*@allowlisted.com';
     $this->configureRerouteEmail([
-      RerouteEmailConstants::REROUTE_EMAIL_ENABLE => TRUE,
-      RerouteEmailConstants::REROUTE_EMAIL_ADDRESS => $emails_reroute_to_form,
-      RerouteEmailConstants::REROUTE_EMAIL_ALLOWLIST => $email_allow_domain,
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ENABLE => TRUE,
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ADDRESS => $emails_reroute_to_form,
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ALLOWLIST => $email_allow_domain,
     ]);
 
     // Make sure configured emails were set properly.
-    $this->assertEquals($this->rerouteConfig->get(RerouteEmailConstants::REROUTE_EMAIL_ADDRESS), $emails_reroute_to_result, 'Reroute email addresses was set.');
-    $this->assertEquals($this->rerouteConfig->get(RerouteEmailConstants::REROUTE_EMAIL_ALLOWLIST), $email_allow_domain, 'Value was set to the allowed list.');
+    $this->assertEquals($this->rerouteConfig->get(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ADDRESS), $emails_reroute_to_result, 'Reroute email addresses was set.');
+    $this->assertEquals($this->rerouteConfig->get(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ALLOWLIST), $email_allow_domain, 'Value was set to the allowed list.');
 
     // Submit a test email (should be rerouted).
     $this->assertMailReroutedFromTestForm(['to' => 'email@not-allowlisted.com, email@allowlisted.com']);

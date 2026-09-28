@@ -107,7 +107,7 @@ class CustomProvidersUiTest extends WebDriverTestBase {
 
     $page->pressButton('Save');
 
-    $assert_session->pageTextContains('A valid URL is required on line 1.');
+    $assert_session->waitForText('A valid URL is required on line 1.');
     $assert_session->pageTextContains('If discovery is disabled, then one or more formats must be explicitly defined for an endpoint.');
     $assert_session->pageTextContains('The URL https://test-provider.com/oembed/v1/{invalid} is not valid.');
 
@@ -136,7 +136,7 @@ class CustomProvidersUiTest extends WebDriverTestBase {
 
     $page->pressButton('Save');
 
-    $assert_session->pageTextContains("The Test Provider oEmbed provider was created.");
+    $assert_session->waitForText("The Test Provider oEmbed provider was created.");
 
     // Verify cached providers are cleared.
     $this->AssertNull(\Drupal::service('keyvalue')->get('media')->get('oembed_providers'));
@@ -203,7 +203,7 @@ class CustomProvidersUiTest extends WebDriverTestBase {
 
     // Verify deletion process.
     $page->pressButton('Delete');
-    $assert_session->pageTextContains('The oembed provider Test Provider has been deleted.');
+    $assert_session->waitForText('The oembed provider Test Provider has been deleted.');
 
     // Verify 'Test Provider' doesn't exist in the provider repository.
     $keyed_providers = \Drupal::service('media.oembed.provider_repository')->getAll();

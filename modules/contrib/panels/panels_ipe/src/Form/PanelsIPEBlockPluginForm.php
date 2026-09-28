@@ -203,7 +203,7 @@ class PanelsIPEBlockPluginForm extends FormBase {
       '#ajax' => [
         'callback' => '::submitForm',
         'wrapper' => 'panels-ipe-block-plugin-form-wrapper',
-        'method' => 'replace',
+        'method' => 'replaceWith',
         'progress' => [
           'type' => 'throbber',
           'message' => '',
@@ -218,7 +218,7 @@ class PanelsIPEBlockPluginForm extends FormBase {
       '#ajax' => [
         'callback' => '::submitPreview',
         'wrapper' => 'panels-ipe-block-plugin-form-wrapper',
-        'method' => 'replace',
+        'method' => 'replaceWith',
         'progress' => [
           'type' => 'throbber',
           'message' => '',
@@ -492,17 +492,31 @@ class PanelsIPEBlockPluginForm extends FormBase {
     $result = $router->matchRequest($request);
 
     $route = $result['_route_object'];
-    $page = $result['page_manager_page'];
+    // Page Manager exposes the page it owns as a route parameter so we can read
+    // its context definitions. As of RC3 it prefixes the page and variant
+    // parameter names with an underscore, so accept both the new and the legacy
+    // names rather than forcing users onto a newer Page Manager release.
+    // @see https://www.drupal.org/project/page_manager/issues/3362561
+    $page = $result['_page_manager_page'] ?? $result['page_manager_page'] ?? NULL;
 
     $contexts = [];
     if ($route && $route_contexts = $route->getOption('parameters')) {
       foreach ($route_contexts as $route_context_name => $route_context) {
-        // Skip this parameter.
-        if ($route_context_name == 'page_manager_page_variant' || $route_context_name == 'page_manager_page') {
+        // The page and variant parameters are handled by Page Manager itself,
+        // so skip them here (in both naming schemes, see above). Also skip
+        // everything when there is no page, e.g. when IPE is used outside of
+        // Page Manager, since there are no page contexts to extract.
+        $page_manager_context_names = [
+          'page_manager_page_variant',
+          '_page_manager_page_variant',
+          'page_manager_page',
+          '_page_manager_page',
+        ];
+        if (!$page || in_array($route_context_name, $page_manager_context_names, TRUE)) {
           continue;
         }
 
-        $parameter = $page->getParameter($route_context_name);
+        $parameter = $page ? $page->getParameter($route_context_name) : NULL;
         $context_name = !empty($parameter['label']) ? $parameter['label'] : $this->t('{@name} from route', ['@name' => $route_context_name]);
         if ($request->attributes->has($route_context_name)) {
           $value = $request->attributes->get($route_context_name);

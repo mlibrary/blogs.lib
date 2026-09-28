@@ -27,15 +27,8 @@ final class UserLogoutConfirmation extends UserLogoutConfirm {
    * Constructor for the UserLogoutConfirmation form.
    */
   public function __construct(
-    protected readonly LogoutService $logoutService,
+    protected LogoutService $logoutService,
   ) {}
-
-  /**
-   * {@inheritDoc}
-   */
-  public function getFormId(): string {
-    return 'openid_connect_user_logout';
-  }
 
   /**
    * {@inheritDoc}

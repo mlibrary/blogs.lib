@@ -1577,12 +1577,12 @@ $connection->insert('key_value')
 ->values(array(
   'collection' => 'config.entity.key_store.openid_connect_client',
   'name' => 'uuid:5787abe7-dea2-45be-9b93-a219f634c405',
-  'value' => 'a:1:{i:0;s:30:"openid_connect.client.missing_allowed_domains";}',
+  'value' => 'a:1:{i:0;s:45:"openid_connect.client.missing_allowed_domains";}',
 ))
 ->values(array(
   'collection' => 'config.entity.key_store.openid_connect_client',
   'name' => 'uuid:5787abe7-dea2-45be-9b93-a219f6347777',
-  'value' => 'a:1:{i:0;s:30:"openid_connect.client.has_allowed_domains";}',
+  'value' => 'a:1:{i:0;s:41:"openid_connect.client.has_allowed_domains";}',
 ))
 ->values(array(
   'collection' => 'config.entity.key_store.user_role',

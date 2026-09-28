@@ -6,7 +6,7 @@ dependencies:
   - page_manager:page_manager
   - panels:panels_ipe
 
-# Information added by Drupal.org packaging script on 2025-04-09
-version: '8.x-4.9'
+# Information added by Drupal.org packaging script on 2026-07-25
+version: '8.x-4.10'
 project: 'panels'
-datestamp: 1744174389
+datestamp: 1784960099

@@ -3,6 +3,7 @@
 namespace Drupal\Tests\scheduler\Functional;
 
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the modules primary function - publishing and unpublishing content.
@@ -10,6 +11,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group scheduler
  */
 #[Group('scheduler')]
+#[RunTestsInSeparateProcesses]
 class SchedulerBasicNodeTest extends SchedulerBrowserTestBase {
 
   /**

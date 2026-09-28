@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\config_devel\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
 use org\bovigo\vfs\vfsStream;
 use Drupal\Component\Serialization\Yaml;
 
@@ -11,6 +12,7 @@ use Drupal\config_devel\EventSubscriber\ConfigDevelAutoExportSubscriber;
  * @coversDefaultClass \Drupal\config_devel\EventSubscriber\ConfigDevelAutoExportSubscriber
  * @group config_devel
  */
+#[Group('config_devel')]
 class ConfigDevelAutoExportSubscriberTest extends ConfigDevelTestBase {
 
   /**
@@ -26,10 +28,10 @@ class ConfigDevelAutoExportSubscriberTest extends ConfigDevelTestBase {
     $config = $this->createMock('\Drupal\Core\Config\Config');
     $config->expects($this->any())
       ->method('getName')
-      ->will($this->returnValue($this->randomMachineName()));
+      ->willReturn($this->randomMachineName());
     $config->expects($this->any())
       ->method('get')
-      ->will($this->returnValue($config_data));
+      ->willReturn($config_data);
 
     $file_names = array(
       vfsStream::url('public://' . $this->randomMachineName() . '.yml'),

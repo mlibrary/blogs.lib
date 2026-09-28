@@ -1,0 +1,5 @@
+
+services:
+  Drupal\link_attributes_menu_link_content\Hook\LinkAttributesMenuLinkContentHooks:
+    class: Drupal\link_attributes_menu_link_content\Hook\LinkAttributesMenuLinkContentHooks
+    autowire: true

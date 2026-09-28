@@ -75,9 +75,9 @@ class LogoutService {
 
     // If the logout redirect is enabled, set the default redirect.
     if ($this->isLogoutRedirectEnabled()) {
-      $redirectUrl = $logoutRedirectUrl->toString(TRUE)->getGeneratedUrl();
-      $response->setTrustedTargetUrl($redirectUrl);
-      $response->addCacheableDependency($redirectUrl);
+      $generatedUrl = $logoutRedirectUrl->toString(TRUE);
+      $response->setTrustedTargetUrl($generatedUrl->getGeneratedUrl());
+      $response->addCacheableDependency($generatedUrl);
     }
 
     if (
@@ -108,7 +108,7 @@ class LogoutService {
       );
     }
 
-    $clientName = $provider?->getPlugin()?->getPluginId() ?? 'unknown';
+    $clientName = $provider?->id() ?? 'unknown';
 
     $rsp = ['response' => &$response];
     $context = ['client' => $clientName];

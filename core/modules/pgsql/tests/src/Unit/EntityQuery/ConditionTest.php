@@ -5,21 +5,23 @@ declare(strict_types=1);
 namespace Drupal\Tests\pgsql\Unit\EntityQuery;
 
 use Drupal\Core\Database\Query\SelectInterface;
-use Drupal\Core\Entity\Query\Sql\pgsql\Condition;
+use Drupal\pgsql\EntityQuery\Condition;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests \Drupal\pgsql\EntityQuery\Condition.
- *
- * @coversDefaultClass \Drupal\Core\Entity\Query\Sql\pgsql\Condition
- * @group Database
  */
+#[CoversClass(Condition::class)]
+#[Group('Database')]
 class ConditionTest extends UnitTestCase {
 
   /**
    * Tests that valid operators are accepted for case-insensitive array values.
-   * @dataProvider providerValidOperators
    */
+  #[DataProvider('providerValidOperators')]
   public function testValidOperatorsAreAccepted(string $operator): void {
     $sql_query = $this->createStub(SelectInterface::class);
     $sql_query->method('escapeField')->willReturn('field');

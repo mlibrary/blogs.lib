@@ -1,0 +1,11 @@
+name: Scheduler No-bundle Test
+type: module
+description: 'Support module providing a no-bundle entity type and Scheduler plugin for tests.'
+package: Testing
+dependencies:
+  - scheduler:scheduler
+
+# Information added by Drupal.org packaging script on 2026-06-05
+version: '2.3.0'
+project: 'scheduler'
+datestamp: 1780654238

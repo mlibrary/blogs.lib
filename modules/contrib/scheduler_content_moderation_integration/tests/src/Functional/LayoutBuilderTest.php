@@ -8,8 +8,6 @@ use Drupal\Core\Url;
  * Test if layout builder can be accessed.
  *
  * @group scheduler_content_moderation_integration
- *
- * @see https://www.drupal.org/project/scheduler_content_moderation_integration/issues/3048485
  */
 class LayoutBuilderTest extends SchedulerContentModerationBrowserTestBase {
 
@@ -22,8 +20,12 @@ class LayoutBuilderTest extends SchedulerContentModerationBrowserTestBase {
 
   /**
    * Tests layout builder.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Behat\Mink\Exception\ElementNotFoundException
+   * @throws \Behat\Mink\Exception\ExpectationException
    */
-  public function testLayoutBuilder() {
+  public function testLayoutBuilder(): void {
     $this->drupalLogin($this->drupalCreateUser([
       'configure any layout',
       'access content',

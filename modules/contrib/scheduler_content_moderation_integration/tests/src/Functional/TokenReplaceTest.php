@@ -12,7 +12,7 @@ class TokenReplaceTest extends SchedulerContentModerationBrowserTestBase {
   /**
    * Creates a node, then tests the tokens generated from it.
    */
-  public function testTokenReplacement() {
+  public function testTokenReplacement(): void {
     // Define body text and the expected replacements.
     $body = implode('. ', [
       'Publish state = [node:scheduled-moderation-publish-state]',

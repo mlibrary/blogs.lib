@@ -3,12 +3,16 @@
 namespace Drupal\Tests\link_attributes\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests link_attributes_plugin alterInfo.
  *
  * @group link_attributes
  */
+#[Group('link_attributes')]
+#[RunTestsInSeparateProcesses]
 class InfoAlterTest extends KernelTestBase {
 
   /**

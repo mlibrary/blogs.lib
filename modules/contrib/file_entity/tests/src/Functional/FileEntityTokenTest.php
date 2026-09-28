@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\file_entity\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Core\Render\BubbleableMetadata;
 
 /**
@@ -9,50 +11,62 @@ use Drupal\Core\Render\BubbleableMetadata;
  *
  * @group file_entity
  */
+#[Group('file_entity')]
+#[RunTestsInSeparateProcesses]
 class FileEntityTokenTest extends FileEntityTestBase {
 
-  function setUp(): void {
+  /**
+   *
+   */
+  public function setUp(): void {
     parent::setUp();
     $this->setUpFiles();
   }
 
-  function testFileEntityTokens() {
-    $tokens = array(
+  /**
+   *
+   */
+  public function testFileEntityTokens() {
+    $tokens = [
       'type' => 'Document',
       'type:name' => 'Document',
       'type:machine-name' => 'document',
       'type:count' => count($this->files['text']),
-    );
-    $this->assertTokens('file', array('file' => $this->files['text'][0]), $tokens);
+    ];
+    $this->assertTokens('file', ['file' => $this->files['text'][0]], $tokens);
 
-    $tokens = array(
+    $tokens = [
       'type' => 'Image',
       'type:name' => 'Image',
       'type:machine-name' => 'image',
       'type:count' => count($this->files['image']),
-    );
-    $this->assertTokens('file', array('file' => $this->files['image'][0]), $tokens);
+    ];
+    $this->assertTokens('file', ['file' => $this->files['image'][0]], $tokens);
   }
 
-  function assertTokens($type, array $data, array $tokens, array $options = array()) {
+  /**
+   *
+   */
+  public function assertTokens($type, array $data, array $tokens, array $options = []) {
     $token_input = array_combine(array_keys($tokens), array_keys($tokens));
     $bubbleable_metadata = new BubbleableMetadata();
     $values = \Drupal::token()->generate($type, $token_input, $data, $options, $bubbleable_metadata);
     foreach ($tokens as $token => $expected) {
       if (!isset($expected)) {
-        $this->assertTrue(!isset($values[$token]), t("Token value for [@type:@token] was not generated.", array('@type' => $type, '@token' => $token)));
+        $this->assertTrue(!isset($values[$token]), t("Token value for [@type:@token] was not generated.", ['@type' => $type, '@token' => $token]));
       }
       elseif (!isset($values[$token])) {
-        $this->fail(t("Token value for [@type:@token] was not generated.", array('@type' => $type, '@token' => $token)));
+        $this->fail(t("Token value for [@type:@token] was not generated.", ['@type' => $type, '@token' => $token]));
       }
       elseif (!empty($options['regex'])) {
-        $this->assertTrue(preg_match('/^' . $expected . '$/', $values[$token]), t("Token value for [@type:@token] was '@actual', matching regular expression pattern '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $values[$token], '@expected' => $expected)));
+        $this->assertTrue(preg_match('/^' . $expected . '$/', $values[$token]), t("Token value for [@type:@token] was '@actual', matching regular expression pattern '@expected'.", ['@type' => $type, '@token' => $token, '@actual' => $values[$token], '@expected' => $expected]));
       }
       else {
-        $this->assertSame($values[$token], $expected, t("Token value for [@type:@token] was '@actual', expected value '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $values[$token], '@expected' => $expected)));
+        $this->assertSame($values[$token], $expected, t("Token value for [@type:@token] was '@actual', expected value '@expected'.", ['@type' => $type, '@token' => $token, '@actual' => $values[$token], '@expected' => $expected]));
       }
     }
 
     return $values;
   }
+
 }

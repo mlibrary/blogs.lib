@@ -1,0 +1,11 @@
+name: OpenID Connect Test Hooks
+type: module
+description: 'Test module that implements openid_connect hooks for testing purposes.'
+package: Testing
+core_version_requirement: ^10 || ^11
+hidden: true
+
+# Information added by Drupal.org packaging script on 2026-08-31
+version: '3.0.0-alpha9'
+project: 'openid_connect'
+datestamp: 1788187142

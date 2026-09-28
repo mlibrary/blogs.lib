@@ -43,6 +43,12 @@ function _scheduler_api_test_get_entities($entityTypeId) {
       $results = Term::loadMultiple(\Drupal::entityQuery('taxonomy_term')->accessCheck(FALSE)->execute());
       break;
 
+    case 'scheduler_test_no_bundle':
+      $results = \Drupal::entityTypeManager()
+        ->getStorage('scheduler_test_no_bundle')
+        ->loadMultiple();
+      break;
+
     default:
       throw new \Exception("Entity type id '{$entityTypeId}' is unrecognized in _scheduler_api_test_get_entities().");
   }

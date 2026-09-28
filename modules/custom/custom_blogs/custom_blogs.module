@@ -471,7 +471,7 @@ function custom_blogs_form_views_exposed_form_alter(array &$form, FormStateInter
       $form['#info']['filter-keys']['label'] = $form['#info']['filter-keys']['label'] . ' ' . $node->getTitle();
     }
     else {
-      $form['#attributes']['class'][] = 'hidden';
+      $form['#access'] = FALSE;
     }
     $form['keys']['#placeholder'] = str_replace('Search in', 'Search within', $form['keys']['#title']);
     if (!empty($form['actions']['reset']['#access'])) {

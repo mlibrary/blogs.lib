@@ -47,7 +47,7 @@ trait ViewsBulkOperationsFormTrait {
     $form_data['entity_labels'] = [];
     if (\count($form_data['list']) !== 0) {
       $form_data['selected_count'] = \count($form_data['list']);
-      if (\array_key_exists('exclude_mode', $form_data) && $form_data['exclude_mode'] === TRUE) {
+      if ($form_data['exclude_mode']) {
         $form_data['selected_count'] = $form_data['total_results'] - $form_data['selected_count'];
       }
 
@@ -73,8 +73,7 @@ trait ViewsBulkOperationsFormTrait {
    */
   protected function getSelectionInfoTitle(array $tempstore_data): ?TranslatableMarkup {
     if (\count($tempstore_data['list']) !== 0) {
-      $exclude_mode = \array_key_exists('exclude_mode', $tempstore_data) && $tempstore_data['exclude_mode'] === TRUE;
-      return $exclude_mode ? $this->t('Selected all items except:') : $this->t('Items selected:');
+      return $tempstore_data['exclude_mode'] ? $this->t('Selected all items except:') : $this->t('Items selected:');
     }
     return NULL;
   }
@@ -121,7 +120,7 @@ trait ViewsBulkOperationsFormTrait {
       }
       $renderable['#title'] = $this->getSelectionInfoTitle($form_data);
     }
-    elseif (\array_key_exists('exclude_mode', $form_data) && $form_data['exclude_mode'] === TRUE) {
+    elseif ($form_data['exclude_mode']) {
       $renderable['#empty'] = $this->t('Action will be executed on all items in the view.');
     }
 

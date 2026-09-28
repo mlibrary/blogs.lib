@@ -20,7 +20,7 @@ entity.oembed_provider.add_form:
     _entity_form: 'oembed_provider.add'
     _title: 'Add custom oEmbed provider'
   requirements:
-    _permission: 'administer oembed providers'
+    _entity_create_access: 'oembed_provider'
 
 entity.oembed_provider.edit_form:
   path: '/admin/config/media/oembed-providers/custom-providers/{oembed_provider}/edit'
@@ -28,7 +28,7 @@ entity.oembed_provider.edit_form:
     _entity_form: 'oembed_provider.edit'
     _title: 'Edit custom oEmbed provider'
   requirements:
-    _permission: 'administer oembed providers'
+    _entity_access: 'oembed_provider.update'
 
 entity.oembed_provider.delete_form:
   path: '/admin/config/media/oembed-providers/custom-providers/{oembed_provider}/delete'
@@ -36,7 +36,7 @@ entity.oembed_provider.delete_form:
     _entity_form: 'oembed_provider.delete'
     _title: 'Delete'
   requirements:
-    _permission: 'administer oembed providers'
+    _entity_access: 'oembed_provider.delete'
 
 entity.oembed_provider_bucket.collection:
   path: '/admin/config/media/oembed-providers/buckets'
@@ -52,7 +52,7 @@ entity.oembed_provider_bucket.add_form:
     _entity_form: 'oembed_provider_bucket.add'
     _title: 'Add oEmbed provider bucket'
   requirements:
-    _permission: 'administer oembed providers'
+    _entity_create_access: 'oembed_provider_bucket'
 
 entity.oembed_provider_bucket.edit_form:
   path: '/admin/config/media/oembed-providers/buckets/{oembed_provider_bucket}/edit'
@@ -60,7 +60,7 @@ entity.oembed_provider_bucket.edit_form:
     _entity_form: 'oembed_provider_bucket.edit'
     _title: 'Edit oEmbed provider bucket'
   requirements:
-    _permission: 'administer oembed providers'
+    _entity_access: 'oembed_provider_bucket.update'
 
 entity.oembed_provider_bucket.delete_form:
   path: '/admin/config/media/oembed-providers/buckets/{oembed_provider_bucket}/delete'
@@ -68,4 +68,4 @@ entity.oembed_provider_bucket.delete_form:
     _entity_form: 'oembed_provider_bucket.delete'
     _title: 'Delete'
   requirements:
-    _permission: 'administer oembed providers'
+    _entity_access: 'oembed_provider_bucket.delete'

@@ -1,5 +1,7 @@
 <?php
 
+use Drupal\Core\Site\Settings;
+
 /**
  * Implements hook_install().
  */
@@ -88,4 +90,42 @@ function symfony_mailer_lite_update_9001(&$sandbox) {
       ->set('character_set', 'UTF-8')
       ->save();
   }
+}
+
+/**
+ * Check for sendmail transport and provide configuration to add to settings.php if necessary.
+ */
+function symfony_mailer_lite_update_10001(&$sandbox) {
+  $missing_commands = [];
+  $allowed_commands = Settings::get('mailer_sendmail_commands', []);
+  $transport_storage = \Drupal::entityTypeManager()->getStorage('symfony_mailer_lite_transport');
+  /** @var \Drupal\symfony_mailer_lite\Entity\Transport[] $transports */
+  $transports = $transport_storage->loadMultiple();
+  foreach ($transports as $transport) {
+    if ($transport->getPluginId() === 'sendmail') {
+      $configuration = $transport->getConfiguration();
+      if (!empty($configuration['query']['command'])) {
+        $command = $transport->getConfiguration()['query']['command'] ?? '';
+        if (!in_array($command, $allowed_commands, TRUE)) {
+          $missing_commands[$command] = $command;
+        }
+      }
+    }
+  }
+  if (empty($missing_commands)) {
+    return;
+  }
+  $command_config_lines = [];
+  foreach ($missing_commands as $command) {
+    $command_config_lines[] = '$settings[\'mailer_sendmail_commands\'][] = \'' . $command. '\';';
+  }
+  $message = t('Symfony Mailer Lite now requires that Sendmail transports only use commands that are marked as
+  allowed in settings.php. Your site has transports that will fail with the current version because the commands have
+  not been marked as allowed. To correct this, add the following lines to your settings.php file:
+
+@commands
+', [
+    '@commands' => \Drupal\Core\Render\Markup::create(implode(";\n  ", $command_config_lines)),
+  ]);
+  throw new \Exception($message);
 }

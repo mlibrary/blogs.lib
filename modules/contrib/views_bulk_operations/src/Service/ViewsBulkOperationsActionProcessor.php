@@ -6,14 +6,19 @@ namespace Drupal\views_bulk_operations\Service;
 
 use Drupal\Core\Access\AccessResultReasonInterface;
 use Drupal\Core\Action\ActionInterface;
+use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\views\Plugin\ViewsPluginManager;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Views;
 use Drupal\views_bulk_operations\Action\ViewsBulkOperationsActionInterface;
 use Drupal\views_bulk_operations\ViewsBulkOperationsBatch;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\AutowireCallable;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
@@ -32,11 +37,6 @@ class ViewsBulkOperationsActionProcessor implements ViewsBulkOperationsActionPro
    * Is the object initialized?
    */
   protected bool $initialized = FALSE;
-
-  /**
-   * Are we operating in exclude mode?
-   */
-  protected bool $excludeMode = FALSE;
 
   /**
    * The processed action object.
@@ -66,8 +66,14 @@ class ViewsBulkOperationsActionProcessor implements ViewsBulkOperationsActionPro
   public function __construct(
     protected readonly ViewsBulkOperationsViewDataInterface $viewDataService,
     protected readonly ViewsBulkOperationsActionManager $actionManager,
+    #[Autowire(service: AccountProxyInterface::class, lazy: true)]
     protected readonly AccountProxyInterface $currentUser,
-    protected readonly ModuleHandlerInterface $moduleHandler,
+    #[AutowireCallable(service: ModuleHandlerInterface::class, method: 'invokeAll')]
+    private readonly \Closure $invokeAll,
+    #[AutowireCallable(service: EntityTypeManagerInterface::class, method: 'getDefinition', lazy: TRUE)]
+    private readonly \Closure $getEntityTypeDefinition,
+    #[Autowire(service: 'plugin.manager.views.style')]
+    protected readonly ViewsPluginManager $stylePluginManager,
   ) {}
 
   /**
@@ -81,7 +87,13 @@ class ViewsBulkOperationsActionProcessor implements ViewsBulkOperationsActionPro
       $this->queue = [];
     }
 
-    $this->excludeMode = \array_key_exists('exclude_mode', $view_data) && $view_data['exclude_mode'] !== FALSE;
+    if (
+      !\array_key_exists('exclude_list', $view_data) ||
+      \count($view_data['exclude_list']) === 0
+    ) {
+      // Nothing to exclude.
+      $view_data['exclude_mode'] = FALSE;
+    }
 
     if (\array_key_exists('action_id', $view_data)) {
       if (!\array_key_exists('configuration', $view_data)) {
@@ -172,47 +184,69 @@ class ViewsBulkOperationsActionProcessor implements ViewsBulkOperationsActionPro
     }
 
     $base_field = $this->view->storage->get('base_field');
+    $base_table = $this->view->storage->get('base_table');
 
     // In some cases we may encounter nondeterministic behavior in
     // db queries with sorts allowing different order of results.
     // To fix this we're removing all sorts and setting one sorting
     // rule by the view base id field.
-    foreach (\array_keys($this->view->getHandlers('sort')) as $id) {
-      $this->view->setHandler($this->bulkFormData['display_id'], 'sort', $id, NULL);
-    }
-    $this->view->setHandler($this->bulkFormData['display_id'], 'sort', $base_field, [
-      'id' => $base_field,
-      'table' => $this->view->storage->get('base_table'),
-      'field' => $base_field,
+    $sort_base = [
+      'table' => $base_table,
       'order' => 'ASC',
       'relationship' => 'none',
       'group_type' => 'group',
       'exposed' => FALSE,
       'plugin_id' => 'standard',
-    ]);
+    ];
+    foreach (\array_keys($this->view->getHandlers('sort')) as $id) {
+      $this->view->setHandler($this->bulkFormData['display_id'], 'sort', $id, NULL);
+    }
+    $this->view->setHandler($this->bulkFormData['display_id'], 'sort', $base_field, [
+      'id' => $base_field,
+      'field' => $base_field,
+    ] + $sort_base);
+
+    // If the entity type supports translations, we need an additional sort
+    // by langcode.
+    $entity_type_ids = $this->viewDataService->getEntityTypeIds();
+    $entity_type_id = \count($entity_type_ids) === 1 ? \reset($entity_type_ids) : NULL;
+    if ($entity_type_id !== NULL) {
+      $entity_type_definition = ($this->getEntityTypeDefinition)($entity_type_id);
+
+      if ($entity_type_definition->isTranslatable() && $entity_type_definition->hasKey('langcode')) {
+        $langcode_field = $entity_type_definition->getKey('langcode');
+
+        // Add this as another sort handler. You can give it a unique ID.
+        $this->view->setHandler($this->bulkFormData['display_id'], 'sort', $langcode_field, [
+          'id' => $langcode_field,
+          'field' => $langcode_field,
+        ] + $sort_base);
+      }
+    }
 
     $this->view->setItemsPerPage($this->bulkFormData['batch_size']);
     $this->view->setCurrentPage($page);
-    $this->view->style_plugin = Views::pluginManager('style')->createInstance('default');
+    $this->view->style_plugin = $this->stylePluginManager->createInstance('default');
     $this->view->style_plugin->init($this->view, $this->view->getDisplay());
     $this->view->build();
 
     $offset = $this->bulkFormData['batch_size'] * $page;
     // If the view doesn't start from the first result,
     // move the offset.
-    if ($pager_offset = $this->view->pager->getOffset()) {
+    // @phpstan-ignore nullsafe.neverNull
+    if ($pager_offset = $this->view->pager?->getOffset()) {
       $offset += $pager_offset;
     }
     $this->view->query->setLimit($this->bulkFormData['batch_size']);
     $this->view->query->setOffset($offset);
-    $this->moduleHandler->invokeAll('views_pre_execute', [$this->view]);
+    ($this->invokeAll)('views_pre_execute', [$this->view]);
     $this->view->query->execute($this->view);
 
     foreach ($this->view->result as $row) {
       $entity = $this->viewDataService->getEntity($row);
 
       $exclude = FALSE;
-      if ($this->excludeMode) {
+      if ($this->bulkFormData['exclude_mode']) {
         // Filter out excluded results basing on base field ID and language.
         foreach ($this->bulkFormData['exclude_list'] as $item) {
           if ($row->{$base_field} === $item[0] && $entity->language()->getId() === $item[1]) {
@@ -316,10 +350,16 @@ class ViewsBulkOperationsActionProcessor implements ViewsBulkOperationsActionPro
       $base_field_alias = $base_field;
     }
 
-    if (!\method_exists($this->view->query, 'addWhere')) {
-      throw new \Exception(\sprintf('Unsupported query type: %s', $this->view->query::class));
+    // Narrow the query to the selected base field values: add directly to a
+    // built SQL query (its root is always AND), otherwise via the query
+    // plugin's addWhere() before the rebuild (e.g. for Search API).
+    $built_query = $this->view->build_info['query'];
+    if (!($built_query instanceof SelectInterface)) {
+      if (!\method_exists($this->view->query, 'addWhere')) {
+        throw new \Exception(\sprintf('Unsupported query type: %s', $this->view->query::class));
+      }
+      $this->view->query->addWhere('views_bulk_operations', $base_field_alias, $base_field_values, 'IN');
     }
-    $this->view->query->addWhere(0, $base_field_alias, $base_field_values, 'IN');
 
     // Rebuild the view query.
     $this->view->query->build($this->view);
@@ -327,6 +367,19 @@ class ViewsBulkOperationsActionProcessor implements ViewsBulkOperationsActionPro
     // We just destroyed any metadata that other modules may have added to the
     // query. Give those modules the opportunity to alter the query again.
     $this->view->query->alter($this->view);
+
+    $built_query = $this->view->build_info['query'];
+    if ($built_query instanceof SelectInterface) {
+      $built_query->condition($base_field_alias, $base_field_values, 'IN');
+    }
+
+    // The count query is built separately from the row query, so it needs
+    // the same restriction, otherwise get_total_rows reflects the whole
+    // (unfiltered) view instead of the current selection.
+    $count_query = $this->view->build_info['count_query'] ?? NULL;
+    if ($count_query instanceof SelectInterface) {
+      $count_query->condition($base_field_alias, $base_field_values, 'IN');
+    }
 
     // Use a different pager ID so we don't break the real pager.
     // @todo Check if we can use something else to set this value.
@@ -336,7 +389,7 @@ class ViewsBulkOperationsActionProcessor implements ViewsBulkOperationsActionPro
     }
 
     // Execute the view.
-    $this->moduleHandler->invokeAll('views_pre_execute', [$this->view]);
+    ($this->invokeAll)('views_pre_execute', [$this->view]);
     $this->view->query->execute($this->view);
 
     // Get all the entities in the batch_list from the view.

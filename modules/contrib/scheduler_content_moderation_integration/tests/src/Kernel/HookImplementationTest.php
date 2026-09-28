@@ -59,6 +59,8 @@ class HookImplementationTest extends SchedulerContentModerationTestBase {
    * Tests if the Scheduler Publish-on and Unpublish-on fields should be hidden.
    *
    * @dataProvider hideSchedulerFieldsProvider
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function testHookHideSchedulerFields($expected, $nodeChoice, $options): void {
     $node = $this->$nodeChoice;

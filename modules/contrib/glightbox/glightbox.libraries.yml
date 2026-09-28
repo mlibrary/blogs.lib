@@ -1,0 +1,52 @@
+glightbox:
+  remote: https://github.com/levmyshkin/glightbox
+  version: VERSION
+  license:
+    name: MIT
+    gpl-compatible: false
+    url: https://github.com/biati-digital/glightbox/blob/master/LICENSE.md
+  css:
+    theme:
+      /libraries/glightbox/dist/css/glightbox.min.css: { }
+  js:
+    /libraries/dom_purify/dist/purify.min.js: { minified: true }
+    /libraries/glightbox/dist/js/glightbox.min.js: { minified: true }
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/once
+
+glightbox-dev:
+  remote: https://github.com/levmyshkin/glightbox
+  version: VERSION
+  license:
+    name: MIT
+    gpl-compatible: false
+    url: https://github.com/biati-digital/glightbox/blob/master/LICENSE.md
+  css:
+    theme:
+      /libraries/glightbox/dist/css/glightbox.css: { }
+  js:
+    /libraries/glightbox/dist/js/glightbox.js: { }
+  dependencies:
+    - core/once
+
+init:
+  version: VERSION
+  js:
+    js/glightbox.js: {}
+  dependencies:
+    - core/drupal
+
+plyr:
+  remote: https://github.com/sampotts/plyr
+  license:
+    name: MIT
+    url: https://github.com/sampotts/plyr/blob/master/license.md
+    gpl-compatible: true
+  version: 3.6.12
+  css:
+    component:
+      //cdn.plyr.io/3.6.12/plyr.css: { type: external, minified: true, attributes: { defer: true, async: true } }
+  js:
+    //cdn.plyr.io/3.6.12/plyr.js: { type: external, minified: true }

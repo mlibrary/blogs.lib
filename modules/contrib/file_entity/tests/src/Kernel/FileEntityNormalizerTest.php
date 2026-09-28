@@ -2,7 +2,8 @@
 
 namespace Drupal\Tests\file_entity\Kernel;
 
-use Drupal\Core\StreamWrapper\PublicStream;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file\Entity\File;
@@ -21,12 +22,14 @@ use Symfony\Component\Routing\RouteCollection;
  *
  * @group file_entity
  */
+#[Group('file_entity')]
+#[RunTestsInSeparateProcesses]
 class FileEntityNormalizerTest extends KernelTestBase {
 
   /**
    * {@inheritdoc}
    */
-  protected static $modules = array(
+  protected static $modules = [
     'field',
     'file',
     'image',
@@ -38,7 +41,7 @@ class FileEntityNormalizerTest extends KernelTestBase {
     'rest',
     'hal',
     'system',
-  );
+  ];
 
   /**
    * {@inheritdoc}
@@ -48,8 +51,8 @@ class FileEntityNormalizerTest extends KernelTestBase {
     $this->installEntitySchema('node');
     $this->installEntitySchema('file');
     $this->installEntitySchema('user');
-    $this->installSchema('file', array('file_usage'));
-    $this->installSchema('file_entity', array('file_metadata'));
+    $this->installSchema('file', ['file_usage']);
+    $this->installSchema('file_entity', ['file_metadata']);
 
     // Set the file route to provide entity URI for serialization.
     $route_collection = new RouteCollection();
@@ -62,42 +65,42 @@ class FileEntityNormalizerTest extends KernelTestBase {
    */
   public function testFileFieldSerializePersist() {
     // Create a node type.
-    $node_type = NodeType::create(array('type' => $this->randomMachineName()));
+    $node_type = NodeType::create(['type' => $this->randomMachineName()]);
     $node_type->save();
 
     // Create a file.
     $file_name = $this->randomMachineName() . '.txt';
     file_put_contents("public://$file_name", $this->randomString());
-    $file = File::create(array(
+    $file = File::create([
       'uri' => "public://$file_name",
-    ));
+    ]);
     $file->save();
 
     // Attach a file field to the node type.
-    $file_field_storage = FieldStorageConfig::create(array(
+    $file_field_storage = FieldStorageConfig::create([
       'type' => 'file',
       'entity_type' => 'node',
       'field_name' => 'field_file',
-    ));
+    ]);
     $file_field_storage->save();
-    $file_field_instance = FieldConfig::create(array(
+    $file_field_instance = FieldConfig::create([
       'field_storage' => $file_field_storage,
       'entity_type' => 'node',
       'bundle' => $node_type->id(),
-    ));
+    ]);
     $file_field_instance->save();
 
     // Create a node referencing the file.
-    $node = Node::create(array(
+    $node = Node::create([
       'title' => 'A node with a file',
       'type' => $node_type->id(),
-      'field_file' => array(
+      'field_file' => [
         'target_id' => $file->id(),
         'display' => 0,
         'description' => 'An attached file',
-      ),
+      ],
       'status' => TRUE,
-    ));
+    ]);
 
     // Export.
     $serialized = $this->container->get('serializer')->serialize($node, 'hal_json');
@@ -109,23 +112,22 @@ class FileEntityNormalizerTest extends KernelTestBase {
     $this->assertEquals($node->toArray()['field_file'], $deserialized->toArray()['field_file'], "File field persists.");
   }
 
-
   /**
    * Tests that file entities are correctly serialized, including file contents.
    */
   public function testFileSerialize() {
 
-    FileType::create(array(
+    FileType::create([
       'id' => 'undefined',
-    ))->save();
+    ])->save();
     foreach ($this->getTestFiles() as $file_obj) {
       $file_contents = file_get_contents($file_obj->uri);
 
       // Create file entity.
-      $file = File::create(array(
+      $file = File::create([
         'uri' => $file_obj->uri,
         'status' => TRUE,
-      ));
+      ]);
       $file->save();
 
       // Serialize.
@@ -148,7 +150,7 @@ class FileEntityNormalizerTest extends KernelTestBase {
       $this->assertTrue(file_exists($file_obj->uri), "A file was created on disk");
 
       // Assert file is equal.
-      foreach (array('filename', 'uri', 'filemime', 'filesize', 'type') as $property) {
+      foreach (['filename', 'uri', 'filemime', 'filesize', 'type'] as $property) {
         $this->assertEquals($file->get($property)->value, $last_file->get($property)->value);
       }
       $this->assertEquals($file->get('type')->target_id, $last_file->get('type')->target_id);
@@ -161,44 +163,44 @@ class FileEntityNormalizerTest extends KernelTestBase {
    */
   public function testImageFieldSerializePersist() {
     // Create a node type.
-    $node_type = NodeType::create(array('type' => $this->randomMachineName()));
+    $node_type = NodeType::create(['type' => $this->randomMachineName()]);
     $node_type->save();
 
     // Create a file.
     $file_name = $this->randomMachineName() . '.jpg';
     file_put_contents("public://$file_name", $this->randomString());
-    $image = File::create(array(
+    $image = File::create([
       'uri' => "public://$file_name",
-    ));
+    ]);
     $image->save();
 
     // Attach a file field to the node type.
-    $image_field_storage = FieldStorageConfig::create(array(
+    $image_field_storage = FieldStorageConfig::create([
       'type' => 'image',
       'entity_type' => 'node',
       'field_name' => 'field_image',
-    ));
+    ]);
     $image_field_storage->save();
-    $file_field_instance = FieldConfig::create(array(
+    $file_field_instance = FieldConfig::create([
       'field_storage' => $image_field_storage,
       'entity_type' => 'node',
       'bundle' => $node_type->id(),
-    ));
+    ]);
     $file_field_instance->save();
 
     // Create a node referencing the image.
-    $node = Node::create(array(
+    $node = Node::create([
       'title' => 'A node with a image',
       'type' => $node_type->id(),
-      'field_image' => array(
+      'field_image' => [
         'target_id' => $image->id(),
         'alt' => 'the image alternative',
         'title' => 'the title',
         'width' => 50,
         'height' => 50,
-      ),
+      ],
       'status' => TRUE,
-    ));
+    ]);
 
     // Export.
     $serialized = $this->container->get('serializer')->serialize($node, 'hal_json');

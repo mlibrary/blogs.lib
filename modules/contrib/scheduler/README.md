@@ -14,8 +14,8 @@ entities, Commerce Products and Taxonomy Terms are supported.
 
 ## Requirements
 
- * Scheduler uses the following Drupal 8 Core components: Actions, Datetime,
-   Field, Node, Text, Filter, User, System, Views.
+ * Scheduler uses the following core components:
+     Actions, Datetime, Field, Node, Text, Filter, User, System, Views.
 
  * There are no special requirements outside core.
 
@@ -47,12 +47,12 @@ entities, Commerce Products and Taxonomy Terms are supported.
 
 ## Installation
 
- * Install as you would normally install a contributed Drupal module. See:
-     https://drupal.org/documentation/install/modules-themes/modules-8
-     for further information.
+ * Install as you would normally install a contributed Drupal module. See the
+   Drupal [module installation guide](https://drupal.org/documentation/install/modules-themes/modules-8)
+   for further information.
 
- * The [Scheduler project page on Drupal.org](https://drupal.org/project/scheduler)
-   has information regarding versions and Core compatibility.
+ * The [Scheduler project page](https://drupal.org/project/scheduler) has
+   information regarding versions and Core compatibility.
 
 ## Configuration
 
@@ -86,22 +86,24 @@ entities, Commerce Products and Taxonomy Terms are supported.
      Scheduler's functions only on more frequent crontab jobs than the full
      Drupal cron run.
 
- * Configure the Scheduler settings per entity type:
-   - Administration » Structure » Content Types » Edit
-   - Administration » Structure » Media Types » Edit
-   - Administration » Commerce » Configuration » Product Types » Edit
-   - Administration » Structure » Taxonomy » Vocabulary » Edit
+  * Configure the Scheduler settings per entity type:
+    - Administration » Structure » Content Types » Edit
+    - Administration » Structure » Media Types » Edit
+    - Administration » Commerce » Configuration » Product Types » Edit
+    - Administration » Structure » Taxonomy » Vocabulary » Edit
+    - For supported entity types without bundles:
+      Administration » Configuration » Content Authoring » Scheduler
+      (use the entity link in the drop-button)
 
- * The system status report at /admin/reports/status has a Scheduler Timecheck
+ * The system status report at /admin/reports/status has a `Scheduler Timecheck`
    section, giving details of the server time, default site time and current
    user time.
 
 ## Troubleshooting
 
- * To submit bug reports and feature requests use
-     https://drupal.org/project/issues/scheduler
+ * Submit bug reports and feature requests to the [project issue tracker](https://drupal.org/project/issues/scheduler)
 
- * To get help with crontab jobs, see https://drupal.org/cron
+ * For help with crontab jobs read the Drupal [cron documentation](https://drupal.org/cron)
 
 ## Maintainers
 
@@ -109,10 +111,12 @@ entities, Commerce Products and Taxonomy Terms are supported.
 <!---  Do not want to add these names into the cspell-project-words file --->
 
 Current maintainers:
+
 - [Pieter Frenssen](https://www.drupal.org/u/pfrenssen) 2014(6.x)-current
 - [Jonathan Smith](https://www.drupal.org/u/jonathan1055) 2013(6.x)-current
 
 Previous maintainers:
+
 - [Rick Manelius](https://www.drupal.org/u/rickmanelius) 2013(6.x)-2014(7.x)
 - [Eric Schaefer](https://www.drupal.org/u/eric-schaefer) 2008(5.x)-2013(7.x)
 - [Sami Kimini](https://www.drupal.org/u/skiminki) 2008(5.x)

@@ -4,7 +4,7 @@ namespace Drupal\openid_connect\EventSubscriber;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\Core\Routing\RouteObjectInterface;
+use Drupal\Core\Routing\RouteMatch;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\openid_connect\OpenIDConnectClaims;
 use Drupal\openid_connect\OpenIDConnectSessionInterface;
@@ -208,7 +208,7 @@ class OpenIDConnectAutoLogin implements EventSubscriberInterface {
    */
   protected function isLoginRequested(Request $request): bool {
     // Get route name of current page.
-    $route_name = $request->get(RouteObjectInterface::ROUTE_NAME);
+    $route_name = RouteMatch::createFromRequest($request)->getRouteName();
     // If the route name is empty, return true to prevent further actions, as
     // it's not yet known what page is being viewed.
     return !empty($route_name) && in_array($route_name, [
@@ -234,12 +234,18 @@ class OpenIDConnectAutoLogin implements EventSubscriberInterface {
         return str_starts_with($var, 'openid_connect.client.');
       });
 
-      // If there is more than one enabled client, skip the auto-login process.
-      if (!$clientConfigs || count($clientConfigs) > 1) {
+      // Filter out disabled clients.
+      $enabledClients = array_filter($clientConfigs, function ($configName) {
+        $config = $this->configFactory->get($configName);
+        return $config->get('status') === TRUE;
+      });
+
+      // If there are 0 or more than 1 enabled clients, skip auto-login.
+      if (count($enabledClients) !== 1) {
         return $this->client;
       }
 
-      $clientConfig = $this->configFactory->get(current($clientConfigs));
+      $clientConfig = $this->configFactory->get(current($enabledClients));
       $this->client = $this->pluginManager->createInstance($clientConfig->get('plugin'), $clientConfig->get('settings'));
       $this->client->setParentEntityId($clientConfig->get('id'));
     }

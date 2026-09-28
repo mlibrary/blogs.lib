@@ -5,6 +5,7 @@ namespace Drupal\Tests\scheduler\Functional;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\scheduler\Traits\SchedulerCommerceProductSetupTrait;
 use Drupal\Tests\scheduler\Traits\SchedulerMediaSetupTrait;
+use Drupal\Tests\scheduler\Traits\SchedulerNoBundleEntitySetupTrait;
 use Drupal\Tests\scheduler\Traits\SchedulerSetupTrait;
 use Drupal\Tests\scheduler\Traits\SchedulerTaxonomyTermSetupTrait;
 
@@ -15,6 +16,7 @@ abstract class SchedulerBrowserTestBase extends BrowserTestBase {
 
   use SchedulerCommerceProductSetupTrait;
   use SchedulerMediaSetupTrait;
+  use SchedulerNoBundleEntitySetupTrait;
   use SchedulerSetupTrait;
   use SchedulerTaxonomyTermSetupTrait;
 
@@ -31,6 +33,7 @@ abstract class SchedulerBrowserTestBase extends BrowserTestBase {
     'media',
     'commerce_product',
     'taxonomy',
+    'scheduler_no_bundle_test',
   ];
 
   /**
@@ -65,6 +68,9 @@ abstract class SchedulerBrowserTestBase extends BrowserTestBase {
     }
     if (stristr($testName, 'taxonomy') || stristr($testName, 'permission')) {
       $this->SchedulerTaxonomyTermSetup();
+    }
+    if (stristr($testName, 'scheduler_test_no_bundle') || stristr($testName, 'permission')) {
+      $this->schedulerNoBundleEntitySetUp();
     }
   }
 

@@ -71,10 +71,17 @@ function openid_connect_user_cancel($edit, $account, $method) {
  * Implements hook_user_format_name_alter().
  */
 function openid_connect_user_format_name_alter(&$name, $account) {
+  // Don't alter anonymous users or objects that do not have any user ID. This
+  // prevents the user data check below from getting all user data.
+  $accountId = $account->id();
+  if (empty($account->id())) {
+    return;
+  }
+
   // Ensure that usernames are not displayed if they are email addresses, or if
   // they are generated names starting with 'oidc_'.
-  $oidc_name = \Drupal::service('user.data')->get('openid_connect', $account->id(), 'oidc_name');
-  if (!empty($oidc_name) && (strpos($name, 'oidc_') !== 0) && (strpos($name, '@') !== FALSE)) {
+  $oidc_name = \Drupal::service('user.data')->get('openid_connect', $accountId, 'oidc_name');
+  if (!empty($oidc_name) && (!str_starts_with($name, 'oidc_')) && (str_contains($name, '@'))) {
     $name = $oidc_name;
   }
 }
@@ -155,10 +162,13 @@ function _openid_connect_user_pass_form_validate(array &$form, FormStateInterfac
   }
 
   // Try to load by email.
-  $user = user_load_by_mail($name);
+  $user_storage = \Drupal::entityTypeManager()->getStorage('user');
+  $users = $user_storage->loadByProperties(['mail' => $name]);
+  $user = reset($users);
   if (empty($user)) {
     // No success, try to load by name.
-    $user = user_load_by_name($name);
+    $users = $user_storage->loadByProperties(['name' => $name]);
+    $user = reset($users);
   }
 
   if (!empty($user) && !\Drupal::service('openid_connect.openid_connect')->hasSetPasswordAccess($user)) {

@@ -21,7 +21,8 @@ use Prophecy\Argument;
 
 /**
  * @coversDefaultClass \Drupal\panels\Plugin\DisplayVariant\PanelsDisplayVariant
- * @group Panels
+ *
+ * @group panels
  */
 class PanelsDisplayVariantTest extends UnitTestCase {
 

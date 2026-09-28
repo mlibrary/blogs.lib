@@ -3,6 +3,7 @@
 namespace Drupal\symfony_mailer_lite\Plugin\SymfonyMailerLite\Transport;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Site\Settings;
 use Symfony\Component\Mailer\Transport;
 
 /**
@@ -48,7 +49,7 @@ class DsnTransport extends TransportBase {
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
     $dsn = $form_state->getValue('dsn');
-    if (parse_url($dsn, PHP_URL_SCHEME) == 'sendmail') {
+    if (in_array(parse_url($dsn, PHP_URL_SCHEME), ['sendmail', 'sendmail+smtp'])) {
       // Don't allow bypassing of the checks done by the Sendmail transport.
       $form_state->setErrorByName('dsn', $this->t('Use the Sendmail transport.'));
     }

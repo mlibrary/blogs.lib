@@ -2,18 +2,19 @@
 
 namespace Drupal\scheduler_content_moderation_integration\Plugin\Validation\Constraint;
 
-use Symfony\Component\Validator\Constraint;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Validation\Attribute\Constraint;
+use Symfony\Component\Validator\Constraint as SymfonyConstraint;
 
 /**
  * Validates scheduler publish state.
- *
- * @Constraint(
- *   id = "SchedulerPublishState",
- *   label = @Translation("Scheduler publish state validation", context = "Validation"),
- *   type = "string"
- * )
  */
-class PublishStateConstraint extends Constraint {
+#[Constraint(
+  id: 'SchedulerPublishState',
+  label: new TranslatableMarkup('Scheduler publish state validation'),
+  type: 'string',
+)]
+class PublishStateConstraint extends SymfonyConstraint {
 
   /**
    * Publish state invalid transition message.
@@ -24,5 +25,12 @@ class PublishStateConstraint extends Constraint {
    * @var string
    */
   public string $invalidTransitionMessage = 'The scheduled publishing state of %publish_state is not a valid transition from the current moderation state of %content_state for this content.';
+
+  /**
+   * Message when the current moderation state matches the scheduled state.
+   *
+   * @var string
+   */
+  public string $sameStateMessage = 'The content is already being saved as %moderation_state. Either remove the scheduled publish date or change the current moderation state to a different state.';
 
 }

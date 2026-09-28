@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\config_devel\Unit;
 
+use PHPUnit\Framework\Attributes\Group;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\ProxyClass\Lock\PersistentDatabaseLockBackend;
@@ -15,11 +16,13 @@ use org\bovigo\vfs\vfsStream;
 use Drupal\Component\Serialization\Yaml;
 
 use Drupal\config_devel\ConfigImporterExporter;
+use Drupal\Core\Extension\ThemeExtensionList;
 
 /**
  * @coversDefaultClass \Drupal\config_devel\ConfigImporterExporter
  * @group config_devel
  */
+#[Group('config_devel')]
 class ConfigImporterExporterTest extends ConfigDevelTestBase {
 
   use ProphecyTrait;
@@ -36,10 +39,10 @@ class ConfigImporterExporterTest extends ConfigDevelTestBase {
     $config = $this->createMock('\Drupal\Core\Config\Config');
     $config->expects($this->any())
       ->method('getName')
-      ->will($this->returnValue($this->randomMachineName()));
+      ->willReturn($this->randomMachineName());
     $config->expects($this->any())
       ->method('get')
-      ->will($this->returnValue($config_data));
+      ->willReturn($config_data);
 
     $file_names = array(
       vfsStream::url('public://' . $this->randomMachineName() . '.yml'),
@@ -57,7 +60,8 @@ class ConfigImporterExporterTest extends ConfigDevelTestBase {
       $this->prophesize(ModuleInstaller::class)->reveal(),
       $this->prophesize(ThemeHandlerInterface::class)->reveal(),
       $this->prophesize(TranslationManager::class)->reveal(),
-      $this->prophesize(ModuleExtensionList::class)->reveal()
+      $this->prophesize(ModuleExtensionList::class)->reveal(),
+      $this->prophesize(ThemeExtensionList::class)->reveal(),
     );
 
     $configDevelSubscriber->writeBackConfig($config, $file_names);

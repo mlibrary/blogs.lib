@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\symfony_mailer_lite\Transport\ErrorTransport;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\Transport\SendmailTransportFactory;
 use Symfony\Component\Mailer\Transport\TransportFactoryInterface;
 use Symfony\Component\Mailer\Transport\Transports;
 
@@ -52,6 +53,12 @@ final class TransportsFactory {
     $this->entityTypeManager = $entityTypeManager;
     $this->configFactory = $configFactory;
     $this->eventDispatcher = $eventDispatcher;
+    $this->transportFactories = iterator_to_array(Transport::getDefaultFactories($this->eventDispatcher));
+    // Replace the sendmail transport factory with our own implementation.
+    $this->transportFactories = array_filter($this->transportFactories, function ($factory) {
+      return !($factory instanceof SendmailTransportFactory);
+    });
+    $this->addTransportFactory(new ReplacementSendmailTransportFactory());
   }
 
   /**
@@ -71,10 +78,7 @@ final class TransportsFactory {
    *   Array with available transport factories.
    */
   public function getTransportFactories(): array {
-    return array_merge(
-      $this->transportFactories,
-      iterator_to_array(Transport::getDefaultFactories($this->eventDispatcher))
-    );
+    return $this->transportFactories;
   }
 
   /**

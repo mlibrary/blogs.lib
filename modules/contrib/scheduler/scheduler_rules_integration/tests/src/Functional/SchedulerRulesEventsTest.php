@@ -6,6 +6,7 @@ use Drupal\Tests\scheduler\Functional\SchedulerBrowserTestBase;
 use Drupal\rules\Context\ContextConfig;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the six events that Scheduler provides for use in Rules module.
@@ -15,6 +16,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group scheduler_rules_integration
  */
 #[Group('scheduler_rules_integration')]
+#[RunTestsInSeparateProcesses]
 class SchedulerRulesEventsTest extends SchedulerBrowserTestBase {
 
   /**

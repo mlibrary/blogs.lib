@@ -3,7 +3,9 @@
 namespace Drupal\mimemail\Form;
 
 use Drupal\Component\Utility\Crypt;
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Extension\ThemeHandlerInterface;
@@ -12,6 +14,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Mail\MailManagerInterface;
 use Drupal\Core\Url;
 use Drupal\field\Entity\FieldConfig;
+use Drupal\filter\FilterFormatRepositoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -52,6 +55,8 @@ class AdminForm extends ConfigFormBase {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The factory for configuration objects.
+   * @param \Drupal\Core\Config\TypedConfigManagerInterface $typedConfigManager
+   *   The typed config manager.
    * @param \Drupal\Core\Mail\MailManagerInterface $mail_manager
    *   The mail plugin manager service.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
@@ -61,8 +66,8 @@ class AdminForm extends ConfigFormBase {
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, MailManagerInterface $mail_manager, ModuleHandlerInterface $module_handler, ThemeHandlerInterface $theme_handler, EntityTypeManagerInterface $entity_type_manager) {
-    parent::__construct($config_factory);
+  public function __construct(ConfigFactoryInterface $config_factory, TypedConfigManagerInterface $typedConfigManager, MailManagerInterface $mail_manager, ModuleHandlerInterface $module_handler, ThemeHandlerInterface $theme_handler, EntityTypeManagerInterface $entity_type_manager) {
+    parent::__construct($config_factory, $typedConfigManager);
     $this->mailManager = $mail_manager;
     $this->moduleHandler = $module_handler;
     $this->themeHandler = $theme_handler;
@@ -75,6 +80,7 @@ class AdminForm extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
+      $container->get('config.typed'),
       $container->get('plugin.manager.mail'),
       $container->get('module_handler'),
       $container->get('theme_handler'),
@@ -124,6 +130,7 @@ class AdminForm extends ConfigFormBase {
     $theme = $this->themeHandler->getDefault();
     // @todo Searching the path is not what we want - this is how it was done
     // in D7, but that's not how assets should be handled in D8.
+    // cspell:ignore mailstyle
     $mailstyle = \Drupal::service('extension.list.theme')->getPath($theme) . '/mail.css';
     // Disable site style sheets including option if found.
     if (is_file($mailstyle)) {
@@ -196,7 +203,7 @@ class AdminForm extends ConfigFormBase {
     }
 
     // Get a list of all formats.
-    $formats = filter_formats();
+    $formats = DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.4.0', fn() => \Drupal::service(FilterFormatRepositoryInterface::class)->getAllFormats(), fn() => filter_formats());
     $format_options = [];
     foreach ($formats as $format) {
       $format_options[$format->get('format')] = $format->get('name');
@@ -204,7 +211,7 @@ class AdminForm extends ConfigFormBase {
     $form['mimemail']['format'] = [
       '#type' => 'select',
       '#title' => $this->t('Email format'),
-      '#default_value' => $config->get('format') ?: filter_fallback_format(),
+      '#default_value' => $config->get('format') ?: DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.4.0', fn() => \Drupal::service(FilterFormatRepositoryInterface::class)->getFallbackFormatId(), fn() => filter_fallback_format()),
       '#options' => $format_options,
       '#access' => count($formats) > 1,
       '#attributes' => ['class' => ['filter-list']],

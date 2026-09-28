@@ -29,7 +29,7 @@ class PublishedStateConstraintTest extends SchedulerContentModerationTestBase {
    *
    * @covers ::validate
    */
-  public function testValidPublishStateTransition() {
+  public function testValidPublishStateTransition(): void {
     $node = Node::create([
       'type' => 'example',
       'title' => 'Test title',
@@ -48,7 +48,7 @@ class PublishedStateConstraintTest extends SchedulerContentModerationTestBase {
    *
    * @covers ::validate
    */
-  public function testInvalidPublishStateTransition() {
+  public function testInvalidPublishStateTransition(): void {
     $node = Node::create([
       'type' => 'example',
       'title' => 'Test title',
@@ -65,6 +65,51 @@ class PublishedStateConstraintTest extends SchedulerContentModerationTestBase {
     // @todo Figure out how to actually test this with valid options that don't
     // break the select list widget but still test the invalid transition.
     // $this->assertCount(1, $violations);
+  }
+
+  /**
+   * Test that saving in the same state as the scheduled publish state fails.
+   *
+   * @covers ::validate
+   */
+  public function testSameStateAsScheduledPublishState(): void {
+    $node = Node::create([
+      'type' => 'example',
+      'title' => 'Test title',
+      'moderation_state' => 'published',
+      'publish_on' => strtotime('tomorrow'),
+      'publish_state' => 'published',
+    ]);
+
+    $violations = $node->validate();
+    $found = FALSE;
+    foreach ($violations as $violation) {
+      if (str_contains(strip_tags((string) $violation->getMessage()), 'already being saved as Published')) {
+        $found = TRUE;
+        break;
+      }
+    }
+    $this->assertTrue($found);
+  }
+
+  /**
+   * Test that saving in a different state than scheduled publish state passes.
+   *
+   * @covers ::validate
+   */
+  public function testDifferentStateFromScheduledPublishState(): void {
+    $node = Node::create([
+      'type' => 'example',
+      'title' => 'Test title',
+      'moderation_state' => 'draft',
+      'publish_on' => strtotime('tomorrow'),
+      'publish_state' => 'published',
+    ]);
+
+    $violations = $node->validate();
+    foreach ($violations as $violation) {
+      $this->assertStringNotContainsString('already being saved as', strip_tags((string) $violation->getMessage()));
+    }
   }
 
 }

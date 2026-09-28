@@ -19,7 +19,7 @@ use Prophecy\Argument;
  *
  * @coversDefaultClass \Drupal\panels\Plugin\PanelsStorage\PageManagerPanelsStorage
  *
- * @group PageManager
+ * @group panels
  */
 class PanelsStorageTest extends UnitTestCase {
 

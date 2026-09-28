@@ -58,7 +58,7 @@ class InstallTest extends BrowserTestBase {
    *
    * @dataProvider dataInstallTest
    */
-  public function testInstall($entityTypeId, $bundle) {
+  public function testInstall($entityTypeId, $bundle): void {
     /** @var \Drupal\Tests\WebAssert $assert */
     $assert = $this->assertSession();
     // This is the user created in the Scheduler test base not SCMI test base.
@@ -68,8 +68,8 @@ class InstallTest extends BrowserTestBase {
     $url = $this->entityAddUrl($entityTypeId, $bundle);
     $this->drupalGet($url);
     $assert->statusCodeEquals(200);
-    $assert->FieldExists('publish_on[0][value][date]');
-    $assert->FieldExists('unpublish_on[0][value][date]');
+    $assert->fieldExists('publish_on[0][value][date]');
+    $assert->fieldExists('unpublish_on[0][value][date]');
 
     // Install scheduler_content_moderation_integration.
     \Drupal::service('module_installer')->install(['scheduler_content_moderation_integration']);
@@ -88,10 +88,10 @@ class InstallTest extends BrowserTestBase {
     // of the SCMI state fields are displayed.
     $this->drupalGet($url);
     $assert->statusCodeEquals(200);
-    $assert->FieldExists('publish_on[0][value][date]');
-    $assert->FieldExists('unpublish_on[0][value][date]');
-    $assert->FieldExists('publish_state[0]');
-    $assert->FieldExists('unpublish_state[0]');
+    $assert->fieldExists('publish_on[0][value][date]');
+    $assert->fieldExists('unpublish_on[0][value][date]');
+    $assert->fieldExists('publish_state[0]');
+    $assert->fieldExists('unpublish_state[0]');
   }
 
   /**

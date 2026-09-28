@@ -13,19 +13,6 @@
                 }
             }
         },
-        "umlib_admin-theme": {
-            "type": "package",
-            "package": {
-                "name": "mlibrary/umlib_admin",
-                "version": "1.0",
-                "type": "drupal-theme",
-                "dist": {
-                    "type": "zip",
-                    "url": "https://github.com/mlibrary/umlib_admin/archive/refs/heads/main.zip",
-                    "reference": "main"
-                }
-            }
-        },
         "colorbox": {
           "type": "package",
           "package": {
@@ -42,7 +29,21 @@
             "type": "composer",
             "url": "https://packages.drupal.org/8",
             "exclude": [
+              "drupal/image_resize_filter"
             ]
+        },
+        "image_resize_filter": {
+            "type": "package",
+            "package": {
+                "name": "drupal/image_resize_filter",
+                "version": "1.0.x-dev",
+                "type": "drupal-module",
+                "source": {
+                    "url": "https://git.drupalcode.org/issue/image_resize_filter-3431013.git",
+                    "type": "git",
+                    "reference": "f443a1ee758404b8b99d4c8e45415a5406418b33"
+                }
+            }
         },
         "jquery_ui_touch_punch": {
           "type": "package",
@@ -62,14 +63,14 @@
         "cweagans/composer-patches": "^1.7",
         "drupal/allowed_formats": "3.x",
         "drupal/autoban": "^1.13",
-        "drupal/better_exposed_filters": "^6.0.3",
+        "drupal/better_exposed_filters": "^7",
         "drupal/block_class": "^3.0",
         "drupal/calendar": "^1.0@beta",
         "drupal/colorbox": "^2.0",
         "drupal/condition_query": "^1.4",
         "drupal/config_devel": "^1.8",
         "drupal/content_moderation_notifications": "^3.5",
-        "drupal/core": "^10.2",
+        "drupal/core": "^11",
         "drupal/create_user_permission": "^2.0",
         "drupal/devel": "^5.1",
         "drupal/easy_breadcrumb": "^2.0",
@@ -77,20 +78,21 @@
         "drupal/entity_reference_exposed_filters": "^2.0@alpha",
         "drupal/entity_reference_revisions": "^1.10",
         "drupal/externalauth": "^2.0.3",
-        "drupal/field_group": "^3.2",
+        "drupal/field_group": "^4",
         "drupal/file_entity": "^2.0@beta",
         "drupal/force_users_logout": "^2.0",
         "drupal/google_analytics": "^4.0",
-        "drupal/image_resize_filter": "^1.2",
+        "drupal/image_resize_filter": "1.0.x-dev",
         "drupal/jquery_ui_accordion": "^2.0",
         "drupal/jquery_ui_datepicker": "^2.0",
         "drupal/jquery_ui_slider": "^2.0",
+        "drupal/jquery_ui_touch_punch": "^1.1",
         "drupal/label_help": "^2.0@RC",
         "drupal/link_attributes": "^2.1",
         "drupal/linked_field": "^1.5",
         "drupal/mailsystem": "^4.4",
         "drupal/metatag": "^2",
-        "drupal/mimemail": "^1.0-alpha",
+        "drupal/mimemail": "^2",
         "drupal/oembed_providers": "^2.1",
         "drupal/og": "^1.0-alpha10",
         "drupal/openid_connect": "^3.0@alpha",
@@ -98,42 +100,52 @@
         "drupal/panels": "^4.7",
         "drupal/panels_ipe": "^4.7",
         "drupal/paragraphs": "^1.15",
-        "drupal/passwordless": "^2.0@alpha",
+        "drupal/passwordless": "^2.0",
         "drupal/pathauto": "^1.11",
         "drupal/r4032login": "^2.2",
         "drupal/redirect": "^1.8",
-        "drupal/reroute_email": "^2.2",
+        "drupal/reroute_email": "^2.3",
         "drupal/scheduler": "^2.0.1",
         "drupal/scheduler_content_moderation_integration": "^3.0",
         "drupal/smtp": "^1.2",
         "drupal/structure_sync": "^2.0.5",
-        "drupal/symfony_mailer_lite": "^1.0",
+        "drupal/symfony_mailer_lite": "^2",
         "drupal/token": "^1.12",
         "drupal/twig_tweak": "^3.1",
         "drupal/twig_vardumper": "^3.1",
-        "drupal/upgrade_status": "^4.0",
+        "drupal/upgrade_status": "^4.3",
         "drupal/view_unpublished": "^1.1",
         "drupal/views_bulk_operations": "^4.0",
         "drupal/views_contextual_filters_or": "^1.4",
         "drupal/views_field_view": "^1.0-beta",
         "drupal/viewsreference": "^2.0-beta",
-        "drush/drush": "^12.0",
+        "drush/drush": "^13.0",
         "furf/jquery-ui-touch-punch": "master",
         "jackmoore/colorbox": "^1.6",
-        "mlibrary/umlib_admin": "^1.0",
         "mlibrary/umlib_base": "^1.0",
-        "wikimedia/composer-merge-plugin": "^2.0"
+        "mglaman/composer-drupal-lenient": "*",
+        "wikimedia/composer-merge-plugin": "^2.0",
+        "mnsami/composer-custom-directory-installer": "^2.1",
+        "drupal/glightbox": "^1.0"
     },
     "conflict": {
         "drupal/drupal": "*"
     },
+    "replace": {
+        "oomphinc/composer-installers-extender": "*"
+    },
     "config": {
-        "sort-packages": true,
+        "preferred-install": "dist",
+        "autoloader-suffix": "Drupal8",
         "allow-plugins": {
             "composer/installers": true,
-            "drupal/core-project-message": false,
             "cweagans/composer-patches": true,
-            "wikimedia/composer-merge-plugin": true
+            "mnsami/composer-custom-directory-installer": true,
+            "oomphinc/composer-installers-extender": false,
+            "wikimedia/composer-merge-plugin": true,
+            "mglaman/composer-drupal-lenient": true,
+            "symfony/runtime": true,
+            "drupal/core-composer-scaffold": true
         }
     },
     "extra": {
@@ -179,10 +191,38 @@
 	  "merge-extra": false,
           "ignore-duplicates": true
         },
+        "drupal-scaffold": {
+            "file-mapping": {
+                "[web-root]/.htaccess": false,
+                "[web-root]/robots.txt": false,
+                "[web-root]/profiles/README.txt": false,
+                "[web-root]/recipes/README.txt": false,
+                "[web-root]/modules/README.txt": false,
+                "[web-root]/themes/README.txt": false,
+                "[web-root]/sites/README.txt": false,
+                "[web-root]/README.md": false,
+                "[web-root]/INSTALL.txt": false,
+                "assets/drupal-core-htaccess.txt": {
+                    "mode": "replace",
+                    "path": "core/assets/scaffold/files/htaccess",
+                    "overwrite": true
+                },
+                "assets/drupal-core-robots.txt": {
+                    "mode": "replace",
+                    "path": "core/assets/scaffold/files/robots.txt",
+                    "overwrite": true
+                }
+            }
+        },
+        "drupal-lenient": {
+            "allowed-list": [
+                "drupal/passwordless"
+            ]
+        },
         "patches": {
           "drupal/core": {
             "https://www.drupal.org/node/2858392": "patches/2858392-34.patch",
-            "https://www.drupal.org/node/2985168": "https://www.drupal.org/files/issues/2023-12-18/2985168-172.patch",
+            "https://www.drupal.org/node/2985168": "https://www.drupal.org/files/issues/2026-07-02/2985168-188-media-library-edit-button-11.4.patch",
             "handle form validation on og_autocomplete": "patches/og_autocomplete_no_error.patch"
           },
           "drupal/og": {
@@ -200,12 +240,8 @@
           "drupal/content_moderation_notifications": {
             "https://www.drupal.org/node/3027690": "https://www.drupal.org/files/issues/2021-08-03/content_moderation_notifications-dont_notify_for_same_state-3027690-23.patch"
           },
-          "drupal/reroute_email": {
-            "fix error": "patches/reroute_email-fix.patch",
-            "fix header in body for symfony mailer lite": "patches/fix-reroute-email-for-symfony-mailer.patch"
-          },
-          "drupal/image_resize_filter": {
-            "https://www.drupal.org/node/3431013": "patches/3431013.patch"
+          "drupal/passwordless": {
+            "https://www.drupal.org/node/3452033": "https://www.drupal.org/files/issues/2024-06-02/passwordless.2.0.x-dev.rector.patch"
           },
           "jackmoore/colorbox": {
             "add aria-label to colorbox": "patches/add-aria-label-to-colorbox.patch"

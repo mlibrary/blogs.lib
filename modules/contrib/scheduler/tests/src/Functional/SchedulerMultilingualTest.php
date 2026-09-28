@@ -5,6 +5,7 @@ namespace Drupal\Tests\scheduler\Functional;
 use Drupal\language\Entity\ConfigurableLanguage;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the scheduling functions for node translations.
@@ -12,6 +13,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group scheduler
  */
 #[Group('scheduler')]
+#[RunTestsInSeparateProcesses]
 class SchedulerMultilingualTest extends SchedulerBrowserTestBase {
 
   /**

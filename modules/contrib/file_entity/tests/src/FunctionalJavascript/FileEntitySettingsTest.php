@@ -2,7 +2,8 @@
 
 namespace Drupal\Tests\file_entity\FunctionalJavascript;
 
-use Drupal\Core\Config\Config;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\Tests\TestFileCreationTrait;
 
@@ -11,6 +12,8 @@ use Drupal\Tests\TestFileCreationTrait;
  *
  * @group file_entity
  */
+#[Group('file_entity')]
+#[RunTestsInSeparateProcesses]
 class FileEntitySettingsTest extends WebDriverTestBase {
 
   use TestFileCreationTrait;
@@ -30,7 +33,7 @@ class FileEntitySettingsTest extends WebDriverTestBase {
   /**
    * File entity config.
    *
-   * @var Config
+   * @var \Drupal\Core\Config\Config
    */
   protected $config;
 
@@ -48,11 +51,14 @@ class FileEntitySettingsTest extends WebDriverTestBase {
   public function testFileImageFormatterSettings() {
     $assert_session = $this->assertSession();
     $account = $this->drupalCreateUser([
-      'administer file display'
+      'administer file display',
     ]);
 
     $this->drupalLogin($account);
-    $this->drupalGet('admin/structure/file-types/manage/image/edit/display');
+    $this->drupalGet('admin/structure/file-types/manage/image/edit/display/default');
+    $this->assertSession()->addressEquals(
+      'admin/structure/file-types/manage/image/edit/display/default'
+    );
     $assert_session->pageTextContains('Field used for the image title attribute: field_image_title_text');
     $assert_session->pageTextContains('Field used for the image title attribute: field_image_title_text');
 
@@ -88,4 +94,5 @@ class FileEntitySettingsTest extends WebDriverTestBase {
     $assert_session->responseNotContains('alt="Alt text"');
     $assert_session->responseNotContains('title="Title text"');
   }
+
 }

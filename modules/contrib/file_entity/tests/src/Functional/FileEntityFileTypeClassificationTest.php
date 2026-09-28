@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\file_entity\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\file\Entity\File;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\TestFileCreationTrait;
@@ -13,6 +15,8 @@ use Drupal\views\Views;
  *
  * @group file_entity
  */
+#[Group('file_entity')]
+#[RunTestsInSeparateProcesses]
 class FileEntityFileTypeClassificationTest extends BrowserTestBase {
 
   use CronRunTrait;
@@ -39,9 +43,9 @@ class FileEntityFileTypeClassificationTest extends BrowserTestBase {
    * @return
    *   The file's file type as a string.
    */
-  function getFileType($file) {
+  public function getFileType($file) {
     $type = \Drupal::database()->select('file_managed', 'fm')
-      ->fields('fm', array('type'))
+      ->fields('fm', ['type'])
       ->condition('fid', $file->id(), '=')
       ->execute()
       ->fetchAssoc();
@@ -52,7 +56,7 @@ class FileEntityFileTypeClassificationTest extends BrowserTestBase {
   /**
    * Test that existing files are properly classified by file type.
    */
-  function testFileTypeClassification() {
+  public function testFileTypeClassification() {
     // Get test text and image files.
     $file = current($this->getTestFiles('text'));
     $text_file = File::create((array) $file);
@@ -63,7 +67,7 @@ class FileEntityFileTypeClassificationTest extends BrowserTestBase {
 
     // Enable file entity which adds adds a file type property to files and
     // queues up existing files for classification.
-    \Drupal::service('module_installer')->install(array('file_entity'));
+    \Drupal::service('module_installer')->install(['file_entity']);
     $change_summary = \Drupal::entityDefinitionUpdateManager()->getChangeSummary();
     $this->assertTrue(empty($change_summary), 'No entity definition changes pending');
 

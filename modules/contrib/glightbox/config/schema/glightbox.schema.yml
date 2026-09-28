@@ -1,0 +1,206 @@
+field.formatter.settings.glightbox:
+  type: mapping
+  label: 'Entity reference field formatter settings.'
+  mapping:
+    glightbox_node_style:
+      type: string
+      label: 'Node Style'
+    glightbox_node_style_first:
+      type: string
+      label: 'Node style first'
+    glightbox_image_style:
+      type: string
+      label: 'Image style'
+    glightbox_gallery:
+      type: string
+      label: 'Gallery'
+    glightbox_gallery_custom:
+      type: string
+      label: 'Gallery custom'
+    glightbox_caption:
+      type: string
+      label: 'Caption'
+    glightbox_caption_custom:
+      type: string
+      label: 'Caption custom'
+    glightbox_caption_description:
+      type: string
+      label: 'Caption description'
+    glightbox_caption_description_custom:
+      type: string
+      label: 'Caption description custom'
+
+field.formatter.settings.glightbox_responsive:
+  type: mapping
+  label: 'GLightbox Responsive formatter settings'
+  mapping:
+    glightbox_responsive_node_style:
+      type: string
+      label: 'Responsive image style for content'
+    glightbox_image_style:
+      type: string
+      label: 'Image style for GLightbox'
+    glightbox_responsive_image_style:
+      type: string
+      label: 'Responsive image style for GLightbox'
+    glightbox_gallery:
+      type: string
+      label: 'Gallery grouping mode'
+    glightbox_gallery_custom:
+      type: string
+      label: 'Custom gallery value'
+    glightbox_caption:
+      type: string
+      label: 'Caption source'
+    glightbox_caption_custom:
+      type: string
+      label: 'Custom caption text'
+    glightbox_caption_description:
+      type: string
+      label: 'Caption description source'
+    glightbox_caption_description_custom:
+      type: string
+      label: 'Custom caption description'
+
+glightbox.settings:
+  type: config_object
+  label: 'GLightbox settings'
+  mapping:
+    custom:
+      type: mapping
+      label: Custom Settings
+      mapping:
+        activate:
+          type: integer
+          label: 'Options'
+        open_effect:
+          type: string
+          label: 'Open effect'
+        close_effect:
+          type: string
+          label: 'Close effect'
+        slide_effect:
+          type: string
+          label: 'Slide effect'
+        width:
+          type: text
+          label: 'Width'
+        height:
+          type: text
+          label: 'Height'
+        videos_width:
+          type: text
+          label: 'Videos width'
+        close_on_outside_click:
+          type: boolean
+          label: 'Overlay close'
+        more_text:
+          type: text
+          label: 'See More text'
+        more_length:
+          type: integer
+          label: 'More text threshold'
+        desc_position:
+          type: text
+          label: 'Description position'
+        loop:
+          type: boolean
+          label: 'Loop'
+        zoomable:
+          type: boolean
+          label: 'Zoomable'
+        draggable:
+          type: boolean
+          label: 'Draggable'
+        preload:
+          type: boolean
+          label: 'Preload'
+        autoplay_videos:
+          type: boolean
+          label: 'Autoplay videos'
+        autofocus_videos:
+          type: boolean
+          label: 'Autofocus videos'
+        videosWidth:
+          type: string
+          label: 'Video width'
+    advanced:
+      type: mapping
+      label: 'Advanced settings'
+      mapping:
+        unique_token:
+          type: integer
+          label: 'Unique per-request gallery token'
+        compression_type:
+          type: string
+          label: 'GLightbox compression level'
+    plyr:
+      type: mapping
+      label: 'Plyr.io player settings'
+      mapping:
+        enabled:
+          type: boolean
+          label: 'Completely disable Plyr'
+        debug:
+          type: boolean
+          label: 'Display debugging information in the console'
+        controls:
+          type: string
+          label: 'HTML string for the controls'
+        settings:
+          type: string
+          label: 'Default controls are used'
+        load_sprite:
+          type: boolean
+          label: 'Load the SVG sprite specified as the iconUrl option'
+        icon_url:
+          type: string
+          label: 'Specify a URL or path to the SVG sprite'
+        icon_prefix:
+          type: string
+          label: 'Specify the id prefix for the icons used in the default controls'
+        blank_video:
+          type: string
+          label: 'Specify a URL or path to a blank video file'
+        autoplay:
+          type: boolean
+          label: 'Autoplay the media on load'
+        autopause:
+          type: boolean
+          label: 'Only allow one player playing at once'
+        playsinline:
+          type: boolean
+          label: 'Allow inline playback on iOS'
+        seek_time:
+          type: string
+          label: 'The time, in seconds, to seek when a user hits fast forward or rewind'
+        volume:
+          type: string
+          label: 'Representing the initial volume of the player'
+        muted:
+          type: boolean
+          label: 'Whether to start playback muted'
+        click_to_play:
+          type: boolean
+          label: 'Click (or tap) of the video container will toggle play/pause'
+        disable_context_menu:
+          type: boolean
+          label: 'Disable right click menu on video'
+        hide_controls:
+          type: boolean
+          label: 'Hide video controls automatically after 2s'
+        reset_on_end:
+          type: boolean
+          label: 'Reset the playback to the start once playback is complete'
+        display_duration:
+          type: boolean
+          label: 'Displays the duration of the media'
+        invert_time:
+          type: boolean
+          label: 'Display the current time as a countdown rather than an incremental counter'
+        toggle_invert:
+          type: boolean
+          label: 'Allow users to click to toggle the above'
+        ratio:
+          type: string
+          label: 'Force an aspect ratio for all videos'

@@ -218,10 +218,10 @@ abstract class ViewsBulkOperationsKernelTestBase extends KernelTestBase {
     $vbo_data += self::VBO_DEFAULTS;
 
     $view = $this->initializeView($vbo_data);
-    if (\array_key_exists('arguments', $vbo_data)) {
+    if (\count($vbo_data['arguments']) !== 0) {
       $view->setArguments($vbo_data['arguments']);
     }
-    if (\array_key_exists('exposed_input', $vbo_data)) {
+    if (\count($vbo_data['exposed_input']) !== 0) {
       $view->setExposedInput($vbo_data['exposed_input']);
     }
 
@@ -285,7 +285,7 @@ abstract class ViewsBulkOperationsKernelTestBase extends KernelTestBase {
     }
 
     // Populate entity list if empty.
-    if (!\array_key_exists('list', $vbo_data) || \count($vbo_data['list']) === 0) {
+    if (\count($vbo_data['list']) === 0) {
       $context = [];
       do {
         $context['finished'] = 1;
@@ -306,7 +306,7 @@ abstract class ViewsBulkOperationsKernelTestBase extends KernelTestBase {
       $context['message'] = '';
       ViewsBulkOperationsBatch::operation($vbo_data, $context);
       if (\array_key_exists('message', $context)) {
-        $summary['messages'][] = (string) $context['message'];
+        $summary['messages'][] = $context['message'];
       }
     } while ($context['finished'] < 1);
 
@@ -326,7 +326,7 @@ abstract class ViewsBulkOperationsKernelTestBase extends KernelTestBase {
    * @return array|null
    *   The messages set previously or NULL.
    */
-  public static function message(?string $message = NULL, string $type = 'status', ?bool $repeat = TRUE): ?array {
+  public static function message(string|\Stringable|NULL $message = NULL, string $type = 'status', ?bool $repeat = TRUE): ?array {
     if ($message === NULL) {
       return self::$messages;
     }

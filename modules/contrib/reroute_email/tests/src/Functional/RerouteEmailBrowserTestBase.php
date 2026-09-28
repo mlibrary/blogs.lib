@@ -3,17 +3,12 @@
 namespace Drupal\Tests\reroute_email\Functional;
 
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Core\Config\Config;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Test\AssertMailTrait;
-use Drupal\reroute_email\Constants\RerouteEmailConstants;
 use Drupal\Tests\BrowserTestBase;
-
-/**
- * @defgroup reroute_email_tests Test Suit
- * @{
- * The automated test suit for Reroute Email.
- * @}
- */
+use Drupal\reroute_email\RerouteEmailHandlerPluginInterface;
+use Drupal\user\Entity\User;
 
 /**
  * Base test class for Reroute Email test cases.
@@ -24,11 +19,25 @@ abstract class RerouteEmailBrowserTestBase extends BrowserTestBase {
   use StringTranslationTrait;
 
   /**
+   * Reroute email plugin id.
+   *
+   * @var string
+   */
+  protected string $reroutePluginId = "reroute_email_hook_mail_alter";
+
+  /**
+   * A mail collector's state id.
+   *
+   * @var string
+   */
+  protected string $mailCollectorState = "system.test_mail_collector";
+
+  /**
    * An editable config.
    *
    * @var \Drupal\Core\Config\Config
    */
-  protected $rerouteConfig;
+  protected Config $rerouteConfig;
 
   /**
    * {@inheritdoc}
@@ -45,7 +54,7 @@ abstract class RerouteEmailBrowserTestBase extends BrowserTestBase {
    *
    * @var array
    */
-  protected $permissions = [
+  protected array $permissions = [
     'administer reroute email',
   ];
 
@@ -54,45 +63,54 @@ abstract class RerouteEmailBrowserTestBase extends BrowserTestBase {
    *
    * @var \Drupal\user\Entity\User
    */
-  protected $adminUser;
+  protected User $adminUser;
 
   /**
    * Original email address used for the tests.
    *
    * @var string
    */
-  protected $originalDestination = 'email@original-destination.com';
+  protected static string $originalDestination = 'email@original-destination.com';
 
   /**
    * Reroute email destination address used for the tests.
    *
    * @var string
    */
-  protected $rerouteDestination = 'email@reroute-destination.com';
+  protected static string $rerouteDestination = 'email@reroute-destination.com';
+
+  /**
+   * Path of the module's settings form.
+   *
+   * @var string
+   */
+  protected string $rerouteSettingsFormPath = 'admin/config/development/reroute_email';
 
   /**
    * Path for reroute email test form.
    *
    * @var string
    */
-  protected $rerouteTestFormPath = 'admin/config/development/reroute_email/test';
+  protected string $rerouteTestFormPath = 'admin/config/development/reroute_email/test';
 
   /**
    * Default subject value in the form.
    *
    * @var string
    */
-  protected $rerouteFormDefaultSubject = 'Reroute Email Test';
+  protected string $rerouteFormDefaultSubject = 'Reroute Email Test';
 
   /**
    * Default subject value in the form.
    *
    * @var string
    */
-  protected $rerouteFormDefaultBody = 'Reroute Email Body';
+  protected string $rerouteFormDefaultBody = 'Reroute Email Body';
 
   /**
    * {@inheritdoc}
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   protected function setUp(): void {
     parent::setUp();
@@ -104,10 +122,26 @@ abstract class RerouteEmailBrowserTestBase extends BrowserTestBase {
   }
 
   /**
+   * Get reroute email plugin for the recently sent email.
+   */
+  public function getRecentEmail(): RerouteEmailHandlerPluginInterface {
+    $emails = $this->container->get('state')->get($this->mailCollectorState, []);
+    $email = end($emails);
+
+    /** @var \Drupal\reroute_email\RerouteEmailHandlerPluginManager $reroute_handlers_manager */
+    $reroute_handlers_manager = \Drupal::service('plugin.manager.reroute_email_handler');
+
+    return $reroute_handlers_manager->createInstance($this->reroutePluginId, [
+      'settings' => $this->rerouteConfig->getRawData(),
+      'email' => $email,
+    ]);
+  }
+
+  /**
    * Helper function to configure Reroute Email Settings.
    *
    * An array of configuration options to set. All params are optional.
-   * RerouteEmailConstants::REROUTE_EMAIL_* define should be
+   * RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_* define should be
    * used as for array keys.
    * Default values can be found at reroute_email.schema.yml file.
    *
@@ -115,14 +149,14 @@ abstract class RerouteEmailBrowserTestBase extends BrowserTestBase {
    */
   public function configureRerouteEmail($post_values): void {
     $schema_values = [
-      RerouteEmailConstants::REROUTE_EMAIL_ENABLE => FALSE,
-      RerouteEmailConstants::REROUTE_EMAIL_ADDRESS => '',
-      RerouteEmailConstants::REROUTE_EMAIL_ALLOWLIST => '',
-      RerouteEmailConstants::REROUTE_EMAIL_ROLES => [],
-      RerouteEmailConstants::REROUTE_EMAIL_DESCRIPTION => TRUE,
-      RerouteEmailConstants::REROUTE_EMAIL_MESSAGE => TRUE,
-      RerouteEmailConstants::REROUTE_EMAIL_MAILKEYS => '',
-      RerouteEmailConstants::REROUTE_EMAIL_MAILKEYS_SKIP => '',
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ENABLE => FALSE,
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ADDRESS => '',
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ALLOWLIST => '',
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ROLES => [],
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_DESCRIPTION => TRUE,
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_MESSAGE => TRUE,
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_MAILKEYS => '',
+      RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_MAILKEYS_SKIP => '',
     ];
 
     // Configure to Reroute Email settings form.
@@ -139,7 +173,7 @@ abstract class RerouteEmailBrowserTestBase extends BrowserTestBase {
     }
 
     // Submit Reroute Email Settings form and check if it was successful.
-    $this->drupalGet('admin/config/development/reroute_email');
+    $this->drupalGet($this->rerouteSettingsFormPath);
     $this->submitForm($post_values, $this->t('Save configuration'));
     $this->assertSession()->pageTextContains($this->t('The configuration options have been saved.'));
 
@@ -170,63 +204,81 @@ abstract class RerouteEmailBrowserTestBase extends BrowserTestBase {
    * @throws \Behat\Mink\Exception\ResponseTextException
    */
   public function assertMailReroutedFromTestForm(array $post, bool $reroute_expected = TRUE): void {
+    // Clear state before next step, due to initialization of MailerTestService.
+    // @see symfony_mailer_test_mailer_init.
+    // It is used as a workaround here because symfony mailer state collector
+    // cannot store more than 1 email. So, applying this workaround will clear
+    // the state before each form submit.
+    \Drupal::state()->delete($this->mailCollectorState);
+
     // Submit the test form.
     $this->drupalGet($this->rerouteTestFormPath);
     $this->submitForm($post, $this->t('Send email'));
     $this->assertSession()->pageTextContains($this->t('Test email submitted for delivery from test form.'));
 
-    // Get the most recent email.
-    $mails = $this->getMails();
-    $mail = end($mails);
+    $post['subject'] = $post['subject'] ?? $this->rerouteFormDefaultSubject;
+    $post['body'] = $post['body'] ?? $this->rerouteFormDefaultBody;
+    $this->assertMailRerouted($post, $reroute_expected);
+  }
 
+  /**
+   * Asserts the latest email rerouting.
+   *
+   * @param array $params
+   *   Details about the email (to, cc, bcc, body, subject).
+   * @param bool $reroute_expected
+   *   Expected reroute status.
+   */
+  public function assertMailRerouted(array $params, bool $reroute_expected = TRUE): void {
     // Destination address can contain display name with symbols "<" and ">".
     // So, we can't use $this->t() or FormattableMarkup here.
-    $search_originally_to = sprintf('Originally to: %s', $post['to'] ?? '');
+    $search_originally_to = sprintf('Originally to: %s', empty($params['to']) ? '[to] is missing' : $params['to']);
 
     // Check email properties related to `to` value.
     if ($reroute_expected) {
-      $this->assertMail('to', $this->rerouteConfig->get(RerouteEmailConstants::REROUTE_EMAIL_ADDRESS), new FormattableMarkup('An email was properly rerouted to the email address: @address.', ['@address' => $this->rerouteDestination]));
-      $this->assertEquals($mail['headers']['X-Rerouted-Original-to'], $post['to'] ?? '', new FormattableMarkup('X-Rerouted-Original-to is correctly set to submitted value: @address', ['@address' => $post['to'] ?? '']));
-      $this->assertMailString('body', $search_originally_to, 1, 'Found the correct "Originally to" line in the body.');
+      $this->assertMailTo($this->rerouteConfig->get(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ADDRESS), new FormattableMarkup('An email was properly rerouted to the email address: @address.', ['@address' => static::$rerouteDestination]));
+      $this->assertMailHeader(RerouteEmailHandlerPluginInterface::HEADER_ORIGINAL_TO, $params['to'] ?? '', new FormattableMarkup('X-Rerouted-Original-to is correctly set to submitted value: @address', ['@address' => $params['to'] ?? '']));
+      $this->assertMailBodyContains($search_originally_to, 'Found the correct "Originally to" line in the body.');
     }
     else {
-      $this->assertMail('to', $post['to'] ?? '', new FormattableMarkup('An email was properly sent to the email address: @address.', ['@address' => $post['to']]));
-      $this->assertArrayNotHasKey('X-Rerouted-Original-to', $mail['headers']);
-      $this->assertStringNotContainsString($search_originally_to, $mail['body']);
+      $this->assertMailTo($params['to'] ?? '', new FormattableMarkup('An email was properly sent to the email address: @address.', ['@address' => $params['to']]));
+      $this->assertMailHeaderNotExist(RerouteEmailHandlerPluginInterface::HEADER_ORIGINAL_TO);
+      $this->assertMailBodyNotContains($search_originally_to);
     }
 
     // Check email subject.
-    $this->assertMail('subject', $post['subject'] ?? $this->rerouteFormDefaultSubject, 'Subject is correctly set to submitted value: @subject');
+    if (!empty($params['subject'])) {
+      $this->assertMailSubject($params['subject'], new FormattableMarkup('Subject is correctly set to submitted value: @subject', ['@subject' => $params['subject']]));
+    }
 
     // Check email body can be found in the email.
-    if (!empty($post['body'])) {
-      $this->assertMailString('body', $post['body'], 1, 'Body contains the value submitted through the form.');
-    }
-    elseif (!isset($post['body'])) {
-      $this->assertMailString('body', $this->rerouteFormDefaultBody, 1, 'Body contains the value submitted through the form.');
+    if (!empty($params['body'])) {
+      $this->assertMailBodyContains($params['body'], 'Body contains the value submitted through the form.');
     }
 
     // Check the Cc and Bcc are the ones submitted through the form and were
     // added to the message body value.
-    $this->assertMailReroutedHeaders('cc', $post['cc'] ?? NULL, $reroute_expected);
-    $this->assertMailReroutedHeaders('bcc', $post['bcc'] ?? NULL, $reroute_expected);
+    $this->assertMailReroutedHeaders('cc', $params['cc'] ?? NULL, $reroute_expected);
+    $this->assertMailReroutedHeaders('bcc', $params['bcc'] ?? NULL, $reroute_expected);
 
     // Check reroute_mail module special headers.
-    if ($this->rerouteConfig->get(RerouteEmailConstants::REROUTE_EMAIL_ENABLE) === FALSE) {
-      $this->assertMailHeaderNotExist('X-Rerouted-Status');
-      $this->assertMailHeaderNotExist('X-Rerouted-Reason');
-      $this->assertMailHeaderNotExist('X-Rerouted-Original-to');
-      $this->assertMailHeaderNotExist('X-Rerouted-Original-cc');
-      $this->assertMailHeaderNotExist('X-Rerouted-Original-bcc');
-      $this->assertMailHeaderNotExist('X-Rerouted-Mail-Key');
-      $this->assertMailHeaderNotExist('X-Rerouted-Website');
+    if ($this->rerouteConfig->get(RerouteEmailHandlerPluginInterface::REROUTE_EMAIL_ENABLE) === FALSE) {
+      $this->assertMailHeaderNotExist(RerouteEmailHandlerPluginInterface::HEADER_FORCE_SKIP);
+      $this->assertMailHeaderNotExist(RerouteEmailHandlerPluginInterface::HEADER_STATUS);
+      $this->assertMailHeaderNotExist(RerouteEmailHandlerPluginInterface::HEADER_REASON);
+      $this->assertMailHeaderNotExist(RerouteEmailHandlerPluginInterface::HEADER_ORIGINAL_TO);
+      $this->assertMailHeaderNotExist(RerouteEmailHandlerPluginInterface::HEADER_ORIGINAL_CC);
+      $this->assertMailHeaderNotExist(RerouteEmailHandlerPluginInterface::HEADER_ORIGINAL_BCC);
+      $this->assertMailHeaderNotExist(RerouteEmailHandlerPluginInterface::HEADER_MAIL_ID);
+      $this->assertMailHeaderNotExist(RerouteEmailHandlerPluginInterface::HEADER_BASE_URL);
+      $this->assertMailHeaderNotExist(RerouteEmailHandlerPluginInterface::HEADER_BODY_UPDATED);
     }
     elseif ($reroute_expected) {
-      $this->assertMailHeader('X-Rerouted-Status', 'REROUTED');
+      $this->assertMailHeader(RerouteEmailHandlerPluginInterface::HEADER_STATUS, 'REROUTED');
     }
     else {
-      $this->assertMailHeader('X-Rerouted-Status', 'NOT-REROUTED');
-      $this->assertMailHeaderExist('X-Rerouted-Reason');
+      $this->assertMailHeader(RerouteEmailHandlerPluginInterface::HEADER_STATUS, 'NOT-REROUTED');
+      $this->assertMailHeaderExist(RerouteEmailHandlerPluginInterface::HEADER_REASON);
     }
   }
 
@@ -247,25 +299,21 @@ abstract class RerouteEmailBrowserTestBase extends BrowserTestBase {
     $header_body_search = sprintf('Originally %s: %s', $header, $value);
     $header_rerouted = 'X-Rerouted-Original-' . $header;
 
-    // Get the most recent email.
-    $mails = $this->getMails();
-    $mail = end($mails);
-
     // Both rerouted and not rerouted mail should not have empty header.
     if (empty($value)) {
       $this->assertMailHeaderNotExist($header);
       $this->assertMailHeaderNotExist($header_rerouted);
-      $this->assertStringNotContainsString($header_body_search, $mail['body']);
+      $this->assertMailBodyNotContains($header_body_search);
     }
     elseif ($rerouted === FALSE) {
       $this->assertMailHeader($header, $value);
       $this->assertMailHeaderNotExist($header_rerouted);
-      $this->assertStringNotContainsString($header_body_search, $mail['body']);
+      $this->assertMailBodyNotContains($header_body_search);
     }
     elseif ($rerouted === TRUE) {
       $this->assertMailHeaderNotExist($header);
       $this->assertMailHeader($header_rerouted, $value);
-      $this->assertMailString('body', $header_body_search, 1);
+      $this->assertMailBodyContains($header_body_search);
     }
   }
 
@@ -276,13 +324,13 @@ abstract class RerouteEmailBrowserTestBase extends BrowserTestBase {
    *   A name of the header to check.
    * @param string|null $value
    *   An expected value of the header.
-   * @param string $message
+   * @param \Drupal\Component\Render\FormattableMarkup|string $message
    *   (optional) A message to display with the assertion. Do not translate
    *   messages: use \Drupal\Component\Render\FormattableMarkup to embed
    *   variables in the message text, not t(). If left blank, a default message
    *   will be displayed.
    */
-  public function assertMailHeader(string $header, ?string $value, string $message = ''): void {
+  public function assertMailHeader(string $header, ?string $value, $message = ''): void {
     if (empty($message)) {
       $message = new FormattableMarkup('Header "@header" is correctly set to submitted value: @value', [
         '@header' => $header,
@@ -290,10 +338,7 @@ abstract class RerouteEmailBrowserTestBase extends BrowserTestBase {
       ]);
     }
 
-    // Get the most recent email.
-    $mails = $this->getMails();
-    $mail = end($mails);
-    $this->assertEquals($mail['headers'][$header], $value, $message);
+    $this->assertEquals($this->getRecentEmail()->getHeader($header), $value, $message);
   }
 
   /**
@@ -301,23 +346,20 @@ abstract class RerouteEmailBrowserTestBase extends BrowserTestBase {
    *
    * @param string $header
    *   A name of the header to check.
-   * @param string $message
+   * @param \Drupal\Component\Render\FormattableMarkup|string $message
    *   (optional) A message to display with the assertion. Do not translate
    *   messages: use \Drupal\Component\Render\FormattableMarkup to embed
    *   variables in the message text, not t(). If left blank, a default message
    *   will be displayed.
    */
-  public function assertMailHeaderExist(string $header, string $message = ''): void {
+  public function assertMailHeaderExist(string $header, $message = ''): void {
     if (empty($message)) {
       $message = new FormattableMarkup('Header "@header" exist in the recent email.', [
         '@header' => $header,
       ]);
     }
 
-    // Get the most recent email.
-    $mails = $this->getMails();
-    $mail = end($mails);
-    $this->assertArrayHasKey($header, $mail['headers'], $message);
+    $this->assertTrue($this->getRecentEmail()->headerExist($header), $message);
   }
 
   /**
@@ -325,23 +367,80 @@ abstract class RerouteEmailBrowserTestBase extends BrowserTestBase {
    *
    * @param string $header
    *   A name of the header to check.
-   * @param string $message
+   * @param \Drupal\Component\Render\FormattableMarkup|string $message
    *   (optional) A message to display with the assertion. Do not translate
    *   messages: use \Drupal\Component\Render\FormattableMarkup to embed
    *   variables in the message text, not t(). If left blank, a default message
    *   will be displayed.
    */
-  public function assertMailHeaderNotExist(string $header, string $message = ''): void {
+  public function assertMailHeaderNotExist(string $header, $message = ''): void {
     if (empty($message)) {
       $message = new FormattableMarkup('Header "@header" correctly does not exist in the recent email.', [
         '@header' => $header,
       ]);
     }
 
-    // Get the most recent email.
-    $mails = $this->getMails();
-    $mail = end($mails);
-    $this->assertArrayNotHasKey($header, $mail['headers'], $message);
+    $this->assertFalse($this->getRecentEmail()->headerExist($header), $message);
+  }
+
+  /**
+   * Asserts that the most recently sent email message has the given "to" value.
+   *
+   * @param string $address
+   *   The email address.
+   * @param \Drupal\Component\Render\FormattableMarkup|string $message
+   *   (optional) A message to display with the assertion. Do not translate
+   *   messages: use \Drupal\Component\Render\FormattableMarkup to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
+   */
+  public function assertMailTo(string $address, $message = ''): void {
+    $this->assertEquals($address, $this->getRecentEmail()->getAddressTo(), $message);
+  }
+
+  /**
+   * Asserts the most recently sent email subject.
+   *
+   * @param string $subject
+   *   The subject to check.
+   * @param \Drupal\Component\Render\FormattableMarkup|string $message
+   *   (optional) A message to display with the assertion. Do not translate
+   *   messages: use \Drupal\Component\Render\FormattableMarkup to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
+   */
+  public function assertMailSubject(string $subject, $message = ''): void {
+    $this->assertEquals($subject, $this->getRecentEmail()->getSubject(), $message);
+  }
+
+  /**
+   * Asserts that the most recently sent email body contains the string.
+   *
+   * @param string $search
+   *   The string for partially search in the email body.
+   * @param \Drupal\Component\Render\FormattableMarkup|string $message
+   *   (optional) A message to display with the assertion. Do not translate
+   *   messages: use \Drupal\Component\Render\FormattableMarkup to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
+   */
+  public function assertMailBodyContains(string $search, $message = ''): void {
+    $this->assertStringContainsString($search, $this->getRecentEmail()->getBody(), $message);
+  }
+
+  /**
+   * Asserts that the most recently sent email body does not contain the string.
+   *
+   * @param string $search
+   *   The string for partially search in the email body.
+   * @param \Drupal\Component\Render\FormattableMarkup|string $message
+   *   (optional) A message to display with the assertion. Do not translate
+   *   messages: use \Drupal\Component\Render\FormattableMarkup to embed
+   *   variables in the message text, not t(). If left blank, a default message
+   *   will be displayed.
+   */
+  public function assertMailBodyNotContains(string $search, $message = ''): void {
+    $this->assertStringNotContainsString($search, $this->getRecentEmail()->getBody(), $message);
   }
 
 }

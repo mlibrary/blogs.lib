@@ -2,6 +2,8 @@
 
 namespace Drupal\file_entity\Form;
 
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\File\FileExists;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\File\FileSystemInterface;
@@ -446,7 +448,7 @@ class FileAddForm extends FormBase {
     if ($save) {
       if (StreamWrapperManager::getScheme($file->getFileUri()) != $form_state->get('scheme')) {
         // @TODO: Users should not be allowed to create private files without permission ('view private files')
-        if ($moved_file = \Drupal::service('file.repository')->move($file, $form_state->get('scheme') . '://' . StreamWrapperManager::getTarget($file->getFileUri()), FileSystemInterface::EXISTS_RENAME)) {
+        if ($moved_file = \Drupal::service('file.repository')->move($file, $form_state->get('scheme') . '://' . StreamWrapperManager::getTarget($file->getFileUri()), DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.3.0', fn() => FileExists::Rename, fn() => FileSystemInterface::EXISTS_RENAME))) {
           // Only re-assign the file object if file_move() did not fail.
           $moved_file->setFilename($file->getFilename());
 

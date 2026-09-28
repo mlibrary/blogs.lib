@@ -9,6 +9,7 @@ use Drupal\Core\Action\ActionBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\views\ViewExecutable;
+use Drupal\views_bulk_operations\Traits\ReturnTypeDeprecationTrait;
 use Drupal\views_bulk_operations\Traits\ViewsBulkOperationsActionCompletedTrait;
 
 /**
@@ -20,6 +21,7 @@ use Drupal\views_bulk_operations\Traits\ViewsBulkOperationsActionCompletedTrait;
 abstract class ViewsBulkOperationsActionBase extends ActionBase implements ViewsBulkOperationsActionInterface, ConfigurableInterface {
 
   use ViewsBulkOperationsActionCompletedTrait;
+  use ReturnTypeDeprecationTrait;
 
   /**
    * Action context.
@@ -31,7 +33,7 @@ abstract class ViewsBulkOperationsActionBase extends ActionBase implements Views
   /**
    * The processed view.
    */
-  protected ViewExecutable $view;
+  protected ?ViewExecutable $view = NULL;
 
   /**
    * Configuration array.
@@ -63,8 +65,14 @@ abstract class ViewsBulkOperationsActionBase extends ActionBase implements Views
 
   /**
    * {@inheritdoc}
+   *
+   * @return mixed[]
+   *   An array of MarkupInterface objects or an empty array or an array
+   *   of arrays with 'message' (MarkupInterface) and 'type' (string) keys.
    */
   public function executeMultiple(array $objects) {
+    $this->deprecateMissingReturnType('executeMultiple', 'array', 'views_bulk_operations:4.4.8', 'views_bulk_operations:5.0.0');
+
     $results = [];
     foreach ($objects as $entity) {
       $results[] = $this->execute($entity);

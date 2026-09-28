@@ -2,14 +2,18 @@
 
 namespace Drupal\mimemail\Utility;
 
-use Symfony\Component\Mime\Header\MailboxHeader;
-use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Header\UnstructuredHeader;
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Mail\MailFormatHelper;
+use Drupal\Core\Site\Settings;
 use Drupal\Core\StreamWrapper\StreamWrapperManager;
 use Drupal\Core\Url;
 use Drupal\user\UserInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Header\MailboxHeader;
+use Symfony\Component\Mime\Header\UnstructuredHeader;
+
+// cspell:ignore RFC2822_MAXLEN
 
 /**
  * Utility methods for formatting MIME-encoded email messages.
@@ -80,8 +84,8 @@ class MimeMailFormatHelper {
     if (($address instanceof UserInterface) && $address->getEmail()) {
       // Return full RFC2822 format only if we're NOT simplifying AND
       // the account name is NOT empty.
-      if (!$simplify && !empty($address->getAccountName())) {
-        $mailbox = new MailboxHeader('From', new Address($address->getEmail(), $address->getAccountName()));
+      if (!$simplify && !empty($address->getDisplayName())) {
+        $mailbox = new MailboxHeader('From', new Address($address->getEmail(), $address->getDisplayName()));
         return $mailbox->getBodyAsString();
       }
       // All other combinations, return a simple email.
@@ -389,7 +393,7 @@ class MimeMailFormatHelper {
     // to an email message.
     static $files = [];
 
-    /** @var \Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface $mime_type_guesser */
+    /** @var \Symfony\Component\Mime\MimeTypeGuesserInterface $mime_type_guesser */
     $mime_type_guesser = \Drupal::service('file.mime_type.guesser');
 
     /** @var \Drupal\Core\File\FileSystemInterface $file_system */
@@ -408,11 +412,15 @@ class MimeMailFormatHelper {
     $mimemail_config = \Drupal::config('mimemail.settings');
 
     if ($url) {
-      $image = preg_match('!\.(png|gif|jpg|jpeg)$!i', $url);
-      $linkonly = \Drupal::config('mimemail.settings')->get('linkonly');
+      $is_image = static::urlIsImage($url, $type);
+
+      // @todo This should really be passed into this method explicitly, so
+      // that this method will produce the same results given the same input.
+      $linkonly = $mimemail_config->get('linkonly');
+
       // The file exists on the server as-is.
       // Allows for non-web-accessible files.
-      if (@is_file($url) && $image && !$linkonly) {
+      if (@is_file($url) && $is_image && !$linkonly) {
         $file = $url;
       }
       else {
@@ -439,17 +447,27 @@ class MimeMailFormatHelper {
     if (isset($file) && (@is_file($file) || $content)) {
       $public_path = $file_config->get('default_scheme') . '://';
       $has_access = $current_user->hasPermission('send arbitrary files');
-      $in_public_path = mb_strpos($file_system->realpath($file), $file_system->realpath($public_path)) === 0;
+      if ($content) {
+        $in_public_path = FALSE;
+      }
+      else {
+        $in_public_path = mb_strpos($file_system->realpath($file), $file_system->realpath($public_path)) === 0;
+      }
       if (@is_file($file) && !$in_public_path && !$has_access) {
         return $url;
       }
 
+      // If we are not passed a $name then extract the name from the file
+      // if we can, or use a default name if we can't.
       if (empty($name)) {
         $name = (@is_file($file)) ? basename($file) : 'attachment.dat';
       }
-      if (!$type) {
+
+      // If we are not passed a MIME $type then guess the type using the MIME
+      // type guesser service.
+      if (empty($type)) {
         // @todo $name will ALWAYS be TRUE here because of the above if{}.
-        $type = ($name) ? $mime_type_guesser->guess($name) : $mime_type_guesser->guess($file);
+        $type = $mime_type_guesser->guessMimeType($name ?: $file);
       }
 
       // Generate a unique ID using the HTTP host requested.
@@ -463,11 +481,16 @@ class MimeMailFormatHelper {
         // Store the metadata in our static $files array indexed by $id.
         $files[$id] = [
           'name' => $name,
-          'file' => $file,
           'Content-ID' => $id,
           'Content-Disposition' => $disposition,
           'Content-Type' => $type,
         ];
+        if ($content) {
+          $files[$id]['filecontent'] = $content;
+        }
+        else {
+          $files[$id]['file'] = $file;
+        }
       }
 
       // Return the content id for this item.
@@ -482,7 +505,6 @@ class MimeMailFormatHelper {
 
     $ret = $files;
     $files = [];
-    $ids = [];
 
     return $ret;
   }
@@ -499,18 +521,25 @@ class MimeMailFormatHelper {
    *   A processed URL.
    */
   public static function mimeMailUrl($url, $to_embed = FALSE) {
-    /** @var \Drupal\Core\Config\ImmutableConfig $mimemail_config */
-    $mimemail_config = \Drupal::config('mimemail.settings');
+    $is_image = static::urlIsImage($url);
+
+    if ($is_image === NULL) {
+      return $url;
+    }
 
     /** @var \Drupal\Core\Language\LanguageManagerInterface $language_manager */
     $language_manager = \Drupal::languageManager();
 
-    // This should not be needed. This method should never be passed an encoded
-    // URL.
-    // $url = urldecode($url);
+    /** @var \Drupal\Core\Config\ImmutableConfig $mimemail_config */
+    $mimemail_config = \Drupal::config('mimemail.settings');
 
+    /*
+     * This should not be needed. This method should never be passed an encoded
+     * URL.
+     * $url = urldecode($url);
+     */
     $to_link = $mimemail_config->get('linkonly');
-    $is_image = preg_match('!\.(png|gif|jpg|jpeg)!i', $url);
+    // cspell:ignore callto
     $is_absolute = StreamWrapperManager::getScheme($url) != FALSE || preg_match('!(mailto|callto|tel)\:!', $url);
 
     // Strip the base path as Uri adds it again at the end.
@@ -540,8 +569,8 @@ class MimeMailFormatHelper {
     }
 
     $url = str_replace('?q=', '', $url);
-    @list($url, $fragment) = explode('#', $url, 2);
-    @list($path, $query) = explode('?', $url, 2);
+    @[$url, $fragment] = explode('#', $url, 2);
+    @[$path, $query] = explode('?', $url, 2);
 
     // If we're dealing with an intra-document reference, return it.
     if (empty($path)) {
@@ -561,12 +590,15 @@ class MimeMailFormatHelper {
       if ($args[1] == $lang->getId()) {
         $prefix = array_shift($args);
         $language = $lang;
-        $path = implode('/', $args);
+        $path = '/' . implode('/', $args);
         break;
       }
     }
+    $arr = [];
+    if (!empty($query)) {
+      parse_str($query, $arr);
+    }
 
-    parse_str($query ?? '', $arr);
     $options = [
       'query' => $arr,
       'fragment' => $fragment,
@@ -575,15 +607,19 @@ class MimeMailFormatHelper {
       'prefix' => $prefix,
     ];
 
-    $url = Url::fromUserInput($path, $options)->toString();
+    try {
+      $url = Url::fromUserInput($path, $options)->toString();
+    }
+    catch (\InvalidArgumentException $e) {
+      return $url;
+    }
 
     // If url() added a ?q= where there should not be one, remove it.
     if (preg_match('!^\?q=*!', $url)) {
       $url = preg_replace('!\?q=!', '', $url);
     }
 
-    $url = str_replace('+', '%2B', $url);
-    return $url;
+    return str_replace('+', '%2B', $url);
   }
 
   /**
@@ -621,7 +657,7 @@ class MimeMailFormatHelper {
     // Control variable to avoid boundary collision.
     static $part_num = 0;
 
-    /** @var \Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface $mime_type_guesser */
+    /** @var \Symfony\Component\Mime\MimeTypeGuesserInterface $mime_type_guesser */
     $mime_type_guesser = \Drupal::service('file.mime_type.guesser');
 
     /** @var \Drupal\Component\Datetime\TimeInterface $time */
@@ -682,7 +718,7 @@ class MimeMailFormatHelper {
         }
 
         if (!isset($part['Content-Type'])) {
-          $part['Content-Type'] = $mime_type_guesser->guess($part['file']);
+          $part['Content-Type'] = $mime_type_guesser->guessMimeType($part['file']);
         }
 
         if (isset($part['name'])) {
@@ -694,6 +730,10 @@ class MimeMailFormatHelper {
         if (isset($part['file'])) {
           $file = (is_file($part['file'])) ? file_get_contents($part['file']) : $part['file'];
           $part_body = chunk_split(base64_encode($file), 76, static::CRLF);
+        }
+
+        if (isset($part['filecontent'])) {
+          $part_body = chunk_split(base64_encode($part['filecontent']), 76, Settings::get('mail_line_endings', PHP_EOL));
         }
       }
 
@@ -772,15 +812,15 @@ class MimeMailFormatHelper {
     // Overwrite standard headers.
     if ($from) {
       $default_from = $site_config->get('mail');
-      if (!isset($headers['From']) || $headers['From'] == $default_from) {
+      $overwrite = isset($headers['From'], $headers['Sender'], $headers['Return-Path'])
+        && $headers['From'] === $default_from
+        && $headers['Sender'] === $default_from;
+
+      if ($overwrite || !isset($headers['From'])) {
         $headers['From'] = $from;
       }
-      if (!isset($headers['Sender']) || $headers['Sender'] == $default_from) {
+      if ($overwrite || !isset($headers['Sender'])) {
         $headers['Sender'] = $from;
-      }
-      // This may not work. The MTA may rewrite the Return-Path.
-      if (!isset($headers['Return-Path']) || $headers['Return-Path'] == $default_from) {
-        $headers['Return-Path'] = '<' . static::mimeMailAddress($from, TRUE) . '>';
       }
     }
 
@@ -789,13 +829,49 @@ class MimeMailFormatHelper {
       $headers['From'] = static::mimeMailAddress($headers['From']);
     }
 
-    // Run all headers through mime_header_encode() to convert non-ASCII
-    // characters to an RFC compliant string, similar to drupal_mail().
+    // Run all string headers through UnstructuredHeader() to convert non-ASCII
+    // characters to an RFC compliant string.
     foreach ($headers as $field_name => $field_body) {
+      // Drupal uses Symfony\Component\Mime\Header\Headers class, where not
+      // all headers are expected/required to be strings (e.g. 'Date' header
+      // is required to be DateTime object). Because of it, skip processing
+      // header body if it is not string.
+      if (!is_string($field_body)) {
+        continue;
+      }
       $headers[$field_name] = (new UnstructuredHeader($field_name, $field_body))->getBodyAsString();
     }
 
     return $headers;
+  }
+
+  /**
+   * Determines if an URL is an image.
+   *
+   * @param string $url
+   *   The URL to check.
+   * @param string|null $mimetype
+   *   The mimetype.
+   *
+   * @return bool|null
+   *   Boolean if its an image or not, null if we can't determine.
+   */
+  protected static function urlIsImage(string $url, ?string $mimetype = NULL): ?bool {
+    if (UrlHelper::isExternal($url)) {
+      return NULL;
+    }
+
+    if (empty($mimetype)) {
+      /** @var \Symfony\Component\Mime\MimeTypeGuesserInterface $mime_type_guesser */
+      $mime_type_guesser = \Drupal::service('file.mime_type.guesser');
+
+      // Guesser needs the file name without the query parameters or
+      // fragments attached.
+      $filename = UrlHelper::parse($url)['path'];
+      $mimetype = $mime_type_guesser->guessMimeType(basename($filename));
+    }
+
+    return $mimetype ? (strpos($mimetype, 'image/') === 0) : FALSE;
   }
 
 }

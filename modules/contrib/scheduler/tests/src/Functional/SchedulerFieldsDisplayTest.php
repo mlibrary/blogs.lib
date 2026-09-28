@@ -5,6 +5,7 @@ namespace Drupal\Tests\scheduler\Functional;
 use Drupal\Core\Url;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the display of date entry fields and form elements.
@@ -16,6 +17,7 @@ use PHPUnit\Framework\Attributes\Group;
  * @group scheduler
  */
 #[Group('scheduler')]
+#[RunTestsInSeparateProcesses]
 class SchedulerFieldsDisplayTest extends SchedulerBrowserTestBase {
 
   /**
@@ -217,8 +219,10 @@ class SchedulerFieldsDisplayTest extends SchedulerBrowserTestBase {
    * This test covers _scheduler_entity_form_alter().
    *
    * @dataProvider dataStandardEntityTypes
+   * @dataProvider dataNoBundleEntityTypes
    */
   #[DataProvider('dataStandardEntityTypes')]
+  #[DataProvider('dataNoBundleEntityTypes')]
   public function testDisabledFields($entityTypeId, $bundle) {
     $this->drupalLogin($this->schedulerUser);
 
@@ -264,8 +268,10 @@ class SchedulerFieldsDisplayTest extends SchedulerBrowserTestBase {
    * Test the option to hide the seconds on the time input fields.
    *
    * @dataProvider dataStandardEntityTypes
+   * @dataProvider dataNoBundleEntityTypes
    */
   #[DataProvider('dataStandardEntityTypes')]
+  #[DataProvider('dataNoBundleEntityTypes')]
   public function testHideSeconds($entityTypeId, $bundle) {
     $this->drupalLogin($this->schedulerUser);
     $config = $this->config('scheduler.settings');

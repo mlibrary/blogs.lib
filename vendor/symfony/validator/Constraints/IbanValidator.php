@@ -151,10 +151,7 @@ class IbanValidator extends ConstraintValidator
         'YE' => 'YE\d{2}[A-Z]{4}\d{4}[\dA-Z]{18}', // Yemen
     ];
 
-    /**
-     * @return void
-     */
-    public function validate(mixed $value, Constraint $constraint)
+    public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof Iban) {
             throw new UnexpectedTypeException($constraint, Iban::class);
@@ -170,8 +167,8 @@ class IbanValidator extends ConstraintValidator
 
         $value = (string) $value;
 
-        // Remove spaces and convert to uppercase
-        $canonicalized = str_replace(' ', '', strtoupper($value));
+        // Remove spaces (regular, non-breaking, and narrow non-breaking) and convert to uppercase
+        $canonicalized = str_replace([' ', "\xc2\xa0", "\xe2\x80\xaf"], '', strtoupper($value));
 
         // The IBAN must contain only digits and characters...
         if (!ctype_alnum($canonicalized)) {

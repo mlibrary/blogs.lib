@@ -5,12 +5,16 @@ namespace Drupal\Tests\link_attributes\Functional;
 use Drupal\link_attributes\Plugin\Field\FieldWidget\LinkWithAttributesWidget;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests link attributes functionality.
  *
  * @group link_attributes
  */
+#[Group('link_attributes')]
+#[RunTestsInSeparateProcesses]
 class LinkAttributesFieldTest extends BrowserTestBase {
 
   use FieldUiTestTrait;

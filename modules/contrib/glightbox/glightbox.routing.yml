@@ -1,0 +1,7 @@
+glightbox.admin_settings:
+  path: '/admin/config/media/glightbox'
+  defaults:
+    _form: '\Drupal\glightbox\Form\GLightboxSettingsForm'
+    _title: 'GLightbox settings'
+  requirements:
+    _permission: 'administer site configuration'

@@ -1,15 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\mimemail_example\Functional;
 
 use Drupal\Core\Test\AssertMailTrait;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
+// cspell:ignore unpriv
 /**
  * Tests operation of the Mime Mail Example module.
  *
  * @group mimemail_example
  */
+#[Group('mimemail_example')]
+#[RunTestsInSeparateProcesses]
 class ExampleMailTest extends BrowserTestBase {
   use AssertMailTrait;
 

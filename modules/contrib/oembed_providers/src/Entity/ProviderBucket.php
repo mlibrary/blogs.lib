@@ -2,8 +2,10 @@
 
 namespace Drupal\oembed_providers\Entity;
 
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Defines the oEmbed provider bucket entity.
@@ -19,6 +21,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *     plural = "@count oembed provider buckets",
  *   ),
  *   handlers = {
+ *     "access" = "Drupal\oembed_providers\OembedProviderAccessControlHandler",
  *     "list_builder" = "Drupal\oembed_providers\OembedProviderBucketListBuilder",
  *     "form" = {
  *       "edit" = "Drupal\oembed_providers\OembedProviderBucketForm",
@@ -45,6 +48,43 @@ use Drupal\Core\Entity\EntityStorageInterface;
  *   }
  * )
  */
+#[ConfigEntityType(
+  id: 'oembed_provider_bucket',
+  label: new TranslatableMarkup('oEmbed provider bucket'),
+  label_collection: new TranslatableMarkup('oEmbed provider buckets'),
+  label_singular: new TranslatableMarkup('oembed provider bucket'),
+  label_plural: new TranslatableMarkup('oembed provider buckets'),
+  label_count: [
+    'singular' => '@count oembed provider bucket',
+    'plural' => '@count oembed provider buckets',
+  ],
+  handlers: [
+    'access' => \Drupal\oembed_providers\OembedProviderAccessControlHandler::class,
+    'list_builder' => \Drupal\oembed_providers\OembedProviderBucketListBuilder::class,
+    'form' => [
+      'edit' => \Drupal\oembed_providers\OembedProviderBucketForm::class,
+      'add' => \Drupal\oembed_providers\OembedProviderBucketForm::class,
+      'delete' => \Drupal\Core\Entity\EntityDeleteForm::class,
+    ],
+  ],
+  admin_permission: 'administer oembed providers',
+  config_prefix: 'bucket',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+  ],
+  config_export: [
+    'id',
+    'label',
+    'providers',
+    'description',
+  ],
+  links: [
+    'edit-form' => '/admin/config/media/oembed-providers/buckets/{oembed_provider_bucket}/edit',
+    'delete-form' => '/admin/config/media/oembed-providers/buckets/{oembed_provider_bucket}/delete',
+    'collection' => '/admin/config/media/oembed-providers/buckets',
+  ]
+)]
 class ProviderBucket extends ConfigEntityBase {
 
   /**

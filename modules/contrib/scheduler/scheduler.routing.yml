@@ -15,6 +15,14 @@ scheduler.cron_form:
   requirements:
     _permission: 'administer scheduler'
 
+scheduler.no_bundle_settings_form:
+  path: '/admin/config/content/scheduler/{entity_type_id}'
+  defaults:
+    _title_callback: '\Drupal\scheduler\Form\SchedulerNoBundleSettingsForm::title'
+    _form: '\Drupal\scheduler\Form\SchedulerNoBundleSettingsForm'
+  requirements:
+    _permission: 'administer scheduler'
+
 scheduler.lightweight_cron:
   path: '/scheduler/cron/{cron_key}'
   defaults:

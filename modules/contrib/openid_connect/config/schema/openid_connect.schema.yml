@@ -35,6 +35,9 @@ openid_connect.settings:
         type: sequence
         sequence:
           type: string
+    force_reset_role_mappings:
+      type: boolean
+      label: 'Reset role mappings if no groups are passed.'
     autostart_login:
       type: boolean
       label: 'Autostart login process'
@@ -65,6 +68,9 @@ openid_connect.client.plugin.*:
     client_secret:
       type: string
       label: 'Client secret'
+    provider_slug:
+      type: string
+      label: 'Redirect URL Slug'
     iss_allowed_domains:
       type: string
       label: 'Domains that are allowed to initiate SSO using ISS'

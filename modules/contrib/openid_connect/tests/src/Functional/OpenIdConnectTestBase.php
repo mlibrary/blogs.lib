@@ -23,7 +23,7 @@ abstract class OpenIdConnectTestBase extends BrowserTestBase {
     $this->drupalGet(Url::fromRoute('user.logout.confirm', options: ['query' => ['destination' => $destination]]));
     // Target the submit button using the name rather than the value to work
     // regardless of the user interface language.
-    $this->submitForm([], 'op', 'openid-connect-user-logout');
+    $this->submitForm([], 'op', 'user-logout-confirm');
     $this->drupalResetSession();
   }
 

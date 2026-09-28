@@ -32,7 +32,7 @@ class ConfigDevelAutoImportSubscriber extends ConfigDevelSubscriberBase implemen
    * @return array
    *   An array of event listener definitions.
    */
-  static function getSubscribedEvents() {
+  static function getSubscribedEvents(): array {
     $events[KernelEvents::REQUEST][] = array('autoImportConfig', 20);
     return $events;
   }

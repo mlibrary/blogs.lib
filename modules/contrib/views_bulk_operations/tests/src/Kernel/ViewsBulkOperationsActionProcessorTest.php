@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\views_bulk_operations\Kernel;
 
+use Drupal\views_bulk_operations\Service\ViewsBulkOperationsActionProcessor;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+
 /**
- * @coversDefaultClass \Drupal\views_bulk_operations\Service\ViewsBulkOperationsActionProcessor
- * @group views_bulk_operations
+ * Action processor test.
  */
+#[CoversClass(ViewsBulkOperationsActionProcessor::class)]
+#[Group('views_bulk_operations')]
 final class ViewsBulkOperationsActionProcessorTest extends ViewsBulkOperationsKernelTestBase {
 
   /**
@@ -61,10 +66,6 @@ final class ViewsBulkOperationsActionProcessorTest extends ViewsBulkOperationsKe
 
   /**
    * Tests general functionality of ViewsBulkOperationsActionProcessor.
-   *
-   * @covers ::getPageList
-   * @covers ::populateQueue
-   * @covers ::process
    */
   public function testViewsBulkOperationsActionProcessor(): void {
     $vbo_data = [
@@ -107,11 +108,6 @@ final class ViewsBulkOperationsActionProcessorTest extends ViewsBulkOperationsKe
 
   /**
    * Tests exclude mode of ViewsBulkOperationsActionProcessor.
-   *
-   * @covers ::getPageList
-   * @covers ::populateQueue
-   * @covers ::process
-   * @covers ::initialize
    */
   public function testViewsBulkOperationsActionProcessorExclude(): void {
     $vbo_data = [
@@ -132,6 +128,34 @@ final class ViewsBulkOperationsActionProcessorTest extends ViewsBulkOperationsKe
     $this->executeAction($vbo_data);
 
     $this->assertNodeStatuses($vbo_data['list'], $vbo_data['exclude_mode']);
+  }
+
+  /**
+   * Tests that total_rows reflects the selection, not the whole view.
+   *
+   * @see https://www.drupal.org/project/views_bulk_operations/issues/3615520
+   */
+  public function testViewsBulkOperationsActionProcessorTotalRowsScoping(): void {
+    $vbo_data = [
+      'view_id' => 'views_bulk_operations_test',
+      'action_id' => 'views_bulk_operations_advanced_test_action',
+      'preconfiguration' => [
+        'test_preconfig' => 'test',
+        'test_config' => 'unpublish',
+      ],
+    ];
+
+    $selection = [0, 5];
+    $vbo_data['list'] = $this->getResultsList($vbo_data, $selection);
+    $vbo_data += self::VBO_DEFAULTS;
+
+    $processor = $this->container->get('views_bulk_operations.processor');
+    $processor->initialize($vbo_data);
+    $processor->populateQueue($vbo_data);
+
+    $view = (new \ReflectionProperty($processor, 'view'))->getValue($processor);
+
+    self::assertEquals(\count($selection), $view->total_rows);
   }
 
 }

@@ -33,6 +33,12 @@ final class ViewsBulkOperationsTestActionV2 extends ViewsBulkOperationsActionBas
         'type' => 'warning',
       ];
     }
+    elseif ($entity->label() === 'Title 2') {
+      $output = [
+        'message' => $this->t('A warning message with a "quote", an & ampersand, and <tag>.'),
+        'type' => 'warning',
+      ];
+    }
     else {
       $output = $this->t('Standard output.');
     }

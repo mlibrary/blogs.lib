@@ -83,6 +83,12 @@ symfony_mailer_lite.transport_plugin.smtp:
     pass:
       type: string
       label: 'Password'
+    pass_key:
+      type: string
+      label: 'Password Key ID'
+    use_key_module:
+      type: boolean
+      label: 'Use Key module for password storage'
     host:
       type: string
       label: 'Host name'

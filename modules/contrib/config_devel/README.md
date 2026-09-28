@@ -55,12 +55,13 @@ Features in the Drupal 7 era. In order to achieve this you need to:
     core_version_requirement: ^10
 
     config_devel:
-      - core.base_field_override.node.article.promote
-      - core.entity_form_display.node.article.default
-      - core.entity_view_display.node.article.default
-      - core.entity_view_display.node.article.teaser
-      - field.field.node.article.body
-      - node.type.article
+      install:
+        - core.base_field_override.node.article.promote
+        - core.entity_form_display.node.article.default
+        - core.entity_view_display.node.article.default
+        - core.entity_view_display.node.article.teaser
+        - field.field.node.article.body
+        - node.type.article
     ```
 5. Run `drush config:devel-export my_module`. The resulting module folder will
    have all the files needed, enable it on another installation and you will get

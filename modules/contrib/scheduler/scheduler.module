@@ -236,7 +236,7 @@ function _scheduler_entity_form_alter(&$form, FormStateInterface $form_state, $f
   }
 
   // The 'once' library was moved from jQuery into core at 9.2. The original js
-  // library file is kept to maintain compatibility with Drupal 8.9.
+  // library file is kept to maintain compatibility with Drupal 9.0 and 9.1.
   // @see https://www.drupal.org/project/scheduler/issues/3314158
   $default_time_library = version_compare(\Drupal::VERSION, '9.2', '>=') ? 'scheduler/default-time' : 'scheduler/default-time-8x';
 
@@ -333,15 +333,17 @@ function _scheduler_entity_form_alter(&$form, FormStateInterface $form_state, $f
   foreach ($fields_to_check as $field) {
     $actual_widget_id = $display->getComponent($field)['type'];
     if ($actual_widget_id == 'datetime_timestamp') {
-      $link = \Drupal::moduleHandler()->moduleExists('field_ui') ?
-        Url::fromRoute("entity.entity_form_display.$entityTypeId.default", ["{$entityTypeId}_type" => $entity->bundle()])->toString()
-        : '#';
+      $bundle_key = $entity->getEntityType()->getKey('bundle');
+      $link = '#';
+      if (\Drupal::moduleHandler()->moduleExists('field_ui') && !empty($bundle_key)) {
+        $link = Url::fromRoute("entity.entity_form_display.$entityTypeId.default", ["{$entityTypeId}_type" => $entity->bundle()])->toString();
+      }
       \Drupal::messenger()->addMessage(t('The widget for field %field is incorrectly set to %wrong. This should be changed to %correct by an admin user via the <a href="@link">Field UI form display</a> :not_available', [
         '%field' => (string) $form[$field]['widget']['#title'],
         '%correct' => (string) $pluginDefinitions[$correct_widget_id]['label'],
         '%wrong' => (string) $pluginDefinitions[$actual_widget_id]['label'],
         '@link' => $link,
-        ':not_available' => \Drupal::moduleHandler()->moduleExists('field_ui') ? '' : ('(' . t('not available') . ')'),
+        ':not_available' => \Drupal::moduleHandler()->moduleExists('field_ui') && !empty($bundle_key) ? '' : ('(' . t('not available') . ')'),
       ]), 'warning', FALSE);
     }
   }
@@ -362,11 +364,14 @@ function _scheduler_entity_type_form_alter(&$form, FormStateInterface $form_stat
   /** @var \Drupal\Core\Entity\ContentEntityInterface $contentEntity */
   $contentEntity = \Drupal::entityTypeManager()->getStorage($contentEntityType->id())->create([$contentEntityType->getKey('bundle') => 'scaffold']);
 
+  $bundleLabel = strtolower($type->label() ?? '');
   $params = [
     '@type' => $type->label() ?? '',
-    '%type' => strtolower($type->label() ?? ''),
+    '%type' => $bundleLabel,
     '@singular' => $contentEntityType->getSingularLabel(),
     '@plural' => $contentEntityType->getPluralLabel(),
+    '@item' => trim($bundleLabel . ' ' . $contentEntityType->getSingularLabel()),
+    '@items' => trim($bundleLabel . ' ' . $contentEntityType->getPluralLabel()),
   ];
 
   $form['#attached']['library'][] = 'scheduler/vertical-tabs';
@@ -378,184 +383,27 @@ function _scheduler_entity_type_form_alter(&$form, FormStateInterface $form_stat
     '#group' => 'additional_settings',
   ];
 
-  // Publishing options.
-  $form['scheduler']['publish'] = [
-    '#type' => 'details',
-    '#title' => t('Publishing'),
-    '#weight' => 1,
-    '#group' => 'scheduler',
-    '#open' => TRUE,
-  ];
-  $form['scheduler']['publish']['scheduler_publish_enable'] = [
-    '#type' => 'checkbox',
-    '#title' => t('Enable scheduled publishing for %type @plural', $params),
-    '#default_value' => $type->getThirdPartySetting('scheduler', 'publish_enable', $config->get('default_publish_enable')),
-  ];
-  $form['scheduler']['publish']['scheduler_publish_touch'] = [
-    '#type' => 'checkbox',
-    '#title' => t('Change %type creation time to match the scheduled publish time', $params),
-    '#default_value' => $type->getThirdPartySetting('scheduler', 'publish_touch', $config->get('default_publish_touch')),
-    '#states' => [
-      'visible' => [
-        ':input[name="scheduler_publish_enable"]' => ['checked' => TRUE],
-      ],
+  /** @var \Drupal\scheduler\SchedulerManager $scheduler_manager */
+  $scheduler_manager = \Drupal::service('scheduler.manager');
+  $form['scheduler'] += $scheduler_manager->buildSchedulerFormElements(
+    [
+      'publish_enable' => $type->getThirdPartySetting('scheduler', 'publish_enable', $config->get('default_publish_enable')),
+      'publish_touch' => $type->getThirdPartySetting('scheduler', 'publish_touch', $config->get('default_publish_touch')),
+      'publish_required' => $type->getThirdPartySetting('scheduler', 'publish_required', $config->get('default_publish_required')),
+      'publish_revision' => $type->getThirdPartySetting('scheduler', 'publish_revision', $config->get('default_publish_revision')),
+      'publish_past_date' => $type->getThirdPartySetting('scheduler', 'publish_past_date', $config->get('default_publish_past_date')),
+      'publish_past_date_created' => $type->getThirdPartySetting('scheduler', 'publish_past_date_created', $config->get('default_publish_past_date_created')),
+      'unpublish_enable' => $type->getThirdPartySetting('scheduler', 'unpublish_enable', $config->get('default_unpublish_enable')),
+      'unpublish_required' => $type->getThirdPartySetting('scheduler', 'unpublish_required', $config->get('default_unpublish_required')),
+      'unpublish_revision' => $type->getThirdPartySetting('scheduler', 'unpublish_revision', $config->get('default_unpublish_revision')),
+      'fields_display_mode' => $type->getThirdPartySetting('scheduler', 'fields_display_mode', $config->get('default_fields_display_mode')),
+      'expand_fieldset' => $type->getThirdPartySetting('scheduler', 'expand_fieldset', $config->get('default_expand_fieldset')),
+      'show_message_after_update' => $type->getThirdPartySetting('scheduler', 'show_message_after_update', $config->get('default_show_message_after_update')),
     ],
-  ];
-
-  // Entity types that do not implement the 'getCreatedTime' method should have
-  // the option set to FALSE and the field disabled and hidden.
-  if (!method_exists($contentEntity, 'getCreatedTime')) {
-    $form['scheduler']['publish']['scheduler_publish_touch']['#disabled'] = TRUE;
-    $form['scheduler']['publish']['scheduler_publish_touch']['#description'] = t('The entity type does not support the change of creation time.');
-    $form['scheduler']['publish']['scheduler_publish_touch']['#default_value'] = FALSE;
-    $form['scheduler']['publish']['scheduler_publish_touch']['#access'] = FALSE;
-  }
-
-  $form['scheduler']['publish']['scheduler_publish_required'] = [
-    '#type' => 'checkbox',
-    '#title' => t('Require scheduled publishing'),
-    '#default_value' => $type->getThirdPartySetting('scheduler', 'publish_required', $config->get('default_publish_required')),
-    '#states' => [
-      'visible' => [
-        ':input[name="scheduler_publish_enable"]' => ['checked' => TRUE],
-      ],
-    ],
-  ];
-  if ($contentEntityType->isRevisionable()) {
-    $form['scheduler']['publish']['scheduler_publish_revision'] = [
-      '#type' => 'checkbox',
-      '#title' => t('Create a new revision on publishing'),
-      '#default_value' => $type->getThirdPartySetting('scheduler', 'publish_revision', $config->get('default_publish_revision')),
-      '#states' => [
-        'visible' => [
-          ':input[name="scheduler_publish_enable"]' => ['checked' => TRUE],
-        ],
-      ],
-    ];
-  }
-  $form['scheduler']['publish']['advanced'] = [
-    '#type' => 'details',
-    '#title' => t('Advanced options'),
-    '#open' => FALSE,
-    '#states' => [
-      'visible' => [
-        ':input[name="scheduler_publish_enable"]' => ['checked' => TRUE],
-      ],
-    ],
-  ];
-  $form['scheduler']['publish']['advanced']['scheduler_publish_past_date'] = [
-    '#type' => 'radios',
-    '#title' => t('Action to be taken for publication dates in the past'),
-    '#default_value' => $type->getThirdPartySetting('scheduler', 'publish_past_date', $config->get('default_publish_past_date')),
-    '#options' => [
-      'error' => t('Display an error message - do not allow dates in the past'),
-      'publish' => t('Publish the %type @singular immediately after saving', $params),
-      'schedule' => t('Schedule the %type @singular for publication on the next cron run', $params),
-    ],
-  ];
-  $form['scheduler']['publish']['advanced']['scheduler_publish_past_date_created'] = [
-    '#type' => 'checkbox',
-    '#title' => t('Change %type creation time to match the published time, for dates before the %type was created', $params),
-    '#description' => t("The created time will only be altered when the scheduled publishing time is earlier than the existing creation time"),
-    '#default_value' => $type->getThirdPartySetting('scheduler', 'publish_past_date_created', $config->get('default_publish_past_date_created')),
-    // This option is not relevant if the full 'change creation time' option is
-    // selected, or when past dates are not allowed. Hence only show it when
-    // the main option is not checked and the past dates option is not 'error'.
-    '#states' => [
-      'visible' => [
-        ':input[name="scheduler_publish_touch"]' => ['checked' => FALSE],
-        ':input[name="scheduler_publish_past_date"]' => ['!value' => 'error'],
-      ],
-    ],
-  ];
-
-  // Entity types that do not implement the 'getCreatedTime' method should have
-  // the option set to FALSE and the field disabled. It will be hidden due to
-  // the #states setting above, as scheduler_publish_touch has #access = FALSE.
-  if (!method_exists($contentEntity, 'getCreatedTime')) {
-    $form['scheduler']['publish']['advanced']['scheduler_publish_past_date_created']['#disabled'] = TRUE;
-    $form['scheduler']['publish']['advanced']['scheduler_publish_past_date_created']['#description'] = t('The entity type does not support the change of creation time.');
-    $form['scheduler']['publish']['advanced']['scheduler_publish_past_date_created']['#default_value'] = FALSE;
-  }
-
-  // Unpublishing options.
-  $form['scheduler']['unpublish'] = [
-    '#type' => 'details',
-    '#title' => t('Unpublishing'),
-    '#weight' => 2,
-    '#group' => 'scheduler',
-    '#open' => TRUE,
-  ];
-  $form['scheduler']['unpublish']['scheduler_unpublish_enable'] = [
-    '#type' => 'checkbox',
-    '#title' => t('Enable scheduled unpublishing for %type @plural', $params),
-    '#default_value' => $type->getThirdPartySetting('scheduler', 'unpublish_enable', $config->get('default_unpublish_enable')),
-  ];
-  $form['scheduler']['unpublish']['scheduler_unpublish_required'] = [
-    '#type' => 'checkbox',
-    '#title' => t('Require scheduled unpublishing'),
-    '#default_value' => $type->getThirdPartySetting('scheduler', 'unpublish_required', $config->get('default_unpublish_required')),
-    '#states' => [
-      'visible' => [
-        ':input[name="scheduler_unpublish_enable"]' => ['checked' => TRUE],
-      ],
-    ],
-  ];
-  if ($contentEntityType->isRevisionable()) {
-    $form['scheduler']['unpublish']['scheduler_unpublish_revision'] = [
-      '#type' => 'checkbox',
-      '#title' => t('Create a new revision on unpublishing'),
-      '#default_value' => $type->getThirdPartySetting('scheduler', 'unpublish_revision', $config->get('default_unpublish_revision')),
-      '#states' => [
-        'visible' => [
-          ':input[name="scheduler_unpublish_enable"]' => ['checked' => TRUE],
-        ],
-      ],
-    ];
-  }
-
-  // The 'entity_edit_layout' fieldset contains options to alter the layout of
-  // entity edit pages.
-  $form['scheduler']['entity_edit_layout'] = [
-    '#type' => 'details',
-    '#title' => t('@type edit page', $params),
-    '#weight' => 3,
-    '#group' => 'scheduler',
-    // The #states processing only caters for AND and does not do OR. So to set
-    // the state to visible if either of the boxes are ticked we use the fact
-    // that logical 'X = A or B' is equivalent to 'not X = not A and not B'.
-    '#states' => [
-      '!visible' => [
-        ':input[name="scheduler_publish_enable"]' => ['!checked' => TRUE],
-        ':input[name="scheduler_unpublish_enable"]' => ['!checked' => TRUE],
-      ],
-    ],
-  ];
-  $form['scheduler']['entity_edit_layout']['scheduler_fields_display_mode'] = [
-    '#type' => 'radios',
-    '#title' => t('Display scheduling date input fields in'),
-    '#default_value' => $type->getThirdPartySetting('scheduler', 'fields_display_mode', $config->get('default_fields_display_mode')),
-    '#options' => [
-      'vertical_tab' => t('Vertical tab'),
-      'fieldset' => t('Separate fieldset'),
-    ],
-    '#description' => t('Use this option to specify how the scheduler fields are displayed when editing %type @plural', $params),
-  ];
-  $form['scheduler']['entity_edit_layout']['scheduler_expand_fieldset'] = [
-    '#type' => 'radios',
-    '#title' => t('Expand fieldset or vertical tab'),
-    '#default_value' => $type->getThirdPartySetting('scheduler', 'expand_fieldset', $config->get('default_expand_fieldset')),
-    '#options' => [
-      'when_required' => t('Expand only when a scheduled date exists or when a date is required'),
-      'always' => t('Always open the fieldset or vertical tab'),
-    ],
-  ];
-  $form['scheduler']['entity_edit_layout']['scheduler_show_message_after_update'] = [
-    '#type' => 'checkbox',
-    '#prefix' => '<strong>' . t('Show message') . '</strong>',
-    '#title' => t('Show a confirmation message when a scheduled %type @singular is saved', $params),
-    '#default_value' => $type->getThirdPartySetting('scheduler', 'show_message_after_update', $config->get('default_show_message_after_update')),
-  ];
+    $contentEntityType->isRevisionable(),
+    method_exists($contentEntity, 'getCreatedTime'),
+    $params,
+  );
 
   $form['#entity_builders'][] = '_scheduler_form_entity_type_form_builder';
 
@@ -1057,7 +905,7 @@ function scheduler_cron() {
     });
   }
   else {
-    // Use getImplementations() to maintain compatibility with Drupal 8.9.
+    // Use getImplementations() to maintain compatibility with Drupal 9.0.
     foreach (Drupal::moduleHandler()->getImplementations('scheduler_api') as $module) {
       \Drupal::logger('scheduler')->warning('Function %function has not been executed. Implementations of hook_scheduler_api() should be replaced by Scheduler event listeners.', [
         '%function' => $module . '_scheduler_api',
@@ -1456,7 +1304,8 @@ function scheduler_local_tasks_alter(&$local_tasks) {
  * Implements hook_config_import_steps_alter().
  */
 function scheduler_config_import_steps_alter(&$sync_steps, ConfigImporter $config_importer) {
-  if (!in_array('scheduler', $config_importer->getExtensionChangelist('module', 'uninstall'))) {
+  $change_list = $config_importer->getExtensionChangelist('module', 'uninstall');
+  if (!empty($change_list) && !in_array('scheduler', $change_list)) {
     $sync_steps[] = '_scheduler_config_import_process_entity_definitions';
   }
 }
@@ -1553,4 +1402,69 @@ function scheduler_tokens($type, $tokens, array $data, array $options, Bubbleabl
   }
 
   return $replacements;
+}
+
+/**
+ * Internal function to give timecheck information.
+ *
+ * This is used for the status report and in the cron form.
+ *
+ * @param string $type
+ *   't_options' (default) Return an array of values for use in constructing
+ *               a custom translatable sentence.
+ *   'description' Return an array of formatted lines for the status report.
+ */
+function _scheduler_timecheck($type = 't_options') {
+  $user = \Drupal::currentUser();
+  $now = \Drupal::time()->getRequestTime();
+  $date_formatter = \Drupal::service('date.formatter');
+  $system_date = \Drupal::config('system.date');
+  $date_default_timezone = $system_date->get('timezone.default') ?: date_default_timezone_get();
+
+  $t_options = [
+    '%date_default_timezone' => $date_default_timezone,
+    '%date_default_offset' => $date_formatter->format($now, 'custom', 'P', $date_default_timezone),
+    '%date_default_code' => $date_formatter->format($now, 'custom', 'T', $date_default_timezone),
+
+    // For %utc specify 'GMT' as the timezone (4th parameter) so that no
+    // timezone offset is returned.
+    '%utc' => $date_formatter->format($now, 'custom', 'jS F Y, H:i:s P', 'GMT'),
+
+    // For %user_date, %user_time, %user_timezone and %daylight_saving do not
+    // specify any timezone so that the user or site default setting is used.
+    '%user_date' => $date_formatter->format($now, 'custom', 'jS F Y'),
+    '%user_time' => $date_formatter->format($now, 'custom', 'H:i:s'),
+    '%user_timezone' => $date_formatter->format($now, 'custom', 'e (T) P'),
+    '%daylight_saving' => $date_formatter->format($now, 'custom', 'I') ? t('currently in daylight saving mode') : t('not in daylight saving mode'),
+
+    '@account_edit' => Url::fromRoute('entity.user.edit_form', ['user' => $user->id()])->toString(),
+    '@admin_regional_settings' => Url::fromRoute('system.regional_settings')->toString(),
+  ];
+
+  switch ($type) {
+    case 't_options':
+      $output = $t_options;
+      break;
+
+    case 'description':
+      $output = [
+        t('In most cases the server time should match Coordinated Universal Time (UTC) / Greenwich Mean Time (GMT).', $t_options),
+        t('Site timezone: %date_default_timezone (%date_default_code), offset from UTC/GMT by %date_default_offset hours. This can be <a href="@admin_regional_settings">changed by admin users</a> who have the appropriate access.', $t_options),
+      ];
+      if ($system_date->get('timezone.user.configurable')) {
+        $output[] = t('Your local time: %user_date, %user_time %user_timezone (%daylight_saving). You can change this via your <a href="@account_edit">user account</a>.', $t_options);
+        if (!$user->getTimezone()) {
+          $output[] = t('Note: The user timezone has not been stored, so defaulting to the website timezone.');
+        }
+      }
+      else {
+        $output[] = t('Your local time: %user_date, %user_time %user_timezone (%daylight_saving). This is not configurable by you.', $t_options);
+      }
+      break;
+
+    default:
+      $output = '_scheduler_timecheck() - unrecognized parameter ' . $type;
+
+  }
+  return $output;
 }

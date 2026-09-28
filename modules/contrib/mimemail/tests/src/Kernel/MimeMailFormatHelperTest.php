@@ -1,10 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\mimemail\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\mimemail\Utility\MimeMailFormatHelper;
 use Drupal\Tests\user\Traits\UserCreationTrait;
+use Drupal\TestTools\Random;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests that Mime Mail utility functions work properly.
@@ -13,6 +19,8 @@ use Drupal\Tests\user\Traits\UserCreationTrait;
  *
  * @group mimemail
  */
+#[Group('mimemail')]
+#[RunTestsInSeparateProcesses]
 class MimeMailFormatHelperTest extends KernelTestBase {
   use UserCreationTrait;
 
@@ -85,13 +93,16 @@ class MimeMailFormatHelperTest extends KernelTestBase {
    * @dataProvider providerAssociativeAddressArray
    * @covers ::mimeMailAddress
    */
+  #[DataProvider('providerAddress')]
+  #[DataProvider('providerArrayOfAddresses')]
+  #[DataProvider('providerAssociativeAddressArray')]
   public function testAddress($address, $result, $simplified_result): void {
     // Test not simplified.
-    $formatted = MimeMailFormatHelper::mimeMailAddress($address, $simplify = FALSE);
+    $formatted = MimeMailFormatHelper::mimeMailAddress($address);
     $this->assertSame($result, $formatted);
 
     // Test simplified.
-    $formatted = MimeMailFormatHelper::mimeMailAddress($address, $simplify = TRUE);
+    $formatted = MimeMailFormatHelper::mimeMailAddress($address, TRUE);
     $this->assertSame($simplified_result, $formatted);
   }
 
@@ -110,29 +121,29 @@ class MimeMailFormatHelperTest extends KernelTestBase {
    *   - simplified_result: Expected return value from
    *     MimeMailFormatHelper::mimeMailAddress($address, $simplify = TRUE).
    */
-  public function providerAddress(): array {
+  public static function providerAddress(): array {
     $addresses = [
-      'Encoded display-name' => [
+      'Encoded display-name (providerAddress)' => [
         '=?utf-8?Q?Drupal=20Supporters?= <support@association.drupal.org>',
         '=?utf-8?Q?Drupal=20Supporters?= <support@association.drupal.org>',
         'support@association.drupal.org',
       ],
-      'Display-name needing quotes' => [
+      'Display-name needing quotes (providerAddress)' => [
         'Acme Industries, Inc. <no-reply@acme.example.com>',
         '"Acme Industries, Inc." <no-reply@acme.example.com>',
         'no-reply@acme.example.com',
       ],
-      'UTF-8 display-name' => [
+      'UTF-8 display-name (providerAddress)' => [
         '山田太郎 <taro@example.com>',
         '=?utf-8?Q?=E5=B1=B1=E7=94=B0=E5=A4=AA=E9=83=8E?= <taro@example.com>',
         'taro@example.com',
       ],
-      'No display-name' => [
+      'No display-name (providerAddress)' => [
         'alpher@example.com',
         'alpher@example.com',
         'alpher@example.com',
       ],
-      'No display-name, address between < and >' => [
+      'No display-name, address between < and > (providerAddress)' => [
         '<tr@202830.no-reply.drupal.org>',
         '<tr@202830.no-reply.drupal.org>',
         'tr@202830.no-reply.drupal.org',
@@ -156,7 +167,7 @@ class MimeMailFormatHelperTest extends KernelTestBase {
    *   - simplified_result: Expected return value from
    *     MimeMailFormatHelper::mimeMailAddress($address, $simplify = TRUE).
    */
-  public function providerArrayOfAddresses(): array {
+  public static function providerArrayOfAddresses(): array {
     $addresses = [
       'Array of address strings' => [
         [
@@ -206,24 +217,24 @@ class MimeMailFormatHelperTest extends KernelTestBase {
    *   - simplified_result: Expected return value from
    *     MimeMailFormatHelper::mimeMailAddress($address, $simplify = TRUE).
    */
-  public function providerAssociativeAddressArray(): array {
+  public static function providerAssociativeAddressArray(): array {
     $addresses = [
-      'Encoded display-name in array' => [
+      'Encoded display-name in array (providerAssociativeAddressArray)' => [
         ['name' => '=?utf-8?Q?Drupal=20Supporters?=', 'mail' => 'support@association.drupal.org'],
         '=?utf-8?Q?Drupal=20Supporters?= <support@association.drupal.org>',
         'support@association.drupal.org',
       ],
-      'Display-name needing quotes in array' => [
+      'Display-name needing quotes in array (providerAssociativeAddressArray)' => [
         ['name' => 'Acme Industries, Inc.', 'mail' => 'no-reply@acme.example.com'],
         '"Acme Industries, Inc." <no-reply@acme.example.com>',
         'no-reply@acme.example.com',
       ],
-      'UTF-8 display-name in array' => [
+      'UTF-8 display-name in array (providerAssociativeAddressArray)' => [
         ['name' => '山田太郎', 'mail' => 'taro@example.com'],
         '=?utf-8?Q?=E5=B1=B1=E7=94=B0=E5=A4=AA=E9=83=8E?= <taro@example.com>',
         'taro@example.com',
       ],
-      'No display-name' => [
+      'No display-name (providerAssociativeAddressArray)' => [
         ['name' => '', 'mail' => 'gamow@example.com'],
         'gamow@example.com',
         'gamow@example.com',
@@ -292,6 +303,7 @@ class MimeMailFormatHelperTest extends KernelTestBase {
    * @dataProvider providerTestUrl
    * @covers ::mimeMailUrl
    */
+  #[DataProvider('providerTestUrl')]
   public function testUrl(string $url, bool $absolute, string $expected): void {
     $result = MimeMailFormatHelper::mimeMailUrl($url, $absolute);
     $this->assertSame($expected, $result);
@@ -300,7 +312,7 @@ class MimeMailFormatHelperTest extends KernelTestBase {
   /**
    * Provides test data for testUrl().
    */
-  public function providerTestUrl(): array {
+  public static function providerTestUrl(): array {
     // Format of each element is:
     // - url: URL to test.
     // - absolute: Whether the URL is absolute.
@@ -317,19 +329,74 @@ class MimeMailFormatHelperTest extends KernelTestBase {
         '/sites/default/files/styles/thumbnail/public/image.jpg',
       ],
       'Space in the filename of the attachment left intact.' => [
-        $url = 'public://' . $this->randomMachineName() . ' ' . $this->randomMachineName() . '.' . $this->randomMachineName(3),
+        $url = 'public://' . Random::machineName() . ' ' . Random::machineName() . '.' . Random::machineName(3),
         TRUE,
-        $expected = $url,
+        $url,
       ],
       'URL-encoded spaces in the filename of the attachment left intact.' => [
-        $url = 'public://' . $this->randomMachineName() . '+' . $this->randomMachineName() . '.' . $this->randomMachineName(3),
+        $url = 'public://' . Random::machineName() . '+' . Random::machineName() . '.' . Random::machineName(3),
         TRUE,
-        $expected = $url,
+        $url,
       ],
       'Base64 encoded image using data: scheme' => [
         $url = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIyLjEuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAyMTYwIDI4ODAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDIxNjAgMjg4MDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiNGRkZGRkY7fQo8L3N0eWxlPgo8ZyBpZD0iTGl2ZWxsb18yXzFfIj4KCTxnIGlkPSJMaXZlbGxvXzEtMl8xXyI+CgkJPHBhdGggY2xhc3M9InN0MCIgZD0iTTExODYsMTA4MC41Yy0zNi0zNi03NC4yLTc0LjYtMTA4LjEtMTEzLjFjLTMxLjcsMzYtNjUuMiw2OC44LTk4LjcsMTAyLjNjLTguMSw4LTE0LjcsMTcuNC0xOS41LDI3LjcKCQkJYy03LjQsMTYuMi05LjgsMzQuMy02LjgsNTEuOWMwLDEuOCwwLDMuNiwwLDUuNGMzLjEsOS43LDcuNywxOC44LDEzLjcsMjdjMSwxLjQsMS44LDIuOCwyLjUsNC4zYzIyLDI3LjQsNzQuMiw3Ny44LDEwMy40LDEwNS45CgkJCWwxNzMsMTgwLjJsNTEuOSw1NC44YzQyLjgsNDQuNCw4MS40LDkyLjYsMTE1LjMsMTQ0LjFsMCwwYzQuMSw3LjEsMTAuNiwxMi4zLDE4LjQsMTQuOGgzLjZjOC40LTEuNCwxNS4zLTcuNCwxOC0xNS41bDAsMAoJCQljMTEuMi0zNi4yLDE2LjktNzMuOCwxNi45LTExMS43Yy0xLTg3LjctMjguOC0xNzIuOS03OS42LTI0NC4zYy01OS45LTgzLjctMTI3LjktMTYxLjItMjAzLjItMjMxLjNMMTE4NiwxMDgwLjV6Ii8+CgkJPHBhdGggY2xhc3M9InN0MCIgZD0iTTEyMzQuMywxNjYwLjdjLTQyLjktNTIuMy04NC4zLTEwMC4yLTE0OS41LTE2OS43Yy01NS4xLDYzLjEtMTA1LjYsMTExLjctMTQ3LjQsMTYxLjEKCQkJYy03My42LDc5LjctNjguNywyMDMuOSwxMSwyNzcuNWM3OS43LDczLjYsMjAzLjksNjguNywyNzcuNS0xMWM2Mi41LTY3LjYsNjkuNi0xNjkuNiwxNy4xLTI0NS4zCgkJCUMxMjQwLjQsMTY2OC44LDEyMzcuNSwxNjY0LjYsMTIzNC4zLDE2NjAuN3oiLz4KCQk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNOTc5LjksMTQwNS41YzQuOC01LjUsNC44LTEzLjYsMC0xOS4xbC0xMjcuMi0xMzAuMWwtMjcuNC0yNS45Yy0yMiwyNS42LTQyLjYsNTIuNC02MS42LDgwLjQKCQkJYy0zMC44LDQ0LjQtNTMuNyw5My44LTY3LjcsMTQ1LjlsMCwwYy0xNS4zLDYwLTEzLjksMTIzLjEsNC4zLDE4Mi4zbDIuNSw1LjRjMy4yLDYuNCw2LjgsMTIuNSwxMC44LDE4LjRsMCwwCgkJCWMwLDAsMTQuOCwyMy44LDI3LjcsMjQuOWg0LjdjNC40LTEsOC00LjEsOS43LTguM2MxMi0yNS4yLDI3LTQ4LjcsNDQuNy03MC4zbDQ2LjUtNTYuNmwwLDBMOTc5LjksMTQwNS41eiIvPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMDgyLjYsMzYzLjRDNDg3LjMsMzYzLjIsNC42LDg0NS42LDQuNCwxNDQwLjhzNDgyLjIsMTA3OCwxMDc3LjQsMTA3OC4yCgkJCWM1OTUuMywwLjIsMTA3OC00ODIuMiwxMDc4LjItMTA3Ny40YzAtMC4xLDAtMC4yLDAtMC40QzIxNjAsODQ2LjEsMTY3Ny43LDM2My42LDEwODIuNiwzNjMuNHogTTEwNzYuNCwyMTI0LjgKCQkJYy0zMTMuMi0wLjgtNTY2LjgtMjU0LjctNTY3LjItNTY3LjljMC0yNjYuMywxNzcuNy00NDMuNiwzMzQtNjAwLjNjMTA0LjUtMTA0LjUsMjA0LjMtMjA0LDIzMy45LTMxNgoJCQljMjkuNSwxMTIuMSwxMjkuNCwyMTEuNSwyMzMuOSwzMTZjMTU2LjgsMTU2LjgsMzM0LDMzNCwzMzQsNjAwLjNDMTY0NC43LDE4NzAuNiwxMzkwLjIsMjEyNC44LDEwNzYuNCwyMTI0Ljh6Ii8+Cgk8L2c+CjwvZz4KPC9zdmc+Cg==",
         TRUE,
-        $expected = $url,
+        $url,
+      ],
+      'Unrecognized file extension' => [
+        '/sites/default/files/photo.imgx',
+        FALSE,
+        'http://localhost/sites/default/files/photo.imgx',
+      ],
+      'Emoji-laden pseudo-path' => [
+        '/images/🦄🌈🎉.jpg',
+        FALSE,
+        'http://localhost/images/%F0%9F%A6%84%F0%9F%8C%88%F0%9F%8E%89.jpg',
+      ],
+      'Control characters embedded' => [
+        "/files/image\x00.jpg",
+        FALSE,
+        'http://localhost/files/image_.jpg',
+      ],
+      'Unprintable characters and invalid encoding, %C0%AF is an overlong UTF-8 sequence (invalid)' => [
+        '/media/%C0%AFimage.jpg',
+        FALSE,
+        'http://localhost/media/%25C0%25AFimage.jpg',
+      ],
+      'Missing scheme, malformed structure' => [
+        '://image.jpg?foo=bar#frag',
+        FALSE,
+        '://image.jpg?foo=bar#frag',
+      ],
+      'Random garbage string' => [
+        '/💥💀👻%00%FF%FEimage.unknown',
+        FALSE,
+        'http://localhost/%F0%9F%92%A5%F0%9F%92%80%F0%9F%91%BB%2500%25FF%25FEimage.unknown',
+      ],
+      'Empty filename with query and fragment' => [
+        '/?foo=bar#baz',
+        FALSE,
+        'http://localhost/?foo=bar#baz',
+      ],
+      'Only extension' => [
+        '/.jpg',
+        FALSE,
+        'http://localhost/.jpg',
+      ],
+      'Filename with multiple extensions' => [
+        '/files/image.jpg.tar.gz',
+        FALSE,
+        'http://localhost/files/image.jpg.tar.gz',
+      ],
+      'Broken URL' => [
+        '💀://%ZZ%GGimage.jpg',
+        FALSE,
+        '💀://%ZZ%GGimage.jpg',
+      ],
+      'Language-prefixed path' => [
+        '/und/files/image.jpg',
+        FALSE,
+        'http://localhost/und/files/image.jpg',
       ],
     ];
   }
@@ -346,6 +413,7 @@ class MimeMailFormatHelperTest extends KernelTestBase {
    * @dataProvider providerRfcHeaders
    * @covers ::mimeMailRfcHeaders
    */
+  #[DataProvider('providerRfcHeaders')]
   public function testRfcHeaders(array $headers, string $expected): void {
     $actual = MimeMailFormatHelper::mimeMailRfcHeaders($headers);
     $this->assertSame($expected, $actual);
@@ -354,13 +422,14 @@ class MimeMailFormatHelperTest extends KernelTestBase {
   /**
    * Provides test data for testRfcHeaders().
    */
-  public function providerRfcHeaders(): array {
+  public static function providerRfcHeaders(): array {
     // Format of each element is:
     // - headers: An associative array of header fields to test. Each element
     //   is keyed by the header field name, which the array value being the
     //   header field body.
     // - expected: Expected return value from
     //   MimeMailFormatHelper::mimeMailRfcHeaders($headers).
+    // phpcs:disable Drupal.Strings.UnnecessaryStringConcat.Found
     $headers = [
       'Multipart mail message header' => [
         [
@@ -448,6 +517,7 @@ class MimeMailFormatHelperTest extends KernelTestBase {
       ],
     ];
 
+    // phpcs:enable Drupal.Strings.UnnecessaryStringConcat.Found
     return $headers;
   }
 
@@ -461,10 +531,14 @@ class MimeMailFormatHelperTest extends KernelTestBase {
     $name = $this->randomString();
     $local = $this->randomMachineName() . $chars[array_rand($chars)] . $this->randomMachineName();
     $domain = $this->randomMachineName() . '-' . $this->randomMachineName() . '.' . $this->randomMachineName(rand(2, 4));
-    $headers = MimeMailFormatHelper::mimeMailHeaders([], "$name <$local@$domain>");
+    $mail = "$name <$local@$domain>";
+    $existing_return_path = "prepopulated@here";
+    $headers = MimeMailFormatHelper::mimeMailHeaders(['Return-Path' => $existing_return_path], $mail);
     $result = $headers['Return-Path'];
-    $expected = "<$local@$domain>";
-    $this->assertSame($result, $expected, 'Return-Path header field correctly set.');
+    $this->assertSame($existing_return_path, $result, 'When a Return-Path header is already present, mimemail leaves it intact.');
+    $headers = MimeMailFormatHelper::mimeMailHeaders([], "$mail");
+    // Check absence of Return-path: header as per RFC 5321.
+    $this->assertFalse(isset(array_change_key_case($headers)['return-path']), 'When no Return-Path header is present, Mimemail does not add one.');
   }
 
 }

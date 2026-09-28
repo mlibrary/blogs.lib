@@ -21,6 +21,8 @@ class RestrictPublishedModerationStateTest extends SchedulerContentModerationTes
 
   /**
    * {@inheritDoc}
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   protected function setUp(): void {
     parent::setUp();
@@ -38,6 +40,8 @@ class RestrictPublishedModerationStateTest extends SchedulerContentModerationTes
    * Tests that moderation state is not set to published.
    *
    * When entity's status is 0 and publish_on is in the future.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function testModerationStateRemainsDraftOnEntityResave(): void {
     $this->node->set('moderation_state', 'published')->save();
