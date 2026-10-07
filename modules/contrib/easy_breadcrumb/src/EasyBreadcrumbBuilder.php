@@ -12,6 +12,8 @@ use Drupal\Core\Breadcrumb\Breadcrumb;
 use Drupal\Core\Breadcrumb\BreadcrumbBuilderInterface;
 use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Cache\Context\CacheContextsManager;
+use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\TitleResolverInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -39,6 +41,7 @@ use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
@@ -52,135 +55,103 @@ class EasyBreadcrumbBuilder implements BreadcrumbBuilderInterface {
 
   /**
    * The router request context.
-   *
-   * @var \Drupal\Core\Routing\RequestContext
    */
-  protected $context;
+  protected RequestContext $context;
 
   /**
    * The access manager service.
-   *
-   * @var \Drupal\Core\Access\AccessManagerInterface
    */
-  protected $accessManager;
+  protected AccessManagerInterface $accessManager;
+
   /**
    * The request stack service.
-   *
-   * @var \Symfony\Component\HttpFoundation\RequestStack
    */
-  protected $requestStack;
+  protected RequestStack $requestStack;
 
   /**
    * The dynamic router service.
-   *
-   * @var \Symfony\Component\Routing\Matcher\RequestMatcherInterface
    */
-  protected $router;
+  protected RequestMatcherInterface $router;
 
   /**
    * The path processor service.
-   *
-   * @var \Drupal\Core\PathProcessor\InboundPathProcessorInterface
    */
-  protected $pathProcessor;
+  protected InboundPathProcessorInterface $pathProcessor;
 
   /**
    * Site config object.
-   *
-   * @var \Drupal\Core\Config\Config
    */
-  protected $siteConfig;
+  protected Config $siteConfig;
 
   /**
    * Breadcrumb config object.
-   *
-   * @var \Drupal\Core\Config\Config
    */
-  protected $config;
+  protected Config $config;
 
   /**
    * Language negotiation config object.
-   *
-   * @var \Drupal\Core\Config\Config
    */
-  protected $languageNegotiationConfig;
+  protected Config $languageNegotiationConfig;
 
   /**
    * The title resolver.
-   *
-   * @var \Drupal\easy_breadcrumb\TitleResolver
    */
-  protected $titleResolver;
+  protected TitleResolverInterface $titleResolver;
 
   /**
    * The current user object.
-   *
-   * @var \Drupal\Core\Session\AccountInterface
    */
-  protected $currentUser;
+  protected AccountInterface $currentUser;
 
   /**
    * The current path object.
-   *
-   * @var \Drupal\Core\Path\CurrentPathStack
    */
-  protected $currentPath;
+  protected CurrentPathStack $currentPath;
 
   /**
    * The menu link manager.
-   *
-   * @var \Drupal\Core\Menu\MenuLinkManagerInterface
    */
-  protected $menuLinkManager;
+  protected MenuLinkManagerInterface $menuLinkManager;
 
   /**
    * The language manager.
-   *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
    */
-  protected $languageManager;
+  protected LanguageManagerInterface $languageManager;
 
   /**
    * The logger service.
-   *
-   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
    */
-  protected $logger;
+  protected LoggerChannelFactoryInterface $logger;
 
   /**
    * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * The entity repository.
-   *
-   * @var \Drupal\Core\Entity\EntityRepositoryInterface
    */
-  protected $entityRepository;
+  protected EntityRepositoryInterface $entityRepository;
 
   /**
    * The messenger service.
-   *
-   * @var \Drupal\Core\Messenger\MessengerInterface
    */
-  protected $messenger;
+  protected MessengerInterface $messenger;
 
   /**
    * The module handler service.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
-  protected $moduleHandler;
+  protected ModuleHandlerInterface $moduleHandler;
 
   /**
    * The path matcher.
-   *
-   * @var \Drupal\Core\Path\PathMatcherInterface
    */
-  protected $pathMatcher;
+  protected PathMatcherInterface $pathMatcher;
+
+  /**
+   * The cache contexts manager service.
+   */
+  protected CacheContextsManager $cacheContextsManager;
 
   /**
    * Constructs the EasyBreadcrumbBuilder.
@@ -219,8 +190,10 @@ class EasyBreadcrumbBuilder implements BreadcrumbBuilderInterface {
    *   The module handler.
    * @param \Drupal\Core\Path\PathMatcherInterface $path_matcher
    *   The path matcher.
+   * @param \Drupal\Core\Cache\Context\CacheContextsManager $cache_contexts_manager
+   *   The cache contexts manager service.
    */
-  public function __construct(RequestContext $context, AccessManagerInterface $access_manager, RequestMatcherInterface $router, RequestStack $request_stack, InboundPathProcessorInterface $path_processor, ConfigFactoryInterface $config_factory, TitleResolverInterface $title_resolver, AccountInterface $current_user, CurrentPathStack $current_path, MenuLinkManagerInterface $menu_link_manager, LanguageManagerInterface $language_manager, EntityTypeManagerInterface $entity_type_manager, EntityRepositoryInterface $entity_repository, LoggerChannelFactoryInterface $logger, MessengerInterface $messenger, ModuleHandlerInterface $module_handler, PathMatcherInterface $path_matcher) {
+  public function __construct(RequestContext $context, AccessManagerInterface $access_manager, RequestMatcherInterface $router, RequestStack $request_stack, InboundPathProcessorInterface $path_processor, ConfigFactoryInterface $config_factory, TitleResolverInterface $title_resolver, AccountInterface $current_user, CurrentPathStack $current_path, MenuLinkManagerInterface $menu_link_manager, LanguageManagerInterface $language_manager, EntityTypeManagerInterface $entity_type_manager, EntityRepositoryInterface $entity_repository, LoggerChannelFactoryInterface $logger, MessengerInterface $messenger, ModuleHandlerInterface $module_handler, PathMatcherInterface $path_matcher, CacheContextsManager $cache_contexts_manager) {
     $this->context = $context;
     $this->accessManager = $access_manager;
     $this->router = $router;
@@ -240,6 +213,7 @@ class EasyBreadcrumbBuilder implements BreadcrumbBuilderInterface {
     $this->messenger = $messenger;
     $this->moduleHandler = $module_handler;
     $this->pathMatcher = $path_matcher;
+    $this->cacheContextsManager = $cache_contexts_manager;
   }
 
   /**
@@ -247,9 +221,9 @@ class EasyBreadcrumbBuilder implements BreadcrumbBuilderInterface {
    */
   public function applies(RouteMatchInterface $route_match, ?CacheableMetadata $cacheable_metadata = NULL) {
 
-    // @todo Remove null safe operator in Drupal 12.0.0, see
+    // @todo Update null safe operator in Drupal 12.0.0, see
     //   https://www.drupal.org/project/drupal/issues/3459277.
-    $cacheable_metadata?->addCacheContexts(['route', 'url', 'languages']);
+    $cacheable_metadata?->addCacheContexts(['route', 'languages', 'easy_breadcrumb']);
 
     $applies_admin_routes = $this->config->get(EasyBreadcrumbConstants::APPLIES_ADMIN_ROUTES);
 
@@ -275,9 +249,26 @@ class EasyBreadcrumbBuilder implements BreadcrumbBuilderInterface {
     $breadcrumb = new Breadcrumb();
 
     // Expire cache by languages and config changes.
-    // @todo Remove in Drupal 12.0.0, will be added from ::applies(). See
+    // @todo Update in Drupal 12.0.0, will be added from ::applies(). See
     //   https://www.drupal.org/project/drupal/issues/3459277
-    $breadcrumb->addCacheContexts(['route', 'url', 'languages']);
+    $contexts = ['route', 'languages'];
+
+    // Checks for exceptions to avoid the cache_dynamic_page_cache table from
+    // growing when 404s are encountered.
+    // @see https://www.drupal.org/project/easy_breadcrumb/issues/3516169.
+    $exception = $this->requestStack->getCurrentRequest()->attributes->get('exception');
+    if ($exception instanceof HttpExceptionInterface) {
+      // Adds the exception_status_code context if it exists, which was
+      // introduced in D11.
+      $available_contexts = $this->cacheContextsManager->getAll();
+      if (in_array('exception_status_code', $available_contexts, TRUE)) {
+        $contexts[] = 'exception_status_code';
+      }
+    }
+    else {
+      $contexts[] = 'url';
+    }
+    $breadcrumb->addCacheContexts($contexts);
 
     // Expire cache context for config changes.
     $breadcrumb->addCacheableDependency($this->config);
@@ -679,20 +670,33 @@ if (strpos($title, '-get_title') !== false) {
           if ($i == 0
               && $this->config->get(EasyBreadcrumbConstants::TERM_HIERARCHY)
               && $term = $route_match->getParameter('taxonomy_term')) {
+            $breadcrumb->addCacheTags(['easy_breadcrumb:taxonomy_term:' . $term->id()]);
             $parents = $this->entityTypeManager->getStorage('taxonomy_term')->loadAllParents($term->id());
 
             // Unset current term.
             array_shift($parents);
             foreach ($parents as $parent) {
-              $parent = $this->entityRepository->getTranslationFromContext($parent);
-              $links[] = $parent->toLink();
+              if ($parent->access('view')) {
+                $parent = $this->entityRepository->getTranslationFromContext($parent);
+                $links[] = $parent->toLink();
+              }
             }
           }
           unset($title);
           $i++;
         }
       }
-      elseif ($this->config->get(EasyBreadcrumbConstants::INCLUDE_INVALID_PATHS) && empty($exclude[implode('/', $path_elements)])) {
+      elseif (
+        (
+          count($path_elements) === 1
+          && $this->config->get(EasyBreadcrumbConstants::LANGUAGE_PATH_PREFIX_AS_SEGMENT)
+          && current($path_elements) === $curr_lang
+        )
+        || (
+          $this->config->get(EasyBreadcrumbConstants::INCLUDE_INVALID_PATHS)
+          && empty($exclude[implode('/', $path_elements)])
+        )
+      ) {
         $title = $this->normalizeText(str_replace(['-', '_'], ' ', end($path_elements)));
         $this->applyTitleReplacement($title, $replacedTitles);
         $links[] = Link::createFromRoute($title, '<none>');
@@ -747,7 +751,7 @@ if (strpos($title, '-get_title') !== false) {
   /**
    * Set request context from passed in $route_match if route is available.
    *
-   * @param Drupal\Core\Routing\RouteMatchInterface $route_match
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The route match for the breadcrumb.
    */
   protected function setRouteContextFromRouteMatch(RouteMatchInterface $route_match) {
@@ -1130,6 +1134,14 @@ if (strpos($title, '-get_title') !== false) {
    *
    * @return string|null
    *   Either the current title string or NULL if unable to determine it
+   *
+   * @see https://www.drupal.org/project/easy_breadcrumb/issues/3620886
+   *   The MarkupInterface/string branch below must strip all HTML tags
+   *   rather than keeping a list of allowed ones: none of the downstream
+   *   pipeline (capitalizator word-splitting, the final Link construction)
+   *   renders a preserved HTML fragment safely, so filtering with
+   *   Xss::filter() leaks raw markup into the rendered breadcrumb text
+   *   instead of stripping it.
    */
   public function formatTitle(mixed $title, array $replacedTitles, RouteMatchInterface $route_match): ?string {
     $this->applyTitleReplacement($title, $replacedTitles);
@@ -1165,10 +1177,10 @@ if (strpos($title, '-get_title') !== false) {
       }
     }
 
-    // Sanitizes strings and instances of MarkupInterface with default allowed
-    // tags.
+    // Sanitizes strings and instances of MarkupInterface by stripping all
+    // HTML tags after decoding entities.
     if ($title instanceof MarkupInterface || is_string($title)) {
-      $title = Html::decodeEntities(Xss::filter($title));
+      $title = strip_tags(Html::decodeEntities($title));
     }
     // Other paths, such as admin/structure/menu/manage/main, return a render
     // array that may contain allowed tags.

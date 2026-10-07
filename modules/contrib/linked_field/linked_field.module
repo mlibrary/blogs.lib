@@ -13,6 +13,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FormatterInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 
@@ -91,14 +92,14 @@ function linked_field_field_formatter_settings_summary_alter(array &$summary, ar
 /**
  * Implements hook_field_formatter_third_party_settings_form().
  */
-function linked_field_field_formatter_third_party_settings_form(FormatterInterface $plugin, FieldDefinitionInterface $field_definition, $view_mode, array $form, FormStateInterface $form_state) {
+function linked_field_field_formatter_third_party_settings_form(FormatterInterface $plugin, FieldDefinitionInterface $field_definition, $view_mode, array $form, FormStateInterface $form_state): array {
   /** @var \Drupal\linked_field\LinkedFieldManager $manager */
   $manager = \Drupal::service('linked_field.manager');
   $available_attributes = $manager->getAttributes();
   $settings = $plugin->getThirdPartySettings('linked_field');
 
   if (in_array($field_definition->getType(), $manager->getFieldTypeBlacklist())) {
-    return;
+    return [];
   }
 
   $settings = NestedArray::mergeDeep([
@@ -360,6 +361,8 @@ function linked_field_entity_display_build_alter(array &$build, array $context) 
       $replace_tokens = [];
     }
 
+    $current_langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
+
     foreach (Element::children($element) as $delta) {
       $destination = $manager->getDestination($destination_type, $destination_src, $context);
       $attributes = [];
@@ -369,7 +372,10 @@ function linked_field_entity_display_build_alter(array &$build, array $context) 
         $attributes = $manager->getFieldItemAttributes($destination_src, $delta, $context);
       }
       elseif ($destination_type == 'custom') {
-        $destination = $manager->replaceToken((is_array($destination) && isset($destination['custom']) ? $destination['custom'] : $destination), $replace_tokens, ['clear' => TRUE]);
+        $destination = $manager->replaceToken((is_array($destination) && isset($destination['custom']) ? $destination['custom'] : $destination), $replace_tokens, [
+          'clear' => TRUE,
+          'langcode' => $current_langcode,
+        ]);
         // Try to grab the href attribute if the replaced token is a link.
         preg_match('/<a.* href="([^"]+)".*>/', $destination, $match);
         $destination = $match[1] ?? $destination;
@@ -381,7 +387,10 @@ function linked_field_entity_display_build_alter(array &$build, array $context) 
           continue;
         }
 
-        $attribute_value = Html::escape($manager->replaceToken($value, $replace_tokens, ['clear' => TRUE]));
+        $attribute_value = Html::escape($manager->replaceToken($value, $replace_tokens, [
+          'clear' => TRUE,
+          'langcode' => $current_langcode,
+        ]));
 
         // In order to merge 'class' and 'rel' attributes properly that could
         // come from existing attributes we need to modify the attribute values,
@@ -400,7 +409,10 @@ function linked_field_entity_display_build_alter(array &$build, array $context) 
       // inline elements are allowed.
       $text = '';
       if (isset($settings['advanced']['text'])) {
-        $text = Xss::filterAdmin($manager->replaceToken($settings['advanced']['text'], $replace_tokens, ['clear' => TRUE]));
+        $text = Xss::filterAdmin($manager->replaceToken($settings['advanced']['text'], $replace_tokens, [
+          'clear' => TRUE,
+          'langcode' => $current_langcode,
+        ]));
       }
 
       // Continue to next field if destination is empty.
@@ -431,9 +443,10 @@ function linked_field_entity_display_build_alter(array &$build, array $context) 
         $rendered = $text;
       }
 
+      // The linked HTML is already XSS filtered by linkHtml(). It must never be
+      // used as Twig template source, as it contains user-provided content.
       $build[$field_name][$delta] = [
-        '#type' => 'inline_template',
-        '#template' => $manager->linkHtml($rendered, $attributes),
+        '#markup' => Markup::create($manager->linkHtml($rendered, $attributes)),
       ];
     }
   }

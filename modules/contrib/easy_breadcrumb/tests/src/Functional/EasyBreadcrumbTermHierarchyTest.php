@@ -25,6 +25,21 @@ class EasyBreadcrumbTermHierarchyTest extends EasyBreadcrumbBrowserTestBase {
   ];
 
   /**
+   * The Parent Term.
+   */
+  protected Term $parent;
+
+  /**
+   * The Child Term.
+   */
+  protected Term $child;
+
+  /**
+   * The Grandchild Term.
+   */
+  protected Term $grandchild;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
@@ -32,28 +47,28 @@ class EasyBreadcrumbTermHierarchyTest extends EasyBreadcrumbBrowserTestBase {
     $vocabularyId = 'tags';
     Vocabulary::create(['vid' => $vocabularyId])->save();
 
-    $parent = Term::create([
+    $this->parent = Term::create([
       'name' => 'Parent',
       'vid' => $vocabularyId,
     ]);
-    $parent->save();
+    $this->parent->save();
 
-    $child = Term::create([
+    $this->child = Term::create([
       'name' => 'Child',
       'vid' => $vocabularyId,
-      'parent' => [$parent->id()],
+      'parent' => [$this->parent->id()],
     ]);
-    $child->save();
+    $this->child->save();
 
-    $grandchild = Term::create([
+    $this->grandchild = Term::create([
       'name' => 'Grandchild',
       'vid' => $vocabularyId,
-      'parent' => [$child->id()],
+      'parent' => [$this->child->id()],
     ]);
-    $grandchild->save();
+    $this->grandchild->save();
 
     $this->easyBreadcrumbSetConfig(EasyBreadcrumbConstants::TERM_HIERARCHY, TRUE);
-    $this->drupalGet($grandchild->toUrl());
+    $this->drupalGet($this->grandchild->toUrl());
   }
 
   /**
@@ -63,6 +78,20 @@ class EasyBreadcrumbTermHierarchyTest extends EasyBreadcrumbBrowserTestBase {
     $this->easyBreadcrumbAssertSegmentTextEquals(2, 'Parent');
     $this->easyBreadcrumbAssertSegmentTextEquals(3, 'Child');
     $this->easyBreadcrumbAssertSegmentTextEquals(4, 'Grandchild');
+  }
+
+  /**
+   * Tests access to crumbs of unpublished terms.
+   */
+  public function testEasyBreadcrumbTermHierarchyAccess() {
+    $this->parent->setUnpublished()->save();
+    $this->drupalGet($this->grandchild->toUrl());
+    $this->easyBreadcrumbAssertSegmentTextEquals(2, 'Child');
+    $this->easyBreadcrumbAssertSegmentTextEquals(3, 'Grandchild');
+
+    $this->child->setUnpublished()->save();
+    $this->drupalGet($this->grandchild->toUrl());
+    $this->easyBreadcrumbAssertSegmentTextEquals(2, 'Grandchild');
   }
 
 }

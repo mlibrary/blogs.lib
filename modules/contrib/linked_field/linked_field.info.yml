@@ -4,7 +4,7 @@ description: 'Adds the functionality to link fields to a specific destination.'
 configure: linked_field.config
 core_version_requirement: ^8.8 || ^9 || ^10 || ^11
 
-# Information added by Drupal.org packaging script on 2025-06-02
-version: '8.x-1.7'
+# Information added by Drupal.org packaging script on 2026-10-07
+version: '8.x-1.8'
 project: 'linked_field'
-datestamp: 1748842770
+datestamp: 1791384501

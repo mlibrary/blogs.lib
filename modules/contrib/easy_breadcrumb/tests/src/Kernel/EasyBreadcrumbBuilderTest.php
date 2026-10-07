@@ -71,7 +71,8 @@ class EasyBreadcrumbBuilderTest extends KernelTestBase {
       $this->container->get('logger.factory'),
       $this->container->get('messenger'),
       $this->container->get('module_handler'),
-      $this->container->get('path.matcher')
+      $this->container->get('path.matcher'),
+      $this->container->get('cache_contexts_manager')
     );
   }
 

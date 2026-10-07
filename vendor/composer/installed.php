@@ -3,7 +3,7 @@
         'name' => '__root__',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '0986111e2bd8b4fbdaf3c94fda87b1225d517666',
+        'reference' => '4ffd22a1310dfddbdf7eb39fa2de5dd6f15c0d90',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         '__root__' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '0986111e2bd8b4fbdaf3c94fda87b1225d517666',
+            'reference' => '4ffd22a1310dfddbdf7eb39fa2de5dd6f15c0d90',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -491,9 +491,9 @@
             'dev_requirement' => false,
         ),
         'drupal/easy_breadcrumb' => array(
-            'pretty_version' => '2.0.10',
-            'version' => '2.0.10.0',
-            'reference' => '2.0.10',
+            'pretty_version' => '2.0.11',
+            'version' => '2.0.11.0',
+            'reference' => '2.0.11',
             'type' => 'drupal-module',
             'install_path' => __DIR__ . '/../../modules/contrib/easy_breadcrumb',
             'aliases' => array(),
@@ -544,12 +544,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'drupal/field_layout' => array(
-            'dev_requirement' => false,
-            'replaced' => array(
-                0 => '*',
-            ),
-        ),
         'drupal/file_entity' => array(
             'pretty_version' => '2.9.0',
             'version' => '2.9.0.0',
@@ -585,12 +579,6 @@
             'install_path' => __DIR__ . '/../../modules/contrib/google_analytics',
             'aliases' => array(),
             'dev_requirement' => false,
-        ),
-        'drupal/history' => array(
-            'dev_requirement' => false,
-            'replaced' => array(
-                0 => '*',
-            ),
         ),
         'drupal/image_resize_filter' => array(
             'pretty_version' => '1.0.x-dev',
@@ -683,9 +671,9 @@
             'dev_requirement' => false,
         ),
         'drupal/linked_field' => array(
-            'pretty_version' => '1.7.0',
-            'version' => '1.7.0.0',
-            'reference' => '8.x-1.7',
+            'pretty_version' => '1.8.0',
+            'version' => '1.8.0.0',
+            'reference' => '8.x-1.8',
             'type' => 'drupal-module',
             'install_path' => __DIR__ . '/../../modules/contrib/linked_field',
             'aliases' => array(),
@@ -880,12 +868,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-        'drupal/stable9' => array(
-            'dev_requirement' => false,
-            'replaced' => array(
-                0 => '*',
-            ),
-        ),
         'drupal/structure_sync' => array(
             'pretty_version' => '2.0.8',
             'version' => '2.0.8.0',
@@ -903,12 +885,6 @@
             'install_path' => __DIR__ . '/../../modules/contrib/symfony_mailer_lite',
             'aliases' => array(),
             'dev_requirement' => false,
-        ),
-        'drupal/telephone' => array(
-            'dev_requirement' => false,
-            'replaced' => array(
-                0 => '*',
-            ),
         ),
         'drupal/token' => array(
             'pretty_version' => '1.17.0',

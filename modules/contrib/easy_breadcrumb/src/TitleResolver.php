@@ -3,6 +3,7 @@
 namespace Drupal\easy_breadcrumb;
 
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Controller\ControllerResolverInterface;
 use Drupal\Core\Controller\TitleResolver as ControllerTitleResolver;
@@ -22,24 +23,18 @@ class TitleResolver extends ControllerTitleResolver {
 
   /**
    * The field storage config storage.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManager
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * Breadcrumb config object.
-   *
-   * @var \Drupal\Core\Config\Config
    */
-  protected $config;
+  protected Config $config;
 
   /**
    * The language manager.
-   *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
    */
-  protected $languageManager;
+  protected LanguageManagerInterface $languageManager;
 
   /**
    * Constructs a new EntityDisplayRebuilder.
@@ -78,12 +73,10 @@ class TitleResolver extends ControllerTitleResolver {
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request object passed to the title callback.
    *
-   * @return array|string|\Stringable|null
-   *   The title for the route.
-   *   The title for the route. NULL should be returned if the method can
-   *   determine that the title will evaluate to an empty string.
+   * @return string
+   *   The title for the route or an empty string if one is not found.
    */
-  public function getAlternateTitle(Request $request) {
+  public function getAlternateTitle(Request $request): string {
     $url = Url::fromUri("internal:" . $request->getRequestUri());
     $alternative_title_field = $this->config->get(EasyBreadcrumbConstants::ALTERNATIVE_TITLE_FIELD);
     // If an alternative title field is set, load the entity if present and

@@ -1,0 +1,8 @@
+{
+    "name": "drupal/linked_field",
+    "type": "drupal-module",
+    "description": "Linked Field allows you to link fields in the field formatter settings.",
+    "require-dev": {
+        "drupal/token": "^1"
+    }
+}

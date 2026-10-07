@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\easy_breadcrumb\Functional;
 
 use Drupal\Tests\BrowserTestBase;
+use Drupal\user\UserInterface;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
@@ -14,9 +15,7 @@ use PHPUnit\Framework\Attributes\Group;
 class EasyBreadcrumbInstallUninstallTest extends BrowserTestBase {
 
   /**
-   * The default theme to use during testing.
-   *
-   * @var string
+   * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
 
@@ -27,10 +26,8 @@ class EasyBreadcrumbInstallUninstallTest extends BrowserTestBase {
 
   /**
    * A test user with admin permissions.
-   *
-   * @var \Drupal\user\Entity\User
    */
-  protected $adminUser;
+  protected UserInterface $adminUser;
 
   /**
    * {@inheritdoc}

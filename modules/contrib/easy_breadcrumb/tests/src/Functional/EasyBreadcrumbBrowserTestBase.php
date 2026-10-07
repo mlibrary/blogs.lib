@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\easy_breadcrumb\Functional;
 
+use Drupal\Core\Config\Config;
 use Drupal\easy_breadcrumb\EasyBreadcrumbConstants;
 use Drupal\Tests\BrowserTestBase;
 use PHPUnit\Framework\Attributes\Group;
@@ -21,10 +22,8 @@ abstract class EasyBreadcrumbBrowserTestBase extends BrowserTestBase {
 
   /**
    * The configuration.
-   *
-   * @var \Drupal\Core\Config\Config
    */
-  protected $easyBreadcrumbConfig;
+  protected Config $easyBreadcrumbConfig;
 
   /**
    * {@inheritdoc}

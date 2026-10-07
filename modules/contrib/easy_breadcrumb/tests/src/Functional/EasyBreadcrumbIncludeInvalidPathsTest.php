@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace Drupal\Tests\easy_breadcrumb\Functional;
 
 use Drupal\easy_breadcrumb\EasyBreadcrumbConstants;
-use Drupal\Tests\BrowserTestBase;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the INCLUDE_INVALID_PATHS configuration.
  */
 #[Group('easy_breadcrumb')]
-class EasyBreadcrumbIncludeInvalidPathsTest extends BrowserTestBase {
+class EasyBreadcrumbIncludeInvalidPathsTest extends EasyBreadcrumbBrowserTestBase {
 
   /**
    * {@inheritdoc}
@@ -27,18 +26,10 @@ class EasyBreadcrumbIncludeInvalidPathsTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'stark';
+  protected function setUp(): void {
+    parent::setUp();
 
-  /**
-   * Tests the INCLUDE_INVALID_PATHS configuration.
-   */
-  public function testIncludeInvalidPaths() {
-    $this->placeBlock('system_breadcrumb_block', ['id' => 'breadcrumb']);
-
-    $this->drupalCreateContentType([
-      'type' => 'page',
-      'name' => 'Page',
-    ]);
+    $this->drupalCreateContentType(['type' => 'page']);
 
     $this->drupalCreateNode([
       'type' => 'page',
@@ -48,38 +39,25 @@ class EasyBreadcrumbIncludeInvalidPathsTest extends BrowserTestBase {
         'alias' => '/test/invalid/paths',
       ],
     ]);
+  }
 
-    $this->config(EasyBreadcrumbConstants::MODULE_SETTINGS)
-      ->set(EasyBreadcrumbConstants::INCLUDE_INVALID_PATHS, TRUE)
-      ->save();
-
+  /**
+   * Tests the INCLUDE_INVALID_PATHS configuration.
+   */
+  public function testIncludeInvalidPaths() {
+    // Tests breadcrumbs when the config is not set.
+    $this->easyBreadcrumbSetConfig(EasyBreadcrumbConstants::INCLUDE_INVALID_PATHS, FALSE);
     $this->drupalGet('test/invalid/paths');
+    $this->easyBreadcrumbAssertSegmentTextEquals(1, 'Home');
+    $this->easyBreadcrumbAssertSegmentTextEquals(2, 'Test Page 1');
 
-    // Tests that first breadcrumb is "Home".
-    $this->assertSession()->elementContains(
-      'css',
-      '#block-breadcrumb li:first-child',
-      'Home',
-    );
-    // Tests that second breadcrumb is "Test".
-    $this->assertSession()->elementContains(
-      'css',
-      '#block-breadcrumb li:nth-child(2)',
-      'Test',
-    );
-    // Tests that third breadcrumb is "Invalid".
-    $this->assertSession()->elementContains(
-      'css',
-      '#block-breadcrumb li:nth-child(3)',
-      'Invalid',
-    );
-    // Tests that fourth breadcrumb is the page title.
-    $this->assertSession()->elementContains(
-      'css',
-      '#block-breadcrumb li:nth-child(4)',
-      'Test Page 1',
-    );
-
+    // Tests breadcrumbs when the config is set.
+    $this->easyBreadcrumbSetConfig(EasyBreadcrumbConstants::INCLUDE_INVALID_PATHS, TRUE);
+    $this->drupalGet('test/invalid/paths');
+    $this->easyBreadcrumbAssertSegmentTextEquals(1, 'Home');
+    $this->easyBreadcrumbAssertSegmentTextEquals(2, 'Test');
+    $this->easyBreadcrumbAssertSegmentTextEquals(3, 'Invalid');
+    $this->easyBreadcrumbAssertSegmentTextEquals(4, 'Test Page 1');
   }
 
 }

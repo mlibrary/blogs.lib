@@ -127,13 +127,35 @@ class ConfigForm extends ConfigFormBase {
     $config_text = $form_state->getValue('config') ?: 'attributes:';
 
     try {
-      $form_state->set('config', Yaml::decode($config_text));
+      $parsed_config = Yaml::decode($config_text);
+      $this->validateParsedConfig($parsed_config, $form_state);
+
+      $form_state->set('config', $parsed_config);
     }
     catch (InvalidDataTypeException $e) {
       $form_state->setErrorByName('config', $e->getMessage());
     }
 
     parent::validateForm($form, $form_state);
+  }
+
+  /**
+   * Validate that config parsed correctly.
+   */
+  protected function validateParsedConfig($parsed_config, FormStateInterface $form_state): void {
+    if (!is_array($parsed_config)) {
+      $form_state->setErrorByName('config', $this->t('The configuration must be a valid YAML array.'));
+      return;
+    }
+
+    if (!array_key_exists('attributes', $parsed_config)) {
+      $form_state->setErrorByName('config', $this->t('The configuration must contain an "attributes" key.'));
+      return;
+    }
+
+    if (!is_array($parsed_config['attributes'])) {
+      $form_state->setErrorByName('config', $this->t('The attributes must be a valid YAML array.'));
+    }
   }
 
   /**
