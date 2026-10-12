@@ -142,15 +142,4 @@ final class MimeMessageNormalizer implements NormalizerInterface, DenormalizerIn
 
         return $class;
     }
-
-    private function resolveClass(mixed $data, string $baseClass, array $context): string
-    {
-        $class = $data['class'] ?? null;
-
-        if (!\is_string($class) || !is_a($class, $baseClass, true)) {
-            throw NotNormalizableValueException::createForUnexpectedDataType(\sprintf('Expected a subclass of "%s", got "%s".', $baseClass, \is_string($class) ? $class : get_debug_type($class)), $data, [$baseClass], $context['deserialization_path'] ?? null);
-        }
-
-        return $class;
-    }
 }

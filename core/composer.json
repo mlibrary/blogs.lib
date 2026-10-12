@@ -65,16 +65,6 @@
         "dealerdirect/phpcodesniffer-composer-installer": "1.1.0"
     },
     "replace": {
-        "drupal/ban": "*",
-        "drupal/contact": "*",
-        "drupal/field_layout": "*",
-        "drupal/history": "*",
-        "drupal/search": "*",
-        "drupal/settings_tray": "*",
-        "drupal/shortcut": "*",
-        "drupal/stable9": "*",
-        "drupal/telephone": "*",
-        "drupal/toolbar": "*",
         "drupal/core-annotation": "self.version",
         "drupal/core-assertion": "self.version",
         "drupal/core-class-finder": "self.version",
@@ -136,7 +126,8 @@
             "lib/Drupal/Component/Datetime/Time.php"
         ],
         "files": [
-            "includes/bootstrap.inc"
+            "includes/bootstrap.inc",
+            "includes/guzzle_file_cookie_jar_shim.php"
         ]
     },
     "bin": [
