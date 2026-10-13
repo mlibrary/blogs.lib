@@ -10,6 +10,7 @@ use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\ResultRow;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Views;
+use Drupal\views\ViewsFormHelperTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -23,6 +24,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @ViewsField("view")
  */
 class View extends FieldPluginBase {
+
+  use ViewsFormHelperTrait;
 
   /**
    * The configuration object.
@@ -117,7 +120,7 @@ class View extends FieldPluginBase {
       '#default_value' => $this->options['view'],
       '#options' => $view_options,
       '#ajax' => [
-        'url' => views_ui_build_form_url($form_state),
+        'url' => $this->buildFormUrl($form_state),
       ],
       '#submit' => [[$this, 'submitTemporaryForm']],
       '#executes_submit_callback' => TRUE,
@@ -148,7 +151,7 @@ class View extends FieldPluginBase {
         '#default_value' => $this->options['display'],
         '#options' => $display_options,
         '#ajax' => [
-          'url' => views_ui_build_form_url($form_state),
+          'url' => $this->buildFormUrl($form_state),
         ],
         '#submit' => [[$this, 'submitTemporaryForm']],
         '#executes_submit_callback' => TRUE,

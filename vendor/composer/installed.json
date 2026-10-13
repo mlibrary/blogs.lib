@@ -5911,6 +5911,9 @@
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
                     }
+                },
+                "patches_applied": {
+                    "https://drupal.org/node/3610512": "https://www.drupal.org/files/issues/2026-07-14/views_field_view-11.4-deprecated-function.patch"
                 }
             },
             "installation-source": "dist",

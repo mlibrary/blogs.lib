@@ -237,6 +237,9 @@
           "drupal/easy_breadcrumb": {
             "fix group membership breadcrumbs": "patches/alter-group-breadcrumbs.patch"
           },
+          "drupal/views_field_view": {
+            "https://drupal.org/node/3610512": "https://www.drupal.org/files/issues/2026-07-14/views_field_view-11.4-deprecated-function.patch"
+          },
           "drupal/content_moderation_notifications": {
             "https://www.drupal.org/node/3027690": "https://www.drupal.org/files/issues/2021-08-03/content_moderation_notifications-dont_notify_for_same_state-3027690-23.patch"
           },
