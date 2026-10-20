@@ -1,0 +1,13 @@
+name: PhotoSwipe SVG Image Field
+description: 'Provides Photoswipe compatibility for the SVG Image Field module.'
+core_version_requirement: ^11
+type: module
+package: Media
+dependencies:
+  - photoswipe:photoswipe
+  - svg_image_field:svg_image_field
+
+# Information added by Drupal.org packaging script on 2026-10-14
+version: '5.0.12'
+project: 'photoswipe'
+datestamp: 1791998154

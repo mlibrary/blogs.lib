@@ -1,0 +1,23 @@
+field.formatter.settings.photoswipe_svg_image_field_formatter:
+  type: mapping
+  label: 'Photoswipe SVG Image Field display format settings'
+  mapping:
+    photoswipe_thumbnail_width:
+      type: integer
+      label: 'Photoswipe thumbnail width'
+    photoswipe_thumbnail_height:
+      type: integer
+      label: 'Photoswipe thumbnail height'
+    photoswipe_remove_gallery_wrapper_class:
+      type: boolean
+      label: 'Remove photoswipe-gallery wrapper class'
+    photoswipe_show_download_button:
+      type: boolean
+      label: 'Show download button'
+    image_loading:
+      type: mapping
+      label: 'Image loading settings'
+      mapping:
+        attribute:
+          type: string
+          label: 'Loading attribute'

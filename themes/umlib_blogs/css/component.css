@@ -433,19 +433,22 @@ a .views-field-title span {
 
 .views-field-title-1 a,
 .views-field-og-audience a {
-  display: flex;
+  display: inline-block;
   align-items: center;
   color: var(--color-neutral-300);
-  text-decoration: none;
+  text-decoration: underline;
   font-size: 1.125rem;
   gap: 4px;
 }
 
 .views-field-title-1 a::before,
 .views-field-og-audience a::before {
+  display: inline-block;
   font-family: 'Material Icons';
   content: "\e892";
   color: var(--color-teal-400);
+  vertical-align: -0.15em;
+  margin-inline-end: 4px;
 }
 
 .tag-posts header,

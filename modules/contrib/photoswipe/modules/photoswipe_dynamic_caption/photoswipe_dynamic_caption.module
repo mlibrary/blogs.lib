@@ -1,0 +1,324 @@
+<?php
+
+/**
+ * @file
+ * Container photoswipe_dynamic_caption hooks.
+ */
+
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FormatterInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\photoswipe\ImageDTO;
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function photoswipe_dynamic_caption_library_info_alter(&$libraries, $module) {
+  switch ($module) {
+    // If local library is provided take it, otherwise check if CDN is
+    // enabled and if so, get library from CDN:
+    case 'photoswipe_dynamic_caption':
+      $library_file_finder = \Drupal::service('library.libraries_directory_file_finder');
+      $is_local = (bool) $library_file_finder->find('photoswipe-dynamic-caption-plugin');
+
+      $is_cnd_enabled = \Drupal::config('photoswipe.settings')->get('enable_cdn');
+
+      if ($is_cnd_enabled) {
+        $libraries['photoswipe_dynamic_caption.init']['dependencies'][] = 'photoswipe_dynamic_caption/photoswipe_dynamic_caption.cdn';
+      }
+      elseif ($is_local) {
+        $libraries['photoswipe_dynamic_caption.init']['dependencies'][] = 'photoswipe_dynamic_caption/photoswipe_dynamic_caption.local';
+      }
+
+      // Optionally load DOMPurify when HTML captions are enabled and the
+      // library is installed.
+      if (!empty(\Drupal::config('photoswipe_dynamic_caption.settings')->get('allowHtmlCaptions')) && $library_file_finder->find('dompurify/dist/purify.min.js')) {
+        $libraries['photoswipe_dynamic_caption.init']['dependencies'][] = 'photoswipe_dynamic_caption/dompurify';
+      }
+      break;
+
+    // We need this because we want react on event that is triggered when
+    // photoswipe is initialized.
+    case 'photoswipe':
+      $libraries['photoswipe.init']['dependencies'][] = 'photoswipe_dynamic_caption/photoswipe_dynamic_caption.init';
+      break;
+  }
+}
+
+/**
+ * Implements hook_photoswipe_js_options_alter().
+ */
+function photoswipe_dynamic_caption_photoswipe_js_options_alter(array &$settings, array &$cacheTags = []) {
+  // Other modules might already set caption options:
+  $options = $settings['captionOptions'] ?? [];
+  // Merge user options with our global options (user options have higher
+  // priority):
+  $settings['captionOptions'] = array_merge(\Drupal::config('photoswipe_dynamic_caption.settings')->get('options'), $options);
+  // Also add our allowHtmlCaptions setting:
+  $settings['allowHtmlCaptions'] = !empty(\Drupal::config('photoswipe_dynamic_caption.settings')->get('allowHtmlCaptions'));
+  // Ensure cached formatter output is invalidated when caption settings change.
+  $cacheTags[] = 'config:photoswipe_dynamic_caption.settings';
+}
+
+/**
+ * Implements hook_field_formatter_third_party_settings_form().
+ */
+function photoswipe_dynamic_caption_field_formatter_third_party_settings_form(FormatterInterface $plugin, FieldDefinitionInterface $field_definition, $view_mode, array $form, FormStateInterface $form_state) {
+  $element = [];
+
+  // Add a 'my_setting' checkbox to the settings form for 'foo_formatter' field
+  // formatters.
+  if (in_array($plugin->getPluginId(), [
+    'photoswipe_field_formatter',
+    'photoswipe_responsive_field_formatter',
+  ])) {
+
+    // Set our caption options.
+    $caption_options = [
+      'title' => t('Image title tag'),
+      'alt' => t('Image alt tag'),
+      'entity_label' => t('Entity label'),
+      'custom' => t('Custom (with tokens)'),
+    ];
+
+    // Add media entity name if the target is a media entity:
+    $field_settings = $field_definition->getSettings();
+    if (isset($field_settings['target_type']) && $field_settings['target_type'] === 'media') {
+      $caption_options['media_name'] = t('Media entity name');
+    }
+
+    // Add the other parent entity fields as options.
+    if (isset($form['#fields'])) {
+      foreach ($form['#fields'] as $parent_field) {
+        if ($parent_field != $field_definition->getName()) {
+          $caption_options[$parent_field] = $parent_field;
+        }
+      }
+    }
+
+    // If we target another entity, also add its field as potential caption
+    // options:
+    if ($field_definition->getType() == 'entity_reference') {
+      $target_type = $field_definition->getSetting('target_type');
+      $target_bundles = $field_definition->getSetting('handler_settings')['target_bundles'];
+
+      // We always have 1 target, so we can access it directly:
+      /** @var \Drupal\Core\Field\FieldDefinitionInterface[] $fields */
+      $fields = \Drupal::service('entity_field.manager')->getFieldDefinitions($target_type, reset($target_bundles));
+
+      foreach ($fields as $field) {
+        $caption_options['photoswipe_dynamic_caption_referenced_entity_' . $field->getName()] = 'Referenced Entity: ' . $field->getName();
+      }
+    }
+
+    $element['photoswipe_caption'] = [
+      '#title' => t('Photoswipe image caption'),
+      '#type' => 'select',
+      '#empty_option' => t('- None -'),
+      '#default_value' => $plugin->getThirdPartySetting('photoswipe_dynamic_caption', 'photoswipe_caption', 'title'),
+      '#options' => $caption_options,
+      '#description' => t('Field that should be used for the caption displayed in the Photoswipe modal.'),
+    ];
+
+    $element['photoswipe_caption_custom'] = [
+      '#title' => t('Custom caption'),
+      '#type' => 'textarea',
+      '#default_value' => $plugin->getThirdPartySetting('photoswipe_dynamic_caption', 'photoswipe_caption_custom', ''),
+      '#states' => [
+        'visible' => [
+          ':input[name$="[third_party_settings][photoswipe_dynamic_caption][photoswipe_caption]"]' => ['value' => 'custom'],
+        ],
+      ],
+    ];
+    if (\Drupal::moduleHandler()->moduleExists('token')) {
+      // Get the field target type, e.g. 'file':
+      $target_type = $field_definition->getSetting('target_type');
+      // Get the field parent entity type, e.g. 'node':
+      $entity_type = $field_definition->getTargetEntityTypeId();
+      $element['photoswipe_token_caption'] = [
+        '#type' => 'fieldset',
+        '#title' => t('Replacement patterns'),
+        '#theme' => 'token_tree_link',
+        '#token_types' => [
+          // Default it will work for file type.
+          'file',
+          // The "entity_type" key is set in \Drupal\Core\Field\FieldConfigBase.
+          $entity_type,
+          // For prevent duplicate file type.
+          ($target_type !== 'file' ? $target_type : 'media'),
+        ],
+        '#states' => [
+          'visible' => [
+            ':input[name$="[third_party_settings][photoswipe_dynamic_caption][photoswipe_caption]"]' => ['value' => 'custom'],
+          ],
+        ],
+      ];
+    }
+    else {
+      $element['photoswipe_token_caption'] = [
+        '#type' => 'fieldset',
+        '#title' => t('Replacement patterns'),
+        '#description' => '<strong class="error">' . t('For token support the <a href="@token_url">token module</a> must be installed.', ['@token_url' => 'http://drupal.org/project/token']) . '</strong>',
+        '#states' => [
+          'visible' => [
+            ':input[name$="[third_party_settings][photoswipe_dynamic_caption][photoswipe_caption]"]' => ['value' => 'custom'],
+          ],
+        ],
+      ];
+    }
+  }
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary_alter().
+ */
+function photoswipe_dynamic_caption_field_formatter_settings_summary_alter(array &$summary, array $context) {
+  if (in_array($context['formatter']->getPluginId(), [
+    'photoswipe_field_formatter',
+    'photoswipe_responsive_field_formatter',
+  ])) {
+    if ($context['formatter']->getThirdPartySetting('photoswipe_dynamic_caption', 'photoswipe_caption')) {
+      $caption_options = [
+        'alt' => t('Image alt tag'),
+        'title' => t('Image title tag'),
+        'entity_label' => t('Entity label'),
+        'media_name' => t('Media entity name'),
+        'custom' => t('Custom (with tokens)'),
+      ];
+      if (array_key_exists($context['formatter']->getThirdPartySetting('photoswipe_dynamic_caption', 'photoswipe_caption'), $caption_options)) {
+        $caption_setting = $caption_options[$context['formatter']->getThirdPartySetting('photoswipe_dynamic_caption', 'photoswipe_caption')];
+      }
+      else {
+        $caption_setting = $context['formatter']->getThirdPartySetting('photoswipe_dynamic_caption', 'photoswipe_caption');
+      }
+      $summary[] = t('Photoswipe Caption: @field', ['@field' => $caption_setting]);
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function photoswipe_dynamic_caption_preprocess_photoswipe_image_formatter(&$variables) {
+  $imageDTO = ImageDTO::createFromVariables($variables);
+  $variables['attributes']['data-overlay-title'] = photoswipe_dynamic_caption_get_caption($imageDTO);
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function photoswipe_dynamic_caption_preprocess_photoswipe_responsive_image_formatter(&$variables) {
+  $imageDTO = ImageDTO::createFromVariables($variables);
+  $variables['attributes']['data-overlay-title'] = photoswipe_dynamic_caption_get_caption($imageDTO);
+}
+
+/**
+ * A helper method to receive the caption.
+ */
+function photoswipe_dynamic_caption_get_caption(ImageDTO $imageDTO) {
+  $thirdPartySettings = $imageDTO->getThirdPartySettings();
+  $caption = NULL;
+  if (isset($thirdPartySettings['photoswipe_dynamic_caption']['photoswipe_caption'])) {
+    $caption_setting = $thirdPartySettings['photoswipe_dynamic_caption']['photoswipe_caption'];
+    switch ($caption_setting) {
+      case 'alt':
+        $caption = $imageDTO->getAlt();
+        break;
+
+      case 'title':
+        $caption = $imageDTO->getTitle();
+        break;
+
+      // Backward compatibility for stored settings.
+      case 'node_title':
+      case 'entity_label':
+        $caption = $imageDTO->getEntity()->label() ?: $imageDTO->getAlt();
+        break;
+
+      case 'media_name':
+        $caption = $imageDTO->getItem()->getParent()->getEntity()->label();
+        break;
+
+      case 'custom':
+        // Note: For media reference fields the ImageDTO already replaced the
+        // item of the formatted field (the reference to the media) with the
+        // image field item of the media entity, so $item is the media's image
+        // field here, not the field the formatter is attached to.
+        $item = $imageDTO->getItem();
+        // The entity the formatted field belongs to, e.g. the node:
+        $hostEntity = $imageDTO->getEntity();
+        // The entity the image field item belongs to (the entity that has the
+        // image field). For media references this is the media entity, for an
+        // image field directly on a node it is the node itself:
+        $itemOwnerEntity = $item->getEntity();
+        // The file the image field item points to:
+        $itemTargetEntity = $item->entity;
+        // Provide all of them to the token service, keyed by their entity
+        // type (e.g. node, media, file), so tokens like [node:title],
+        // [media:name] and [file:name] work. If two entities share a type
+        // (host and owner are both the node), the first one is kept:
+        $tokenData = [];
+        foreach ([$hostEntity, $itemOwnerEntity, $itemTargetEntity] as $tokenEntity) {
+          if (!empty($tokenEntity)) {
+            $tokenData += [$tokenEntity->getEntityTypeId() => $tokenEntity];
+          }
+        }
+        $caption = \Drupal::service('token')->replace($thirdPartySettings['photoswipe_dynamic_caption']['photoswipe_caption_custom'], $tokenData, [
+          'clear' => TRUE,
+          'langcode' => \Drupal::service('language_manager')->getCurrentLanguage()->getId(),
+        ]);
+        break;
+
+      case '':
+        return '';
+
+      default:
+        // The caption setting starts with
+        // "photoswipe_dynamic_caption_referenced_entity_", we need to check the
+        // field values of the referenced entity:
+        if (str_starts_with($caption_setting, 'photoswipe_dynamic_caption_referenced_entity_')) {
+          $entity = $imageDTO->getItem()->getParent()->getEntity();
+          $caption_setting = str_replace('photoswipe_dynamic_caption_referenced_entity_', '', $caption_setting);
+        }
+        // Else we check the entity itself:
+        else {
+          $entity = $imageDTO->getEntity();
+        }
+        // Assume the user wants to use another node field as the caption.
+        if ($entity->hasField($caption_setting)) {
+          // Note, even if we have a field with a cardinality > 1, "value" will
+          // always resolve to a single value here.
+          $fieldValue = $entity->get($caption_setting)->value;
+          // The field value is empty, return early:
+          if (empty($fieldValue)) {
+            $caption = '';
+            break;
+          }
+          // Assign the field value to the caption:
+          $caption = $fieldValue;
+        }
+        else {
+          // No such field exists or the field value is empty. Log a warning:
+          $bundle = $entity->bundle();
+          $entityType = $entity->getEntityTypeId();
+          $entityId = $entity->id();
+          \Drupal::logger('photoswipe_dynamic_caption')->warning("The caption for an image inside entity '@entityId' (entity type: '@entityType', bundle '@bundle') could not get generated. The field '@fieldName' doesn't exist on the entity.", [
+            '@entityId' => $entityId,
+            '@bundle' => $bundle,
+            '@entityType' => $entityType,
+            '@fieldName' => $caption_setting,
+          ]);
+        }
+        break;
+    }
+  }
+  // If for any reason $caption is still NULL, use an empty string as the
+  // caption (aka no caption):
+  if ($caption === NULL) {
+    $caption = '';
+  }
+  // Return the plain caption. We escape it on the js side only, so injected
+  // js outside of the formatter markup will also get escaped.
+  return $caption;
+}

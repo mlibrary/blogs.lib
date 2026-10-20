@@ -1,0 +1,3 @@
+field.formatter.settings.photoswipe_svg_image_formatter:
+  type: field.formatter.settings.photoswipe_field_formatter
+  label: 'Photoswipe SVG Image display format settings'

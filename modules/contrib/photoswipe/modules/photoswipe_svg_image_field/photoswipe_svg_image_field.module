@@ -1,0 +1,43 @@
+<?php
+
+/**
+ * @file
+ * Photoswipe integration with the SVG Image Field module.
+ */
+
+use Drupal\photoswipe_svg_image_field\PhotoswipeSvgImageFieldPreprocessProcessor;
+
+/**
+ * Implements hook_theme().
+ */
+function photoswipe_svg_image_field_theme() {
+  return [
+    'photoswipe_svg_image_field_formatter' => [
+      'variables' => [
+        'item' => NULL,
+        'item_attributes' => [],
+        'entity' => NULL,
+        'display_settings' => [],
+        'third_party_settings' => [],
+        'delta' => NULL,
+      ],
+      'template' => 'photoswipe-svg-image-field-formatter',
+    ],
+  ];
+}
+
+/**
+ * Prepares variables for a Photoswipe SVG Image Field formatter.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - item: A SvgImageFieldItem object.
+ *   - display_settings: formatter settings.
+ *
+ * @ingroup themeable
+ */
+function template_preprocess_photoswipe_svg_image_field_formatter(array &$variables) {
+  \Drupal::service('class_resolver')
+    ->getInstanceFromDefinition(PhotoswipeSvgImageFieldPreprocessProcessor::class)
+    ->preprocess($variables);
+}

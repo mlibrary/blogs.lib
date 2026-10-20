@@ -1,0 +1,40 @@
+photoswipe_dynamic_caption.cdn:
+  remote: https://github.com/dimsemenov/photoswipe-dynamic-caption-plugin
+  version: 1.2.7
+  license:
+    name: MIT
+    url: https://github.com/dimsemenov/photoswipe-dynamic-caption-plugin/blob/main/LICENSE
+    gpl-compatible: false
+  css:
+    component:
+      //unpkg.com/photoswipe-dynamic-caption-plugin/photoswipe-dynamic-caption-plugin.css: { external: true }
+  js:
+    //unpkg.com/photoswipe-dynamic-caption-plugin@1.2.7/dist/photoswipe-dynamic-caption-plugin.umd.min.js: { external: true }
+
+photoswipe_dynamic_caption.local:
+  license:
+    name: MIT
+    url: https://github.com/dimsemenov/photoswipe-dynamic-caption-plugin/blob/main/LICENSE
+    gpl-compatible: false
+  css:
+    component:
+      /libraries/photoswipe-dynamic-caption-plugin/photoswipe-dynamic-caption-plugin.css: { }
+  js:
+    /libraries/photoswipe-dynamic-caption-plugin/dist/photoswipe-dynamic-caption-plugin.umd.min.js: { minified: true }
+
+dompurify:
+  remote: https://github.com/cure53/DOMPurify
+  license:
+    name: Apache 2.0
+    url: https://github.com/cure53/DOMPurify/blob/main/LICENSE
+    gpl-compatible: false
+  js:
+    /libraries/dompurify/dist/purify.min.js: { minified: true }
+
+photoswipe_dynamic_caption.init:
+  js:
+    js/photoswipe_dynamic_caption.init.js: {  }
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/drupalSettings

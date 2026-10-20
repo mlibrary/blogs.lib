@@ -1,0 +1,61 @@
+{
+    "name": "drupal/photoswipe",
+    "type": "drupal-module",
+    "description": "Javascript-based photo gallery display for your Drupal website (very sleek with mobile browsers).",
+    "keywords": [
+        "Drupal",
+        "Photoswipe",
+        "Gallery",
+        "Lightbox",
+        "Mobile"
+    ],
+    "license": "GPL-2.0+",
+    "homepage": "https://www.drupal.org/project/photoswipe",
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/photoswipe",
+        "source": "http://cgit.drupalcode.org/photoswipe"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "npm-asset/photoswipe",
+                "version": "5.4.4",
+                "type": "drupal-library",
+                "dist": {
+                    "url": "https://github.com/dimsemenov/PhotoSwipe/archive/v5.4.4.zip",
+                    "type": "zip"
+                }
+            }
+        },
+        {
+          "type": "package",
+          "package": {
+              "name": "npm-asset/photoswipe-dynamic-caption-plugin",
+              "version": "1.2.7",
+              "type": "drupal-library",
+              "dist": {
+                "url": "https://registry.npmjs.org/photoswipe-dynamic-caption-plugin/-/photoswipe-dynamic-caption-plugin-1.2.7.tgz",
+                "type": "tar"
+            }
+          }
+      }
+    ],
+    "require-dev": {
+        "enshrined/svg-sanitize": "^0.22",
+        "drupal/svg_image": "^3.0",
+        "drupal/svg_image_field": "^2.0",
+        "drupal/token": "^1"
+    },
+    "suggest": {
+        "npm-asset/photoswipe": "Required to make the 'photoswipe' module functional. Expected version: ^5",
+        "npm-asset/photoswipe-dynamic-caption-plugin": "Required to make the 'photoswipe_dynamic_caption' submodule functional. Expected version: ^1.2",
+        "enshrined/svg-sanitize": "SVG sanitization library if using one of the svg submodules."
+    }
+}

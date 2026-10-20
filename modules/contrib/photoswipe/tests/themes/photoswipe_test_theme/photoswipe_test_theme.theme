@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Theme to help test the Photoswipe module.
+ */
+
+/**
+ * Implements hook_photoswipe_js_options_alter().
+ */
+function photoswipe_test_theme_photoswipe_js_options_alter(array &$settings) {
+  $settings['loop'] = FALSE;
+}

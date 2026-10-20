@@ -1,0 +1,10 @@
+photoswipe_svg_image.sanitized_svg:
+  path: '/photoswipe/svg-image/{file}/sanitized'
+  defaults:
+    _controller: '\Drupal\photoswipe\Controller\SanitizedSvgController::view'
+  requirements:
+    _entity_access: 'file.view'
+  options:
+    parameters:
+      file:
+        type: entity:file

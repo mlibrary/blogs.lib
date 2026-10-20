@@ -13,6 +13,18 @@
                 }
             }
         },
+        "photoswipe": {
+          "type": "package",
+          "package": {
+            "name": "bower-asset/photoswipe",
+            "version": "5.4.4",
+            "type": "drupal-library",
+            "dist": {
+              "url": "https://github.com/dimsemenov/PhotoSwipe/archive/refs/tags/v5.4.4.zip",
+              "type": "zip"
+            }
+          }
+        },
         "colorbox": {
           "type": "package",
           "package": {
@@ -126,7 +138,9 @@
         "mglaman/composer-drupal-lenient": "*",
         "wikimedia/composer-merge-plugin": "^2.0",
         "mnsami/composer-custom-directory-installer": "^2.1",
-        "drupal/glightbox": "^1.0"
+        "drupal/glightbox": "^1.0",
+        "drupal/photoswipe": "^5.0",
+        "bower-asset/photoswipe": "^5"
     },
     "conflict": {
         "drupal/drupal": "*"

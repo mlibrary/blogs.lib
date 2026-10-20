@@ -1,0 +1,157 @@
+photoswipe.settings:
+  type: config_object
+  label: Settings
+  mapping:
+    photoswipe_always_load_non_admin:
+      type: boolean
+    enable_cdn:
+      label: 'Indicates if CDN is enabled.'
+      type: boolean
+    options:
+      type: mapping
+      label: Options
+      mapping:
+        showHideAnimationType:
+          type: string
+          label: 'Show / Hide Animation Type'
+        showAnimationDuration:
+          type: integer
+          label: 'Show Animation Duration'
+        hideAnimationDuration:
+          type: integer
+          label: 'Hide Animation Duration'
+        zoomAnimationDuration:
+          type: integer
+          label: 'Zoom Animation Duration'
+        maxWidthToAnimate:
+          type: integer
+          label: 'Max Width to Animate'
+        easing:
+          type: string
+          label: 'Easing Method'
+        bgOpacity:
+          type: float
+          label: 'Background Opacity'
+        spacing:
+          type: float
+          label: 'Spacing'
+        initialZoomLevel:
+          type: string
+          label: 'Initial Zoom Level (float or string)'
+        secondaryZoomLevel:
+          type: string
+          label: 'Secondary Zoom Level (float or string)'
+        maxZoomLevel:
+          type: string
+          label: 'Maximum Zoom Level (float or string)'
+        allowPanToNext:
+          type: boolean
+          label: 'Allow Pan to Next'
+        loop:
+          type: boolean
+          label: 'Loop'
+        wheelToZoom:
+          type: boolean
+          label: 'Wheel to Zoom'
+        pinchToClose:
+          type: boolean
+          label: 'Pinch to Close'
+        clickToCloseNonZoomable:
+          type: boolean
+          label: 'Click to Close Non-Zoomable'
+        closeOnVerticalDrag:
+          type: boolean
+          label: 'Close on Vertical Drag'
+        trapFocus:
+          type: boolean
+          label: 'Trap Focus'
+        returnFocus:
+          type: boolean
+          label: 'Return Focus after Close'
+        escKey:
+          type: boolean
+          label: 'Escape Key'
+        arrowKeys:
+          type: boolean
+          label: 'Arrow Keys'
+        imageClickAction:
+          type: string
+          label: 'Image Click Action'
+        tapAction:
+          type: string
+          label: 'Tap Action'
+        doubleTapAction:
+          type: string
+          label: 'Double Tap Action'
+        bgClickAction:
+          type: string
+          label: 'Background Click Action'
+        closeTitle:
+          type: label
+          label: 'Gallery Close Tooltip'
+        zoomTitle:
+          type: label
+          label: 'Zoom Tooltip'
+        arrowPrevTitle:
+          type: label
+          label: 'Previous Arrow Tooltip'
+        arrowNextTitle:
+          type: label
+          label: 'Next Arrow Tooltip'
+        downloadTitle:
+          type: label
+          label: 'Download Tooltip'
+        indexIndicatorSep:
+          type: label
+          label: 'Index Indicator Separator'
+        errorMsg:
+          type: label
+          label: 'Error Message'
+        preload:
+          type: sequence
+          label: 'Preload'
+          sequence:
+            type: integer
+        preloaderDelay:
+          type: integer
+          label: 'Preloader Delay'
+        mainClass:
+          type: string
+          label: 'Main Class'
+
+field.formatter.settings.photoswipe_field_formatter:
+  type: mapping
+  label: 'Photoswipe display format settings'
+  mapping:
+    photoswipe_thumbnail_style_first:
+      type: string
+      label: 'Photoswipe Node Style First'
+    photoswipe_thumbnail_style:
+      type: string
+      label: 'Photoswipe Node Style'
+    photoswipe_image_style:
+      type: string
+      label: 'Photoswipe Image Style'
+    photoswipe_reference_image_field:
+      type: string
+      label: 'Photoswipe Reference Image Field'
+    photoswipe_view_mode:
+      type: string
+      label: 'Photoswipe View Mode'
+    photoswipe_remove_gallery_wrapper_class:
+      type: boolean
+      label: 'Remove photoswipe-gallery wrapper class'
+    photoswipe_show_download_button:
+      type: boolean
+      label: 'Show download button'
+    image_loading:
+      type: mapping
+      label: 'Image loading settings'
+      mapping:
+        attribute:
+          type: string
+          label: 'Loading attribute'
+
+field.formatter.settings.photoswipe_responsive_field_formatter:
+  type: field.formatter.settings.photoswipe_field_formatter
+  label: 'Photoswipe responsive display format settings'

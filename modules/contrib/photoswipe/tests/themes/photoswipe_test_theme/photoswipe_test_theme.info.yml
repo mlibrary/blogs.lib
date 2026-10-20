@@ -1,0 +1,13 @@
+name: Photoswipe test theme
+type: theme
+description: 'Theme for testing the photoswipe module'
+base theme: starterkit_theme
+core_version_requirement: ^9.3 || ^10 || ^11
+
+regions:
+  content: Content
+
+# Information added by Drupal.org packaging script on 2026-10-14
+version: '5.0.12'
+project: 'photoswipe'
+datestamp: 1791998154

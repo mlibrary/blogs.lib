@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * @file
+ * Install, uninstall and update hooks for PhotoSwipe SVG Image Field module.
+ */
+
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
+use Drupal\Core\Hook\Attribute\LegacyRequirementsHook;
+use enshrined\svgSanitize\Sanitizer;
+
+/**
+ * Implements hook_requirements().
+ */
+#[LegacyRequirementsHook]
+function photoswipe_svg_image_field_requirements($phase) {
+  // If we are not in runtime phase, there is nothing to do. So bail out early.
+  if ($phase !== 'runtime') {
+    return [];
+  }
+
+  $requirements = [];
+
+  if (!class_exists(Sanitizer::class)) {
+    $requirements['photoswipe_svg_image_field_svg_sanitizer'] = [
+      'title' => t('SVG sanitization library'),
+      'severity' => RequirementSeverity::Error,
+      'value' => t('<strong>enshrined/svg-sanitize library not found</strong>'),
+      'description' => t('The "PhotoSwipe SVG Image Field" formatter relies on the <a href=":url" target="_blank" >enshrined/svg-sanitize</a>. Install it by running <code>composer require enshrined/svg-sanitize</code>.', [
+        ':url' => 'https://github.com/darylldoyle/svg-sanitizer',
+      ]),
+    ];
+  }
+
+  return $requirements;
+}

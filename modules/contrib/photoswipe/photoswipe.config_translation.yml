@@ -1,0 +1,5 @@
+photoswipe.settings:
+  title: 'Photoswipe Settings'
+  base_route_name: photoswipe.settings
+  names:
+    - photoswipe.settings

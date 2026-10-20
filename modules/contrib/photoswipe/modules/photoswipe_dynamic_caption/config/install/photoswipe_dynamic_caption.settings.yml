@@ -1,0 +1,7 @@
+options:
+  type: 'auto'
+  mobileLayoutBreakpoint: 600
+  horizontalEdgeThreshold: 20
+  mobileCaptionOverlapRatio: 0.3
+  verticallyCenterImage: FALSE
+allowHtmlCaptions: FALSE

@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Contain pat module hooks.
+ */
+
+/**
+ * Implements hook_photoswipe_js_options_alter().
+ */
+function photoswipe_assets_test_photoswipe_js_options_alter(array &$settings) {
+  $settings['errorMsg'] = 'Test';
+}

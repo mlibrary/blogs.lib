@@ -1,0 +1,99 @@
+<?php
+
+/**
+ * @file
+ * Photoswipe integration with Drupal module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function photoswipe_theme() {
+  return [
+    'photoswipe_image_formatter' => [
+      'variables' => [
+        'item' => NULL,
+        'item_attributes' => [],
+        'entity' => NULL,
+        'display_settings' => [],
+        'third_party_settings' => [],
+        'delta' => NULL,
+      ],
+      'file' => 'photoswipe.theme.inc',
+    ],
+    'photoswipe_responsive_image_formatter' => [
+      'variables' => [
+        'item' => NULL,
+        'item_attributes' => [],
+        'entity' => NULL,
+        'display_settings' => [],
+        'third_party_settings' => [],
+        'delta' => NULL,
+      ],
+      'template' => 'photoswipe-image-formatter',
+      'file' => 'photoswipe.theme.inc',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_help().
+ */
+function photoswipe_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the photoswipe module.
+    case 'help.page.photoswipe':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('<a href=":url">Photoswipe</a> provides a nice javascript-based display for photo galleries, very sleek on mobile browsers.', [
+        ':url' => 'http://www.photoswipe.com/',
+      ]) . '</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function photoswipe_page_attachments(array &$attachments) {
+  // Vary / invalidate when photoswipe.settings changes (e.g. always-load).
+  $attachments['#cache']['tags'][] = 'config:photoswipe.settings';
+
+  // Conditionally load on non-admin pages.
+  $is_admin = \Drupal::service('router.admin_context')->isAdminRoute();
+
+  if (\Drupal::config('photoswipe.settings')->get('photoswipe_always_load_non_admin') && !$is_admin) {
+    \Drupal::service('photoswipe.assets_manager')->attach($attachments);
+  }
+}
+
+/**
+ * Implements hook_library_info_alter().
+ *
+ * If local library is provided take it, otherwise check if CDN is
+ * enabled and if so get library from CDN.
+ */
+function photoswipe_library_info_alter(&$libraries, $module) {
+  if ($module !== 'photoswipe') {
+    return;
+  }
+  // Use local library by default, CDN if enabled:
+  $dependency = 'photoswipe/photoswipe.local';
+  if (\Drupal::config('photoswipe.settings')->get('enable_cdn')) {
+    $dependency = 'photoswipe/photoswipe.cdn';
+  }
+  $libraries['photoswipe.init']['dependencies'][] = $dependency;
+}
+
+/**
+ * Implements hook_field_migration_field_formatter_info().
+ */
+function photoswipe_field_migration_field_formatter_info() {
+  return [
+    'image' => ['photoswipe_image_formatter' => 'photoswipe_field_formatter'],
+    'media_image' => ['photoswipe_image_formatter' => 'photoswipe_field_formatter'],
+    'entity_reference' => ['photoswipe_image_formatter' => 'photoswipe_field_formatter'],
+  ];
+}

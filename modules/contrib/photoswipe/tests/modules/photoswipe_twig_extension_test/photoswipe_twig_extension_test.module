@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * Helper module for Twig extension tests.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function photoswipe_twig_extension_test_theme($existing, $type, $theme, $path) {
+  return [
+    'photoswipe_twig_extension_test_function' => [
+      'render element' => 'element',
+      'template' => 'photoswipe_twig_extension_test.function_test',
+    ],
+    'photoswipe_twig_extension_test_function_options_overridden' => [
+      'render element' => 'element',
+      'template' => 'photoswipe_twig_extension_test.function_test_options_overridden',
+    ],
+  ];
+}

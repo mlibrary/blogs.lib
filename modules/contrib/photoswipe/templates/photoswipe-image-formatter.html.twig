@@ -1,0 +1,21 @@
+{#
+/**
+ * @file
+ * Returns HTML for an image using a specific Photoswipe image style.
+ *
+ * Available variables:
+ * - image: image item.
+ * - path: The path of the image that should be displayed in Photoswipe.
+ * - attributes: Link attributes.
+ * - item: An ImageItem object.
+ * - display_settings: optional image styles.
+ * - third_party_settings: optional third party settings.
+ *
+ * @ingroup themeable
+ */
+#}
+{% if path is not empty %}
+  <a href="{{ path }}" {{ attributes }}>{{ image }}</a>
+{% else %}
+  <!-- Broken image detected in photoswipe-image-formatter.html.twig. Please check the source field values. -->
+{% endif %}

@@ -1,0 +1,14 @@
+photoswipe_twig_extension_test.function_test:
+  path: '/photoswipe-twig-extension-test/function-test'
+  defaults:
+    _controller: '\Drupal\photoswipe_twig_extension_test\PhotoswipeTwigExtensionTestController::renderTestTemplate'
+  requirements:
+    # This is a test route, so we don't need to check access:
+    _access: 'TRUE'
+photoswipe_twig_extension_test.function_test_options_overridden:
+  path: '/photoswipe-twig-extension-test/function-test-options-overridden'
+  defaults:
+    _controller: '\Drupal\photoswipe_twig_extension_test\PhotoswipeTwigExtensionTestController::renderTestTemplateOptionsOverridden'
+  requirements:
+    # This is a test route, so we don't need to check access:
+    _access: 'TRUE'

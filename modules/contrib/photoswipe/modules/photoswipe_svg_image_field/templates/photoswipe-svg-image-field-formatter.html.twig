@@ -1,0 +1,20 @@
+{#
+/**
+ * @file
+ * Returns HTML for an SVG Image Field item using Photoswipe.
+ *
+ * Available variables:
+ * - image: image render array for the thumbnail.
+ * - path: The path of the original SVG that should be displayed in Photoswipe.
+ * - attributes: Link attributes.
+ * - item: A SvgImageFieldItem object.
+ * - display_settings: formatter settings.
+ *
+ * @ingroup themeable
+ */
+#}
+{% if path is not empty %}
+  <a href="{{ path }}" {{ attributes }}>{{ image }}</a>
+{% else %}
+  <!-- Broken image detected in photoswipe-svg-image-field-formatter.html.twig. Please check the source field values. -->
+{% endif %}

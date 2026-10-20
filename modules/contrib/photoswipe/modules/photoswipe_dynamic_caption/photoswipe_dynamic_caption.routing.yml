@@ -1,0 +1,7 @@
+photoswipe_dynamic_caption.settings:
+  path: '/admin/config/media/photoswipe_dynamic_caption'
+  defaults:
+    _title: 'PhotoSwipe Dynamic Caption Settings'
+    _form: '\Drupal\photoswipe_dynamic_caption\Form\PhotoswipeDynamicCaptionSettings'
+  requirements:
+    _permission: 'administer site configuration'

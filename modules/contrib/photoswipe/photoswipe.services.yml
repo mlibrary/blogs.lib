@@ -1,0 +1,9 @@
+services:
+  photoswipe.assets_manager:
+    class: Drupal\photoswipe\PhotoswipeAssetsManager
+    arguments: ['@config.factory', '@module_handler', '@theme.manager']
+  photoswipe.twig.extension:
+    class: Drupal\photoswipe\TwigExtension\PhotoswipeTwigExtension
+    arguments: ['@photoswipe.assets_manager', '@renderer']
+    tags:
+      - { name: twig.extension }

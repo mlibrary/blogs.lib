@@ -1,0 +1,12 @@
+photoswipe_svg_image_field.sanitized_svg:
+  path: '/photoswipe/svg-image-field/{file}/sanitized'
+  defaults:
+    # Shared with photoswipe_svg_image; see that controller's docblock for
+    # why it lives in the parent module.
+    _controller: '\Drupal\photoswipe\Controller\SanitizedSvgController::view'
+  requirements:
+    _entity_access: 'file.view'
+  options:
+    parameters:
+      file:
+        type: entity:file

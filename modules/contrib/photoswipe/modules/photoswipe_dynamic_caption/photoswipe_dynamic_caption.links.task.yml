@@ -1,0 +1,9 @@
+photoswipe.settings:
+  route_name: photoswipe.settings
+  title: 'Photoswipe Settings'
+  base_route: photoswipe.settings
+
+photoswipe_dynamic_caption.settings:
+  route_name: photoswipe_dynamic_caption.settings
+  title: 'Dynamic Caption Settings'
+  base_route: photoswipe.settings

@@ -1,0 +1,45 @@
+photoswipe.cdn:
+  remote: https://github.com/dimsemenov/PhotoSwipe/archive/v5.4.4.zip
+  version: 5.4.4
+  license:
+    name: MIT
+    url: https://github.com/dimsemenov/PhotoSwipe/blob/master/LICENSE
+    gpl-compatible: false
+  css:
+    component:
+      //cdnjs.cloudflare.com/ajax/libs/photoswipe/5.4.4/photoswipe.min.css: { external: true }
+  js:
+    //cdnjs.cloudflare.com/ajax/libs/photoswipe/5.4.4/umd/photoswipe-lightbox.umd.min.js: { external: true }
+    //cdnjs.cloudflare.com/ajax/libs/photoswipe/5.4.4/umd/photoswipe.umd.min.js: { external: true }
+
+photoswipe.local:
+  license:
+    name: MIT
+    url: https://github.com/dimsemenov/PhotoSwipe/blob/master/LICENSE
+    gpl-compatible: false
+  css:
+    component:
+      /libraries/photoswipe/dist/photoswipe.css: {}
+  js:
+    /libraries/photoswipe/dist/umd/photoswipe.umd.min.js: { minified: true }
+    /libraries/photoswipe/dist/umd/photoswipe-lightbox.umd.min.js: { minified: true }
+
+photoswipe.init:
+  js:
+    js/photoswipe.init.js: {  }
+  dependencies:
+    - photoswipe/prepare_galleries
+    - core/drupal
+    - core/once
+    - core/drupalSettings
+
+# We want to separate preparing galleries logic from photoswipe initialization
+# script, because in the new version we've introduced separate module for the
+# caption plugin. And this ensures that preparation of galleries logic will not be
+# copy pasted, and we will not need to maintain this in two separate places.
+prepare_galleries:
+  js:
+    js/prepare-galleries.js: {  }
+  dependencies:
+    - core/drupal
+    - core/once

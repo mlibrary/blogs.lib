@@ -1,0 +1,14 @@
+name: PhotoSwipe SVG Image
+description: 'Provides Photoswipe compatibility for SVG files uploaded through the SVG Image module.'
+core_version_requirement: ^11
+type: module
+package: Media
+lifecycle: experimental
+dependencies:
+  - photoswipe:photoswipe
+  - svg_image:svg_image
+
+# Information added by Drupal.org packaging script on 2026-10-14
+version: '5.0.12'
+project: 'photoswipe'
+datestamp: 1791998154
