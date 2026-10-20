@@ -1,5 +1,9 @@
 /* Navigation Menus */
 
+.featured-image a.photoswipe {
+  display:block;
+}
+
 #block-umlib-blogs-usermenu ul li a,
 #block-umlib-blogs-usermenu ul li,
 .primary-edit-tasks li,
