@@ -7,7 +7,6 @@
 
 declare(strict_types=1);
 
-use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
@@ -38,7 +37,6 @@ function view_unpublished_node_access_records(NodeInterface $node): array {
         'grant_view' => 1,
         'grant_update' => 0,
         'grant_delete' => 0,
-        'priority' => 0,
         'langcode' => $langcode,
       ];
       $grants[] = [
@@ -47,18 +45,28 @@ function view_unpublished_node_access_records(NodeInterface $node): array {
         'grant_view' => 1,
         'grant_update' => 0,
         'grant_delete' => 0,
-        'priority' => 0,
         'langcode' => $langcode,
       ];
-      $grants[] = [
-        'realm' => 'view_unpublished_author',
-        'gid' => $node->getOwnerId(),
-        'grant_view' => 1,
-        'grant_update' => 0,
-        'grant_delete' => 0,
-        'priority' => 0,
-        'langcode' => $langcode,
-      ];
+      /*
+       * Prevents SQL error.
+       *
+       * @code
+       * SQLSTATE[23000]: Integrity constraint violation:
+       * 1048 Column 'gid' cannot be null: INSERT INTO "node_access"
+       * @endcode
+       *
+       * @see https://www.drupal.org/project/view_unpublished/issues/3485023
+       */
+      if ($node->getOwnerId() !== NULL) {
+        $grants[] = [
+          'realm' => 'view_unpublished_author',
+          'gid' => $node->getOwnerId(),
+          'grant_view' => 1,
+          'grant_update' => 0,
+          'grant_delete' => 0,
+          'langcode' => $langcode,
+        ];
+      }
     }
   }
 
@@ -70,44 +78,74 @@ function view_unpublished_node_access_records(NodeInterface $node): array {
 }
 
 /**
+ * Implements hook_node_access_records_alter().
+ *
+ * The "view_unpublished_published_content" grant only replaces the default
+ * "all" grant, which core drops as soon as a node has any grant record. If
+ * another module provides grant records for the node, it controls the access
+ * to published translations, so the grant must not open them to everyone.
+ */
+function view_unpublished_node_access_records_alter(array &$grants, NodeInterface $node): void {
+  $own_realms = [
+    'view_unpublished_author',
+    'view_unpublished_content',
+    'view_unpublished_published_content',
+    "view_unpublished_{$node->getType()}_content",
+  ];
+  foreach ($grants as $grant) {
+    if (!is_array($grant) || !in_array($grant['realm'] ?? NULL, $own_realms, TRUE)) {
+      $grants = array_values(array_filter(
+        $grants,
+        static fn (mixed $grant): bool => !is_array($grant) || ($grant['realm'] ?? NULL) !== 'view_unpublished_published_content',
+      ));
+      return;
+    }
+  }
+}
+
+/**
  * Implements hook_node_grants().
  */
 function view_unpublished_node_grants(AccountInterface $account, string $op): array {
+  if ($op !== 'view') {
+    return [];
+  }
+
   /** @var array $grants_cache */
   $grants_cache = &drupal_static(__FUNCTION__, []);
-  if (isset($grants_cache[$account->id()][$op])) {
-    return $grants_cache[$account->id()][$op];
+  $account_id = (int) $account->id();
+  if (isset($grants_cache[$account_id]) && is_array($grants_cache[$account_id])) {
+    return $grants_cache[$account_id];
   }
 
   $grants = [];
-  if ($op === 'view') {
-    if ($account->hasPermission('view own unpublished content')) {
-      $grants['view_unpublished_author'] = [$account->id()];
-    }
-    if ($account->hasPermission('access content')) {
-      $grants['view_unpublished_published_content'] = [1];
-    }
-    if ($account->hasPermission('view any unpublished content')) {
-      $grants['view_unpublished_content'] = [1];
-      $grants_cache[$account->id()][$op] = $grants;
-      return $grants_cache[$account->id()][$op];
-    }
-    foreach (NodeType::loadMultiple() as $type) {
-      $type_id = $type->id();
-      if ($account->hasPermission("view any unpublished $type_id content")) {
-        $grants["view_unpublished_{$type_id}_content"] = [1];
-      }
+  if ($account->hasPermission('view own unpublished content')) {
+    $grants['view_unpublished_author'] = [$account_id];
+  }
+  if ($account->hasPermission('access content')) {
+    $grants['view_unpublished_published_content'] = [1];
+  }
+  if ($account->hasPermission('view any unpublished content')) {
+    $grants['view_unpublished_content'] = [1];
+    $grants_cache[$account_id] = $grants;
+    // With this permission
+    // we do not need to check node type specific permission.
+    return $grants;
+  }
+  foreach (NodeType::loadMultiple() as $type) {
+    $type_id = $type->id();
+    if ($account->hasPermission("view any unpublished $type_id content")) {
+      $grants["view_unpublished_{$type_id}_content"] = [1];
     }
   }
-
-  $grants_cache[$account->id()][$op] = $grants;
-  return $grants_cache[$account->id()][$op];
+  $grants_cache[$account_id] = $grants;
+  return $grants;
 }
 
 /**
  * Implements hook_help().
  */
-function view_unpublished_help(string $route_name, RouteMatchInterface $arg): string {
+function view_unpublished_help(string $route_name): string {
   $output = '';
   if ($route_name === 'help.page.view_unpublished') {
     $output .= '<h3>' . t('About') . '</h3>';

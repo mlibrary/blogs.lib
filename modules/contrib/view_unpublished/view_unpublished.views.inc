@@ -14,5 +14,6 @@ use Drupal\view_unpublished\Plugin\views\filter\NodeStatus;
  */
 function view_unpublished_views_plugins_filter_alter(array &$plugins): void {
   // Change the 'status' handler class.
+  /** @var array{node_status:array{class:string}} $plugins */
   $plugins['node_status']['class'] = NodeStatus::class;
 }

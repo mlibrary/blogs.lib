@@ -72,13 +72,4 @@ that you back up the site first.
 
 ## Maintainers
 
-- Domenic Santangelo - [entendu](https://www.drupal.org/u/entendu)
-- Agnes Chisholm - [amaria](https://www.drupal.org/u/amaria)
-- Brad Bowman - [beeradb](https://www.drupal.org/u/beeradb)
-- Erik Levinson - [elevins](https://www.drupal.org/u/elevins)
-
-**Additional credits:**
-- Brad Bowman/beeradb - Aten Design Group
-- Domenic Santangelo/dsantangelo - WorkHabit
-   (7.x) for this feature.
 - The drupal community
