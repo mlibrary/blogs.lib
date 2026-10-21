@@ -1,7 +1,8 @@
 /* Navigation Menus */
 
-.featured-image a.photoswipe {
-  display:block;
+a.photoswipe {
+  display: block;
+  width: fit-content;
 }
 
 #block-umlib-blogs-usermenu ul li a,
