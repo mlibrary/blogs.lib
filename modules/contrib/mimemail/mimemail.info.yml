@@ -10,7 +10,7 @@ test_dependencies:
 
 configure: mimemail.settings
 
-# Information added by Drupal.org packaging script on 2026-06-26
-version: '2.0.3'
+# Information added by Drupal.org packaging script on 2026-11-04
+version: '2.0.4'
 project: 'mimemail'
-datestamp: 1782504339
+datestamp: 1793807319

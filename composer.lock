@@ -3918,17 +3918,17 @@
         },
         {
             "name": "drupal/mimemail",
-            "version": "2.0.3",
+            "version": "2.0.4",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/mimemail.git",
-                "reference": "2.0.3"
+                "reference": "2.0.4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/mimemail-2.0.3.zip",
-                "reference": "2.0.3",
-                "shasum": "133e81946ec4815451eb25794fd9256d9c5c226a"
+                "url": "https://ftp.drupal.org/files/projects/mimemail-2.0.4.zip",
+                "reference": "2.0.4",
+                "shasum": "696723501b27188a8530806c3051d05c1c69e43b"
             },
             "require": {
                 "drupal/core": "^10.3 || ^11 || ^12",
@@ -3940,8 +3940,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "2.0.3",
-                    "datestamp": "1782504338",
+                    "version": "2.0.4",
+                    "datestamp": "1793813938",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"

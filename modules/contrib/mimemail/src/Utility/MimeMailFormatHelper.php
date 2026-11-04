@@ -451,7 +451,8 @@ class MimeMailFormatHelper {
         $in_public_path = FALSE;
       }
       else {
-        $in_public_path = mb_strpos($file_system->realpath($file), $file_system->realpath($public_path)) === 0;
+        $public_real = rtrim($file_system->realpath($public_path), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $in_public_path = str_starts_with((string) $file_system->realpath($file), $public_real);
       }
       if (@is_file($file) && !$in_public_path && !$has_access) {
         return $url;
