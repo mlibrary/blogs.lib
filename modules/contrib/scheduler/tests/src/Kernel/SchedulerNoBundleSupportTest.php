@@ -73,6 +73,33 @@ class SchedulerNoBundleSupportTest extends KernelTestBase {
   }
 
   /**
+   * Tests that no-bundle settings can ship as module default config.
+   *
+   * The standalone scheduler.no_bundle_entity_type_settings.* object must be
+   * typed as config_object so it inherits the _core and langcode keys. The
+   * config installer always writes _core.default_config_hash to installed
+   * config, so a bare mapping schema throws SchemaIncompleteException under the
+   * strict schema checking that is active in every kernel and functional test.
+   *
+   * @see https://www.drupal.org/project/scheduler/issues/3593940
+   */
+  public function testNoBundleSettingsShippedAsDefaultConfig(): void {
+    // Enabling this module installs its config/install file through the config
+    // installer, which writes _core.default_config_hash and validates against
+    // the schema. Before the fix this threw "_core missing schema". The config
+    // lives in a dedicated module so its enabled scheduling does not leak into
+    // other tests that use scheduler_no_bundle_test.
+    $this->enableModules(['scheduler_no_bundle_config_test']);
+    $this->installConfig(['scheduler_no_bundle_config_test']);
+
+    $config = $this->config('scheduler.no_bundle_entity_type_settings.scheduler_test_no_bundle');
+    $this->assertFalse($config->isNew(), 'Default config installed from the test module.');
+    $this->assertTrue((bool) $config->get('publish_enable'));
+    $this->assertTrue((bool) $config->get('unpublish_enable'));
+    $this->assertNotNull($config->get('_core.default_config_hash'), 'Config installer wrote the default config hash.');
+  }
+
+  /**
    * Tests that submitForm() skips alter-only form modes with no config entity.
    *
    * Form modes registered via hook_entity_form_mode_info_alter() without a

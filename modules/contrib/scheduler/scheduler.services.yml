@@ -20,6 +20,11 @@ services:
     factory: logger.factory:get
     arguments: ['scheduler']
 
+  Drupal\scheduler\Hook\SchedulerFieldAccessHook:
+    class: Drupal\scheduler\Hook\SchedulerFieldAccessHook
+    arguments:
+      - '@scheduler.manager'
+
   theme.negotiator.scheduler:
     class: Drupal\scheduler\Theme\SchedulerThemeNegotiator
     arguments:

@@ -5,12 +5,14 @@
  * Installation file for Scheduler module.
  */
 
+use Drupal\Core\Hook\Attribute\LegacyRequirementsHook;
 use Drupal\scheduler\Form\SchedulerCronForm;
 use Drupal\views\Entity\View;
 
 /**
  * Implements hook_requirements().
  */
+#[LegacyRequirementsHook]
 function scheduler_requirements($phase) {
   $requirements = [];
 

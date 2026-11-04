@@ -51,7 +51,12 @@ class SchedulerEntityAccessTest extends SchedulerBrowserTestBase {
     // scheduler_access_test_install() sets node_access_needs_rebuild(TRUE) and
     // this works when testing the module interactively, but in a phpunit run
     // the node access table is not rebuilt. Hence do that explicitly here.
-    node_access_rebuild();
+    if (\Drupal::hasService('\Drupal\node\NodeAccessRebuild')) {
+      \Drupal::service('\Drupal\node\NodeAccessRebuild')->rebuild();
+    }
+    else {
+      node_access_rebuild();
+    }
 
     // Login as a user who is only able to view the published entities.
     $this->drupalLogin($this->drupalCreateUser());

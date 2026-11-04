@@ -71,7 +71,7 @@ scheduler.settings:
 scheduler_third_party_settings:
   type: mapping
   label: 'Scheduler entity type settings'
-  mapping:
+  mapping: &scheduler_settings_mapping
     expand_fieldset:
       type: string
       label: 'Conditions under which to expand the date input fieldset or vertical tab ("when_required" or "always")'
@@ -122,4 +122,6 @@ taxonomy.vocabulary.*.third_party.scheduler:
   type: scheduler_third_party_settings
 
 scheduler.no_bundle_entity_type_settings.*:
-  type: scheduler_third_party_settings
+  type: config_object
+  label: 'Scheduler no-bundle entity type settings'
+  mapping: *scheduler_settings_mapping

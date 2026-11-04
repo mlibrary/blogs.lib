@@ -1,0 +1,12 @@
+name: Scheduler No-bundle Config Test
+type: module
+description: 'Ships default Scheduler settings for a no-bundle entity type via config/install, to test the standalone config_object schema.'
+package: Testing
+dependencies:
+  - scheduler:scheduler
+  - scheduler:scheduler_no_bundle_test
+
+# Information added by Drupal.org packaging script on 2026-11-03
+version: '2.3.1'
+project: 'scheduler'
+datestamp: 1793736089

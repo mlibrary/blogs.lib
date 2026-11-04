@@ -10,6 +10,8 @@
  *   filename      (positional) defaults to phpstan-baseline.neon.
  */
 
+global $argv;
+
 // Get the options.
 $rest_index = NULL;
 $options = getopt('vm', ['verbose', 'more'], $rest_index);

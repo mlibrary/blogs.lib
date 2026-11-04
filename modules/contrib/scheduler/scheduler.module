@@ -14,9 +14,13 @@ use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Hook\Attribute\LegacyHook;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use Drupal\migrate\Exception\RequirementsException;
 use Drupal\migrate\Plugin\MigrateSourceInterface;
@@ -24,6 +28,7 @@ use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\migrate\Row;
 use Drupal\migrate_drupal\Plugin\migrate\source\DrupalSqlBase;
 use Drupal\scheduler\Form\SchedulerCronForm;
+use Drupal\scheduler\Hook\SchedulerFieldAccessHook;
 use Drupal\workbench_moderation\Plugin\Action\ModerationOptOutPublishNode;
 use Drupal\workbench_moderation\Plugin\Action\ModerationOptOutUnpublishNode;
 
@@ -744,6 +749,14 @@ function scheduler_entity_view(array &$build, EntityInterface $entity, EntityVie
     // Any value seems to be OK for the second item, but it must not be omitted.
     $build['#attached']['html_head'][] = [$unavailable_meta_tag, 'robots_unavailable_date'];
   }
+}
+
+/**
+ * Implements hook_entity_field_access().
+ */
+#[LegacyHook]
+function scheduler_entity_field_access($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, ?FieldItemListInterface $items = NULL) {
+  return \Drupal::service(SchedulerFieldAccessHook::class)->entityFieldAccess($operation, $field_definition, $account, $items);
 }
 
 /**
