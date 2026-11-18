@@ -2117,17 +2117,17 @@
         },
         {
             "name": "drupal/core",
-            "version": "11.4.12",
-            "version_normalized": "11.4.12.0",
+            "version": "11.4.13",
+            "version_normalized": "11.4.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core.git",
-                "reference": "d383935b2ee61cef905fa7d1f84642160a89a942"
+                "reference": "ec81468a1e534a8a5a0b803060dbe782a709ef77"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core/zipball/d383935b2ee61cef905fa7d1f84642160a89a942",
-                "reference": "d383935b2ee61cef905fa7d1f84642160a89a942",
+                "url": "https://api.github.com/repos/drupal/core/zipball/ec81468a1e534a8a5a0b803060dbe782a709ef77",
+                "reference": "ec81468a1e534a8a5a0b803060dbe782a709ef77",
                 "shasum": ""
             },
             "require": {
@@ -2224,7 +2224,7 @@
             "suggest": {
                 "ext-zip": "Needed to extend the plugin.manager.archiver service capability with the handling of files in the ZIP format."
             },
-            "time": "2026-11-06T22:05:10+00:00",
+            "time": "2026-11-18T14:44:34+00:00",
             "bin": [
                 "scripts/dr"
             ],
@@ -2307,7 +2307,7 @@
             ],
             "description": "Drupal is an open source content management platform powering millions of websites and applications.",
             "support": {
-                "source": "https://github.com/drupal/core/tree/11.4.12"
+                "source": "https://github.com/drupal/core/tree/11.4.13"
             },
             "funding": [
                 {
@@ -2319,8 +2319,8 @@
         },
         {
             "name": "drupal/core-composer-scaffold",
-            "version": "11.4.12",
-            "version_normalized": "11.4.12.0",
+            "version": "11.4.13",
+            "version_normalized": "11.4.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-composer-scaffold.git",
@@ -2366,7 +2366,7 @@
                 "drupal"
             ],
             "support": {
-                "source": "https://github.com/drupal/core-composer-scaffold/tree/11.4.12"
+                "source": "https://github.com/drupal/core-composer-scaffold/tree/11.4.13"
             },
             "install-path": "../drupal/core-composer-scaffold"
         },
