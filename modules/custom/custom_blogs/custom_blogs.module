@@ -39,7 +39,7 @@ function custom_blogs_form_alter(&$form, FormStateInterface $form_state, $form_i
       }
     }
     $form['publish_state']['#type'] = 'hidden';
-    $form['#validate'][] = '_custom_blogs_form_validate';
+//    $form['#validate'][] = '_custom_blogs_form_validate';
   }
 }
 
